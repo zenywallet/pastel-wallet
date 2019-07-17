@@ -17,8 +17,8 @@ type
   RocksDbError* = object of Exception
 
   ResultKeyValue* = object
-    key: seq[byte]
-    value: seq[byte]
+    key*: seq[byte]
+    value*: seq[byte]
 
 template rocksdb_checkerr* {.dirty.} =
   if not rocks.err.isNil:
@@ -103,8 +103,11 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
     rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len)
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
-      if kv.key[0..key.high] != key:
-        break
+      var i = key.high
+      while i >= 0:
+        if kv.key[i] != key[i]:
+          break
+        dec(i)
       yield kv
       rocksdb_iter_next(iter)
   finally:
@@ -133,8 +136,11 @@ proc getsReverse*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
     rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
   while cast[bool](rocksdb_iter_valid(iter)):
     let kv = get_iter_key_value(iter)
-    if kv.key[0..key.high] != key:
-      break
+    var i = key.high
+    while i >= 0:
+      if kv.key[i] != key[i]:
+        break
+      dec(i)
     result.add(get_iter_key_value(iter))
     rocksdb_iter_prev(iter)
   rocksdb_iter_destroy(iter)
@@ -150,8 +156,11 @@ iterator getsReverse*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
       rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
-      if kv.key[0..key.high] != key:
-        break
+      var i = key.high
+      while i >= 0:
+        if kv.key[i] != key[i]:
+          break
+        dec(i)
       yield kv
       rocksdb_iter_prev(iter)
   finally:
