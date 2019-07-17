@@ -133,7 +133,8 @@ test "sign message":
   var outlen: csize = -1
   var fCompressed = true
   var recid: cint
-  var ret3 = btc_ecc_sign_compact_recoverable(cast[ptr cuchar](addr priv[0]), hashout, cast[ptr cuchar](addr sigrec[1]), addr outlen, addr recid)
+  var ret = btc_ecc_sign_compact_recoverable(cast[ptr cuchar](addr priv[0]), hashout, cast[ptr cuchar](addr sigrec[1]), addr outlen, addr recid)
+  check(ret == true)
   if fCompressed:
     sigrec[0] = (27 + recid + 4).cuchar
   else:
