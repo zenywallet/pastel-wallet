@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import unittest, byteutils, marshal, sequtils, base64
-import ../libbtc
+import ../src/libbtc
 
 test "btc_random_bytes array":
   var buf: array[32, byte]

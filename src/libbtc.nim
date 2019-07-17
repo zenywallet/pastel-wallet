@@ -2,7 +2,7 @@
 
 import os, byteutils, marshal, sequtils
 
-const libbtcPath = splitPath(currentSourcePath()).head & "/deps/libbtc"
+const libbtcPath = splitPath(currentSourcePath()).head & "/../deps/libbtc"
 {.passL: libbtcPath & "/.libs/libbtc.a".}
 {.passL: libbtcPath & "/src/secp256k1/.libs/libsecp256k1.a".}
 
