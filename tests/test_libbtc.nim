@@ -1,7 +1,7 @@
-import unittest, byteutils, marshal, sequtils
-{.passL: "../deps/libbtc/.libs/libbtc.a ../deps/libbtc/src/secp256k1/.libs/libsecp256k1.a".}
+# Copyright (c) 2019 zenywallet
 
-proc btc_random_bytes(buf: var openarray[byte], len: uint32, update_seed: uint8): uint8 {.importc.}
+import unittest, byteutils, marshal, sequtils
+import ../libbtc
 
 test "btc_random_bytes array":
   var buf: array[32, byte]
