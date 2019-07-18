@@ -298,4 +298,4 @@ when isMainModule:
 
   setAddrval(1, 0, 0, "address1", 100, 100)
   for d in getAddrvals(1):
-    echo d, " "
+    echo d
