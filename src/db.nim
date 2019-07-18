@@ -233,6 +233,27 @@ proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
     result = d2.res
   release(createWalletLock)
 
+proc setAddress*(address: string, change: uint32, index: uint32,
+                wid: uint64, sequence: uint64) =
+  let key = concat(Prefix.addresses.toByte,
+                  address.toByte,
+                  change.toByte,
+                  index.toByte,
+                  wid.toByte)
+  let val = concat(sequence.toByte)
+  db.put(key, val)
+
+iterator getAddresses*(address: string): tuple[change: uint32,
+                      index: uint32, wid: uint64, sequence: uint64] =
+  let key = concat(Prefix.addresses.toByte, address.toByte)
+  for d in db.gets(key):
+    let address = d.key[0..^17].toString
+    let change = d.key[^16..^13].toUint32
+    let index = d.key[^12..^9].toUint32
+    let wid = d.key[^8..^1].toUint64
+    let sequence = d.value.toUint64
+    yield (change, index, wid, sequence)
+
 block start:
   echo "db open"
   db.open(".pasteldb")
@@ -250,3 +271,7 @@ block start:
   echo getOrCreateWallet("test2")
   echo getOrCreateWallet("test3")
   echo getOrCreateWallet("test3")
+
+  setAddress("address1", 0, 0, 1, 1)
+  for d in getAddresses("address1"):
+    echo d, " ", d.wid
