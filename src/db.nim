@@ -220,6 +220,18 @@ proc getWallet*(xpubkey: string): tuple[err: DbStatus,
     result = (DbStatus.NotFound, (cast[uint64](nil), cast[uint64](nil),
               cast[uint32](nil), cast[uint32](nil)))
 
+iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
+                    wallet_id: uint64, sequence: uint64,
+                    last_0_index: uint32, last_1_index: uint32] =
+  let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
+  for d in db.gets(key):
+    let xpubkey = d.key[1..^9].toString
+    let wid = d.key[^8..^1].toUint64
+    let sequence = d.value[0..7].toUint64
+    let last_0_index = d.value[8..11].toUint32
+    let last_1_index = d.value[12..15].toUint32
+    yield (xpubkey, wid, sequence, last_0_index, last_1_index)
+
 var createWalletLock: Lock
 initLock(createWalletLock)
 
@@ -336,6 +348,8 @@ when isMainModule:
   echo getOrCreateWallet("test2")
   echo getOrCreateWallet("test3")
   echo getOrCreateWallet("test3")
+  for d in getWallets(""):
+    echo d
 
   setAddress("address1", 0, 0, 1, 1)
   for d in getAddresses("address1"):
