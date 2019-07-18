@@ -130,6 +130,9 @@ proc toUint16(a: openarray[byte]): uint16 =
 proc toUint8(a: openarray[byte]): uint8 =
   result = cast[uint8](a[0])
 
+proc toUint8(b: byte): uint8 =
+  result = cast[uint8](b)
+
 proc setParam*(param_id: uint32, value: uint32) =
   let key = concat(Prefix.params.toByte, param_id.toByte)
   let value = value.toByte
@@ -273,6 +276,31 @@ iterator getAddrvals*(wid: uint64): tuple[change: uint32,
     let utxo_count = d.value[8..11].toUint32
     yield (change, index, address, value, utxo_count)
 
+proc setAddrlog*(wid: uint64, sequence: uint64, txtype: uint8,
+                change: uint32, index: uint32, address: string,
+                value: uint64, txid: string, height: uint32, time: uint32) =
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte,
+                  sequence.toByte, txtype.toByte,
+                  change.toByte, index.toByte, address.toByte)
+  let val = concat(value.toByte, txid.toByte, height.toByte, time.toByte)
+  db.put(key, val)
+
+iterator getAddrlogs*(wid: uint64): tuple[sequence: uint64, txtype: uint8,
+                change: uint32, index: uint32, address: string,
+                value: uint64, txid: string, height: uint32, time: uint32] =
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte)
+  for d in db.gets(key):
+    let sequence = d.key[9..16].toUint64
+    let txtype = d.key[17].toUint8
+    let change = d.key[18..21].toUint32
+    let index = d.key[22..25].toUint32
+    let address = d.key[26..^1].toString
+    let value = d.value[0..7].toUint64
+    let txid = d.value[8..^9].toString
+    let height = d.value[^8..^5].toUint32
+    let time = d.value[^4..^1].toUint32
+    yield (sequence, txtype, change, index, address, value, txid, height, time)
+
 block start:
   echo "db open"
   db.open(".pasteldb")
@@ -298,4 +326,8 @@ when isMainModule:
 
   setAddrval(1, 0, 0, "address1", 100, 100)
   for d in getAddrvals(1):
+    echo d
+
+  setAddrlog(1, 1, 0, 0, 0, "address1", 200, "txid1", 2, 3)
+  for d in getAddrlogs(1):
     echo d
