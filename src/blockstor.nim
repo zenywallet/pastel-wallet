@@ -3,7 +3,7 @@
 import httpclient, json, asyncdispatch
 export json
 
-let baseurl = "http://localhost:8000/api/"
+const baseurl = "http://localhost:8000/api/"
 
 proc get(cmdurl: string): JsonNode =
   try:
