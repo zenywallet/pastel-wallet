@@ -91,8 +91,13 @@ proc gets*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
   block next:
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
-      if kv.key[0..key.high] != key:
+      var i = key.high
+      if kv.key.high < i:
         break next
+      while i >= 0:
+        if kv.key[i] != key[i]:
+          break next
+        dec(i)
       result.add(get_iter_key_value(iter))
       rocksdb_iter_next(iter)
   rocksdb_iter_destroy(iter);
@@ -106,6 +111,8 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
       while cast[bool](rocksdb_iter_valid(iter)):
         let kv = get_iter_key_value(iter)
         var i = key.high
+        if kv.key.high < i:
+          break next
         while i >= 0:
           if kv.key[i] != key[i]:
             break next
@@ -140,6 +147,8 @@ proc getsReverse*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
       var i = key.high
+      if kv.key.high < i:
+        break prev
       while i >= 0:
         if kv.key[i] != key[i]:
           break prev
@@ -161,6 +170,8 @@ iterator getsReverse*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
       while cast[bool](rocksdb_iter_valid(iter)):
         let kv = get_iter_key_value(iter)
         var i = key.high
+        if kv.key.high < i:
+          break prev
         while i >= 0:
           if kv.key[i] != key[i]:
             break prev

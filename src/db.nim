@@ -350,6 +350,7 @@ when isMainModule:
   echo getOrCreateWallet("test3")
   for d in getWallets(""):
     echo d
+  echo getOrCreateWallet("testtest")
 
   setAddress("address1", 0, 0, 1, 1)
   for d in getAddresses("address1"):
