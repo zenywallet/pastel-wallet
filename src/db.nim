@@ -300,6 +300,24 @@ iterator getAddrlogs*(wid: uint64): tuple[sequence: uint64, txtype: uint8,
     let time = d.value[^4..^1].toUint32
     yield (sequence, txtype, change, index, address, value, txid, height, time)
 
+proc setUnspent*(wid: uint64, sequence: uint64, txid: string, n: uint32,
+                address: string, value: uint64) =
+  let key = concat(Prefix.unspents.toByte, wid.toByte,
+                  sequence.toByte, txid.toByte, n.toByte)
+  let val = concat(address.toByte, value.toByte)
+  db.put(key, val)
+
+iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
+                      n: uint32, address: string, value: uint64] =
+  let key = concat(Prefix.unspents.toByte, wid.toByte)
+  for d in db.gets(key):
+    let sequence = d.key[9..16].toUint64
+    let txid = d.key[17..^5].toString
+    let n = d.key[^4..^1].toUint32
+    let address = d.value[0..^9].toString
+    let value = d.value[^8..^1].toUint64
+    yield (sequence, txid, n, address, value)
+
 block start:
   echo "db open"
   db.open(".pasteldb")
@@ -329,4 +347,8 @@ when isMainModule:
 
   setAddrlog(1, 1, 0, 0, 0, "address1", 200, "txid1", 2, 3)
   for d in getAddrlogs(1):
+    echo d
+
+  setUnspent(1, 1, "txid1", 5, "address1", 200)
+  for d in getUnspents(1):
     echo d
