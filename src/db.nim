@@ -265,6 +265,7 @@ block start:
   addQuitProc(quit)
   loadWalletId()
 
+when isMainModule:
   echo getWallet("test")
   echo getOrCreateWallet("test")
   echo getOrCreateWallet("test2")
