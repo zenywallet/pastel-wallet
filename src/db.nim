@@ -254,6 +254,25 @@ iterator getAddresses*(address: string): tuple[change: uint32,
     let sequence = d.value.toUint64
     yield (change, index, wid, sequence)
 
+proc setAddrval*(wid: uint64, change: uint32, index: uint32,
+                address: string, value: uint64, utxo_count: uint32) =
+  let key = concat(Prefix.addrvals.toByte, wid.toByte,
+                  change.toByte, index.toByte, address.toByte)
+  let val = concat(value.toByte, utxo_count.toByte)
+  db.put(key, val)
+
+iterator getAddrvals*(wid: uint64): tuple[change: uint32,
+                      index: uint32, address: string,
+                      value: uint64, utxo_cunt: uint32] =
+  let key = concat(Prefix.addrvals.toByte, wid.toByte)
+  for d in db.gets(key):
+    let change = d.key[9..12].toUint32
+    let index = d.key[13..16].toUint32
+    let address = d.key[17..^1].toString
+    let value = d.value[0..7].toUint64
+    let utxo_count = d.value[8..11].toUint32
+    yield (change, index, address, value, utxo_count)
+
 block start:
   echo "db open"
   db.open(".pasteldb")
@@ -276,3 +295,7 @@ when isMainModule:
   setAddress("address1", 0, 0, 1, 1)
   for d in getAddresses("address1"):
     echo d, " ", d.wid
+
+  setAddrval(1, 0, 0, "address1", 100, 100)
+  for d in getAddrvals(1):
+    echo d, " "
