@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import sequtils, endians, algorithm
+import sequtils, endians, algorithm, locks
 import rocksdblib
 export rocksdblib.RocksDbError
 
@@ -67,11 +67,68 @@ proc toByte(val: uint64): seq[byte] =
   var v: uint64 = val
   bigEndian64(addr result[0], addr v)
 
-proc toString(s: seq[byte]): string =
+proc toString(s: openarray[byte]): string =
   result = newStringOfCap(len(s))
   for c in s:
     result.add(cast[char](c))
 
+proc toUint(s: var seq[byte]): uint8 or uint16 or uint32 or uint64 =
+  if s.len == 8:
+    var b = newSeq[byte](8)
+    bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
+    result = cast[ptr uint64](addr b[0])[]
+  elif s.len == 4:
+    echo "s=4"
+    var r32: uint32
+    var b = newSeq[byte](4)
+    bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
+    r32 = cast[ptr uint32](addr b[0])[]
+    result = r32
+  elif s.len == 2:
+    var b = newSeq[byte](2)
+    bigEndian16(addr b[0], cast[ptr uint16](addr s[0]))
+    result = cast[ptr uint16](addr b[0])[]
+  elif s.len == 1:
+    result = cast[uint8](s[0])
+
+proc toUint64(s: var seq[byte]): uint64 =
+  var b = newSeq[byte](8)
+  bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
+  result = cast[ptr uint64](addr b[0])[]
+
+proc toUint32(s: var seq[byte]): uint32 =
+  var b = newSeq[byte](4)
+  bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
+  result = cast[ptr uint32](addr b[0])[]
+
+proc toUint16(s: var seq[byte]): uint16 =
+  var b = newSeq[byte](2)
+  bigEndian16(addr b[0], cast[ptr uint16](addr s[0]))
+  result = cast[ptr uint16](addr b[0])[]
+
+proc toUint8(s: var seq[byte]): uint8 =
+  result = cast[uint8](s[0])
+
+proc toUint64(a: openarray[byte]): uint64 =
+  var s = a.toSeq
+  var b = newSeq[byte](8)
+  bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
+  result = cast[ptr uint64](addr b[0])[]
+
+proc toUint32(a: openarray[byte]): uint32 =
+  var s = a.toSeq
+  var b = newSeq[byte](4)
+  bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
+  result = cast[ptr uint32](addr b[0])[]
+
+proc toUint16(a: openarray[byte]): uint16 =
+  var s = a.toSeq
+  var b = newSeq[byte](2)
+  bigEndian16(addr b[0], cast[ptr uint16](addr s[0]))
+  result = cast[ptr uint16](addr b[0])[]
+
+proc toUint8(a: openarray[byte]): uint8 =
+  result = cast[uint8](a[0])
 
 proc setParam*(param_id: uint32, value: uint32) =
   let key = concat(Prefix.params.toByte, param_id.toByte)
@@ -116,6 +173,65 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
   else:
     (DbStatus.NotFound, cast[string](nil))
 
+var wallet_id: uint64
+var L: Lock
+initLock(L)
+
+proc acquireWalletId(): uint64 =
+  acquire(L)
+  inc(wallet_id)
+  setParam(0, wallet_id)
+  result = wallet_id
+  release(L)
+
+proc loadWalletId() =
+  let (err, wid) = getParamUint64(0)
+  if err == DbStatus.Success:
+    wallet_id = wid
+  else:
+    wallet_id = 0
+  echo "load wallet_id=", wallet_id
+
+proc setWallet*(xpubkey: string, wid: uint64, sequence: uint64,
+                last_0_index: uint32, last_1_index: uint32) =
+  let key = concat(Prefix.wallets.toByte,
+                  xpubkey.toByte,
+                  wid.toByte)
+  let val = concat(sequence.toByte,
+                  last_0_index.toByte,
+                  last_1_index.toByte)
+  db.put(key, val)
+
+proc getWallet*(xpubkey: string): tuple[err: DbStatus,
+                res: tuple[wallet_id: uint64, sequence: uint64,
+                last_0_index: uint32, last_1_index: uint32]] =
+  let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
+  var d = db.gets(key)
+  if d.len > 0:
+    let wid = d[0].key[^8..^1].toUint64
+    let sequence = d[0].value[0..7].toUint64
+    let last_0_index = d[0].value[8..11].toUint32
+    let last_1_index = d[0].value[12..15].toUint32
+    result = (DbStatus.Success, (wid, sequence, last_0_index, last_1_index))
+  else:
+    result = (DbStatus.NotFound, (cast[uint64](nil), cast[uint64](nil),
+              cast[uint32](nil), cast[uint32](nil)))
+
+var createWalletLock: Lock
+initLock(createWalletLock)
+
+proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
+                        sequence: uint64, last_0_index: uint32,
+                        last_1_index: uint32] =
+  acquire(createWalletLock)
+  let d = getWallet(xpubkey)
+  if d.err == DbStatus.Success:
+    result = d.res
+  else:
+    setWallet(xpubkey, acquireWalletId(), 0, 0, 0)
+    let d2 = getWallet(xpubkey)
+    result = d2.res
+  release(createWalletLock)
 
 block start:
   echo "db open"
@@ -126,3 +242,11 @@ block start:
     echo "db close"
 
   addQuitProc(quit)
+  loadWalletId()
+
+  echo getWallet("test")
+  echo getOrCreateWallet("test")
+  echo getOrCreateWallet("test2")
+  echo getOrCreateWallet("test2")
+  echo getOrCreateWallet("test3")
+  echo getOrCreateWallet("test3")
