@@ -5,6 +5,18 @@ export json
 
 const baseurl = "http://localhost:8000/api/"
 
+type
+  BsErrorCode* {.pure.} = enum
+    SUCCESS
+    ERROR
+    SYNCING
+    ROLLBACKING
+    ROLLBACKED
+    UNKNOWN_APIKEY
+    BUSY
+    TOO_MANY
+    TOO_HIGH
+
 proc get(cmdurl: string): JsonNode =
   try:
     let client = newHttpClient()
