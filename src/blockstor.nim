@@ -206,7 +206,7 @@ proc getUint32*(data: JsonNode): uint32 =
     of JInt:
       cast[uint32](data.getInt)
     of Jstring:
-      cast[uint32](parseBiggestUInt(data.getStr))
+      cast[uint32](parseUInt(data.getStr))
     else:
       raise
 
