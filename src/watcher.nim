@@ -32,7 +32,7 @@ proc main() =
   for d in db.getWallets(""):
     echo "wid=", d.wallet_id, " ", d.xpubkey
     var address_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string]]
-    var prev_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string]]
+    var target_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string]]
     var addrs: seq[string]
     var new_last_0_index, new_last_1_index: uint32
     var base_index: uint32 = 0
@@ -77,23 +77,21 @@ proc main() =
                 new_last_1_index = address_list[pos].index + 1
                 find_1 = true
             inc(pos)
-        prev_list = prev_list.concat(address_list)
+        target_list = target_list.concat(address_list)
 
       dec(try_limit)
       if try_limit <= 0:
         break
 
-    echo prev_list
+    echo target_list
     if find_0 or find_1:
       echo "postpone ", find_0, " ", find_1, " ", new_last_0_index, " ", new_last_1_index, " wid=", d.wallet_id, " ", d.xpubkey
 
-    for d in prev_list:
-      if d.change == 0:
-        if d.index < new_last_0_index + gap_limit:
-          echo d.change, " ", d.index
-      elif d.change == 1:
-        if d.index < new_last_1_index + gap_limit:
-          echo d.change, " ", d.index
+    target_list.keepIf(proc(d: auto): bool =
+      (d.change == 0 and d.index < new_last_0_index + gap_limit) or
+      (d.change == 1 and d.index < new_last_1_index + gap_limit))
+
+    echo target_list
 
     echo "new_last_0_index=", new_last_0_index
     echo "new_last_1_index=", new_last_1_index
