@@ -66,7 +66,7 @@ proc main() =
       find_1 = false
       if addrs.len > 0:
         let balance = blockstor.getAddress(addrs)
-        if balance["err"].getInt == 0:
+        if balance.kind != JNull and balance["err"].getInt == 0:
           var pos = 0
           for b in balance["res"]:
             if b{"balance"} != nil:
