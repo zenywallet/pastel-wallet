@@ -146,14 +146,14 @@ proc main() =
     let smarker = blockstor.setMarker(blockstor_apikey, max_sequence)
     echo "smarker=", smarker
     if smarker.kind != JNull:
-      case smarker["err"].getInt:
-        of ord(BsErrorCode.SUCCESS), ord(BsErrorCode.ROLLBACKING):
+      case BsErrorCode(smarker["err"].getInt):
+        of BsErrorCode.SUCCESS, BsErrorCode.ROLLBACKING:
           echo "done"
-        of ord(BsErrorCode.ROLLBACKED):
+        of BsErrorCode.ROLLBACKED:
           let sequence = smarker["res"].getUint64
           # > seq: remove
           let smarker = blockstor.setMarker(blockstor_apikey, sequence)
-        of ord(BsErrorCode.UNKNOWN_APIKEY):
+        of BsErrorCode.UNKNOWN_APIKEY:
           echo "invalid apikey"
         else:
           echo "setmaker err=", smarker["err"].getInt
