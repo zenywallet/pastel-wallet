@@ -210,6 +210,12 @@ proc getUint32*(data: JsonNode): uint32 =
     else:
       raise
 
+iterator toIterator*(api_result: JsonNode): JsonNode =
+  if api_result.kind != JNull and api_result["err"].getInt == 0 and
+    api_result{"res"} != nil and api_result["res"].kind == JArray:
+    for d in api_result["res"]:
+      yield d
+
 when isMainModule:
   echo get("addr/ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP")
   echo post("addrs", %*{"addrs": ["ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP"]})
