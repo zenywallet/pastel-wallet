@@ -210,6 +210,24 @@ proc getUint32*(data: JsonNode): uint32 =
     else:
       raise
 
+proc getUint16*(data: JsonNode): uint16 =
+  result = case data.kind:
+    of JInt:
+      cast[uint16](data.getInt)
+    of Jstring:
+      cast[uint16](parseUInt(data.getStr))
+    else:
+      raise
+
+proc getUint8*(data: JsonNode): uint8 =
+  result = case data.kind:
+    of JInt:
+      cast[uint8](data.getInt)
+    of Jstring:
+      cast[uint8](parseUInt(data.getStr))
+    else:
+      raise
+
 iterator toApiResIterator*(api_result: JsonNode): JsonNode =
   if api_result.kind != JNull and api_result["err"].getInt == 0 and
     api_result{"res"} != nil and api_result["res"].kind == JArray:
