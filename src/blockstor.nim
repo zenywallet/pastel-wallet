@@ -210,7 +210,7 @@ proc getUint32*(data: JsonNode): uint32 =
     else:
       raise
 
-iterator toIterator*(api_result: JsonNode): JsonNode =
+iterator toApiResIterator*(api_result: JsonNode): JsonNode =
   if api_result.kind != JNull and api_result["err"].getInt == 0 and
     api_result{"res"} != nil and api_result["res"].kind == JArray:
     for d in api_result["res"]:
