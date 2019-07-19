@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import httpclient, json, asyncdispatch
+import httpclient, json, asyncdispatch, strutils
 export json
 
 const baseurl = "http://localhost:8000/api/"
@@ -192,6 +192,23 @@ template getTx*(tx: string, cb: proc(data: JsonNode)) =
 template search*(keyword: string, cb: proc(data: JsonNode)) =
   asyncCheck getAsync("search/" & keyword, cb)
 
+proc getUint64*(data: JsonNode): uint64 =
+  result = case data.kind:
+    of JInt:
+      cast[uint64](data.getBiggestInt)
+    of Jstring:
+      cast[uint64](parseBiggestUInt(data.getStr))
+    else:
+      raise
+
+proc getUint32*(data: JsonNode): uint32 =
+  result = case data.kind:
+    of JInt:
+      cast[uint32](data.getInt)
+    of Jstring:
+      cast[uint32](parseBiggestUInt(data.getStr))
+    else:
+      raise
 
 when isMainModule:
   echo get("addr/ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP")
@@ -232,6 +249,27 @@ when isMainModule:
 
   getAddress("ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP", proc(data: JsonNode) = echo data)
   getAddress(["ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP", "ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP"], proc(data: JsonNode) = echo data)
+
+  let j1 = parseJson("""{"key": 4294967295}""")
+  echo j1["key"].getUint32
+
+  let j2 = parseJson("""{"key": -1}""")
+  echo j2["key"].getUint32
+
+  let j3 = parseJson("""{"key": 9007199254740991}""")
+  echo j3["key"].getUint64
+
+  let j4 = parseJson("""{"key": 9007199254740992}""")
+  echo j4["key"].getUint64
+
+  let j5 = parseJson("""{"key": "9007199254740991"}""")
+  echo j5["key"].getUint64
+
+  let j6 = parseJson("""{"key": "9007199254740992"}""")
+  echo j6["key"].getUint64
+
+  let j7 = parseJson("""{"key": -1}""")
+  echo j7["key"].getUint64
 
   try:
     runForever()
