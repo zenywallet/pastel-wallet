@@ -6,9 +6,11 @@ type
   RocksDb* = object
     db: rocksdb_t
     dbpath: cstring
+    dbpathBackup: cstring
     options: rocksdb_options_t
     readOptions*: rocksdb_readoptions_t
     writeOptions*: rocksdb_writeoptions_t
+    be: rocksdb_backup_engine_t
     err: cstring
 
   KeyType = openarray[byte]
@@ -26,7 +28,8 @@ template rocksdb_checkerr* {.dirty.} =
     rocksdb_free(rocks.err)
     raise newException(RocksDbError, err_msg)
 
-proc open*(rocks: var RocksDb, dbpath: cstring, total_threads: int32 = cpuinfo.countProcessors().int32) =
+proc open*(rocks: var RocksDb, dbpath: cstring, dbpathBackup: cstring,
+          total_threads: int32 = cpuinfo.countProcessors().int32) =
   rocks.options = rocksdb_options_create()
   rocksdb_options_increase_parallelism(rocks.options, total_threads)
   rocksdb_options_set_create_if_missing(rocks.options, 1)
@@ -34,6 +37,10 @@ proc open*(rocks: var RocksDb, dbpath: cstring, total_threads: int32 = cpuinfo.c
   rocks.writeOptions = rocksdb_writeoptions_create()
   rocks.dbpath = dbpath
   rocks.db = rocksdb_open(rocks.options, rocks.dbpath, rocks.err.addr)
+  rocksdb_checkerr
+  rocks.be = rocksdb_backup_engine_open(rocks.options, dbpathBackup, rocks.err.addr)
+  rocksdb_checkerr
+  rocksdb_backup_engine_create_new_backup(rocks.be, rocks.db, rocks.err.addr)
   rocksdb_checkerr
 
 proc close*(rocks: var RocksDb) =
@@ -49,6 +56,9 @@ proc close*(rocks: var RocksDb) =
   if not rocks.options.isNil:
     rocksdb_options_destroy(rocks.options)
     rocks.options = nil
+  if not rocks.be.isNil:
+    rocksdb_backup_engine_close(rocks.be)
+    rocks.be = nil
   if not rocks.db.isNil:
     rocksdb_close(rocks.db)
     rocks.db = nil

@@ -4,5 +4,4 @@
 nimcache/
 !deps/
 !deps/libbtc/
-.pasteldb/
-
+.pasteldb*/

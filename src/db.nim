@@ -332,7 +332,7 @@ iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
 
 block start:
   echo "db open"
-  db.open(".pasteldb")
+  db.open(".pasteldb", ".pasteldb_backup")
 
   proc quit() {.noconv.} =
     db.close()
