@@ -53,10 +53,6 @@ type
     timestamp*: uint32_t
     target*: uint32_t
 
-
-  btc_chainparams2* {.bycopy.} = object
-    chainname*: array[32, char]
-
 #var btc_chainparams_main*: btc_chainparams
 
 #var btc_chainparams_test*: btc_chainparams
