@@ -216,6 +216,12 @@ iterator toIterator*(api_result: JsonNode): JsonNode =
     for d in api_result["res"]:
       yield d
 
+proc resLen*(api_result: JsonNode): int =
+  if api_result{"res"} != nil and api_result["res"].kind == JArray:
+    result = api_result["res"].len
+  else:
+    result = 0
+
 when isMainModule:
   echo get("addr/ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP")
   echo post("addrs", %*{"addrs": ["ZdzzJGbxRLSiim9cWvVHetJVxzPW72n6eP"]})
