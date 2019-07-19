@@ -69,7 +69,7 @@ proc main() =
         if balance["err"].getInt == 0:
           var pos = 0
           for b in balance["res"]:
-            if b.hasKey("balance"):
+            if b{"balance"} != nil:
               if address_list[pos].change == 0:
                 new_last_0_index = address_list[pos].index + 1
                 find_0 = true
