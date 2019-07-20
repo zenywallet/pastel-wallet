@@ -367,3 +367,10 @@ when isMainModule:
   setUnspent(1, 1, "txid1", 5, "address1", 200)
   for d in getUnspents(1):
     echo d
+
+  let key = concat(Prefix.rewards.toByte, 10'u64.toByte)
+  let val = concat(5'u64.toByte)
+  db.put(key, val)
+  echo db.get(key)
+  db.del(key)
+  echo db.get(key)

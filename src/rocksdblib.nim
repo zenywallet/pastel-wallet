@@ -82,6 +82,11 @@ proc get*(rocks: var RocksDb, key: KeyType): seq[byte] =
     copyMem(addr s[0], unsafeAddr data[0], len)
   result = s
 
+proc del*(rocks: var RocksDb, key: KeyType) =
+  rocksdb_delete(rocks.db, rocks.writeOptions, cast[cstring](unsafeAddr key[0]),
+                key.len, rocks.err.addr)
+  rocksdb_checkerr
+
 proc get_iter_key_value(iter: rocksdb_iterator_t): ResultKeyValue =
   var key_str, value_str: cstring
   var key_len, value_len: csize
