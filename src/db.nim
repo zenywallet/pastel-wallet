@@ -316,6 +316,22 @@ proc delAddrlogs*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
   db.dels(key)
 
+proc delAddrlogs_gt(wid: uint64, sequence: uint64) =
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  for d in db.gets_nobreak(key):
+    let prefix = d.key[0].toUint8
+    let d_wid = d.key[1..8]
+    if Prefix(prefix) != Prefix.addrlogs or d_wid.toUint64 != wid:
+      break
+    let d_sequence = d.key[9..16]
+    if d_sequence.toUint64 > sequence:
+      let d_change = d.key[18..21]
+      let d_index = d.key[22..25]
+      let d_address = d.key[26..^1]
+      let d_key = concat(Prefix.addrlogs.toByte, d_wid, d_sequence,
+                        d_change, d_index, d_address)
+      db.del(d_key)
+
 proc setUnspent*(wid: uint64, sequence: uint64, txid: string, n: uint32,
                 address: string, value: uint64) =
   let key = concat(Prefix.unspents.toByte, wid.toByte,
@@ -337,6 +353,20 @@ iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
 proc delUnspents*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
   db.dels(key)
+
+proc delUnspents_gt(wid: uint64, sequence: uint64) =
+  let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
+  for d in db.gets_nobreak(key):
+    let prefix = d.key[0].toUint8
+    let d_wid = d.key[1..8]
+    if Prefix(prefix) != Prefix.unspents or d_wid.toUint64 != wid:
+      break
+    let d_sequence = d.key[9..16]
+    if d_sequence.toUint64 > sequence:
+      let txid = d.key[17..^5]
+      let n = d.key[^4..^1]
+      let d_key = concat(Prefix.unspents.toByte, d_wid, d_sequence, txid, n)
+      db.del(d_key)
 
 block start:
   echo "db open"
