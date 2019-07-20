@@ -312,6 +312,10 @@ iterator getAddrlogs*(wid: uint64): tuple[sequence: uint64, txtype: uint8,
     let time = d.value[^4..^1].toUint32
     yield (sequence, txtype, change, index, address, value, txid, height, time)
 
+proc delAddrlogs*(wid: uint64, sequence: uint64) =
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  db.dels(key)
+
 proc setUnspent*(wid: uint64, sequence: uint64, txid: string, n: uint32,
                 address: string, value: uint64) =
   let key = concat(Prefix.unspents.toByte, wid.toByte,
@@ -329,6 +333,10 @@ iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
     let address = d.value[0..^9].toString
     let value = d.value[^8..^1].toUint64
     yield (sequence, txid, n, address, value)
+
+proc delUnspents*(wid: uint64, sequence: uint64) =
+  let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
+  db.dels(key)
 
 block start:
   echo "db open"
