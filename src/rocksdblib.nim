@@ -115,7 +115,7 @@ proc gets*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
         dec(i)
       result.add(get_iter_key_value(iter))
       rocksdb_iter_next(iter)
-  rocksdb_iter_destroy(iter);
+  rocksdb_iter_destroy(iter)
 
 iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
@@ -135,7 +135,7 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
         yield kv
         rocksdb_iter_next(iter)
   finally:
-    rocksdb_iter_destroy(iter);
+    rocksdb_iter_destroy(iter)
 
 iterator gets_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
