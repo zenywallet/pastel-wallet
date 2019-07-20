@@ -389,7 +389,15 @@ when isMainModule:
     let v = concat(cast[uint64](i * 10).toByte)
     db.put(k, v)
 
+  var i = 0;
+  for d in db.gets_nobreak(Prefix.rewards.toByte):
+    echo "d=", d
+    inc(i)
+    if i > 3:
+      break
+
   let key2 = concat(Prefix.rewards.toByte)
   echo db.gets(key2)
   db.dels(key2)
   echo db.gets(key2)
+
