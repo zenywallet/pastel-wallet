@@ -368,9 +368,20 @@ when isMainModule:
   for d in getUnspents(1):
     echo d
 
-  let key = concat(Prefix.rewards.toByte, 10'u64.toByte)
-  let val = concat(5'u64.toByte)
-  db.put(key, val)
-  echo db.get(key)
-  db.del(key)
-  echo db.get(key)
+  let key1 = concat(Prefix.rewards.toByte, 10'u64.toByte)
+  let val1 = concat(5'u64.toByte)
+  db.put(key1, val1)
+  echo db.get(key1)
+  db.del(key1)
+  echo db.get(key1)
+  db.put(key1, val1)
+
+  for i in 1..10:
+    let k = concat(Prefix.rewards.toByte, cast[uint64](i * 10).toByte)
+    let v = concat(cast[uint64](i * 10).toByte)
+    db.put(k, v)
+
+  let key2 = concat(Prefix.rewards.toByte)
+  echo db.gets(key2)
+  db.dels(key2)
+  echo db.gets(key2)

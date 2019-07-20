@@ -137,6 +137,10 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   finally:
     rocksdb_iter_destroy(iter);
 
+proc dels*(rocks: var RocksDb, key: KeyType) =
+  for d in rocks.gets(key):
+    rocks.del(d.key)
+
 proc key_countup(key: openarray[byte]): tuple[carry: bool, key: seq[byte]] =
   var k = newSeq[byte](key.len)
   var carry = true
