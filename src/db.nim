@@ -344,7 +344,7 @@ proc delAddrlogs*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
   db.dels(key)
 
-proc delAddrlogs_gt(wid: uint64, sequence: uint64) =
+proc delAddrlogs_gt*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
@@ -399,7 +399,7 @@ proc delUnspents*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
   db.dels(key)
 
-proc delUnspents_gt(wid: uint64, sequence: uint64) =
+proc delUnspents_gt*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
