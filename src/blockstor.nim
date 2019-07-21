@@ -205,7 +205,7 @@ template search*(keyword: string, cb: proc(data: JsonNode)) =
   asyncCheck getAsync("search/" & keyword, cb)
 
 proc getUint64*(data: JsonNode): uint64 =
-  result = case data.kind:
+  result = case data.kind
     of JInt:
       cast[uint64](data.getBiggestInt)
     of Jstring:
@@ -214,7 +214,7 @@ proc getUint64*(data: JsonNode): uint64 =
       raise
 
 proc getUint32*(data: JsonNode): uint32 =
-  result = case data.kind:
+  result = case data.kind
     of JInt:
       cast[uint32](data.getInt)
     of Jstring:
@@ -223,7 +223,7 @@ proc getUint32*(data: JsonNode): uint32 =
       raise
 
 proc getUint16*(data: JsonNode): uint16 =
-  result = case data.kind:
+  result = case data.kind
     of JInt:
       cast[uint16](data.getInt)
     of Jstring:
@@ -232,7 +232,7 @@ proc getUint16*(data: JsonNode): uint16 =
       raise
 
 proc getUint8*(data: JsonNode): uint8 =
-  result = case data.kind:
+  result = case data.kind
     of JInt:
       cast[uint8](data.getInt)
     of Jstring:
