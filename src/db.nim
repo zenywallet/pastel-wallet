@@ -287,6 +287,11 @@ iterator getAddrvals*(wid: uint64): tuple[change: uint32,
     let utxo_count = d.value[8..11].toUint32
     yield (change, index, address, value, utxo_count)
 
+proc delAddrval*(wid: uint64, change: uint32, index: uint32, address: string) =
+  let key = concat(Prefix.addrvals.toByte, wid.toByte,
+                  change.toByte, index.toByte, address.toByte)
+  db.del(key)
+
 proc setAddrlog*(wid: uint64, sequence: uint64, txtype: uint8,
                 change: uint32, index: uint32, address: string,
                 value: uint64, txid: string, height: uint32, time: uint32) =
