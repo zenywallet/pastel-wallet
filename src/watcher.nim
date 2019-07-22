@@ -29,7 +29,7 @@ proc hdaddress(xpubkey: string, change, index: uint32): string =
   btc_hdnode_get_p2pkh_address(addr node, addr chain, address, cast[cint](address_size))
   result = $address
 
-proc enumRangeCheck(enumtype: type, value: int): bool =
+template enumRangeCheck(enumtype: type, value: int): bool =
   (enumtype.low.ord..enumtype.high.ord).contains(value)
 
 proc main() =
