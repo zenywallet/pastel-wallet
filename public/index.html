@@ -1,1 +1,31 @@
-hello!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description" content="Pastel WALLET">
+  <meta name="author" content="zenywallet">
+  <meta name="keywords" content="wallet">
+  <meta name="format-detection" content="telephone=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script type="text/javascript" src="js/qcode-decoder.min.js"></script>
+  <title>Pastel WALLET</title>
+</head>
+<body>
+<video id="qrvideo" autoplay></video>
+<script>
+var qr = new QCodeDecoder();
+if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
+  var video = document.querySelector('#qrvideo');
+  function resultHandler(err, result) {
+    if(err) {
+      qr.stop();
+      return;
+    }
+    console.log(result);
+  }
+  qr.decodeFromCamera(video, resultHandler);
+}
+</script>
+</body>
+</html>
