@@ -63,6 +63,50 @@ function onClientSizeChanged(cb) {
   }
 }
 
+var target_scroll_pos = null;
+function scrollPos(pos, duration, done) {
+  target_scroll_pos = pos;
+  var direction = pos > sy ? 1 : -1;
+  var sy = window.scrollY;
+  var cosParameter = (pos - sy) / 2 * direction;
+  var scrollCount = 0;
+  var oldTimestamp = performance.now();
+  function step(newTimestamp) {
+    if(target_scroll_pos != pos) {
+      return;
+    }
+    scrollCount += Math.PI / (duration / (newTimestamp - oldTimestamp));
+    if(scrollCount >= Math.PI) {
+      window.scrollTo(0, pos);
+    }
+    if(window.scrollY === pos) {
+      if(done) {
+        done();
+      }
+      return;
+    }
+    window.scrollTo(0, sy + Math.round(cosParameter - cosParameter * Math.cos(scrollCount)) * direction);
+    oldTimestamp = newTimestamp;
+    window.requestAnimationFrame(step);
+  }
+  window.requestAnimationFrame(step);
+}
+
+var lastSection = null;
+function goSection(selector) {
+  var section = document.querySelector(selector);
+  var rect = section.getBoundingClientRect();
+  var offset_top = rect.top + (window.pageYOffset || document.documentElement.scrollTop);
+  scrollPos(offset_top, 800);
+  lastSection = selector;
+}
+
+function reloadSection() {
+  if(lastSection) {
+    goSection(lastSection);
+  }
+}
+
 function showQrReader() {
   var qr = new QCodeDecoder();
   if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
