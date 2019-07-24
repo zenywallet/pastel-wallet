@@ -107,6 +107,37 @@ function reloadSection() {
   }
 }
 
+var scroll_tval = null;
+window.onscroll = function() {
+  if(scroll_tval != null) {
+    clearTimeout(scroll_tval);
+    scroll_tval = null;
+  }
+  var difflist = {};
+  var sections = document.getElementsByClassName('section');
+  Array.prototype.forEach.call(sections, function(section) {
+    var rect = section.getBoundingClientRect();
+    var section_id = section.getAttribute('id');
+    difflist['#' + section_id] = Math.abs(rect.top);
+  });
+  var min_val = 0;
+  var min_item = null;
+  for(var key in difflist) {
+    if(min_item == null || difflist[key] < min_val) {
+      min_val = difflist[key];
+      min_item = key;
+    }
+  }
+  if(min_item) {
+    lastSection = min_item;
+  }
+  scroll_tval = setTimeout(function() {
+    if(lastSection) {
+      goSection(lastSection);
+    }
+  }, 1200);
+}
+
 function showQrReader() {
   var qr = new QCodeDecoder();
   if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
