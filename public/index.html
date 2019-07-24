@@ -34,6 +34,20 @@
 </section>
 <video id="qrvideo" autoplay></video>
 <script>
+function ready(cb) {
+  if(document.readyState != 'loading') {
+    cb();
+  } else if(document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', cb);
+  } else {
+    document.attachEvent('onreadystatechange', function() {
+      if(document.readyState == 'complete') {
+        cb();
+      }
+    });
+  }
+}
+
 function showQrReader() {
   var qr = new QCodeDecoder();
   if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
