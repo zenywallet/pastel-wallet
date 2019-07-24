@@ -4,13 +4,21 @@
   <meta charset="utf-8">
   <script type="text/javascript" src="/js/jquery-3.4.1.slim.min.js"></script>
   <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
+  <script type="text/javascript" src="/js/elliptic.min.js"></script>
   <title>Seed Maker</title>
 </head>
 <body>
 <div id="qrcode"></div>
+<div id="seed"></div>
 <script>
+var EC = elliptic.ec;
+var ec = new EC('curve25519');
+var key = ec.genKeyPair();
+var priv = key.getPrivate('hex');
+console.log(priv);
+var seedstr = 'seed:' + priv;
+document.getElementById('seed').innerHTML = seedstr;
 var s = 400;
-var seedstr = 'seed:12341234';
 $('#qrcode').qrcode({
   render: 'canvas',
   ecLevel: 'Q',
@@ -20,7 +28,7 @@ $('#qrcode').qrcode({
   mode: 2,
   label: 'seed',
   fontname: 'sans',
-  fontcolor: '#000'
+  fontcolor: '#393939'
 });
 </script>
 </body>
