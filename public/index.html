@@ -137,6 +137,10 @@ ready(function() {
       elm.addEventListener('click', cb);
     }
   });
+
+  onClientSizeChanged(function() {
+    reloadSection();
+  });
 });
 </script>
 </body>
