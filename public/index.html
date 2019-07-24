@@ -121,6 +121,23 @@ function showQrReader() {
     qr.decodeFromCamera(video, resultHandler);
   }
 }
+
+var registerEventList = [];
+ready(function() {
+  var elms = document.querySelectorAll('a');
+  Array.prototype.forEach.call(elms, function(elm) {
+    var href = elm.getAttribute("href");
+    if(href && href.startsWith('#')) {
+      var cb = function(e) {
+        e.preventDefault();
+        var href = this.getAttribute('href');
+        goSection(href);
+      }
+      registerEventList.push({elm: elm, type: 'click', cb: cb});
+      elm.addEventListener('click', cb);
+    }
+  });
+});
 </script>
 </body>
 </html>
