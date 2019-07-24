@@ -22,17 +22,19 @@
 <body>
 <video id="qrvideo" autoplay></video>
 <script>
-var qr = new QCodeDecoder();
-if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
-  var video = document.querySelector('#qrvideo');
-  function resultHandler(err, result) {
-    if(err) {
-      qr.stop();
-      return;
+function showQrReader() {
+  var qr = new QCodeDecoder();
+  if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
+    var video = document.querySelector('#qrvideo');
+    function resultHandler(err, result) {
+      if(err) {
+        qr.stop();
+        return;
+      }
+      console.log(result);
     }
-    console.log(result);
+    qr.decodeFromCamera(video, resultHandler);
   }
-  qr.decodeFromCamera(video, resultHandler);
 }
 </script>
 </body>
