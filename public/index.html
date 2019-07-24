@@ -48,6 +48,21 @@ function ready(cb) {
   }
 }
 
+var bodyWidth, bodyHeight;
+function onClientSizeChanged(cb) {
+  bodyWidth = document.body.clientWidth;
+  bodyHeight = document.body.clientHeight;
+  window.onresize = function() {
+    var newBodyWidth = document.body.clientWidth;
+    var newBodyHeight = document.body.clientHeight;
+    if(bodyWidth != newBodyWidth || bodyHeight != newBodyHeight) {
+      cb();
+      bodyWidth = newBodyWidth;
+      bodyHeight = newBodyHeight;
+    }
+  }
+}
+
 function showQrReader() {
   var qr = new QCodeDecoder();
   if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
