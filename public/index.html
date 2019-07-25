@@ -66,31 +66,35 @@ function onClientSizeChanged(cb) {
 var target_scroll_pos = null;
 function scrollPos(pos, duration, done) {
   target_scroll_pos = pos;
-  var direction = pos > sy ? 1 : -1;
   var sy = window.scrollY;
-  var cosParameter = (pos - sy) / 2 * direction;
-  var scrollCount = 0;
-  var oldTimestamp = performance.now();
-  function step(newTimestamp) {
+  if(pos == sy) {
+    return;
+  }
+  var rad = 0;
+  var diff = pos - sy;
+  var hpi = Math.PI / 2;
+  var stime = performance.now();
+  function step(timestamp) {
     if(target_scroll_pos != pos) {
       return;
     }
-    scrollCount += Math.PI / (duration / (newTimestamp - oldTimestamp));
-    if(scrollCount >= Math.PI) {
+    var elaps = timestamp - stime;
+    rad = hpi * elaps / duration;
+    if(rad >= hpi) {
       window.scrollTo(0, pos);
-    }
-    if(window.scrollY === pos) {
       if(done) {
         done();
       }
       return;
     }
-    window.scrollTo(0, sy + Math.round(cosParameter - cosParameter * Math.cos(scrollCount)) * direction);
-    oldTimestamp = newTimestamp;
+    var curpos = Math.round(sy + diff * Math.sin(rad));
+    window.scrollTo(0, curpos);
     window.requestAnimationFrame(step);
+
   }
   window.requestAnimationFrame(step);
 }
+
 
 var lastSection = null;
 function goSection(selector) {
