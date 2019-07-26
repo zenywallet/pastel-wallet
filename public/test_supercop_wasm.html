@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/require.js"></script>
+  <title>test supercop.wasm</title>
+</head>
+<body>
+<script>
+requirejs(['js/supercop.wasm'], function(supercop) {
+  supercop.ready(function() {
+    var seed = supercop.createSeed()
+    var keys = supercop.createKeyPair(seed)
+    var msg = (new TextEncoder("utf-8")).encode("hello there")
+    var sig = supercop.sign(msg, keys.publicKey, keys.secretKey)
+    console.log(supercop.verify(sig, msg, keys.publicKey)) // true
+  });
+})
+</script>
+</body>
+</html>
