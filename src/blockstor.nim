@@ -101,107 +101,107 @@ proc toUrlParam(params: JsonNode): string =
       result = result & "&" & $item.key & "=" & $item.val
 
 
-template getAddress*(address: string): JsonNode =
+proc getAddress*(address: string): JsonNode {.inline.} =
   get("addr/" & address)
 
-template getAddress*(addresses: openarray[string]): JsonNode =
+proc getAddress*(addresses: openarray[string]): JsonNode {.inline.} =
   post("addrs", %*{"addrs": addresses})
 
-template getUtxo*(address: string): JsonNode =
+proc getUtxo*(address: string): JsonNode {.inline.} =
   get("utxo/" & address)
 
-template getUtxo*(address: string, params: tuple or JsonNode): JsonNode =
+proc getUtxo*(address: string, params: tuple or JsonNode): JsonNode {.inline.} =
   get("utxo/" & address & params.toUrlParam)
 
-template getUtxo*(addresses: openarray[string]): JsonNode =
+proc getUtxo*(addresses: openarray[string]): JsonNode {.inline.} =
   post("utxos", %*{"addrs": addresses})
 
-template getUtxo*(addresses: openarray[string], params: tuple or JsonNode): JsonNode =
+proc getUtxo*(addresses: openarray[string], params: tuple or JsonNode): JsonNode {.inline.} =
   post("utxos" & params.toUrlParam, %*{"addrs": addresses})
 
-template getAddrlog*(address: string): JsonNode =
+proc getAddrlog*(address: string): JsonNode {.inline.} =
   get("addrlog/" & address)
 
-template getAddrlog*(address: string, params: tuple or JsonNode): JsonNode =
+proc getAddrlog*(address: string, params: tuple or JsonNode): JsonNode {.inline.} =
   get("addrlog/" & address & params.toUrlParam)
 
-template getAddrlog*(addresses: openarray[string]): JsonNode =
+proc getAddrlog*(addresses: openarray[string]): JsonNode {.inline.} =
   post("addrlogs", %*{"addrs": addresses})
 
-template getAddrlog*(addresses: openarray[string], params: tuple or JsonNode): JsonNode =
+proc getAddrlog*(addresses: openarray[string], params: tuple or JsonNode): JsonNode {.inline.} =
   post("addrlogs" & params.toUrlParam, %*{"addrs": addresses})
 
-template getMempool*(): JsonNode =
+proc getMempool*(): JsonNode {.inline.} =
   get("mempool")
 
-template getMarker*(apikey: string): JsonNode =
+proc getMarker*(apikey: string): JsonNode {.inline.} =
   get("marker/" & apikey)
 
-template setMarker*(apikey: string, sequence: uint64): JsonNode =
+proc setMarker*(apikey: string, sequence: uint64): JsonNode {.inline.} =
   post("marker", %*{"apikey": apikey, "sequence": sequence})
 
-template getHeight*(): JsonNode =
+proc getHeight*(): JsonNode {.inline.} =
   get("height")
 
-template send*(rawtx: string): JsonNode =
+proc send*(rawtx: string): JsonNode {.inline.} =
   post("addrs", %*{"rawtx": rawtx})
 
-template getTx*(tx: string): JsonNode =
+proc getTx*(tx: string): JsonNode {.inline.} =
   get("tx/" & tx)
 
-template search*(keyword: string): JsonNode =
+proc search*(keyword: string): JsonNode {.inline.} =
   get("search/" & keyword)
 
 
-template getAddress*(address: string, cb: proc(data: JsonNode)) =
+proc getAddress*(address: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("addr/" & address, cb)
 
-template getAddress*(addresses: openarray[string], cb: proc(data: JsonNode)) =
+proc getAddress*(addresses: openarray[string], cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("addrs", %*{"addrs": addresses}, cb)
 
-template getUtxo*(address: string, cb: proc(data: JsonNode)) =
+proc getUtxo*(address: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("utxo/" & address, cb)
 
-template getUtxo*(address: string, params: tuple or JsonNode, cb: proc(data: JsonNode)) =
+proc getUtxo*(address: string, params: tuple or JsonNode, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("utxo/" & address & params.toUrlParam, cb)
 
-template getUtxo*(addresses: openarray[string], cb: proc(data: JsonNode)) =
+proc getUtxo*(addresses: openarray[string], cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("utxos", %*{"addrs": addresses}, cb)
 
-template getUtxo*(addresses: openarray[string], params: tuple or JsonNode, cb: proc(data: JsonNode)) =
+proc getUtxo*(addresses: openarray[string], params: tuple or JsonNode, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("utxos" & params.toUrlParam, %*{"addrs": addresses}, cb)
 
-template getAddrlog*(address: string, cb: proc(data: JsonNode)) =
+proc getAddrlog*(address: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("addrlog/" & address, cb)
 
-template getAddrlog*(address: string, params: tuple or JsonNode, cb: proc(data: JsonNode)) =
+proc getAddrlog*(address: string, params: tuple or JsonNode, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("addrlog/" & address & params.toUrlParam, cb)
 
-template getAddrlog*(addresses: openarray[string], cb: proc(data: JsonNode)) =
+proc getAddrlog*(addresses: openarray[string], cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("addrlogs", %*{"addrs": addresses}, cb)
 
-template getAddrlog*(addresses: openarray[string], params: tuple or JsonNode, cb: proc(data: JsonNode)) =
+proc getAddrlog*(addresses: openarray[string], params: tuple or JsonNode, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("addrlogs" & params.toUrlParam, %*{"addrs": addresses}, cb)
 
-template getMempool*(cb: proc(data: JsonNode)) =
+proc getMempool*(cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("mempool", cb)
 
-template getMarker*(apikey: string, cb: proc(data: JsonNode)) =
+proc getMarker*(apikey: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("marker/" & apikey, cb)
 
-template setMarker*(apikey: string, sequence: uint64, cb: proc(data: JsonNode)) =
+proc setMarker*(apikey: string, sequence: uint64, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("marker", %*{"apikey": apikey, "sequence": sequence}, cb)
 
-template getHeight*(cb: proc(data: JsonNode)) =
+proc getHeight*(cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("height", cb)
 
-template send*(rawtx: string, cb: proc(data: JsonNode)) =
+proc send*(rawtx: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck postAsync("addrs", %*{"rawtx": rawtx}, cb)
 
-template getTx*(tx: string, cb: proc(data: JsonNode)) =
+proc getTx*(tx: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("tx/" & tx, cb)
 
-template search*(keyword: string, cb: proc(data: JsonNode)) =
+proc search*(keyword: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("search/" & keyword, cb)
 
 proc getUint64*(data: JsonNode): uint64 =
