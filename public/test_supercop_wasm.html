@@ -14,6 +14,20 @@ requirejs(['js/supercop.wasm'], function(supercop) {
     var msg = (new TextEncoder("utf-8")).encode("hello there")
     var sig = supercop.sign(msg, keys.publicKey, keys.secretKey)
     console.log(supercop.verify(sig, msg, keys.publicKey)) // true
+
+    console.log(JSON.stringify(keys))
+    var publickey = supercop.getPublicKey(keys.secretKey)
+    console.log(JSON.stringify(publickey))
+
+    var seed1 = supercop.createSeed()
+    var keys1 = supercop.createKeyPair(seed1)
+    var seed2 = supercop.createSeed()
+    var keys2 = supercop.createKeyPair(seed2)
+
+    var sharedkey1 = supercop.keyExchange(keys2.publicKey, keys1.secretKey)
+    var sharedkey2 = supercop.keyExchange(keys1.publicKey, keys2.secretKey)
+    console.log(JSON.stringify(sharedkey1))
+    console.log(JSON.stringify(sharedkey2))
   });
 })
 </script>
