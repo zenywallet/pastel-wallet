@@ -86,46 +86,67 @@ console.log(levenshtein(s1_nfc, s3_nfc))
 var mnemonic_input = "いやす くしょう せっきゃく てんきん こんかい ちらみ みいら ぜんら うけたまわる げねつ さかみち ちこく ぱそこん ずぶぬれ はっちゅう おらんだ むらさき のりも このまま ともだち あばれる ききて おうさま くれる";
 
 function levens(word, wordlist) {
-  var result = {}
-  for(var i in wordlist) {
-    var wl = wordlist[i]
-    var distance = distance3(word, wl);
-    if(result[distance]) {
-      result[distance].push(wl);
-    } else {
-      result[distance] = [wl];
-    }
+  if(word.length == 0) {
+    return;
   }
-  console.log(JSON.stringify(result));
-  return result;
-}
-
-
-function jaroWinklerDistance(word, wordlist) {
-  var result = {};
+  var data = {}
   for(var i in wordlist) {
     var wl = wordlist[i];
-    var d = jarowinkler(word, wl);
-    if(result[d]) {
-      result[d].push(wl);
+    var maxlen = Math.max(word.length, wl.length);
+    var score = levenshtein(word, wl) / maxlen;
+    if(data[score]) {
+      data[score].push(wl);
     } else {
-      result[d] = [wl];
+      data[score] = [wl];
     }
   }
   var similars = [];
-  var dvals = Object.keys(result).sort(function(a, b) { return (a > b ? -1 : 1); });
-  for(var i in dvals) {
-    var key = dvals[i];
-    if(similars.length > 0 && key < 0.8) {
+  var result = [];
+  var svals = Object.keys(data).sort();
+  for(var i in svals) {
+    var score = svals[i];
+    similars.push(data[score]);
+    if(result.length > 0 && score > 0.5) {
       break;
     }
-    if(similars.length == 0 || (similars.length + result[key].length) <= 10) {
-      similars = similars.concat(result[key]);
+    if(result.length == 0 || (result.length + data[score].length) <= 7) {
+      result = result.concat(data[score]);
     }
   }
-  return similars;
+  console.log(similars);
+  return result;
 }
 
+function jaroWinklerDistance(word, wordlist) {
+  if(word.length == 0) {
+    return;
+  }
+  var data = {};
+  for(var i in wordlist) {
+    var wl = wordlist[i];
+    var d = jarowinkler(word, wl);
+    if(data[d]) {
+      data[d].push(wl);
+    } else {
+      data[d] = [wl];
+    }
+  }
+  var similars = [];
+  var result = [];
+  var svals = Object.keys(data).sort(function(a, b) { return (a < b); });
+  for(var i in svals) {
+    var score = svals[i];
+    similars.push(data[score]);
+    if(result.length > 0 && score < 0.7) {
+      break;
+    }
+    if(result.length == 0 || (result.length + data[score].length) <= 7) {
+      result = result.concat(data[score]);
+    }
+  }
+  console.log(similars);
+  return result;
+}
 
 var japanese_wordlist_nfkd = [];
 for(var i in bip39.wordlists.japanese) {
@@ -137,8 +158,10 @@ for(var i in words) {
   const index = japanese_wordlist_nfkd.indexOf(word);
   if(index === -1) {
     console.log("not found: " + word);
-    var distances = jaroWinklerDistance(word, japanese_wordlist_nfkd);
-    console.log(distances);
+    var levens_d = levens(word, japanese_wordlist_nfkd);
+    console.log(levens_d);
+    var jaro_d = jaroWinklerDistance(word, japanese_wordlist_nfkd);
+    console.log(jaro_d);
   } else {
     console.log("OK - " + word);
   }
