@@ -166,6 +166,64 @@ for(var i in words) {
     console.log("OK - " + word);
   }
 }
+
+function words_score(words, regexp) {
+  var word = words.replace(/\s+/g, '').split('');
+  var score = 0;
+  for(var i in word) {
+    if(regexp.test(word[i])) {
+      score++;
+    }
+  }
+  return score;
+}
+
+function japanese_hiragana_score(words) {
+  return words_score(words, /[\u3041-\u3096]/);
+}
+
+function japanese_katakana_score(words) {
+  return words_score(words, /[\u30A1-\u30FA]/);
+}
+
+function japanese_cjk_unified_score(words) {
+  return words_score(words, /[\u3400-\u9FFF]/);
+}
+
+function japanese_cjk_compatibility_score(words) {
+  return words_score(words, /[\uF900-\uFAFF]/);
+}
+
+function english_score(words) {
+  return words_score(words, /[a-zA-Z0-9]/);
+}
+
+function isJapanese(words) {
+  var word = words.replace(/\s+/g, '').split('');
+  var ja_score = 0;
+  var en_score = 0;
+  for(var i in word) {
+    var w = word[i];
+    if(/[\u3041-\u3096]/.test(w)
+      || /[\u30A1-\u30FA]/.test(w)
+      || /[\u3400-\u9FFF]/.test(w)
+      || /[\uF900-\uFAFF]/.test(w)
+      ) {
+      ja_score++;
+    } else if(/[a-zA-Z0-9]/.test(w)) {
+      en_score++;
+    }
+  }
+  return ja_score > en_score;
+}
+
+console.log('---');
+console.log(japanese_hiragana_score(mnemonic_input));
+console.log(japanese_katakana_score(mnemonic_input));
+console.log(japanese_cjk_unified_score(mnemonic_input));
+console.log(japanese_cjk_compatibility_score(mnemonic_input));
+console.log(english_score(mnemonic_input));
+console.log(isJapanese(mnemonic_input));
 </script>
 </body>
 </html>
