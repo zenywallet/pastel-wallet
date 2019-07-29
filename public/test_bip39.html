@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <script type="text/javascript" src="/js/bip39.js"></script>
   <script type="text/javascript" src="/js/levenshtein.js"></script>
+  <script type="text/javascript" src="/js/jarowinkler.js"></script>
   <title>test bip39</title>
 </head>
 <body>
@@ -80,6 +81,68 @@ console.log(levenshtein(s1_nfd, s2_nfd))
 console.log(levenshtein(s1_nfd, s3_nfd))
 console.log(levenshtein(s1_nfc, s2_nfc))
 console.log(levenshtein(s1_nfc, s3_nfc))
+
+//var mnemonic_input = "いやす くしょう せっきゃく てんけん こんかい ちらみ みいら ぜんら うけたまわる げねつ さかみち ちこく ぱそこん ずぶぬれ はっちゅう おらんだ むらさき のりもの このまま ともだち あこがれる ききて おうさま くれる";
+var mnemonic_input = "いやす くしょう せっきゃく てんきん こんかい ちらみ みいら ぜんら うけたまわる げねつ さかみち ちこく ぱそこん ずぶぬれ はっちゅう おらんだ むらさき のりも このまま ともだち あばれる ききて おうさま くれる";
+
+function levens(word, wordlist) {
+  var result = {}
+  for(var i in wordlist) {
+    var wl = wordlist[i]
+    var distance = distance3(word, wl);
+    if(result[distance]) {
+      result[distance].push(wl);
+    } else {
+      result[distance] = [wl];
+    }
+  }
+  console.log(JSON.stringify(result));
+  return result;
+}
+
+
+function jaroWinklerDistance(word, wordlist) {
+  var result = {};
+  for(var i in wordlist) {
+    var wl = wordlist[i];
+    var d = jarowinkler(word, wl);
+    if(result[d]) {
+      result[d].push(wl);
+    } else {
+      result[d] = [wl];
+    }
+  }
+  var similars = [];
+  var dvals = Object.keys(result).sort(function(a, b) { return (a > b ? -1 : 1); });
+  for(var i in dvals) {
+    var key = dvals[i];
+    if(similars.length > 0 && key < 0.8) {
+      break;
+    }
+    if(similars.length == 0 || (similars.length + result[key].length) <= 10) {
+      similars = similars.concat(result[key]);
+    }
+  }
+  return similars;
+}
+
+
+var japanese_wordlist_nfkd = [];
+for(var i in bip39.wordlists.japanese) {
+  japanese_wordlist_nfkd.push(bip39.wordlists.japanese[i].normalize("NFKD"));
+}
+var words = mnemonic_input.normalize("NFKD").split(" ");
+for(var i in words) {
+  var word = words[i];
+  const index = japanese_wordlist_nfkd.indexOf(word);
+  if(index === -1) {
+    console.log("not found: " + word);
+    var distances = jaroWinklerDistance(word, japanese_wordlist_nfkd);
+    console.log(distances);
+  } else {
+    console.log("OK - " + word);
+  }
+}
 </script>
 </body>
 </html>
