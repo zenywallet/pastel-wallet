@@ -2,7 +2,7 @@
 
 import sequtils, endians, algorithm, locks
 import rocksdblib
-export rocksdblib.RocksDbError
+export rocksdblib.RocksDbErr
 
 type Prefix {.pure.} = enum
   params = 0  # param_id = value

@@ -16,7 +16,7 @@ type
   KeyType = openarray[byte]
   ValueType = openarray[byte]
 
-  RocksDbError* = object of Exception
+  RocksDbErr* = object of Exception
 
   ResultKeyValue* = object
     key*: seq[byte]
@@ -26,7 +26,7 @@ template rocksdb_checkerr* {.dirty.} =
   if not rocks.err.isNil:
     let err_msg: string = $rocks.err
     rocksdb_free(rocks.err)
-    raise newException(RocksDbError, err_msg)
+    raise newException(RocksDbErr, err_msg)
 
 proc open*(rocks: var RocksDb, dbpath: cstring, dbpathBackup: cstring,
           total_threads: int32 = cpuinfo.countProcessors().int32) =
