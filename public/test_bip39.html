@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <script type="text/javascript" src="/js/bip39.js"></script>
+  <script type="text/javascript" src="/js/levenshtein.js"></script>
   <title>test bip39</title>
 </head>
 <body>
@@ -53,6 +54,32 @@ var entropy24 = bip39.mnemonicToEntropy(mnemonic24_japanese, bip39.wordlists.jap
 console.log(entropy24)
 console.log(bip39.entropyToMnemonic(entropy24, bip39.wordlists.japanese))
 console.log(bip39.entropyToMnemonic(entropy24, bip39.wordlists.english))
+
+var string = "が" ;
+var result = string.normalize("NFKD")
+console.log(result.length)
+console.log(result[0])
+console.log(result[1])
+console.log(result[2])
+result = string.normalize("NFKC")
+console.log(result.length)
+console.log(result[0])
+console.log(result[1])
+console.log(result[2])
+
+var s1 = "るいじ"
+var s2 = "るいし"
+var s3 = "るいす"
+var s1_nfd = s1.normalize("NFKD")
+var s2_nfd = s2.normalize("NFKD")
+var s3_nfd = s3.normalize("NFKD")
+var s1_nfc = s1.normalize("NFKC")
+var s2_nfc = s2.normalize("NFKC")
+var s3_nfc = s3.normalize("NFKC")
+console.log(levenshtein(s1_nfd, s2_nfd))
+console.log(levenshtein(s1_nfd, s3_nfd))
+console.log(levenshtein(s1_nfc, s2_nfc))
+console.log(levenshtein(s1_nfc, s3_nfc))
 </script>
 </body>
 </html>
