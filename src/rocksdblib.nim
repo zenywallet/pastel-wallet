@@ -79,7 +79,7 @@ proc get*(rocks: var RocksDb, key: KeyType): seq[byte] =
   rocksdb_checkerr
   var s: seq[byte] = newSeq[byte](len)
   if not data.isNil and len > 0:
-    copyMem(addr s[0], unsafeAddr data[0], len)
+    copyMem(addr s[0], unsafeAddr data[0], s.len)
   result = s
 
 proc del*(rocks: var RocksDb, key: KeyType) =
@@ -95,9 +95,9 @@ proc get_iter_key_value(iter: rocksdb_iterator_t): ResultKeyValue =
   var key_seq: seq[byte] = newSeq[byte](key_len)
   var value_seq: seq[byte] = newSeq[byte](value_len)
   if key_len > 0:
-    copyMem(addr key_seq[0], unsafeAddr key_str[0], key_len)
+    copyMem(addr key_seq[0], unsafeAddr key_str[0], key_seq.len)
   if value_len > 0:
-    copyMem(addr value_seq[0], unsafeAddr value_str[0], value_len)
+    copyMem(addr value_seq[0], unsafeAddr value_str[0], value_seq.len)
   result = ResultKeyValue(key: key_seq, value: value_seq)
 
 proc gets*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
