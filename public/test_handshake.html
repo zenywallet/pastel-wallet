@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/require.js"></script>
+  <title>test handshsake</title>
+</head>
+<body>
+<script>
+function start(supercop) {
+  var seed = supercop.createSeed();
+  var kp = supercop.createKeyPair(seed);
+  var shared = null;
+  var ws = new WebSocket('ws://localhost:5001/', 'pastel-v0.1');
+  ws.binaryType = 'arraybuffer';
+  ws.onmessage = function(evt) {
+    if(typeof evt.data == 'object') {
+      let data = new Uint8Array(evt.data, 0, evt.data.length);
+      if(!shared && data.length == 32) {
+        console.log('server publicKey=' + JSON.stringify(data));
+        shared = supercop.keyExchange(data, kp.secretKey);
+        console.log('shared=' + JSON.stringify(shared));
+      } else {
+        console.log(data);
+      }
+    } else if(typeof evt.data == 'string') {
+      console.log(evt.data);
+    }
+  }
+
+  ws.onopen = function(evt) {
+    ws.send(kp.publicKey);
+    console.log('client publicKey=' + JSON.stringify(kp.publicKey));
+  }
+}
+
+requirejs(['js/supercop.wasm'], function(supercop) {
+  supercop.ready(function() {
+    start(supercop);
+  });
+})
+</script>
+</body>
+</html>
