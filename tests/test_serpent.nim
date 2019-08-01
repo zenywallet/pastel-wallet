@@ -3,7 +3,7 @@
 import os, byteutils, algorithm
 
 const libbtcPath = splitPath(currentSourcePath()).head & "/../deps/serpent"
-{.passL: libbtcPath & "/serpent.a".}
+{.compile: libbtcPath & "/serpent.c".}
 
 type
   u4byte* = uint32
