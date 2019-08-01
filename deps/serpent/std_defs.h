@@ -1,13 +1,14 @@
 
 /* 1. Standard types for AES cryptography source code               */
 
+#include <stdint.h>
 typedef unsigned char   u1byte; /* an 8 bit unsigned character type */
 typedef unsigned short  u2byte; /* a 16 bit unsigned integer type   */
-typedef unsigned long   u4byte; /* a 32 bit unsigned integer type   */
+typedef uint32_t        u4byte; /* a 32 bit unsigned integer type   */
 
 typedef signed char     s1byte; /* an 8 bit signed character type   */
 typedef signed short    s2byte; /* a 16 bit signed integer type     */
-typedef signed long     s4byte; /* a 32 bit signed integer type     */
+typedef int32_t         s4byte; /* a 32 bit signed integer type     */
 
 /* 2. Standard interface for AES cryptographic routines             */
 
