@@ -3,10 +3,7 @@
 
 {.compile: "../deps/serpent/serpent.c".}
 
-type
-  u4byte* = uint32
-
 proc cipher_name*(): cstringArray {.importc: "serpent_cipher_name".}
-proc set_key*(in_key: ptr u4byte; key_len: u4byte): ptr u4byte {.importc: "serpent_set_key".}
-proc encrypt*(in_blk: ptr array[4, u4byte]; out_blk: ptr array[4, u4byte]) {.importc: "serpent_encrypt".}
-proc decrypt*(in_blk: ptr array[4, u4byte]; out_blk: ptr array[4, u4byte]) {.importc: "serpent_decrypt".}
+proc set_key*(in_key: ptr uint32; key_len: uint32): ptr uint32 {.importc: "serpent_set_key".}
+proc encrypt*(in_blk: ptr array[4, uint32]; out_blk: ptr array[4, uint32]) {.importc: "serpent_encrypt".}
+proc decrypt*(in_blk: ptr array[4, uint32]; out_blk: ptr array[4, uint32]) {.importc: "serpent_decrypt".}
