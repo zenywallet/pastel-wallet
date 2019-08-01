@@ -63,7 +63,7 @@ Mean:          970 cycles =    26.4 mbits/sec
 #  undef    BLOCK_SWAP
 #endif
 
-#include "../std_defs.h"
+#include "std_defs.h"
 
 static char *alg_name[] = { "serpent", "serpent.c", "serpent" };
 
