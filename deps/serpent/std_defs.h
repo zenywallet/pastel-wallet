@@ -20,10 +20,10 @@ typedef int32_t         s4byte; /* a 32 bit signed integer type     */
     {
 #endif
 
-    char **cipher_name(void);
-    u4byte *set_key(const u4byte in_key[], const u4byte key_len);
-    void encrypt(const u4byte in_blk[4], u4byte out_blk[4]);
-    void decrypt(const u4byte in_blk[4], u4byte out_blk[4]);
+    char **serpent_cipher_name(void);
+    u4byte *serpent_set_key(const u4byte in_key[], const u4byte key_len);
+    void serpent_encrypt(const u4byte in_blk[4], u4byte out_blk[4]);
+    void serpent_decrypt(const u4byte in_blk[4], u4byte out_blk[4]);
 
 #ifdef  __cplusplus
     };

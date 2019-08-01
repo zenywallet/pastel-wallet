@@ -67,7 +67,7 @@ Mean:          970 cycles =    26.4 mbits/sec
 
 static char *alg_name[] = { "serpent", "serpent.c", "serpent" };
 
-char **cipher_name()
+char **serpent_cipher_name()
 {
     return alg_name;
 }
@@ -475,7 +475,7 @@ u4byte  l_key[140]; /* storage for the key schedule         */
 
 /* initialise the key schedule from the user supplied key   */
 
-u4byte *set_key(const u4byte in_key[], const u4byte key_len)
+u4byte *serpent_set_key(const u4byte in_key[], const u4byte key_len)
 {   u4byte  i,lk,a,b,c,d,e,f,g,h;
     u4byte  t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16;
 
@@ -553,7 +553,7 @@ u4byte *set_key(const u4byte in_key[], const u4byte key_len)
 
 /* encrypt a block of text  */
 
-void encrypt(const u4byte in_blk[4], u4byte out_blk[])
+void serpent_encrypt(const u4byte in_blk[4], u4byte out_blk[])
 {   u4byte  a,b,c,d,e,f,g,h;
     u4byte  t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16;
 
@@ -607,7 +607,7 @@ void encrypt(const u4byte in_blk[4], u4byte out_blk[])
 
 /* decrypt a block of text  */
 
-void decrypt(const u4byte in_blk[4], u4byte out_blk[4])
+void serpent_decrypt(const u4byte in_blk[4], u4byte out_blk[4])
 {   u4byte  a,b,c,d,e,f,g,h;
     u4byte  t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16;
 

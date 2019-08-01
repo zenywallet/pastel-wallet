@@ -1,4 +1,5 @@
 # Copyright (c) 2019 zenywallet
+# nim c -d:release -d:emscripten -o:test_serpent.js test_serpent.nim
 
 import os, byteutils, algorithm
 
@@ -8,10 +9,10 @@ const libbtcPath = splitPath(currentSourcePath()).head & "/../deps/serpent"
 type
   u4byte* = uint32
 
-proc cipher_name*(): cstringArray {.importc.}
-proc set_key*(in_key: ptr u4byte; key_len: u4byte): ptr u4byte {.importc.}
-proc encrypt*(in_blk: ptr array[4, u4byte]; out_blk: ptr array[4, u4byte]) {.importc.}
-proc decrypt*(in_blk: ptr array[4, u4byte]; out_blk: ptr array[4, u4byte]) {.importc.}
+proc cipher_name*(): cstringArray {.importc: "serpent_cipher_name".}
+proc set_key*(in_key: ptr u4byte; key_len: u4byte): ptr u4byte {.importc: "serpent_set_key".}
+proc encrypt*(in_blk: ptr array[4, u4byte]; out_blk: ptr array[4, u4byte]) {.importc: "serpent_encrypt".}
+proc decrypt*(in_blk: ptr array[4, u4byte]; out_blk: ptr array[4, u4byte]) {.importc: "serpent_decrypt".}
 
 when isMainModule:
   var key: array[32, byte]
