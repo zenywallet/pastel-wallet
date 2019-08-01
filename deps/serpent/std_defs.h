@@ -50,7 +50,7 @@ typedef signed long     s4byte; /* a 32 bit signed integer type     */
 
 #define bswap(x)    (rotl(x, 8) & 0x00ff00ff | rotr(x, 8) & 0xff00ff00)
 
-/* Extract byte from a 32 bit quantity (little endian notation)     */ 
+/* Extract byte from a 32 bit quantity (little endian notation)     */
 
 #define byte(x,n)   ((u1byte)((x) >> (8 * n)))
 
