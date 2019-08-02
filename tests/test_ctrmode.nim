@@ -21,8 +21,8 @@ when isMainModule:
     var enc: array[16, byte]
     var dec: array[16, byte]
 
-    echo "enc_iv=", ctr.enc_iv.toHex
-    echo "dec_iv=", ctr.dec_iv.toHex
+    #echo "enc_iv=", ctr.enc_iv.toHex
+    #echo "dec_iv=", ctr.dec_iv.toHex
     ctr.encrypt(cast[ptr byte](addr data[0]), cast[ptr byte](addr enc[0]))
     ctr.decrypt(cast[ptr byte](addr enc[0]), cast[ptr byte](addr dec[0]))
     echo "enc=", enc.toHex
