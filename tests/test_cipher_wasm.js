@@ -9,7 +9,7 @@ for(var obj in Module) {
 var cipher = cipher || {};
 
 Module.onRuntimeInitialized = function() {
-  cipher.mod_init = Module.cwrap('cipher_init', null, ['number']);
+  cipher.mod_init = Module.cwrap('cipher_init', null, ['number', 'number', 'number']);
   cipher.mod_enc = Module.cwrap('cipher_enc', null, ['number', 'number']);
   cipher.mod_dec = Module.cwrap('cipher_dec', null, ['number', 'number']);
 
