@@ -23,7 +23,7 @@ when isMainModule:
 
     #echo "enc_iv=", ctr.enc_iv.toHex
     #echo "dec_iv=", ctr.dec_iv.toHex
-    ctr.encrypt(cast[ptr byte](addr data[0]), cast[ptr byte](addr enc[0]))
-    ctr.decrypt(cast[ptr byte](addr enc[0]), cast[ptr byte](addr dec[0]))
+    ctr.encrypt(cast[ptr UncheckedArray[byte]](addr data[0]), cast[ptr UncheckedArray[byte]](addr enc[0]))
+    ctr.decrypt(cast[ptr UncheckedArray[byte]](addr enc[0]), cast[ptr UncheckedArray[byte]](addr dec[0]))
     echo "enc=", enc.toHex
     echo "dec=", dec.toHex

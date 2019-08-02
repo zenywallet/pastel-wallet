@@ -18,7 +18,7 @@ proc init*(ctr: var CTR, key: array[32, byte], enc_iv: array[32, byte], dec_iv: 
   copyMem(addr ctr.enc_iv[0], unsafeAddr enc_iv[0], sizeof(ctr.enc_iv))
   copyMem(addr ctr.dec_iv[0], unsafeAddr dec_iv[0], sizeof(ctr.dec_iv))
 
-proc encrypt*(ctr: var CTR, in_blk: ptr byte, out_blk: ptr byte) =
+proc encrypt*(ctr: var CTR, in_blk: ptr UncheckedArray[byte], out_blk: ptr UncheckedArray[byte]) =
   var enc: array[16, byte]
   encrypt(cast[ptr array[4, uint32]](addr ctr.enc_iv[0]), cast[ptr array[4, uint32]](addr enc[0]))
   var enc_u32p = cast[ptr array[4, uint32]](addr enc[0])
@@ -28,7 +28,7 @@ proc encrypt*(ctr: var CTR, in_blk: ptr byte, out_blk: ptr byte) =
     out_u32p[i] = in_u32p[i] xor enc_u32p[i]
   countup(ctr.enc_iv)
 
-proc decrypt*(ctr: var CTR, in_blk: ptr byte, out_blk: ptr byte) =
+proc decrypt*(ctr: var CTR, in_blk: ptr UncheckedArray[byte], out_blk: ptr UncheckedArray[byte]) =
   var dec: array[16, byte]
   encrypt(cast[ptr array[4, uint32]](addr ctr.dec_iv[0]), cast[ptr array[4, uint32]](addr dec[0]))
   var dec_u32p = cast[ptr array[4, uint32]](addr dec[0])
