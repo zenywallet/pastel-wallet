@@ -27,13 +27,35 @@ Module.onRuntimeInitialized = function() {
     cipher.free();
   }
 
+  var isBigEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x12;
+  function endian_swap(array) {
+    var ret_array = new Uint8Array(array.length);
+    var pos = 0;
+    for(var i = 0; i < array.length; i+= 4) {
+      for(var j = 3; j >= 0; j--) {
+        ret_array[pos] = array[i + j];
+        pos++;
+      }
+    }
+    return ret_array;
+  }
+
   cipher.alloc = function(size) {
     var p = new Number(Module._malloc(size));
-    p.set = function(array) {
-      Module.HEAPU8.set(array, p);
-    }
-    p.get = function() {
-      return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+    if(isBigEndian) {
+      p.set = function(array) {
+        Module.HEAPU8.set(endian_swap(array), p);
+      }
+      p.get = function() {
+        return endian_swap((new Uint8Array(Module.HEAPU8.buffer, p, size)).slice());
+      }
+    } else {
+      p.set = function(array) {
+        Module.HEAPU8.set(array, p);
+      }
+      p.get = function() {
+        return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+      }
     }
     p.free = function() {
       Module._free(p);
