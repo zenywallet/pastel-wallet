@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/zopfli.raw.min.js"></script>
+  <script type="text/javascript" src="/js/rawinflate.min.js"></script>
+  <title>test zopfli deflate</title>
+</head>
+<body>
+<script>
+var plain = [1, 2, 3, 4];
+var compressor = new Zopfli.RawDeflate(plain);
+var compressed = compressor.compress();
+console.log(compressed);
+var decompressed = new Zlib.RawInflate(compressed).decompress();
+console.log(decompressed);
+</script>
+</body>
+</html>
