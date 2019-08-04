@@ -26,6 +26,9 @@ proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
           echo "client publicKey=", clientPublicKey
           let shared = keyExchange(clientPublicKey, client.kp.privateKey)
           echo "shared=", shared
+          let shared_hash = sha256.digest(shared)
+          echo "shared hash=", shared_hash
+          echo "shared hash=", shared_hash.data
       of Opcode.Close:
         echo "del=", fd
         acquire(clientsLock)

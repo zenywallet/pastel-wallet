@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <script type="text/javascript" src="/js/coin.js"></script>
   <script type="text/javascript" src="/js/require.js"></script>
   <title>test handshsake</title>
 </head>
@@ -20,6 +21,11 @@ function start(supercop) {
         console.log('server publicKey=' + JSON.stringify(data));
         shared = supercop.keyExchange(data, kp.secretKey);
         console.log('shared=' + JSON.stringify(shared));
+        var shared_hash = coin.crypto.sha256(shared);
+        var shared_hash_uint8array = new Uint8Array(shared_hash);
+        console.log('shared hash=' + JSON.stringify(shared_hash));
+        console.log('shared hash=' + JSON.stringify(shared_hash_uint8array));
+        console.log('shared hash=' + shared_hash.toString('hex'));
       } else {
         console.log(data);
       }
