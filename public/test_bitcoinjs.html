@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/coin.js"></script>
+  <title>test bitocinjs</title>
+</head>
+<body>
+<script>
+var data = new Uint8Array(32);
+data.fill(0);
+console.log(data);
+var hash = coin.crypto.sha256(data);
+console.log(hash);
+console.log(hash.toString('hex'));  // 66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925
+</script>
+</body>
+</html>
