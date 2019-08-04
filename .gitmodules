@@ -4,3 +4,6 @@
 [submodule "deps/websocket.nim"]
 	path = deps/websocket.nim
 	url = https://github.com/niv/websocket.nim
+[submodule "deps/zip"]
+	path = deps/zip
+	url = https://github.com/zenywallet/zip
