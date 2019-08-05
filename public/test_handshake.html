@@ -4,10 +4,14 @@
   <meta charset="utf-8">
   <script type="text/javascript" src="/js/coin.js"></script>
   <script type="text/javascript" src="/js/require.js"></script>
+  <script type="text/javascript" src="/js/zopfli.raw.min.js"></script>
+  <script type="text/javascript" src="/js/rawinflate.min.js"></script>
   <title>test handshsake</title>
 </head>
 <body>
 <script>
+String.prototype.toByteArray=String.prototype.toByteArray||(function(e){for(var b=[],c=0,f=this.length;c<f;c++){var a=this.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=this.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b})
+
 function start(supercop) {
   var seed = supercop.createSeed();
   var kp = supercop.createKeyPair(seed);
@@ -26,6 +30,11 @@ function start(supercop) {
         console.log('shared hash=' + JSON.stringify(shared_hash));
         console.log('shared hash=' + JSON.stringify(shared_hash_uint8array));
         console.log('shared hash=' + shared_hash.toString('hex'));
+        var comp =  (new Zopfli.RawDeflate("test日本語".toByteArray(false))).compress();
+        console.log(comp);
+        var decomp = (new Zlib.RawInflate(comp)).decompress();
+        console.log(decomp);
+        ws.send(comp);
       } else {
         console.log(data);
       }

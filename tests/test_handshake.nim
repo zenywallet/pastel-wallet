@@ -1,5 +1,8 @@
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
 import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks
+import ../deps/zip/zip/zlib
+import unicode
+import unittest
 
 let server = newAsyncHttpServer()
 var channel: Channel[tuple[req: Request, ws: AsyncWebSocket]]
@@ -8,6 +11,19 @@ var closedclients: seq[int]
 var clientsLock: Lock
 initLock(clientsLock)
 var clientsdirty = false
+var shared_key: MDigest[256]
+
+proc clientDelete(fd: int) =
+  acquire(clientsLock)
+  closedclients.add(fd)
+  let client_count = clients.len - closedclients.len
+  release(clientsLock)
+  echo "client count=", client_count
+
+proc toString(oa: openarray[byte]): string =
+  result = newString(oa.len)
+  if oa.len > 0:
+    copyMem(addr result[0], unsafeAddr oa[0], result.len)
 
 proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
   var exchange = false
@@ -19,7 +35,12 @@ proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
       of Opcode.Text:
         echo data
       of Opcode.Binary:
-        if not exchange and data.len == 32:
+        if not exchange:
+          if not data.len == 32:
+            echo "error: client data len=", data.len
+            clientDelete(fd)
+            waitFor ws.close()
+            return
           var client = clients[fd]
           var clientPublicKey: PublicKey
           copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
@@ -29,13 +50,18 @@ proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
           let shared_hash = sha256.digest(shared)
           echo "shared hash=", shared_hash
           echo "shared hash=", shared_hash.data
+          shared_key = shared_hash
+          exchange = true
+        else:
+          echo shared_key
+          let uncomp = uncompress(data, stream=RAW_DEFLATE)
+          echo uncomp
+          echo runeLen(uncomp)
+          echo uncomp.toRunes
+          echo uncomp.toSeq
       of Opcode.Close:
         echo "del=", fd
-        acquire(clientsLock)
-        closedclients.add(fd)
-        let client_count = clients.len - closedclients.len
-        release(clientsLock)
-        echo "client count=", client_count
+        clientDelete(fd)
         waitFor ws.close()
         let (closeCode, reason) = extractCloseData(data)
         echo "socket went away, close code: ", closeCode, ", reason: ", reason
@@ -64,11 +90,6 @@ proc senddata() {.async.} =
       echo e.name, ": ", e.msg
     await sleepAsync(2000)
     deleteClosedClient()
-
-proc toString(str: openarray[byte]): string =
-  result = newString(str.len)
-  if str.len > 0:
-    copyMem(addr result[0], unsafeAddr str[0], result.len)
 
 proc clientManager() {.async.} =
  while true:
