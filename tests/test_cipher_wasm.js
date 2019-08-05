@@ -1,6 +1,6 @@
 /* Copyright (c) 2019 zenywallet */
 
-var Module = require('../public/js/cipher.js');
+var Module = require('../public/js/cipher.js')();
 
 for(var obj in Module) {
   console.log(obj);
