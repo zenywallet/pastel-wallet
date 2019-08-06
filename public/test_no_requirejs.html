@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/supercop.js"></script>
+  <script type="text/javascript" src="/js/supercop.wasm.js"></script>
+  <script type="text/javascript" src="/js/cipher.js"></script>
+  <script type="text/javascript" src="/js/coin.js"></script>
+  <title>test no requirejs</title>
+</head>
+<body>
+<script>
+var supercop = supercop_wasm;
+supercop.ready(function() {
+  var seed = supercop.createSeed();
+  var keys = supercop.createKeyPair(seed);
+  console.log(keys);
+});
+
+var cipher = {
+  onRuntimeInitialized: function() {
+    for(var o in cipher) {
+      console.log(o);
+    }
+  }
+};
+cipher = Cipher(cipher);
+
+var data = new Uint8Array(32);
+data.fill(0);
+console.log(coin.crypto.sha256(data));
+</script>
+</body>
+</html>
