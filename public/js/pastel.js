@@ -1,4 +1,9 @@
 var pastel = pastel || {};
+pastel.config = pastel.config || {
+  ws_url: 'ws://localhost:5001/',
+  ws_protocol: 'pastel-v0.1'
+};
+
 pastel.ready = function() {}
 pastel.load = function() {
   requirejs(['js/supercop.wasm', 'js/cipher', 'js/coin'], function(supercop, cipherMod, coin) {
