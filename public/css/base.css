@@ -44,6 +44,7 @@ section h1 {
   left: 50%;
   z-index: 2;
   display: inline-block;
+  margin-left: -24px;
   -webkit-transform: translate(0, -50%);
   transform: translate(0, -50%);
   color: #fff;
@@ -96,4 +97,27 @@ section h1 {
   40% {
     transform: rotate(-45deg) translate(0, 0);
   }
+}
+
+
+.intro {
+  position: relative;
+  top: 10%;
+}
+.intro .caption {
+  color: #fff;
+  font : normal 300 44px/1 'Josefin Sans', sans-serif;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.intro .steps {
+  position: relative;
+  width: 90%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.button {
+
 }

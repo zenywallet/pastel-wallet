@@ -33,21 +33,88 @@
 </head>
 <body>
 <section id="section01" class="section">
-  <h1>Pastel Wallet</h1>
+  <div class ="intro">
+    <div class="caption">Pastel Wallet</div>
+    <div class="ui steps">
+      <div class="step">
+        <i class="qrcode icon"></i>
+        <div class="content">
+          <div class="title">Wallet Seed</div>
+          <div class="description">Scan your seed card or use mnemonic</div>
+        </div>
+      </div>
+      <div class="step">
+        <i class="payment icon"></i>
+        <div class="content">
+          <div class="title">Access Key</div>
+          <div class="description">Scan your key card or use password</div>
+        </div>
+      </div>
+      <div class="step">
+        <i class="child icon"></i>
+        <div class="content">
+          <div class="title">Wellcome</div>
+          <div class="description">Your wallet is ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
   <a href="#section02"><span></span>Start</a>
 </section>
 <section id="section02" class="section">
-  <h1>Section 2</h1>
+  <div class="ui container">
+    <div class="ui center aligned basic segment">
+      <div class="ui teal labeled icon button bt-scan-seed">
+        Scan Seed Card
+        <i class="qrcode icon"></i>
+      </div>
+    </div>
+    <div class="ui enter aligned segment">
+      <video id="qrvideo" autoplay></video>
+    </div>
+  </div>
+
+
   <a href="#section03"><span></span>Next</a>
 </section>
 <section id="section03" class="section">
   <h1>Section 3</h1>
   <a href="#section01"><span></span>Top</a>
 </section>
-<video id="qrvideo" autoplay></video>
 <script>
+function showQrReader(cb) {
+  var scandata = "";
+  var cb_once = 0;
+  var qr = new QCodeDecoder();
+  if(qr.isCanvasSupported() && qr.hasGetUserMedia()) {
+    var video = document.querySelector('#qrvideo');
+    function resultHandler(err, result) {
+      if(err) {
+        console.log('err=', err);
+        qr.stop();
+        return;
+      }
+      if(cb_once) {
+        return;
+      }
+      if(scandata == result) {
+        cb_once = 1;
+        qr.stop();
+        cb(result);
+      }
+      scandata = result;
+    }
+    qr.decodeFromCamera(video, resultHandler);
+  }
+}
+
 pastel.ready = function() {
   console.log('ready');
+  $('.bt-scan-seed').click(function() {
+    showQrReader(function(data) {
+      console.log(data);
+    });
+  });
 }
 pastel.load();
 </script>
