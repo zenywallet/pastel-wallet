@@ -27,6 +27,7 @@
   <script type="text/javascript" src="/js/zepto.js"></script>
   <script type="text/javascript" src="/js/zepto_patch.js"></script>
   <script type="text/javascript" src="/semantic/semantic.js"></script>
+  <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
   <script type="text/javascript" src="/js/ui.js"></script>
   <script type="text/javascript" src="/js/pastel.js"></script>
   <title>Pastel WALLET</title>
@@ -73,12 +74,15 @@
       <video id="qrvideo" autoplay></video>
     </div>
   </div>
-
-
   <a href="#section03"><span></span>Next</a>
 </section>
 <section id="section03" class="section">
-  <h1>Section 3</h1>
+  <div class="ui container">
+    <div class="ui center aligned basic segment">
+      <div id="qrcode"></div>
+      <div id="seed"></div>
+    </div>
+  </div>
   <a href="#section01"><span></span>Top</a>
 </section>
 <script>
@@ -118,6 +122,23 @@ pastel.ready = function() {
     showQrReader(function(data) {
       console.log(data);
     });
+  });
+
+  var key = coin.ECPair.makeRandom();
+  var priv = key.privateKey.toString('hex');
+  var seedstr = 'seed:' + priv;
+  document.getElementById('seed').innerHTML = seedstr;
+  var s = 400;
+  $('#qrcode').qrcode({
+    render: 'canvas',
+    ecLevel: 'Q',
+    radius: 0.39,
+    text: seedstr,
+    size: s,
+    mode: 2,
+    label: 'seed',
+    fontname: 'sans',
+    fontcolor: '#393939'
   });
 }
 pastel.load();
