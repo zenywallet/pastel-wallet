@@ -102,10 +102,10 @@ function showQrReader(cb) {
         qr_stop();
         return;
       }
-      if(cb_once) {
-        return;
-      }
       if(scandata == result) {
+        if(cb_once) {
+          return;
+        }
         cb_once = 1;
         qr_stop();
         cb(result);
