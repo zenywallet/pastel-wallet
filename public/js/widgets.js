@@ -14306,7 +14306,7 @@ function check_mnemonic_214089(ev_214091, n_214092) {
 
 		var s_214093 = value_169822(n_214092);
 		var cur_214117 = document.getElementById((n_214092.id)).selectionStart;
-		    s_214093 = s_214093.substr(0, cur_214117).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0]
+		    s_214093 = s_214093.substr(0, cur_214117).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
   
 			if (!!((s_214093 == null))) Tmp1 = false; else {				Tmp1 = (0 < (s_214093 != null ? s_214093.length : 0));			}		if (Tmp1) {
 		var tmplist_214134 = [];
@@ -14429,7 +14429,7 @@ function select_word_214189(input_id_214191, word_214192) {
 				var x_214198 = get_vnode_by_id_190117(input_id_214191, kxi_189324[0]);
 				var s_214199 = value_169822(x_214198);
 				var cur_214213 = document.getElementById((input_id_214191)).selectionStart;
-				      var t = s_214199.substr(0, cur_214213).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0]
+				      var t = s_214199.substr(0, cur_214213).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
       if(t && t.length > 0) {
         var tail = s_214199.substr(cur_214213) || '';
         s_214199 = s_214199.substr(0, cur_214213 - t.length) + word_214192 + tail;
@@ -14470,7 +14470,7 @@ function fix_word_214500(input_id_214502, idx_214503, word_214504) {
       var skip = false;
       for(var t in s_214511) {
         if(/[ 　\n\r]/.test(s_214511[t])) {
-          ret_214512 += s_214511[t]
+          ret_214512 += s_214511[t];
           if(find) {
             count++;
           }
@@ -14483,7 +14483,7 @@ function fix_word_214500(input_id_214502, idx_214503, word_214504) {
             skip = true;
           } else {
             if(!skip) {
-              ret_214512 += s_214511[t]
+              ret_214512 += s_214511[t];
             }
           }
         }

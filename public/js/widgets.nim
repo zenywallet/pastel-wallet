@@ -55,7 +55,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
   var cur = document.getElementById(n.id).selectionStart
   asm """
-    `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0]
+    `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
   """
   if not s.isNil and s.len > 0:
     var tmplist: seq[cstring] = @[]
@@ -77,7 +77,7 @@ proc selectWord(input_id: cstring, word: cstring): proc() =
     var s = x.value
     var cur = document.getElementById(input_id).selectionStart
     asm """
-      var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0]
+      var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
       if(t && t.length > 0) {
         var tail = `s`.substr(`cur`) || '';
         `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
@@ -119,7 +119,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
       var skip = false;
       for(var t in `s`) {
         if(/[ 　\n\r]/.test(`s`[t])) {
-          `ret` += `s`[t]
+          `ret` += `s`[t];
           if(find) {
             count++;
           }
@@ -132,7 +132,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
             skip = true;
           } else {
             if(!skip) {
-              `ret` += `s`[t]
+              `ret` += `s`[t];
             }
           }
         }
