@@ -14377,12 +14377,12 @@ function confirm_mnemonic_214326(input_id_214328) {
 				var idx_214351 = 0;
 				L1: do {
 					var word_214414 = null;
-					var i_214912 = 0;
-					var l_214913 = (words_214337 != null ? words_214337.length : 0);
+					var i_214911 = 0;
+					var l_214912 = (words_214337 != null ? words_214337.length : 0);
 					L2: do {
 							L3: while (true) {
-							if (!(i_214912 < l_214913)) break L3;
-								word_214414 = words_214337[chckIndx(i_214912, 0, words_214337.length+0-1)-0];
+							if (!(i_214911 < l_214912)) break L3;
+								word_214414 = words_214337[chckIndx(i_214911, 0, words_214337.length+0-1)-0];
 								if (wl_japanese_214295[0].includes(word_214414)) {
 								if (chklist_214260[0] != null) { chklist_214260[0].push({Field0: idx_214351, Field1: word_214414, Field2: true, Field3: []}); } else { chklist_214260[0] = [{Field0: idx_214351, Field1: word_214414, Field2: true, Field3: []}]; };
 								}
@@ -14392,8 +14392,8 @@ function confirm_mnemonic_214326(input_id_214328) {
 								}
 								
 								idx_214351 = addInt(idx_214351, 1);
-								i_214912 = addInt(i_214912, 1);
-								if (!(((words_214337 != null ? words_214337.length : 0) == l_214913))) {
+								i_214911 = addInt(i_214911, 1);
+								if (!(((words_214337 != null ? words_214337.length : 0) == l_214912))) {
 								failed_assert_impl_15051(makeNimstrLit("iterators.nim(190, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 								}
 								

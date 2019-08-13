@@ -91,7 +91,7 @@ var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObje
 proc confirmMnemonic(input_id: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
-    var s = cast[cstring](x.value)
+    var s = x.value
     var words: seq[cstring]
     asm """
       `words` = `s`.replace(/[ 　\n\r]+/g, ' ').trim().split(' ');
@@ -110,8 +110,8 @@ proc confirmMnemonic(input_id: cstring): proc() =
 proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
-    var s = cast[cstring](x.value)
-    var ret: JsObject
+    var s = x.value
+    var ret: cstring
     asm """
       `ret` = "";
       var count = 0;
@@ -138,7 +138,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
         }
       }
     """
-    x.setInputText(cast[cstring](ret))
+    x.setInputText(ret)
 
 proc mnemonicEditor(): VNode =
   let input_id: cstring = "minput"
