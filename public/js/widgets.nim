@@ -53,17 +53,18 @@ var autocompleteWords: seq[cstring] = @[]
 
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
-  var cur = document.getElementById(n.id).selectionStart
-  asm """
-    `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-  """
   if not s.isNil and s.len > 0:
-    var tmplist: seq[cstring] = @[]
-    for word in bip39.wordlists.japanese:
-      let w = cast[cstring](word)
-      if w.startsWith(s):
-        tmplist.add(w)
-    autocompleteWords = tmplist
+    var cur = document.getElementById(n.id).selectionStart
+    asm """
+      `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
+    """
+    if not s.isNil and s.len > 0:
+      var tmplist: seq[cstring] = @[]
+      for word in bip39.wordlists.japanese:
+        let w = cast[cstring](word)
+        if w.startsWith(s):
+          tmplist.add(w)
+      autocompleteWords = tmplist
   else:
     autocompleteWords = @[]
 
@@ -75,15 +76,16 @@ proc selectWord(input_id: cstring, word: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
     var s = x.value
-    var cur = document.getElementById(input_id).selectionStart
-    asm """
-      var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-      if(t && t.length > 0) {
-        var tail = `s`.substr(`cur`) || '';
-        `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
-      }
-    """
-    x.setInputText(s)
+    if not s.isNil and s.len > 0:
+      var cur = document.getElementById(input_id).selectionStart
+      asm """
+        var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
+        if(t && t.length > 0) {
+          var tail = `s`.substr(`cur`) || '';
+          `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
+        }
+      """
+      x.setInputText(s)
     autocompleteWords = @[]
 
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
@@ -92,53 +94,55 @@ proc confirmMnemonic(input_id: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
     var s = x.value
-    var words: seq[cstring]
-    asm """
-      `words` = `s`.replace(/[ 　\n\r]+/g, ' ').trim().split(' ');
-    """
-    chklist = @[]
-    var idx: int = 0
-    for word in words:
-      if wl_japanese.includes(cast[cstring](word)):
-        chklist.add (idx, word, true, @[])
-      else:
-        let levs = cast[seq[cstring]](levens(word.toJs, bip39.wordlists.japanese))
-        chklist.add (idx, word, false, levs)
-      inc(idx)
+    if not s.isNil and s.len > 0:
+      var words: seq[cstring]
+      asm """
+        `words` = `s`.replace(/[ 　\n\r]+/g, ' ').trim().split(' ');
+      """
+      chklist = @[]
+      var idx: int = 0
+      for word in words:
+        if wl_japanese.includes(cast[cstring](word)):
+          chklist.add (idx, word, true, @[])
+        else:
+          let levs = cast[seq[cstring]](levens(word.toJs, bip39.wordlists.japanese))
+          chklist.add (idx, word, false, levs)
+        inc(idx)
     autocompleteWords = @[]
 
 proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
     var s = x.value
-    var ret: cstring
-    asm """
-      `ret` = "";
-      var count = 0;
-      var find = false;
-      var skip = false;
-      for(var t in `s`) {
-        if(/[ 　\n\r]/.test(`s`[t])) {
-          `ret` += `s`[t];
-          if(find) {
-            count++;
-          }
-          find = false;
-          skip = false;
-        } else {
-          find = true;
-          if(`idx` == count && skip == false) {
-            `ret` += `word`;
-            skip = true;
+    if not s.isNil and s.len > 0:
+      var ret: cstring
+      asm """
+        `ret` = "";
+        var count = 0;
+        var find = false;
+        var skip = false;
+        for(var t in `s`) {
+          if(/[ 　\n\r]/.test(`s`[t])) {
+            `ret` += `s`[t];
+            if(find) {
+              count++;
+            }
+            find = false;
+            skip = false;
           } else {
-            if(!skip) {
-              `ret` += `s`[t];
+            find = true;
+            if(`idx` == count && skip == false) {
+              `ret` += `word`;
+              skip = true;
+            } else {
+              if(!skip) {
+                `ret` += `s`[t];
+              }
             }
           }
         }
-      }
-    """
-    x.setInputText(ret)
+      """
+      x.setInputText(ret)
 
 proc mnemonicEditor(): VNode =
   let input_id: cstring = "minput"
