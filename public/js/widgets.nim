@@ -46,6 +46,7 @@ var document {. importc, nodecl .}: JsObject
 #var console {. importc, nodecl .}: JsObject
 #proc jq(selector: JsObject): JsObject {. importcpp: "$(#)" .}
 var bip39 {. importc, nodecl .}: JsObject
+var bip39_wordlist = bip39.wordlists.japanese
 #proc levenshtein(a, b: JsObject): JsObject {. importc, nodecl .}
 proc levens(word, wordlist: JsObject): JsObject {. importc, nodecl .}
 
@@ -60,7 +61,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
     """
     if not s.isNil and s.len > 0:
       var tmplist: seq[cstring] = @[]
-      for word in bip39.wordlists.japanese:
+      for word in bip39_wordlist:
         let w = cast[cstring](word)
         if w.startsWith(s):
           tmplist.add(w)
@@ -95,6 +96,9 @@ proc selectWord(input_id: cstring, word: cstring): proc() =
 
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
 var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObject): cstring = cast[cstring](x)))
+var wl_english = cast[seq[cstring]](bip39.wordlists.english.map(proc(x: JsObject): cstring = cast[cstring](x)))
+var wl_select = wl_japanese
+
 proc confirmMnemonic(input_id: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
@@ -107,10 +111,10 @@ proc confirmMnemonic(input_id: cstring): proc() =
       chklist = @[]
       var idx: int = 0
       for word in words:
-        if wl_japanese.includes(cast[cstring](word)):
+        if wl_select.includes(cast[cstring](word)):
           chklist.add (idx, word, true, @[])
         else:
-          let levs = cast[seq[cstring]](levens(word.toJs, bip39.wordlists.japanese))
+          let levs = cast[seq[cstring]](levens(word.toJs, bip39_wordlist))
           chklist.add (idx, word, false, levs)
         inc(idx)
     autocompleteWords = @[]
@@ -149,11 +153,35 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
       """
       x.setInputText(ret)
 
+proc changeLanguage(ev: Event; n: VNode) =
+  var langId = cast[int](n.value)
+  if langId == 0:
+    bip39_wordlist = bip39.wordlists.japanese
+    wl_select = wl_japanese
+  elif langId == 1:
+    bip39_wordlist = bip39.wordlists.english
+    wl_select = wl_english
+  autocompleteWords = @[]
+  chklist = @[]
+
 proc mnemonicEditor(): VNode =
   let input_id: cstring = "minput"
   result = buildHtml(tdiv):
     tdiv(class="ui clearing segment"):
       tdiv(class="ui form"):
+        tdiv(class="field"):
+          label:
+            text "Select mnemonic language"
+          tdiv(class="ui selection dropdown"):
+            input(type="hidden", name="mnmonic-language", value="0", onchange = changeLanguage)
+            italic(class="dropdown icon")
+            tdiv(class="default text"):
+              text "Mnemonic Language"
+            tdiv(class="menu"):
+              tdiv(class="item", data-value="0"):
+                text "Japanese"
+              tdiv(class="item", data-value="1"):
+                text "English"
         tdiv(class="field"):
           label:
             text "Import your mnemonic you already have"
@@ -176,4 +204,9 @@ proc mnemonicEditor(): VNode =
               a(class="ui blue basic label", onclick = fixWord(input_id, chklist[i].idx, lev)):
                 text lev
 
-setRenderer mnemonicEditor, "mnemonic-editor"
+proc afterScript() =
+  asm """
+    $('.ui.dropdown').dropdown();
+  """
+
+setRenderer mnemonicEditor, "mnemonic-editor", afterScript
