@@ -77,15 +77,20 @@ proc selectWord(input_id: cstring, word: cstring): proc() =
     let x = getVNodeById(input_id)
     var s = x.value
     if not s.isNil and s.len > 0:
-      var cur = document.getElementById(input_id).selectionStart
+      var input_elm = document.getElementById(input_id)
+      var cur = input_elm.selectionStart
+      var newcur = cur
       asm """
         var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
         if(t && t.length > 0) {
           var tail = `s`.substr(`cur`) || '';
           `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
+          `newcur` = `s`.length - tail.length;
         }
       """
       x.setInputText(s)
+      input_elm.focus()
+      input_elm.selectionEnd = newcur
     autocompleteWords = @[]
 
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
