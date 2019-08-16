@@ -117,6 +117,8 @@ proc confirmMnemonic(input_id: cstring): proc() =
           let levs = cast[seq[cstring]](levens(word.toJs, bip39_wordlist))
           chklist.add (idx, word, false, levs)
         inc(idx)
+    else:
+      chklist = @[]
     autocompleteWords = @[]
 
 proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
