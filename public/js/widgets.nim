@@ -42,13 +42,13 @@ function levens(word, wordlist) {
 }
 """.}
 
-var document {. importc, nodecl .}: JsObject
-#var console {. importc, nodecl .}: JsObject
-#proc jq(selector: JsObject): JsObject {. importcpp: "$(#)" .}
-var bip39 {. importc, nodecl .}: JsObject
+var document {.importc, nodecl.}: JsObject
+#var console {.importc, nodecl.}: JsObject
+#proc jq(selector: JsObject): JsObject {.importcpp: "$(#)".}
+var bip39 {.importc, nodecl.}: JsObject
 var bip39_wordlist = bip39.wordlists.japanese
-#proc levenshtein(a, b: JsObject): JsObject {. importc, nodecl .}
-proc levens(word, wordlist: JsObject): JsObject {. importc, nodecl .}
+#proc levenshtein(a, b: JsObject): JsObject {.importc, nodecl.}
+proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
 
 var autocompleteWords: seq[cstring] = @[]
 
