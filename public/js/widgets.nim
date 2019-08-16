@@ -44,7 +44,7 @@ function levens(word, wordlist) {
 
 var document {.importc, nodecl.}: JsObject
 #var console {.importc, nodecl.}: JsObject
-#proc jq(selector: JsObject): JsObject {.importcpp: "$(#)".}
+proc jq(selector: cstring): JsObject {.importcpp: "$$(#)".}
 var bip39 {.importc, nodecl.}: JsObject
 var bip39_wordlist = bip39.wordlists.japanese
 #proc levenshtein(a, b: JsObject): JsObject {.importc, nodecl.}
@@ -207,8 +207,6 @@ proc mnemonicEditor(): VNode =
                 text lev
 
 proc afterScript() =
-  asm """
-    $('.ui.dropdown').dropdown();
-  """
+  jq(".ui.dropdown").dropdown()
 
 setRenderer mnemonicEditor, "mnemonic-editor", afterScript
