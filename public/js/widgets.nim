@@ -66,6 +66,8 @@ proc checkMnemonic(ev: Event; n: VNode) =
         if w.startsWith(s):
           tmplist.add(w)
       autocompleteWords = tmplist
+    else:
+      autocompleteWords = @[]
   else:
     autocompleteWords = @[]
 
