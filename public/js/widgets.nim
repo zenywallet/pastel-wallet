@@ -1,3 +1,7 @@
+# nim js -d:release widgets.nim
+# cat widgets.js | grep -o 'offset: "[^"]\+"' | sort | uniq | grep -o '"[^"]\+"' | tr -d '"'
+# java -jar closure-compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --js widgets.js --externs jquery-3.4.1.slim-externs.js --externs jquery-externs.js --externs bip39-externs.js --externs widgets-externs.js > widgets.min.js
+
 include karax / prelude
 import jsffi except `&`
 import strutils
