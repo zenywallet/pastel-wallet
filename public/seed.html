@@ -16,20 +16,33 @@ var ec = new EC('curve25519');
 var key = ec.genKeyPair();
 var priv = key.getPrivate('hex');
 console.log(priv);
-var seedstr = 'seed:' + priv;
-document.getElementById('seed').innerHTML = seedstr;
-var s = 400;
-$('#qrcode').qrcode({
-  render: 'canvas',
-  ecLevel: 'Q',
-  radius: 0.39,
-  text: seedstr,
-  size: s,
-  mode: 2,
-  label: 'seed',
-  fontname: 'sans',
-  fontcolor: '#393939'
-});
+var crypto = window.crypto || window.msCrypto;
+if(crypto && crypto.getRandomValues) {
+  var b58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  var tags = new Uint8Array(6);
+  crypto.getRandomValues(tags);
+  var tag = "";
+  for(var i in tags) {
+    tag += b58.charAt(tags[i] % 58)
+  }
+  console.log(tag);
+  var seedstr = 'seed:' + priv + ',tag:' + tag + ',gen:pastel-v0.1';
+  document.getElementById('seed').innerHTML = seedstr;
+  var s = 400;
+  $('#qrcode').qrcode({
+    render: 'canvas',
+    ecLevel: 'Q',
+    radius: 0.39,
+    text: seedstr,
+    size: s,
+    mode: 2,
+    label: 'seed',
+    fontname: 'sans',
+    fontcolor: '#393939'
+  });
+} else {
+  throw new Error('Secure random number generation is not supported by this browser.');
+}
 </script>
 </body>
 </html>
