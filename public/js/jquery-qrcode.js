@@ -275,6 +275,19 @@
         }
     }
 
+    function getPixelRatio() {
+        var ctx = document.createElement("canvas").getContext("2d"),
+            dpr = window.devicePixelRatio || 1,
+            bsr = ctx.webkitBackingStorePixelRatio ||
+                  ctx.mozBackingStorePixelRatio ||
+                  ctx.msBackingStorePixelRatio ||
+                  ctx.oBackingStorePixelRatio ||
+                  ctx.backingStorePixelRatio || 1;
+        return dpr / bsr;
+    }
+
+    var pixel_ratio = getPixelRatio();
+
     // Draws QR code to the given `canvas` and returns it.
     function drawOnCanvas(canvas, settings) {
         var qr = createMinQRCode(settings.text, settings.ecLevel, settings.minVersion, settings.maxVersion, settings.quiet);
@@ -283,7 +296,13 @@
         }
 
         var $canvas = jq(canvas).data('qrcode', qr);
+        $canvas[0].width = settings.size * pixel_ratio;
+        $canvas[0].height = settings.size * pixel_ratio;
+        $canvas[0].style.width = settings.size + "px";
+        $canvas[0].style.height = settings.size + "px";
         var context = $canvas[0].getContext('2d');
+        context.clearRect(0, 0, $canvas[0].width, $canvas[0].height);
+        context.setTransform(pixel_ratio, 0, 0, pixel_ratio, 0, 0);
 
         drawBackground(qr, context, settings);
         drawModules(qr, context, settings);
@@ -293,7 +312,11 @@
 
     // Returns a `canvas` element representing the QR code for the given settings.
     function createCanvas(settings) {
-        var $canvas = jq('<canvas/>').attr('width', settings.size).attr('height', settings.size);
+        var $canvas = jq('<canvas/>');
+        $(window).resize(function() {
+            pixel_ratio = getPixelRatio();
+            drawOnCanvas($canvas, settings);
+        });
         return drawOnCanvas($canvas, settings);
     }
 
