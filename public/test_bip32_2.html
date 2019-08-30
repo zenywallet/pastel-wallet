@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/coinlibs.js"></script>
+  <title>test bip32</title>
+</head>
+<body>
+<script>
+var bip32 = coinlibs.bip32;
+var coin = coinlibs.coin;
+var node = bip32.fromBase58('xprv9s21ZrQH143K4KinPjY2wtbeAW62uSqNbc4UPGjt3cpyVc5Udzc5odqwZbN14qLCFkLdAezMrN2BvsYNjqS48GfKdijwfdXg9Jo8n8fQoYf');
+
+var child = node.derivePath("m/44'/0'/0'/0/0");
+console.log(child.publicKey.toString('hex'));
+console.log(child.toWIF());
+console.log(coin.payments.p2pkh({pubkey: child.publicKey}).address);
+var p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey});
+console.log(p2wpkh.address);
+console.log(coin.payments.p2sh({redeem: p2wpkh}).address);
+
+const fromHexString = hexString =>
+  new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+
+var seed = "80a20b8ad8e285266196504d0e4a66d2397ccce83d024237aaf7496e3cb4b0ad26fec4bc35b98c7a03c1e707e29c31185d078113a1004d5880c2edcdb788dfcc";
+var seed_uint8array = fromHexString(seed);
+console.log('fromhex=', seed_uint8array);
+try {
+  console.log('fromseed=', bip32.fromSeed(seed_uint8array)); // fail with typeforce
+} catch(ex) {
+  console.log(ex.message);
+}
+
+var node2 = bip32.fromSeedHex(seed);
+console.log(node2.toBase58());
+
+var child2 = node.derivePath("m/44'/0'/0'");
+console.log(child2.toBase58());
+console.log(child2.neutered().toBase58());
+
+var node3 = bip32.fromBase58('xpub6D3KyTf3qKBMGWoRCF7JHkPdKUP2tYgAziBkikqhyhHxm4shdKHfC3L4RxdeNRDeFGpZGHEoEGoCorRcodbjKf7E6zAg7XkKUHfnrGNDz8q');
+
+var child3 = node3.derivePath("0/0");
+console.log(child3.publicKey.toString('hex'));
+try {
+  console.log(child3.toWIF());
+} catch(ex) {
+  console.log(ex.message);
+}
+</script>
+</body>
+</html>
