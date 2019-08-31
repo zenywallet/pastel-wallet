@@ -9570,8 +9570,8 @@ check.toJSON = function () { return 'witnessScriptHash input' }
 
 module.exports = { check }
 
-}).call(this,{"isBuffer":require("../../../../../../../.nvm/versions/node/v10.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../../../../.nvm/versions/node/v10.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":8,"../../script":62,"../../types":88,"../multisig/":65,"../pubkey/":69,"../pubkeyhash/":72,"typeforce":157}],85:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../is-buffer/index.js")})
+},{"../../is-buffer/index.js":8,"../../script":62,"../../types":88,"../multisig/":65,"../pubkey/":69,"../pubkeyhash/":72,"typeforce":157}],85:[function(require,module,exports){
 // OP_0 {scriptHash}
 
 const bscript = require('../../script')
