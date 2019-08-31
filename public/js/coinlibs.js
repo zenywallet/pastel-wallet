@@ -6505,36 +6505,6 @@ exports.wordlists = wordlists;
 let _default;
 exports._default = _default;
 try {
-    exports._default = _default = require('./wordlists/chinese_simplified.json');
-    wordlists.chinese_simplified = _default;
-}
-catch (err) { }
-try {
-    exports._default = _default = require('./wordlists/chinese_traditional.json');
-    wordlists.chinese_traditional = _default;
-}
-catch (err) { }
-try {
-    exports._default = _default = require('./wordlists/korean.json');
-    wordlists.korean = _default;
-}
-catch (err) { }
-try {
-    exports._default = _default = require('./wordlists/french.json');
-    wordlists.french = _default;
-}
-catch (err) { }
-try {
-    exports._default = _default = require('./wordlists/italian.json');
-    wordlists.italian = _default;
-}
-catch (err) { }
-try {
-    exports._default = _default = require('./wordlists/spanish.json');
-    wordlists.spanish = _default;
-}
-catch (err) { }
-try {
     exports._default = _default = require('./wordlists/japanese.json');
     wordlists.japanese = _default;
     wordlists.JA = _default;
@@ -6547,7 +6517,7 @@ try {
 }
 catch (err) { }
 
-},{"./wordlists/chinese_simplified.json":undefined,"./wordlists/chinese_traditional.json":undefined,"./wordlists/english.json":undefined,"./wordlists/french.json":undefined,"./wordlists/italian.json":undefined,"./wordlists/japanese.json":undefined,"./wordlists/korean.json":undefined,"./wordlists/spanish.json":undefined}],39:[function(require,module,exports){
+},{"./wordlists/english.json":undefined,"./wordlists/japanese.json":undefined}],39:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
