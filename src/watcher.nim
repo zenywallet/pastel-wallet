@@ -78,7 +78,7 @@ proc main() =
         address_list = @[]
         addrs = @[]
         if find_0:
-          for i in (d.last_0_index + base_index)..(d.last_0_index + base_index + gaplimit - 1'u32):
+          for i in (d.last_0_index + base_index)..<(d.last_0_index + base_index + gaplimit):
             var address = hdaddress(d.xpubkey, 0, i)
             if address.len <= 0:
               break
@@ -86,7 +86,7 @@ proc main() =
             addrs.add(address)
 
         if find_1:
-          for i in (d.last_1_index + base_index)..(d.last_1_index + base_index + gaplimit - 1'u32):
+          for i in (d.last_1_index + base_index)..<(d.last_1_index + base_index + gaplimit):
             var address = hdaddress(d.xpubkey, 1, i)
             if address.len <= 0:
               break
