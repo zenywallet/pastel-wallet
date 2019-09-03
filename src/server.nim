@@ -1,11 +1,13 @@
 # Copyright (c) 2019 zenywallet
 
 import jester, json
+import templates/layout_base
 
 proc main() {.thread.} =
   routes:
     get "/":
-      redirect "index.html"
+      resp layout_base(true)
+      #redirect "index.html"
 
     get "/api/pub/@pubkey":
       var data = %*{"pub": @"pubkey"}

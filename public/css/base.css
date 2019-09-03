@@ -6,7 +6,7 @@
 html, body {
   height: 100%;
 }
-section {
+section, #main {
   position: relative;
   width: 100%;
   height: 100%;
@@ -34,9 +34,10 @@ section h1 {
   white-space: nowrap;
 }
 
-#section01 { background: #4682b4; }
-#section02 { background: #8fbc8f; }
-#section03 { background: #d2b48c; }
+#section0 { background: #4682b4; }
+#section1 { background: #4682b4; }
+#section2 { background: #8fbc8f; }
+#section3 { background: #d2b48c; }
 
 .section a {
   position: absolute;
@@ -99,10 +100,30 @@ section h1 {
   }
 }
 
-
 .intro {
   position: relative;
-  top: 10%;
+  width: 100%;
+  height: 100%;
+}
+.intro-head {
+  position: relative;
+  width: 100%;
+  height: 212px;
+  top: 40px;
+}
+.intro-body {
+  width: 100%;
+  height: calc(100% - 212px);
+}
+.intro-body .segment {
+  height: 100%;
+  margin: 0 14px;
+  bottom: 30px;
+  min-height: 50px;
+  min-width: 324px;
+  z-index: 2;
+  background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
+  background-color: transparent;
 }
 .intro .caption {
   color: #fff;
@@ -110,14 +131,24 @@ section h1 {
   text-align: center;
   white-space: nowrap;
 }
-
-.intro .steps {
-  position: relative;
-  width: 90%;
+.bt-scan-seed {
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.method-selector {
+  text-align: center;
 }
 
-.button {
+.method-selector .title {
+  color: #fff;
+  font : normal 300 14px/1 'Josefin Sans', sans-serif;
+  padding: 20px 10px 8px 10px;
+}
 
+.method-selector .button {
+  width: 160px;
+  z-index: 2;
 }
