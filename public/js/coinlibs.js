@@ -5885,7 +5885,7 @@ exports.coin = require('bitcoinjs-lib');
 exports.bip32 = require('bip32');
 exports.bip39 = require('bip39');
 
-},{"bip32":37,"bip39":39,"bitcoinjs-lib":51}],33:[function(require,module,exports){
+},{"bip32":37,"bip39":39,"bitcoinjs-lib":53}],33:[function(require,module,exports){
 'use strict'
 // base-x encoding / decoding
 // Copyright (c) 2018 base-x contributors
@@ -6007,7 +6007,7 @@ function base (ALPHABET) {
 }
 module.exports = base
 
-},{"safe-buffer":144}],34:[function(require,module,exports){
+},{"safe-buffer":146}],34:[function(require,module,exports){
 'use strict'
 var ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 
@@ -6456,7 +6456,7 @@ function fromSeedHex(seed, network) {
 exports.fromSeedHex = fromSeedHex;
 
 }).call(this,require("buffer").Buffer)
-},{"./crypto":36,"bs58check":93,"buffer":3,"tiny-secp256k1":153,"typeforce":157,"wif":160}],36:[function(require,module,exports){
+},{"./crypto":36,"bs58check":95,"buffer":3,"tiny-secp256k1":155,"typeforce":159,"wif":162}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const createHash = require('create-hash');
@@ -6484,7 +6484,7 @@ function hmacSHA512(key, data) {
 }
 exports.hmacSHA512 = hmacSHA512;
 
-},{"create-hash":95,"create-hmac":97}],37:[function(require,module,exports){
+},{"create-hash":97,"create-hmac":99}],37:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bip32_1 = require("./bip32");
@@ -6517,7 +6517,7 @@ try {
 }
 catch (err) { }
 
-},{"./wordlists/english.json":undefined,"./wordlists/japanese.json":undefined}],39:[function(require,module,exports){
+},{"./wordlists/english.json":40,"./wordlists/japanese.json":41}],39:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6681,7 +6681,4111 @@ var _wordlists_2 = require("./_wordlists");
 exports.wordlists = _wordlists_2.wordlists;
 
 }).call(this,require("buffer").Buffer)
-},{"./_wordlists":38,"buffer":3,"create-hash":95,"pbkdf2":136,"randombytes":142}],40:[function(require,module,exports){
+},{"./_wordlists":38,"buffer":3,"create-hash":97,"pbkdf2":138,"randombytes":144}],40:[function(require,module,exports){
+module.exports=[
+    "abandon",
+    "ability",
+    "able",
+    "about",
+    "above",
+    "absent",
+    "absorb",
+    "abstract",
+    "absurd",
+    "abuse",
+    "access",
+    "accident",
+    "account",
+    "accuse",
+    "achieve",
+    "acid",
+    "acoustic",
+    "acquire",
+    "across",
+    "act",
+    "action",
+    "actor",
+    "actress",
+    "actual",
+    "adapt",
+    "add",
+    "addict",
+    "address",
+    "adjust",
+    "admit",
+    "adult",
+    "advance",
+    "advice",
+    "aerobic",
+    "affair",
+    "afford",
+    "afraid",
+    "again",
+    "age",
+    "agent",
+    "agree",
+    "ahead",
+    "aim",
+    "air",
+    "airport",
+    "aisle",
+    "alarm",
+    "album",
+    "alcohol",
+    "alert",
+    "alien",
+    "all",
+    "alley",
+    "allow",
+    "almost",
+    "alone",
+    "alpha",
+    "already",
+    "also",
+    "alter",
+    "always",
+    "amateur",
+    "amazing",
+    "among",
+    "amount",
+    "amused",
+    "analyst",
+    "anchor",
+    "ancient",
+    "anger",
+    "angle",
+    "angry",
+    "animal",
+    "ankle",
+    "announce",
+    "annual",
+    "another",
+    "answer",
+    "antenna",
+    "antique",
+    "anxiety",
+    "any",
+    "apart",
+    "apology",
+    "appear",
+    "apple",
+    "approve",
+    "april",
+    "arch",
+    "arctic",
+    "area",
+    "arena",
+    "argue",
+    "arm",
+    "armed",
+    "armor",
+    "army",
+    "around",
+    "arrange",
+    "arrest",
+    "arrive",
+    "arrow",
+    "art",
+    "artefact",
+    "artist",
+    "artwork",
+    "ask",
+    "aspect",
+    "assault",
+    "asset",
+    "assist",
+    "assume",
+    "asthma",
+    "athlete",
+    "atom",
+    "attack",
+    "attend",
+    "attitude",
+    "attract",
+    "auction",
+    "audit",
+    "august",
+    "aunt",
+    "author",
+    "auto",
+    "autumn",
+    "average",
+    "avocado",
+    "avoid",
+    "awake",
+    "aware",
+    "away",
+    "awesome",
+    "awful",
+    "awkward",
+    "axis",
+    "baby",
+    "bachelor",
+    "bacon",
+    "badge",
+    "bag",
+    "balance",
+    "balcony",
+    "ball",
+    "bamboo",
+    "banana",
+    "banner",
+    "bar",
+    "barely",
+    "bargain",
+    "barrel",
+    "base",
+    "basic",
+    "basket",
+    "battle",
+    "beach",
+    "bean",
+    "beauty",
+    "because",
+    "become",
+    "beef",
+    "before",
+    "begin",
+    "behave",
+    "behind",
+    "believe",
+    "below",
+    "belt",
+    "bench",
+    "benefit",
+    "best",
+    "betray",
+    "better",
+    "between",
+    "beyond",
+    "bicycle",
+    "bid",
+    "bike",
+    "bind",
+    "biology",
+    "bird",
+    "birth",
+    "bitter",
+    "black",
+    "blade",
+    "blame",
+    "blanket",
+    "blast",
+    "bleak",
+    "bless",
+    "blind",
+    "blood",
+    "blossom",
+    "blouse",
+    "blue",
+    "blur",
+    "blush",
+    "board",
+    "boat",
+    "body",
+    "boil",
+    "bomb",
+    "bone",
+    "bonus",
+    "book",
+    "boost",
+    "border",
+    "boring",
+    "borrow",
+    "boss",
+    "bottom",
+    "bounce",
+    "box",
+    "boy",
+    "bracket",
+    "brain",
+    "brand",
+    "brass",
+    "brave",
+    "bread",
+    "breeze",
+    "brick",
+    "bridge",
+    "brief",
+    "bright",
+    "bring",
+    "brisk",
+    "broccoli",
+    "broken",
+    "bronze",
+    "broom",
+    "brother",
+    "brown",
+    "brush",
+    "bubble",
+    "buddy",
+    "budget",
+    "buffalo",
+    "build",
+    "bulb",
+    "bulk",
+    "bullet",
+    "bundle",
+    "bunker",
+    "burden",
+    "burger",
+    "burst",
+    "bus",
+    "business",
+    "busy",
+    "butter",
+    "buyer",
+    "buzz",
+    "cabbage",
+    "cabin",
+    "cable",
+    "cactus",
+    "cage",
+    "cake",
+    "call",
+    "calm",
+    "camera",
+    "camp",
+    "can",
+    "canal",
+    "cancel",
+    "candy",
+    "cannon",
+    "canoe",
+    "canvas",
+    "canyon",
+    "capable",
+    "capital",
+    "captain",
+    "car",
+    "carbon",
+    "card",
+    "cargo",
+    "carpet",
+    "carry",
+    "cart",
+    "case",
+    "cash",
+    "casino",
+    "castle",
+    "casual",
+    "cat",
+    "catalog",
+    "catch",
+    "category",
+    "cattle",
+    "caught",
+    "cause",
+    "caution",
+    "cave",
+    "ceiling",
+    "celery",
+    "cement",
+    "census",
+    "century",
+    "cereal",
+    "certain",
+    "chair",
+    "chalk",
+    "champion",
+    "change",
+    "chaos",
+    "chapter",
+    "charge",
+    "chase",
+    "chat",
+    "cheap",
+    "check",
+    "cheese",
+    "chef",
+    "cherry",
+    "chest",
+    "chicken",
+    "chief",
+    "child",
+    "chimney",
+    "choice",
+    "choose",
+    "chronic",
+    "chuckle",
+    "chunk",
+    "churn",
+    "cigar",
+    "cinnamon",
+    "circle",
+    "citizen",
+    "city",
+    "civil",
+    "claim",
+    "clap",
+    "clarify",
+    "claw",
+    "clay",
+    "clean",
+    "clerk",
+    "clever",
+    "click",
+    "client",
+    "cliff",
+    "climb",
+    "clinic",
+    "clip",
+    "clock",
+    "clog",
+    "close",
+    "cloth",
+    "cloud",
+    "clown",
+    "club",
+    "clump",
+    "cluster",
+    "clutch",
+    "coach",
+    "coast",
+    "coconut",
+    "code",
+    "coffee",
+    "coil",
+    "coin",
+    "collect",
+    "color",
+    "column",
+    "combine",
+    "come",
+    "comfort",
+    "comic",
+    "common",
+    "company",
+    "concert",
+    "conduct",
+    "confirm",
+    "congress",
+    "connect",
+    "consider",
+    "control",
+    "convince",
+    "cook",
+    "cool",
+    "copper",
+    "copy",
+    "coral",
+    "core",
+    "corn",
+    "correct",
+    "cost",
+    "cotton",
+    "couch",
+    "country",
+    "couple",
+    "course",
+    "cousin",
+    "cover",
+    "coyote",
+    "crack",
+    "cradle",
+    "craft",
+    "cram",
+    "crane",
+    "crash",
+    "crater",
+    "crawl",
+    "crazy",
+    "cream",
+    "credit",
+    "creek",
+    "crew",
+    "cricket",
+    "crime",
+    "crisp",
+    "critic",
+    "crop",
+    "cross",
+    "crouch",
+    "crowd",
+    "crucial",
+    "cruel",
+    "cruise",
+    "crumble",
+    "crunch",
+    "crush",
+    "cry",
+    "crystal",
+    "cube",
+    "culture",
+    "cup",
+    "cupboard",
+    "curious",
+    "current",
+    "curtain",
+    "curve",
+    "cushion",
+    "custom",
+    "cute",
+    "cycle",
+    "dad",
+    "damage",
+    "damp",
+    "dance",
+    "danger",
+    "daring",
+    "dash",
+    "daughter",
+    "dawn",
+    "day",
+    "deal",
+    "debate",
+    "debris",
+    "decade",
+    "december",
+    "decide",
+    "decline",
+    "decorate",
+    "decrease",
+    "deer",
+    "defense",
+    "define",
+    "defy",
+    "degree",
+    "delay",
+    "deliver",
+    "demand",
+    "demise",
+    "denial",
+    "dentist",
+    "deny",
+    "depart",
+    "depend",
+    "deposit",
+    "depth",
+    "deputy",
+    "derive",
+    "describe",
+    "desert",
+    "design",
+    "desk",
+    "despair",
+    "destroy",
+    "detail",
+    "detect",
+    "develop",
+    "device",
+    "devote",
+    "diagram",
+    "dial",
+    "diamond",
+    "diary",
+    "dice",
+    "diesel",
+    "diet",
+    "differ",
+    "digital",
+    "dignity",
+    "dilemma",
+    "dinner",
+    "dinosaur",
+    "direct",
+    "dirt",
+    "disagree",
+    "discover",
+    "disease",
+    "dish",
+    "dismiss",
+    "disorder",
+    "display",
+    "distance",
+    "divert",
+    "divide",
+    "divorce",
+    "dizzy",
+    "doctor",
+    "document",
+    "dog",
+    "doll",
+    "dolphin",
+    "domain",
+    "donate",
+    "donkey",
+    "donor",
+    "door",
+    "dose",
+    "double",
+    "dove",
+    "draft",
+    "dragon",
+    "drama",
+    "drastic",
+    "draw",
+    "dream",
+    "dress",
+    "drift",
+    "drill",
+    "drink",
+    "drip",
+    "drive",
+    "drop",
+    "drum",
+    "dry",
+    "duck",
+    "dumb",
+    "dune",
+    "during",
+    "dust",
+    "dutch",
+    "duty",
+    "dwarf",
+    "dynamic",
+    "eager",
+    "eagle",
+    "early",
+    "earn",
+    "earth",
+    "easily",
+    "east",
+    "easy",
+    "echo",
+    "ecology",
+    "economy",
+    "edge",
+    "edit",
+    "educate",
+    "effort",
+    "egg",
+    "eight",
+    "either",
+    "elbow",
+    "elder",
+    "electric",
+    "elegant",
+    "element",
+    "elephant",
+    "elevator",
+    "elite",
+    "else",
+    "embark",
+    "embody",
+    "embrace",
+    "emerge",
+    "emotion",
+    "employ",
+    "empower",
+    "empty",
+    "enable",
+    "enact",
+    "end",
+    "endless",
+    "endorse",
+    "enemy",
+    "energy",
+    "enforce",
+    "engage",
+    "engine",
+    "enhance",
+    "enjoy",
+    "enlist",
+    "enough",
+    "enrich",
+    "enroll",
+    "ensure",
+    "enter",
+    "entire",
+    "entry",
+    "envelope",
+    "episode",
+    "equal",
+    "equip",
+    "era",
+    "erase",
+    "erode",
+    "erosion",
+    "error",
+    "erupt",
+    "escape",
+    "essay",
+    "essence",
+    "estate",
+    "eternal",
+    "ethics",
+    "evidence",
+    "evil",
+    "evoke",
+    "evolve",
+    "exact",
+    "example",
+    "excess",
+    "exchange",
+    "excite",
+    "exclude",
+    "excuse",
+    "execute",
+    "exercise",
+    "exhaust",
+    "exhibit",
+    "exile",
+    "exist",
+    "exit",
+    "exotic",
+    "expand",
+    "expect",
+    "expire",
+    "explain",
+    "expose",
+    "express",
+    "extend",
+    "extra",
+    "eye",
+    "eyebrow",
+    "fabric",
+    "face",
+    "faculty",
+    "fade",
+    "faint",
+    "faith",
+    "fall",
+    "false",
+    "fame",
+    "family",
+    "famous",
+    "fan",
+    "fancy",
+    "fantasy",
+    "farm",
+    "fashion",
+    "fat",
+    "fatal",
+    "father",
+    "fatigue",
+    "fault",
+    "favorite",
+    "feature",
+    "february",
+    "federal",
+    "fee",
+    "feed",
+    "feel",
+    "female",
+    "fence",
+    "festival",
+    "fetch",
+    "fever",
+    "few",
+    "fiber",
+    "fiction",
+    "field",
+    "figure",
+    "file",
+    "film",
+    "filter",
+    "final",
+    "find",
+    "fine",
+    "finger",
+    "finish",
+    "fire",
+    "firm",
+    "first",
+    "fiscal",
+    "fish",
+    "fit",
+    "fitness",
+    "fix",
+    "flag",
+    "flame",
+    "flash",
+    "flat",
+    "flavor",
+    "flee",
+    "flight",
+    "flip",
+    "float",
+    "flock",
+    "floor",
+    "flower",
+    "fluid",
+    "flush",
+    "fly",
+    "foam",
+    "focus",
+    "fog",
+    "foil",
+    "fold",
+    "follow",
+    "food",
+    "foot",
+    "force",
+    "forest",
+    "forget",
+    "fork",
+    "fortune",
+    "forum",
+    "forward",
+    "fossil",
+    "foster",
+    "found",
+    "fox",
+    "fragile",
+    "frame",
+    "frequent",
+    "fresh",
+    "friend",
+    "fringe",
+    "frog",
+    "front",
+    "frost",
+    "frown",
+    "frozen",
+    "fruit",
+    "fuel",
+    "fun",
+    "funny",
+    "furnace",
+    "fury",
+    "future",
+    "gadget",
+    "gain",
+    "galaxy",
+    "gallery",
+    "game",
+    "gap",
+    "garage",
+    "garbage",
+    "garden",
+    "garlic",
+    "garment",
+    "gas",
+    "gasp",
+    "gate",
+    "gather",
+    "gauge",
+    "gaze",
+    "general",
+    "genius",
+    "genre",
+    "gentle",
+    "genuine",
+    "gesture",
+    "ghost",
+    "giant",
+    "gift",
+    "giggle",
+    "ginger",
+    "giraffe",
+    "girl",
+    "give",
+    "glad",
+    "glance",
+    "glare",
+    "glass",
+    "glide",
+    "glimpse",
+    "globe",
+    "gloom",
+    "glory",
+    "glove",
+    "glow",
+    "glue",
+    "goat",
+    "goddess",
+    "gold",
+    "good",
+    "goose",
+    "gorilla",
+    "gospel",
+    "gossip",
+    "govern",
+    "gown",
+    "grab",
+    "grace",
+    "grain",
+    "grant",
+    "grape",
+    "grass",
+    "gravity",
+    "great",
+    "green",
+    "grid",
+    "grief",
+    "grit",
+    "grocery",
+    "group",
+    "grow",
+    "grunt",
+    "guard",
+    "guess",
+    "guide",
+    "guilt",
+    "guitar",
+    "gun",
+    "gym",
+    "habit",
+    "hair",
+    "half",
+    "hammer",
+    "hamster",
+    "hand",
+    "happy",
+    "harbor",
+    "hard",
+    "harsh",
+    "harvest",
+    "hat",
+    "have",
+    "hawk",
+    "hazard",
+    "head",
+    "health",
+    "heart",
+    "heavy",
+    "hedgehog",
+    "height",
+    "hello",
+    "helmet",
+    "help",
+    "hen",
+    "hero",
+    "hidden",
+    "high",
+    "hill",
+    "hint",
+    "hip",
+    "hire",
+    "history",
+    "hobby",
+    "hockey",
+    "hold",
+    "hole",
+    "holiday",
+    "hollow",
+    "home",
+    "honey",
+    "hood",
+    "hope",
+    "horn",
+    "horror",
+    "horse",
+    "hospital",
+    "host",
+    "hotel",
+    "hour",
+    "hover",
+    "hub",
+    "huge",
+    "human",
+    "humble",
+    "humor",
+    "hundred",
+    "hungry",
+    "hunt",
+    "hurdle",
+    "hurry",
+    "hurt",
+    "husband",
+    "hybrid",
+    "ice",
+    "icon",
+    "idea",
+    "identify",
+    "idle",
+    "ignore",
+    "ill",
+    "illegal",
+    "illness",
+    "image",
+    "imitate",
+    "immense",
+    "immune",
+    "impact",
+    "impose",
+    "improve",
+    "impulse",
+    "inch",
+    "include",
+    "income",
+    "increase",
+    "index",
+    "indicate",
+    "indoor",
+    "industry",
+    "infant",
+    "inflict",
+    "inform",
+    "inhale",
+    "inherit",
+    "initial",
+    "inject",
+    "injury",
+    "inmate",
+    "inner",
+    "innocent",
+    "input",
+    "inquiry",
+    "insane",
+    "insect",
+    "inside",
+    "inspire",
+    "install",
+    "intact",
+    "interest",
+    "into",
+    "invest",
+    "invite",
+    "involve",
+    "iron",
+    "island",
+    "isolate",
+    "issue",
+    "item",
+    "ivory",
+    "jacket",
+    "jaguar",
+    "jar",
+    "jazz",
+    "jealous",
+    "jeans",
+    "jelly",
+    "jewel",
+    "job",
+    "join",
+    "joke",
+    "journey",
+    "joy",
+    "judge",
+    "juice",
+    "jump",
+    "jungle",
+    "junior",
+    "junk",
+    "just",
+    "kangaroo",
+    "keen",
+    "keep",
+    "ketchup",
+    "key",
+    "kick",
+    "kid",
+    "kidney",
+    "kind",
+    "kingdom",
+    "kiss",
+    "kit",
+    "kitchen",
+    "kite",
+    "kitten",
+    "kiwi",
+    "knee",
+    "knife",
+    "knock",
+    "know",
+    "lab",
+    "label",
+    "labor",
+    "ladder",
+    "lady",
+    "lake",
+    "lamp",
+    "language",
+    "laptop",
+    "large",
+    "later",
+    "latin",
+    "laugh",
+    "laundry",
+    "lava",
+    "law",
+    "lawn",
+    "lawsuit",
+    "layer",
+    "lazy",
+    "leader",
+    "leaf",
+    "learn",
+    "leave",
+    "lecture",
+    "left",
+    "leg",
+    "legal",
+    "legend",
+    "leisure",
+    "lemon",
+    "lend",
+    "length",
+    "lens",
+    "leopard",
+    "lesson",
+    "letter",
+    "level",
+    "liar",
+    "liberty",
+    "library",
+    "license",
+    "life",
+    "lift",
+    "light",
+    "like",
+    "limb",
+    "limit",
+    "link",
+    "lion",
+    "liquid",
+    "list",
+    "little",
+    "live",
+    "lizard",
+    "load",
+    "loan",
+    "lobster",
+    "local",
+    "lock",
+    "logic",
+    "lonely",
+    "long",
+    "loop",
+    "lottery",
+    "loud",
+    "lounge",
+    "love",
+    "loyal",
+    "lucky",
+    "luggage",
+    "lumber",
+    "lunar",
+    "lunch",
+    "luxury",
+    "lyrics",
+    "machine",
+    "mad",
+    "magic",
+    "magnet",
+    "maid",
+    "mail",
+    "main",
+    "major",
+    "make",
+    "mammal",
+    "man",
+    "manage",
+    "mandate",
+    "mango",
+    "mansion",
+    "manual",
+    "maple",
+    "marble",
+    "march",
+    "margin",
+    "marine",
+    "market",
+    "marriage",
+    "mask",
+    "mass",
+    "master",
+    "match",
+    "material",
+    "math",
+    "matrix",
+    "matter",
+    "maximum",
+    "maze",
+    "meadow",
+    "mean",
+    "measure",
+    "meat",
+    "mechanic",
+    "medal",
+    "media",
+    "melody",
+    "melt",
+    "member",
+    "memory",
+    "mention",
+    "menu",
+    "mercy",
+    "merge",
+    "merit",
+    "merry",
+    "mesh",
+    "message",
+    "metal",
+    "method",
+    "middle",
+    "midnight",
+    "milk",
+    "million",
+    "mimic",
+    "mind",
+    "minimum",
+    "minor",
+    "minute",
+    "miracle",
+    "mirror",
+    "misery",
+    "miss",
+    "mistake",
+    "mix",
+    "mixed",
+    "mixture",
+    "mobile",
+    "model",
+    "modify",
+    "mom",
+    "moment",
+    "monitor",
+    "monkey",
+    "monster",
+    "month",
+    "moon",
+    "moral",
+    "more",
+    "morning",
+    "mosquito",
+    "mother",
+    "motion",
+    "motor",
+    "mountain",
+    "mouse",
+    "move",
+    "movie",
+    "much",
+    "muffin",
+    "mule",
+    "multiply",
+    "muscle",
+    "museum",
+    "mushroom",
+    "music",
+    "must",
+    "mutual",
+    "myself",
+    "mystery",
+    "myth",
+    "naive",
+    "name",
+    "napkin",
+    "narrow",
+    "nasty",
+    "nation",
+    "nature",
+    "near",
+    "neck",
+    "need",
+    "negative",
+    "neglect",
+    "neither",
+    "nephew",
+    "nerve",
+    "nest",
+    "net",
+    "network",
+    "neutral",
+    "never",
+    "news",
+    "next",
+    "nice",
+    "night",
+    "noble",
+    "noise",
+    "nominee",
+    "noodle",
+    "normal",
+    "north",
+    "nose",
+    "notable",
+    "note",
+    "nothing",
+    "notice",
+    "novel",
+    "now",
+    "nuclear",
+    "number",
+    "nurse",
+    "nut",
+    "oak",
+    "obey",
+    "object",
+    "oblige",
+    "obscure",
+    "observe",
+    "obtain",
+    "obvious",
+    "occur",
+    "ocean",
+    "october",
+    "odor",
+    "off",
+    "offer",
+    "office",
+    "often",
+    "oil",
+    "okay",
+    "old",
+    "olive",
+    "olympic",
+    "omit",
+    "once",
+    "one",
+    "onion",
+    "online",
+    "only",
+    "open",
+    "opera",
+    "opinion",
+    "oppose",
+    "option",
+    "orange",
+    "orbit",
+    "orchard",
+    "order",
+    "ordinary",
+    "organ",
+    "orient",
+    "original",
+    "orphan",
+    "ostrich",
+    "other",
+    "outdoor",
+    "outer",
+    "output",
+    "outside",
+    "oval",
+    "oven",
+    "over",
+    "own",
+    "owner",
+    "oxygen",
+    "oyster",
+    "ozone",
+    "pact",
+    "paddle",
+    "page",
+    "pair",
+    "palace",
+    "palm",
+    "panda",
+    "panel",
+    "panic",
+    "panther",
+    "paper",
+    "parade",
+    "parent",
+    "park",
+    "parrot",
+    "party",
+    "pass",
+    "patch",
+    "path",
+    "patient",
+    "patrol",
+    "pattern",
+    "pause",
+    "pave",
+    "payment",
+    "peace",
+    "peanut",
+    "pear",
+    "peasant",
+    "pelican",
+    "pen",
+    "penalty",
+    "pencil",
+    "people",
+    "pepper",
+    "perfect",
+    "permit",
+    "person",
+    "pet",
+    "phone",
+    "photo",
+    "phrase",
+    "physical",
+    "piano",
+    "picnic",
+    "picture",
+    "piece",
+    "pig",
+    "pigeon",
+    "pill",
+    "pilot",
+    "pink",
+    "pioneer",
+    "pipe",
+    "pistol",
+    "pitch",
+    "pizza",
+    "place",
+    "planet",
+    "plastic",
+    "plate",
+    "play",
+    "please",
+    "pledge",
+    "pluck",
+    "plug",
+    "plunge",
+    "poem",
+    "poet",
+    "point",
+    "polar",
+    "pole",
+    "police",
+    "pond",
+    "pony",
+    "pool",
+    "popular",
+    "portion",
+    "position",
+    "possible",
+    "post",
+    "potato",
+    "pottery",
+    "poverty",
+    "powder",
+    "power",
+    "practice",
+    "praise",
+    "predict",
+    "prefer",
+    "prepare",
+    "present",
+    "pretty",
+    "prevent",
+    "price",
+    "pride",
+    "primary",
+    "print",
+    "priority",
+    "prison",
+    "private",
+    "prize",
+    "problem",
+    "process",
+    "produce",
+    "profit",
+    "program",
+    "project",
+    "promote",
+    "proof",
+    "property",
+    "prosper",
+    "protect",
+    "proud",
+    "provide",
+    "public",
+    "pudding",
+    "pull",
+    "pulp",
+    "pulse",
+    "pumpkin",
+    "punch",
+    "pupil",
+    "puppy",
+    "purchase",
+    "purity",
+    "purpose",
+    "purse",
+    "push",
+    "put",
+    "puzzle",
+    "pyramid",
+    "quality",
+    "quantum",
+    "quarter",
+    "question",
+    "quick",
+    "quit",
+    "quiz",
+    "quote",
+    "rabbit",
+    "raccoon",
+    "race",
+    "rack",
+    "radar",
+    "radio",
+    "rail",
+    "rain",
+    "raise",
+    "rally",
+    "ramp",
+    "ranch",
+    "random",
+    "range",
+    "rapid",
+    "rare",
+    "rate",
+    "rather",
+    "raven",
+    "raw",
+    "razor",
+    "ready",
+    "real",
+    "reason",
+    "rebel",
+    "rebuild",
+    "recall",
+    "receive",
+    "recipe",
+    "record",
+    "recycle",
+    "reduce",
+    "reflect",
+    "reform",
+    "refuse",
+    "region",
+    "regret",
+    "regular",
+    "reject",
+    "relax",
+    "release",
+    "relief",
+    "rely",
+    "remain",
+    "remember",
+    "remind",
+    "remove",
+    "render",
+    "renew",
+    "rent",
+    "reopen",
+    "repair",
+    "repeat",
+    "replace",
+    "report",
+    "require",
+    "rescue",
+    "resemble",
+    "resist",
+    "resource",
+    "response",
+    "result",
+    "retire",
+    "retreat",
+    "return",
+    "reunion",
+    "reveal",
+    "review",
+    "reward",
+    "rhythm",
+    "rib",
+    "ribbon",
+    "rice",
+    "rich",
+    "ride",
+    "ridge",
+    "rifle",
+    "right",
+    "rigid",
+    "ring",
+    "riot",
+    "ripple",
+    "risk",
+    "ritual",
+    "rival",
+    "river",
+    "road",
+    "roast",
+    "robot",
+    "robust",
+    "rocket",
+    "romance",
+    "roof",
+    "rookie",
+    "room",
+    "rose",
+    "rotate",
+    "rough",
+    "round",
+    "route",
+    "royal",
+    "rubber",
+    "rude",
+    "rug",
+    "rule",
+    "run",
+    "runway",
+    "rural",
+    "sad",
+    "saddle",
+    "sadness",
+    "safe",
+    "sail",
+    "salad",
+    "salmon",
+    "salon",
+    "salt",
+    "salute",
+    "same",
+    "sample",
+    "sand",
+    "satisfy",
+    "satoshi",
+    "sauce",
+    "sausage",
+    "save",
+    "say",
+    "scale",
+    "scan",
+    "scare",
+    "scatter",
+    "scene",
+    "scheme",
+    "school",
+    "science",
+    "scissors",
+    "scorpion",
+    "scout",
+    "scrap",
+    "screen",
+    "script",
+    "scrub",
+    "sea",
+    "search",
+    "season",
+    "seat",
+    "second",
+    "secret",
+    "section",
+    "security",
+    "seed",
+    "seek",
+    "segment",
+    "select",
+    "sell",
+    "seminar",
+    "senior",
+    "sense",
+    "sentence",
+    "series",
+    "service",
+    "session",
+    "settle",
+    "setup",
+    "seven",
+    "shadow",
+    "shaft",
+    "shallow",
+    "share",
+    "shed",
+    "shell",
+    "sheriff",
+    "shield",
+    "shift",
+    "shine",
+    "ship",
+    "shiver",
+    "shock",
+    "shoe",
+    "shoot",
+    "shop",
+    "short",
+    "shoulder",
+    "shove",
+    "shrimp",
+    "shrug",
+    "shuffle",
+    "shy",
+    "sibling",
+    "sick",
+    "side",
+    "siege",
+    "sight",
+    "sign",
+    "silent",
+    "silk",
+    "silly",
+    "silver",
+    "similar",
+    "simple",
+    "since",
+    "sing",
+    "siren",
+    "sister",
+    "situate",
+    "six",
+    "size",
+    "skate",
+    "sketch",
+    "ski",
+    "skill",
+    "skin",
+    "skirt",
+    "skull",
+    "slab",
+    "slam",
+    "sleep",
+    "slender",
+    "slice",
+    "slide",
+    "slight",
+    "slim",
+    "slogan",
+    "slot",
+    "slow",
+    "slush",
+    "small",
+    "smart",
+    "smile",
+    "smoke",
+    "smooth",
+    "snack",
+    "snake",
+    "snap",
+    "sniff",
+    "snow",
+    "soap",
+    "soccer",
+    "social",
+    "sock",
+    "soda",
+    "soft",
+    "solar",
+    "soldier",
+    "solid",
+    "solution",
+    "solve",
+    "someone",
+    "song",
+    "soon",
+    "sorry",
+    "sort",
+    "soul",
+    "sound",
+    "soup",
+    "source",
+    "south",
+    "space",
+    "spare",
+    "spatial",
+    "spawn",
+    "speak",
+    "special",
+    "speed",
+    "spell",
+    "spend",
+    "sphere",
+    "spice",
+    "spider",
+    "spike",
+    "spin",
+    "spirit",
+    "split",
+    "spoil",
+    "sponsor",
+    "spoon",
+    "sport",
+    "spot",
+    "spray",
+    "spread",
+    "spring",
+    "spy",
+    "square",
+    "squeeze",
+    "squirrel",
+    "stable",
+    "stadium",
+    "staff",
+    "stage",
+    "stairs",
+    "stamp",
+    "stand",
+    "start",
+    "state",
+    "stay",
+    "steak",
+    "steel",
+    "stem",
+    "step",
+    "stereo",
+    "stick",
+    "still",
+    "sting",
+    "stock",
+    "stomach",
+    "stone",
+    "stool",
+    "story",
+    "stove",
+    "strategy",
+    "street",
+    "strike",
+    "strong",
+    "struggle",
+    "student",
+    "stuff",
+    "stumble",
+    "style",
+    "subject",
+    "submit",
+    "subway",
+    "success",
+    "such",
+    "sudden",
+    "suffer",
+    "sugar",
+    "suggest",
+    "suit",
+    "summer",
+    "sun",
+    "sunny",
+    "sunset",
+    "super",
+    "supply",
+    "supreme",
+    "sure",
+    "surface",
+    "surge",
+    "surprise",
+    "surround",
+    "survey",
+    "suspect",
+    "sustain",
+    "swallow",
+    "swamp",
+    "swap",
+    "swarm",
+    "swear",
+    "sweet",
+    "swift",
+    "swim",
+    "swing",
+    "switch",
+    "sword",
+    "symbol",
+    "symptom",
+    "syrup",
+    "system",
+    "table",
+    "tackle",
+    "tag",
+    "tail",
+    "talent",
+    "talk",
+    "tank",
+    "tape",
+    "target",
+    "task",
+    "taste",
+    "tattoo",
+    "taxi",
+    "teach",
+    "team",
+    "tell",
+    "ten",
+    "tenant",
+    "tennis",
+    "tent",
+    "term",
+    "test",
+    "text",
+    "thank",
+    "that",
+    "theme",
+    "then",
+    "theory",
+    "there",
+    "they",
+    "thing",
+    "this",
+    "thought",
+    "three",
+    "thrive",
+    "throw",
+    "thumb",
+    "thunder",
+    "ticket",
+    "tide",
+    "tiger",
+    "tilt",
+    "timber",
+    "time",
+    "tiny",
+    "tip",
+    "tired",
+    "tissue",
+    "title",
+    "toast",
+    "tobacco",
+    "today",
+    "toddler",
+    "toe",
+    "together",
+    "toilet",
+    "token",
+    "tomato",
+    "tomorrow",
+    "tone",
+    "tongue",
+    "tonight",
+    "tool",
+    "tooth",
+    "top",
+    "topic",
+    "topple",
+    "torch",
+    "tornado",
+    "tortoise",
+    "toss",
+    "total",
+    "tourist",
+    "toward",
+    "tower",
+    "town",
+    "toy",
+    "track",
+    "trade",
+    "traffic",
+    "tragic",
+    "train",
+    "transfer",
+    "trap",
+    "trash",
+    "travel",
+    "tray",
+    "treat",
+    "tree",
+    "trend",
+    "trial",
+    "tribe",
+    "trick",
+    "trigger",
+    "trim",
+    "trip",
+    "trophy",
+    "trouble",
+    "truck",
+    "true",
+    "truly",
+    "trumpet",
+    "trust",
+    "truth",
+    "try",
+    "tube",
+    "tuition",
+    "tumble",
+    "tuna",
+    "tunnel",
+    "turkey",
+    "turn",
+    "turtle",
+    "twelve",
+    "twenty",
+    "twice",
+    "twin",
+    "twist",
+    "two",
+    "type",
+    "typical",
+    "ugly",
+    "umbrella",
+    "unable",
+    "unaware",
+    "uncle",
+    "uncover",
+    "under",
+    "undo",
+    "unfair",
+    "unfold",
+    "unhappy",
+    "uniform",
+    "unique",
+    "unit",
+    "universe",
+    "unknown",
+    "unlock",
+    "until",
+    "unusual",
+    "unveil",
+    "update",
+    "upgrade",
+    "uphold",
+    "upon",
+    "upper",
+    "upset",
+    "urban",
+    "urge",
+    "usage",
+    "use",
+    "used",
+    "useful",
+    "useless",
+    "usual",
+    "utility",
+    "vacant",
+    "vacuum",
+    "vague",
+    "valid",
+    "valley",
+    "valve",
+    "van",
+    "vanish",
+    "vapor",
+    "various",
+    "vast",
+    "vault",
+    "vehicle",
+    "velvet",
+    "vendor",
+    "venture",
+    "venue",
+    "verb",
+    "verify",
+    "version",
+    "very",
+    "vessel",
+    "veteran",
+    "viable",
+    "vibrant",
+    "vicious",
+    "victory",
+    "video",
+    "view",
+    "village",
+    "vintage",
+    "violin",
+    "virtual",
+    "virus",
+    "visa",
+    "visit",
+    "visual",
+    "vital",
+    "vivid",
+    "vocal",
+    "voice",
+    "void",
+    "volcano",
+    "volume",
+    "vote",
+    "voyage",
+    "wage",
+    "wagon",
+    "wait",
+    "walk",
+    "wall",
+    "walnut",
+    "want",
+    "warfare",
+    "warm",
+    "warrior",
+    "wash",
+    "wasp",
+    "waste",
+    "water",
+    "wave",
+    "way",
+    "wealth",
+    "weapon",
+    "wear",
+    "weasel",
+    "weather",
+    "web",
+    "wedding",
+    "weekend",
+    "weird",
+    "welcome",
+    "west",
+    "wet",
+    "whale",
+    "what",
+    "wheat",
+    "wheel",
+    "when",
+    "where",
+    "whip",
+    "whisper",
+    "wide",
+    "width",
+    "wife",
+    "wild",
+    "will",
+    "win",
+    "window",
+    "wine",
+    "wing",
+    "wink",
+    "winner",
+    "winter",
+    "wire",
+    "wisdom",
+    "wise",
+    "wish",
+    "witness",
+    "wolf",
+    "woman",
+    "wonder",
+    "wood",
+    "wool",
+    "word",
+    "work",
+    "world",
+    "worry",
+    "worth",
+    "wrap",
+    "wreck",
+    "wrestle",
+    "wrist",
+    "write",
+    "wrong",
+    "yard",
+    "year",
+    "yellow",
+    "you",
+    "young",
+    "youth",
+    "zebra",
+    "zero",
+    "zone",
+    "zoo"
+]
+
+},{}],41:[function(require,module,exports){
+module.exports=[
+    "あいこくしん",
+    "あいさつ",
+    "あいだ",
+    "あおぞら",
+    "あかちゃん",
+    "あきる",
+    "あけがた",
+    "あける",
+    "あこがれる",
+    "あさい",
+    "あさひ",
+    "あしあと",
+    "あじわう",
+    "あずかる",
+    "あずき",
+    "あそぶ",
+    "あたえる",
+    "あたためる",
+    "あたりまえ",
+    "あたる",
+    "あつい",
+    "あつかう",
+    "あっしゅく",
+    "あつまり",
+    "あつめる",
+    "あてな",
+    "あてはまる",
+    "あひる",
+    "あぶら",
+    "あぶる",
+    "あふれる",
+    "あまい",
+    "あまど",
+    "あまやかす",
+    "あまり",
+    "あみもの",
+    "あめりか",
+    "あやまる",
+    "あゆむ",
+    "あらいぐま",
+    "あらし",
+    "あらすじ",
+    "あらためる",
+    "あらゆる",
+    "あらわす",
+    "ありがとう",
+    "あわせる",
+    "あわてる",
+    "あんい",
+    "あんがい",
+    "あんこ",
+    "あんぜん",
+    "あんてい",
+    "あんない",
+    "あんまり",
+    "いいだす",
+    "いおん",
+    "いがい",
+    "いがく",
+    "いきおい",
+    "いきなり",
+    "いきもの",
+    "いきる",
+    "いくじ",
+    "いくぶん",
+    "いけばな",
+    "いけん",
+    "いこう",
+    "いこく",
+    "いこつ",
+    "いさましい",
+    "いさん",
+    "いしき",
+    "いじゅう",
+    "いじょう",
+    "いじわる",
+    "いずみ",
+    "いずれ",
+    "いせい",
+    "いせえび",
+    "いせかい",
+    "いせき",
+    "いぜん",
+    "いそうろう",
+    "いそがしい",
+    "いだい",
+    "いだく",
+    "いたずら",
+    "いたみ",
+    "いたりあ",
+    "いちおう",
+    "いちじ",
+    "いちど",
+    "いちば",
+    "いちぶ",
+    "いちりゅう",
+    "いつか",
+    "いっしゅん",
+    "いっせい",
+    "いっそう",
+    "いったん",
+    "いっち",
+    "いってい",
+    "いっぽう",
+    "いてざ",
+    "いてん",
+    "いどう",
+    "いとこ",
+    "いない",
+    "いなか",
+    "いねむり",
+    "いのち",
+    "いのる",
+    "いはつ",
+    "いばる",
+    "いはん",
+    "いびき",
+    "いひん",
+    "いふく",
+    "いへん",
+    "いほう",
+    "いみん",
+    "いもうと",
+    "いもたれ",
+    "いもり",
+    "いやがる",
+    "いやす",
+    "いよかん",
+    "いよく",
+    "いらい",
+    "いらすと",
+    "いりぐち",
+    "いりょう",
+    "いれい",
+    "いれもの",
+    "いれる",
+    "いろえんぴつ",
+    "いわい",
+    "いわう",
+    "いわかん",
+    "いわば",
+    "いわゆる",
+    "いんげんまめ",
+    "いんさつ",
+    "いんしょう",
+    "いんよう",
+    "うえき",
+    "うえる",
+    "うおざ",
+    "うがい",
+    "うかぶ",
+    "うかべる",
+    "うきわ",
+    "うくらいな",
+    "うくれれ",
+    "うけたまわる",
+    "うけつけ",
+    "うけとる",
+    "うけもつ",
+    "うける",
+    "うごかす",
+    "うごく",
+    "うこん",
+    "うさぎ",
+    "うしなう",
+    "うしろがみ",
+    "うすい",
+    "うすぎ",
+    "うすぐらい",
+    "うすめる",
+    "うせつ",
+    "うちあわせ",
+    "うちがわ",
+    "うちき",
+    "うちゅう",
+    "うっかり",
+    "うつくしい",
+    "うったえる",
+    "うつる",
+    "うどん",
+    "うなぎ",
+    "うなじ",
+    "うなずく",
+    "うなる",
+    "うねる",
+    "うのう",
+    "うぶげ",
+    "うぶごえ",
+    "うまれる",
+    "うめる",
+    "うもう",
+    "うやまう",
+    "うよく",
+    "うらがえす",
+    "うらぐち",
+    "うらない",
+    "うりあげ",
+    "うりきれ",
+    "うるさい",
+    "うれしい",
+    "うれゆき",
+    "うれる",
+    "うろこ",
+    "うわき",
+    "うわさ",
+    "うんこう",
+    "うんちん",
+    "うんてん",
+    "うんどう",
+    "えいえん",
+    "えいが",
+    "えいきょう",
+    "えいご",
+    "えいせい",
+    "えいぶん",
+    "えいよう",
+    "えいわ",
+    "えおり",
+    "えがお",
+    "えがく",
+    "えきたい",
+    "えくせる",
+    "えしゃく",
+    "えすて",
+    "えつらん",
+    "えのぐ",
+    "えほうまき",
+    "えほん",
+    "えまき",
+    "えもじ",
+    "えもの",
+    "えらい",
+    "えらぶ",
+    "えりあ",
+    "えんえん",
+    "えんかい",
+    "えんぎ",
+    "えんげき",
+    "えんしゅう",
+    "えんぜつ",
+    "えんそく",
+    "えんちょう",
+    "えんとつ",
+    "おいかける",
+    "おいこす",
+    "おいしい",
+    "おいつく",
+    "おうえん",
+    "おうさま",
+    "おうじ",
+    "おうせつ",
+    "おうたい",
+    "おうふく",
+    "おうべい",
+    "おうよう",
+    "おえる",
+    "おおい",
+    "おおう",
+    "おおどおり",
+    "おおや",
+    "おおよそ",
+    "おかえり",
+    "おかず",
+    "おがむ",
+    "おかわり",
+    "おぎなう",
+    "おきる",
+    "おくさま",
+    "おくじょう",
+    "おくりがな",
+    "おくる",
+    "おくれる",
+    "おこす",
+    "おこなう",
+    "おこる",
+    "おさえる",
+    "おさない",
+    "おさめる",
+    "おしいれ",
+    "おしえる",
+    "おじぎ",
+    "おじさん",
+    "おしゃれ",
+    "おそらく",
+    "おそわる",
+    "おたがい",
+    "おたく",
+    "おだやか",
+    "おちつく",
+    "おっと",
+    "おつり",
+    "おでかけ",
+    "おとしもの",
+    "おとなしい",
+    "おどり",
+    "おどろかす",
+    "おばさん",
+    "おまいり",
+    "おめでとう",
+    "おもいで",
+    "おもう",
+    "おもたい",
+    "おもちゃ",
+    "おやつ",
+    "おやゆび",
+    "およぼす",
+    "おらんだ",
+    "おろす",
+    "おんがく",
+    "おんけい",
+    "おんしゃ",
+    "おんせん",
+    "おんだん",
+    "おんちゅう",
+    "おんどけい",
+    "かあつ",
+    "かいが",
+    "がいき",
+    "がいけん",
+    "がいこう",
+    "かいさつ",
+    "かいしゃ",
+    "かいすいよく",
+    "かいぜん",
+    "かいぞうど",
+    "かいつう",
+    "かいてん",
+    "かいとう",
+    "かいふく",
+    "がいへき",
+    "かいほう",
+    "かいよう",
+    "がいらい",
+    "かいわ",
+    "かえる",
+    "かおり",
+    "かかえる",
+    "かがく",
+    "かがし",
+    "かがみ",
+    "かくご",
+    "かくとく",
+    "かざる",
+    "がぞう",
+    "かたい",
+    "かたち",
+    "がちょう",
+    "がっきゅう",
+    "がっこう",
+    "がっさん",
+    "がっしょう",
+    "かなざわし",
+    "かのう",
+    "がはく",
+    "かぶか",
+    "かほう",
+    "かほご",
+    "かまう",
+    "かまぼこ",
+    "かめれおん",
+    "かゆい",
+    "かようび",
+    "からい",
+    "かるい",
+    "かろう",
+    "かわく",
+    "かわら",
+    "がんか",
+    "かんけい",
+    "かんこう",
+    "かんしゃ",
+    "かんそう",
+    "かんたん",
+    "かんち",
+    "がんばる",
+    "きあい",
+    "きあつ",
+    "きいろ",
+    "ぎいん",
+    "きうい",
+    "きうん",
+    "きえる",
+    "きおう",
+    "きおく",
+    "きおち",
+    "きおん",
+    "きかい",
+    "きかく",
+    "きかんしゃ",
+    "ききて",
+    "きくばり",
+    "きくらげ",
+    "きけんせい",
+    "きこう",
+    "きこえる",
+    "きこく",
+    "きさい",
+    "きさく",
+    "きさま",
+    "きさらぎ",
+    "ぎじかがく",
+    "ぎしき",
+    "ぎじたいけん",
+    "ぎじにってい",
+    "ぎじゅつしゃ",
+    "きすう",
+    "きせい",
+    "きせき",
+    "きせつ",
+    "きそう",
+    "きぞく",
+    "きぞん",
+    "きたえる",
+    "きちょう",
+    "きつえん",
+    "ぎっちり",
+    "きつつき",
+    "きつね",
+    "きてい",
+    "きどう",
+    "きどく",
+    "きない",
+    "きなが",
+    "きなこ",
+    "きぬごし",
+    "きねん",
+    "きのう",
+    "きのした",
+    "きはく",
+    "きびしい",
+    "きひん",
+    "きふく",
+    "きぶん",
+    "きぼう",
+    "きほん",
+    "きまる",
+    "きみつ",
+    "きむずかしい",
+    "きめる",
+    "きもだめし",
+    "きもち",
+    "きもの",
+    "きゃく",
+    "きやく",
+    "ぎゅうにく",
+    "きよう",
+    "きょうりゅう",
+    "きらい",
+    "きらく",
+    "きりん",
+    "きれい",
+    "きれつ",
+    "きろく",
+    "ぎろん",
+    "きわめる",
+    "ぎんいろ",
+    "きんかくじ",
+    "きんじょ",
+    "きんようび",
+    "ぐあい",
+    "くいず",
+    "くうかん",
+    "くうき",
+    "くうぐん",
+    "くうこう",
+    "ぐうせい",
+    "くうそう",
+    "ぐうたら",
+    "くうふく",
+    "くうぼ",
+    "くかん",
+    "くきょう",
+    "くげん",
+    "ぐこう",
+    "くさい",
+    "くさき",
+    "くさばな",
+    "くさる",
+    "くしゃみ",
+    "くしょう",
+    "くすのき",
+    "くすりゆび",
+    "くせげ",
+    "くせん",
+    "ぐたいてき",
+    "くださる",
+    "くたびれる",
+    "くちこみ",
+    "くちさき",
+    "くつした",
+    "ぐっすり",
+    "くつろぐ",
+    "くとうてん",
+    "くどく",
+    "くなん",
+    "くねくね",
+    "くのう",
+    "くふう",
+    "くみあわせ",
+    "くみたてる",
+    "くめる",
+    "くやくしょ",
+    "くらす",
+    "くらべる",
+    "くるま",
+    "くれる",
+    "くろう",
+    "くわしい",
+    "ぐんかん",
+    "ぐんしょく",
+    "ぐんたい",
+    "ぐんて",
+    "けあな",
+    "けいかく",
+    "けいけん",
+    "けいこ",
+    "けいさつ",
+    "げいじゅつ",
+    "けいたい",
+    "げいのうじん",
+    "けいれき",
+    "けいろ",
+    "けおとす",
+    "けおりもの",
+    "げきか",
+    "げきげん",
+    "げきだん",
+    "げきちん",
+    "げきとつ",
+    "げきは",
+    "げきやく",
+    "げこう",
+    "げこくじょう",
+    "げざい",
+    "けさき",
+    "げざん",
+    "けしき",
+    "けしごむ",
+    "けしょう",
+    "げすと",
+    "けたば",
+    "けちゃっぷ",
+    "けちらす",
+    "けつあつ",
+    "けつい",
+    "けつえき",
+    "けっこん",
+    "けつじょ",
+    "けっせき",
+    "けってい",
+    "けつまつ",
+    "げつようび",
+    "げつれい",
+    "けつろん",
+    "げどく",
+    "けとばす",
+    "けとる",
+    "けなげ",
+    "けなす",
+    "けなみ",
+    "けぬき",
+    "げねつ",
+    "けねん",
+    "けはい",
+    "げひん",
+    "けぶかい",
+    "げぼく",
+    "けまり",
+    "けみかる",
+    "けむし",
+    "けむり",
+    "けもの",
+    "けらい",
+    "けろけろ",
+    "けわしい",
+    "けんい",
+    "けんえつ",
+    "けんお",
+    "けんか",
+    "げんき",
+    "けんげん",
+    "けんこう",
+    "けんさく",
+    "けんしゅう",
+    "けんすう",
+    "げんそう",
+    "けんちく",
+    "けんてい",
+    "けんとう",
+    "けんない",
+    "けんにん",
+    "げんぶつ",
+    "けんま",
+    "けんみん",
+    "けんめい",
+    "けんらん",
+    "けんり",
+    "こあくま",
+    "こいぬ",
+    "こいびと",
+    "ごうい",
+    "こうえん",
+    "こうおん",
+    "こうかん",
+    "ごうきゅう",
+    "ごうけい",
+    "こうこう",
+    "こうさい",
+    "こうじ",
+    "こうすい",
+    "ごうせい",
+    "こうそく",
+    "こうたい",
+    "こうちゃ",
+    "こうつう",
+    "こうてい",
+    "こうどう",
+    "こうない",
+    "こうはい",
+    "ごうほう",
+    "ごうまん",
+    "こうもく",
+    "こうりつ",
+    "こえる",
+    "こおり",
+    "ごかい",
+    "ごがつ",
+    "ごかん",
+    "こくご",
+    "こくさい",
+    "こくとう",
+    "こくない",
+    "こくはく",
+    "こぐま",
+    "こけい",
+    "こける",
+    "ここのか",
+    "こころ",
+    "こさめ",
+    "こしつ",
+    "こすう",
+    "こせい",
+    "こせき",
+    "こぜん",
+    "こそだて",
+    "こたい",
+    "こたえる",
+    "こたつ",
+    "こちょう",
+    "こっか",
+    "こつこつ",
+    "こつばん",
+    "こつぶ",
+    "こてい",
+    "こてん",
+    "ことがら",
+    "ことし",
+    "ことば",
+    "ことり",
+    "こなごな",
+    "こねこね",
+    "このまま",
+    "このみ",
+    "このよ",
+    "ごはん",
+    "こひつじ",
+    "こふう",
+    "こふん",
+    "こぼれる",
+    "ごまあぶら",
+    "こまかい",
+    "ごますり",
+    "こまつな",
+    "こまる",
+    "こむぎこ",
+    "こもじ",
+    "こもち",
+    "こもの",
+    "こもん",
+    "こやく",
+    "こやま",
+    "こゆう",
+    "こゆび",
+    "こよい",
+    "こよう",
+    "こりる",
+    "これくしょん",
+    "ころっけ",
+    "こわもて",
+    "こわれる",
+    "こんいん",
+    "こんかい",
+    "こんき",
+    "こんしゅう",
+    "こんすい",
+    "こんだて",
+    "こんとん",
+    "こんなん",
+    "こんびに",
+    "こんぽん",
+    "こんまけ",
+    "こんや",
+    "こんれい",
+    "こんわく",
+    "ざいえき",
+    "さいかい",
+    "さいきん",
+    "ざいげん",
+    "ざいこ",
+    "さいしょ",
+    "さいせい",
+    "ざいたく",
+    "ざいちゅう",
+    "さいてき",
+    "ざいりょう",
+    "さうな",
+    "さかいし",
+    "さがす",
+    "さかな",
+    "さかみち",
+    "さがる",
+    "さぎょう",
+    "さくし",
+    "さくひん",
+    "さくら",
+    "さこく",
+    "さこつ",
+    "さずかる",
+    "ざせき",
+    "さたん",
+    "さつえい",
+    "ざつおん",
+    "ざっか",
+    "ざつがく",
+    "さっきょく",
+    "ざっし",
+    "さつじん",
+    "ざっそう",
+    "さつたば",
+    "さつまいも",
+    "さてい",
+    "さといも",
+    "さとう",
+    "さとおや",
+    "さとし",
+    "さとる",
+    "さのう",
+    "さばく",
+    "さびしい",
+    "さべつ",
+    "さほう",
+    "さほど",
+    "さます",
+    "さみしい",
+    "さみだれ",
+    "さむけ",
+    "さめる",
+    "さやえんどう",
+    "さゆう",
+    "さよう",
+    "さよく",
+    "さらだ",
+    "ざるそば",
+    "さわやか",
+    "さわる",
+    "さんいん",
+    "さんか",
+    "さんきゃく",
+    "さんこう",
+    "さんさい",
+    "ざんしょ",
+    "さんすう",
+    "さんせい",
+    "さんそ",
+    "さんち",
+    "さんま",
+    "さんみ",
+    "さんらん",
+    "しあい",
+    "しあげ",
+    "しあさって",
+    "しあわせ",
+    "しいく",
+    "しいん",
+    "しうち",
+    "しえい",
+    "しおけ",
+    "しかい",
+    "しかく",
+    "じかん",
+    "しごと",
+    "しすう",
+    "じだい",
+    "したうけ",
+    "したぎ",
+    "したて",
+    "したみ",
+    "しちょう",
+    "しちりん",
+    "しっかり",
+    "しつじ",
+    "しつもん",
+    "してい",
+    "してき",
+    "してつ",
+    "じてん",
+    "じどう",
+    "しなぎれ",
+    "しなもの",
+    "しなん",
+    "しねま",
+    "しねん",
+    "しのぐ",
+    "しのぶ",
+    "しはい",
+    "しばかり",
+    "しはつ",
+    "しはらい",
+    "しはん",
+    "しひょう",
+    "しふく",
+    "じぶん",
+    "しへい",
+    "しほう",
+    "しほん",
+    "しまう",
+    "しまる",
+    "しみん",
+    "しむける",
+    "じむしょ",
+    "しめい",
+    "しめる",
+    "しもん",
+    "しゃいん",
+    "しゃうん",
+    "しゃおん",
+    "じゃがいも",
+    "しやくしょ",
+    "しゃくほう",
+    "しゃけん",
+    "しゃこ",
+    "しゃざい",
+    "しゃしん",
+    "しゃせん",
+    "しゃそう",
+    "しゃたい",
+    "しゃちょう",
+    "しゃっきん",
+    "じゃま",
+    "しゃりん",
+    "しゃれい",
+    "じゆう",
+    "じゅうしょ",
+    "しゅくはく",
+    "じゅしん",
+    "しゅっせき",
+    "しゅみ",
+    "しゅらば",
+    "じゅんばん",
+    "しょうかい",
+    "しょくたく",
+    "しょっけん",
+    "しょどう",
+    "しょもつ",
+    "しらせる",
+    "しらべる",
+    "しんか",
+    "しんこう",
+    "じんじゃ",
+    "しんせいじ",
+    "しんちく",
+    "しんりん",
+    "すあげ",
+    "すあし",
+    "すあな",
+    "ずあん",
+    "すいえい",
+    "すいか",
+    "すいとう",
+    "ずいぶん",
+    "すいようび",
+    "すうがく",
+    "すうじつ",
+    "すうせん",
+    "すおどり",
+    "すきま",
+    "すくう",
+    "すくない",
+    "すける",
+    "すごい",
+    "すこし",
+    "ずさん",
+    "すずしい",
+    "すすむ",
+    "すすめる",
+    "すっかり",
+    "ずっしり",
+    "ずっと",
+    "すてき",
+    "すてる",
+    "すねる",
+    "すのこ",
+    "すはだ",
+    "すばらしい",
+    "ずひょう",
+    "ずぶぬれ",
+    "すぶり",
+    "すふれ",
+    "すべて",
+    "すべる",
+    "ずほう",
+    "すぼん",
+    "すまい",
+    "すめし",
+    "すもう",
+    "すやき",
+    "すらすら",
+    "するめ",
+    "すれちがう",
+    "すろっと",
+    "すわる",
+    "すんぜん",
+    "すんぽう",
+    "せあぶら",
+    "せいかつ",
+    "せいげん",
+    "せいじ",
+    "せいよう",
+    "せおう",
+    "せかいかん",
+    "せきにん",
+    "せきむ",
+    "せきゆ",
+    "せきらんうん",
+    "せけん",
+    "せこう",
+    "せすじ",
+    "せたい",
+    "せたけ",
+    "せっかく",
+    "せっきゃく",
+    "ぜっく",
+    "せっけん",
+    "せっこつ",
+    "せっさたくま",
+    "せつぞく",
+    "せつだん",
+    "せつでん",
+    "せっぱん",
+    "せつび",
+    "せつぶん",
+    "せつめい",
+    "せつりつ",
+    "せなか",
+    "せのび",
+    "せはば",
+    "せびろ",
+    "せぼね",
+    "せまい",
+    "せまる",
+    "せめる",
+    "せもたれ",
+    "せりふ",
+    "ぜんあく",
+    "せんい",
+    "せんえい",
+    "せんか",
+    "せんきょ",
+    "せんく",
+    "せんげん",
+    "ぜんご",
+    "せんさい",
+    "せんしゅ",
+    "せんすい",
+    "せんせい",
+    "せんぞ",
+    "せんたく",
+    "せんちょう",
+    "せんてい",
+    "せんとう",
+    "せんぬき",
+    "せんねん",
+    "せんぱい",
+    "ぜんぶ",
+    "ぜんぽう",
+    "せんむ",
+    "せんめんじょ",
+    "せんもん",
+    "せんやく",
+    "せんゆう",
+    "せんよう",
+    "ぜんら",
+    "ぜんりゃく",
+    "せんれい",
+    "せんろ",
+    "そあく",
+    "そいとげる",
+    "そいね",
+    "そうがんきょう",
+    "そうき",
+    "そうご",
+    "そうしん",
+    "そうだん",
+    "そうなん",
+    "そうび",
+    "そうめん",
+    "そうり",
+    "そえもの",
+    "そえん",
+    "そがい",
+    "そげき",
+    "そこう",
+    "そこそこ",
+    "そざい",
+    "そしな",
+    "そせい",
+    "そせん",
+    "そそぐ",
+    "そだてる",
+    "そつう",
+    "そつえん",
+    "そっかん",
+    "そつぎょう",
+    "そっけつ",
+    "そっこう",
+    "そっせん",
+    "そっと",
+    "そとがわ",
+    "そとづら",
+    "そなえる",
+    "そなた",
+    "そふぼ",
+    "そぼく",
+    "そぼろ",
+    "そまつ",
+    "そまる",
+    "そむく",
+    "そむりえ",
+    "そめる",
+    "そもそも",
+    "そよかぜ",
+    "そらまめ",
+    "そろう",
+    "そんかい",
+    "そんけい",
+    "そんざい",
+    "そんしつ",
+    "そんぞく",
+    "そんちょう",
+    "ぞんび",
+    "ぞんぶん",
+    "そんみん",
+    "たあい",
+    "たいいん",
+    "たいうん",
+    "たいえき",
+    "たいおう",
+    "だいがく",
+    "たいき",
+    "たいぐう",
+    "たいけん",
+    "たいこ",
+    "たいざい",
+    "だいじょうぶ",
+    "だいすき",
+    "たいせつ",
+    "たいそう",
+    "だいたい",
+    "たいちょう",
+    "たいてい",
+    "だいどころ",
+    "たいない",
+    "たいねつ",
+    "たいのう",
+    "たいはん",
+    "だいひょう",
+    "たいふう",
+    "たいへん",
+    "たいほ",
+    "たいまつばな",
+    "たいみんぐ",
+    "たいむ",
+    "たいめん",
+    "たいやき",
+    "たいよう",
+    "たいら",
+    "たいりょく",
+    "たいる",
+    "たいわん",
+    "たうえ",
+    "たえる",
+    "たおす",
+    "たおる",
+    "たおれる",
+    "たかい",
+    "たかね",
+    "たきび",
+    "たくさん",
+    "たこく",
+    "たこやき",
+    "たさい",
+    "たしざん",
+    "だじゃれ",
+    "たすける",
+    "たずさわる",
+    "たそがれ",
+    "たたかう",
+    "たたく",
+    "ただしい",
+    "たたみ",
+    "たちばな",
+    "だっかい",
+    "だっきゃく",
+    "だっこ",
+    "だっしゅつ",
+    "だったい",
+    "たてる",
+    "たとえる",
+    "たなばた",
+    "たにん",
+    "たぬき",
+    "たのしみ",
+    "たはつ",
+    "たぶん",
+    "たべる",
+    "たぼう",
+    "たまご",
+    "たまる",
+    "だむる",
+    "ためいき",
+    "ためす",
+    "ためる",
+    "たもつ",
+    "たやすい",
+    "たよる",
+    "たらす",
+    "たりきほんがん",
+    "たりょう",
+    "たりる",
+    "たると",
+    "たれる",
+    "たれんと",
+    "たろっと",
+    "たわむれる",
+    "だんあつ",
+    "たんい",
+    "たんおん",
+    "たんか",
+    "たんき",
+    "たんけん",
+    "たんご",
+    "たんさん",
+    "たんじょうび",
+    "だんせい",
+    "たんそく",
+    "たんたい",
+    "だんち",
+    "たんてい",
+    "たんとう",
+    "だんな",
+    "たんにん",
+    "だんねつ",
+    "たんのう",
+    "たんぴん",
+    "だんぼう",
+    "たんまつ",
+    "たんめい",
+    "だんれつ",
+    "だんろ",
+    "だんわ",
+    "ちあい",
+    "ちあん",
+    "ちいき",
+    "ちいさい",
+    "ちえん",
+    "ちかい",
+    "ちから",
+    "ちきゅう",
+    "ちきん",
+    "ちけいず",
+    "ちけん",
+    "ちこく",
+    "ちさい",
+    "ちしき",
+    "ちしりょう",
+    "ちせい",
+    "ちそう",
+    "ちたい",
+    "ちたん",
+    "ちちおや",
+    "ちつじょ",
+    "ちてき",
+    "ちてん",
+    "ちぬき",
+    "ちぬり",
+    "ちのう",
+    "ちひょう",
+    "ちへいせん",
+    "ちほう",
+    "ちまた",
+    "ちみつ",
+    "ちみどろ",
+    "ちめいど",
+    "ちゃんこなべ",
+    "ちゅうい",
+    "ちゆりょく",
+    "ちょうし",
+    "ちょさくけん",
+    "ちらし",
+    "ちらみ",
+    "ちりがみ",
+    "ちりょう",
+    "ちるど",
+    "ちわわ",
+    "ちんたい",
+    "ちんもく",
+    "ついか",
+    "ついたち",
+    "つうか",
+    "つうじょう",
+    "つうはん",
+    "つうわ",
+    "つかう",
+    "つかれる",
+    "つくね",
+    "つくる",
+    "つけね",
+    "つける",
+    "つごう",
+    "つたえる",
+    "つづく",
+    "つつじ",
+    "つつむ",
+    "つとめる",
+    "つながる",
+    "つなみ",
+    "つねづね",
+    "つのる",
+    "つぶす",
+    "つまらない",
+    "つまる",
+    "つみき",
+    "つめたい",
+    "つもり",
+    "つもる",
+    "つよい",
+    "つるぼ",
+    "つるみく",
+    "つわもの",
+    "つわり",
+    "てあし",
+    "てあて",
+    "てあみ",
+    "ていおん",
+    "ていか",
+    "ていき",
+    "ていけい",
+    "ていこく",
+    "ていさつ",
+    "ていし",
+    "ていせい",
+    "ていたい",
+    "ていど",
+    "ていねい",
+    "ていひょう",
+    "ていへん",
+    "ていぼう",
+    "てうち",
+    "ておくれ",
+    "てきとう",
+    "てくび",
+    "でこぼこ",
+    "てさぎょう",
+    "てさげ",
+    "てすり",
+    "てそう",
+    "てちがい",
+    "てちょう",
+    "てつがく",
+    "てつづき",
+    "でっぱ",
+    "てつぼう",
+    "てつや",
+    "でぬかえ",
+    "てぬき",
+    "てぬぐい",
+    "てのひら",
+    "てはい",
+    "てぶくろ",
+    "てふだ",
+    "てほどき",
+    "てほん",
+    "てまえ",
+    "てまきずし",
+    "てみじか",
+    "てみやげ",
+    "てらす",
+    "てれび",
+    "てわけ",
+    "てわたし",
+    "でんあつ",
+    "てんいん",
+    "てんかい",
+    "てんき",
+    "てんぐ",
+    "てんけん",
+    "てんごく",
+    "てんさい",
+    "てんし",
+    "てんすう",
+    "でんち",
+    "てんてき",
+    "てんとう",
+    "てんない",
+    "てんぷら",
+    "てんぼうだい",
+    "てんめつ",
+    "てんらんかい",
+    "でんりょく",
+    "でんわ",
+    "どあい",
+    "といれ",
+    "どうかん",
+    "とうきゅう",
+    "どうぐ",
+    "とうし",
+    "とうむぎ",
+    "とおい",
+    "とおか",
+    "とおく",
+    "とおす",
+    "とおる",
+    "とかい",
+    "とかす",
+    "ときおり",
+    "ときどき",
+    "とくい",
+    "とくしゅう",
+    "とくてん",
+    "とくに",
+    "とくべつ",
+    "とけい",
+    "とける",
+    "とこや",
+    "とさか",
+    "としょかん",
+    "とそう",
+    "とたん",
+    "とちゅう",
+    "とっきゅう",
+    "とっくん",
+    "とつぜん",
+    "とつにゅう",
+    "とどける",
+    "ととのえる",
+    "とない",
+    "となえる",
+    "となり",
+    "とのさま",
+    "とばす",
+    "どぶがわ",
+    "とほう",
+    "とまる",
+    "とめる",
+    "ともだち",
+    "ともる",
+    "どようび",
+    "とらえる",
+    "とんかつ",
+    "どんぶり",
+    "ないかく",
+    "ないこう",
+    "ないしょ",
+    "ないす",
+    "ないせん",
+    "ないそう",
+    "なおす",
+    "ながい",
+    "なくす",
+    "なげる",
+    "なこうど",
+    "なさけ",
+    "なたでここ",
+    "なっとう",
+    "なつやすみ",
+    "ななおし",
+    "なにごと",
+    "なにもの",
+    "なにわ",
+    "なのか",
+    "なふだ",
+    "なまいき",
+    "なまえ",
+    "なまみ",
+    "なみだ",
+    "なめらか",
+    "なめる",
+    "なやむ",
+    "ならう",
+    "ならび",
+    "ならぶ",
+    "なれる",
+    "なわとび",
+    "なわばり",
+    "にあう",
+    "にいがた",
+    "にうけ",
+    "におい",
+    "にかい",
+    "にがて",
+    "にきび",
+    "にくしみ",
+    "にくまん",
+    "にげる",
+    "にさんかたんそ",
+    "にしき",
+    "にせもの",
+    "にちじょう",
+    "にちようび",
+    "にっか",
+    "にっき",
+    "にっけい",
+    "にっこう",
+    "にっさん",
+    "にっしょく",
+    "にっすう",
+    "にっせき",
+    "にってい",
+    "になう",
+    "にほん",
+    "にまめ",
+    "にもつ",
+    "にやり",
+    "にゅういん",
+    "にりんしゃ",
+    "にわとり",
+    "にんい",
+    "にんか",
+    "にんき",
+    "にんげん",
+    "にんしき",
+    "にんずう",
+    "にんそう",
+    "にんたい",
+    "にんち",
+    "にんてい",
+    "にんにく",
+    "にんぷ",
+    "にんまり",
+    "にんむ",
+    "にんめい",
+    "にんよう",
+    "ぬいくぎ",
+    "ぬかす",
+    "ぬぐいとる",
+    "ぬぐう",
+    "ぬくもり",
+    "ぬすむ",
+    "ぬまえび",
+    "ぬめり",
+    "ぬらす",
+    "ぬんちゃく",
+    "ねあげ",
+    "ねいき",
+    "ねいる",
+    "ねいろ",
+    "ねぐせ",
+    "ねくたい",
+    "ねくら",
+    "ねこぜ",
+    "ねこむ",
+    "ねさげ",
+    "ねすごす",
+    "ねそべる",
+    "ねだん",
+    "ねつい",
+    "ねっしん",
+    "ねつぞう",
+    "ねったいぎょ",
+    "ねぶそく",
+    "ねふだ",
+    "ねぼう",
+    "ねほりはほり",
+    "ねまき",
+    "ねまわし",
+    "ねみみ",
+    "ねむい",
+    "ねむたい",
+    "ねもと",
+    "ねらう",
+    "ねわざ",
+    "ねんいり",
+    "ねんおし",
+    "ねんかん",
+    "ねんきん",
+    "ねんぐ",
+    "ねんざ",
+    "ねんし",
+    "ねんちゃく",
+    "ねんど",
+    "ねんぴ",
+    "ねんぶつ",
+    "ねんまつ",
+    "ねんりょう",
+    "ねんれい",
+    "のいず",
+    "のおづま",
+    "のがす",
+    "のきなみ",
+    "のこぎり",
+    "のこす",
+    "のこる",
+    "のせる",
+    "のぞく",
+    "のぞむ",
+    "のたまう",
+    "のちほど",
+    "のっく",
+    "のばす",
+    "のはら",
+    "のべる",
+    "のぼる",
+    "のみもの",
+    "のやま",
+    "のらいぬ",
+    "のらねこ",
+    "のりもの",
+    "のりゆき",
+    "のれん",
+    "のんき",
+    "ばあい",
+    "はあく",
+    "ばあさん",
+    "ばいか",
+    "ばいく",
+    "はいけん",
+    "はいご",
+    "はいしん",
+    "はいすい",
+    "はいせん",
+    "はいそう",
+    "はいち",
+    "ばいばい",
+    "はいれつ",
+    "はえる",
+    "はおる",
+    "はかい",
+    "ばかり",
+    "はかる",
+    "はくしゅ",
+    "はけん",
+    "はこぶ",
+    "はさみ",
+    "はさん",
+    "はしご",
+    "ばしょ",
+    "はしる",
+    "はせる",
+    "ぱそこん",
+    "はそん",
+    "はたん",
+    "はちみつ",
+    "はつおん",
+    "はっかく",
+    "はづき",
+    "はっきり",
+    "はっくつ",
+    "はっけん",
+    "はっこう",
+    "はっさん",
+    "はっしん",
+    "はったつ",
+    "はっちゅう",
+    "はってん",
+    "はっぴょう",
+    "はっぽう",
+    "はなす",
+    "はなび",
+    "はにかむ",
+    "はぶらし",
+    "はみがき",
+    "はむかう",
+    "はめつ",
+    "はやい",
+    "はやし",
+    "はらう",
+    "はろうぃん",
+    "はわい",
+    "はんい",
+    "はんえい",
+    "はんおん",
+    "はんかく",
+    "はんきょう",
+    "ばんぐみ",
+    "はんこ",
+    "はんしゃ",
+    "はんすう",
+    "はんだん",
+    "ぱんち",
+    "ぱんつ",
+    "はんてい",
+    "はんとし",
+    "はんのう",
+    "はんぱ",
+    "はんぶん",
+    "はんぺん",
+    "はんぼうき",
+    "はんめい",
+    "はんらん",
+    "はんろん",
+    "ひいき",
+    "ひうん",
+    "ひえる",
+    "ひかく",
+    "ひかり",
+    "ひかる",
+    "ひかん",
+    "ひくい",
+    "ひけつ",
+    "ひこうき",
+    "ひこく",
+    "ひさい",
+    "ひさしぶり",
+    "ひさん",
+    "びじゅつかん",
+    "ひしょ",
+    "ひそか",
+    "ひそむ",
+    "ひたむき",
+    "ひだり",
+    "ひたる",
+    "ひつぎ",
+    "ひっこし",
+    "ひっし",
+    "ひつじゅひん",
+    "ひっす",
+    "ひつぜん",
+    "ぴったり",
+    "ぴっちり",
+    "ひつよう",
+    "ひてい",
+    "ひとごみ",
+    "ひなまつり",
+    "ひなん",
+    "ひねる",
+    "ひはん",
+    "ひびく",
+    "ひひょう",
+    "ひほう",
+    "ひまわり",
+    "ひまん",
+    "ひみつ",
+    "ひめい",
+    "ひめじし",
+    "ひやけ",
+    "ひやす",
+    "ひよう",
+    "びょうき",
+    "ひらがな",
+    "ひらく",
+    "ひりつ",
+    "ひりょう",
+    "ひるま",
+    "ひるやすみ",
+    "ひれい",
+    "ひろい",
+    "ひろう",
+    "ひろき",
+    "ひろゆき",
+    "ひんかく",
+    "ひんけつ",
+    "ひんこん",
+    "ひんしゅ",
+    "ひんそう",
+    "ぴんち",
+    "ひんぱん",
+    "びんぼう",
+    "ふあん",
+    "ふいうち",
+    "ふうけい",
+    "ふうせん",
+    "ぷうたろう",
+    "ふうとう",
+    "ふうふ",
+    "ふえる",
+    "ふおん",
+    "ふかい",
+    "ふきん",
+    "ふくざつ",
+    "ふくぶくろ",
+    "ふこう",
+    "ふさい",
+    "ふしぎ",
+    "ふじみ",
+    "ふすま",
+    "ふせい",
+    "ふせぐ",
+    "ふそく",
+    "ぶたにく",
+    "ふたん",
+    "ふちょう",
+    "ふつう",
+    "ふつか",
+    "ふっかつ",
+    "ふっき",
+    "ふっこく",
+    "ぶどう",
+    "ふとる",
+    "ふとん",
+    "ふのう",
+    "ふはい",
+    "ふひょう",
+    "ふへん",
+    "ふまん",
+    "ふみん",
+    "ふめつ",
+    "ふめん",
+    "ふよう",
+    "ふりこ",
+    "ふりる",
+    "ふるい",
+    "ふんいき",
+    "ぶんがく",
+    "ぶんぐ",
+    "ふんしつ",
+    "ぶんせき",
+    "ふんそう",
+    "ぶんぽう",
+    "へいあん",
+    "へいおん",
+    "へいがい",
+    "へいき",
+    "へいげん",
+    "へいこう",
+    "へいさ",
+    "へいしゃ",
+    "へいせつ",
+    "へいそ",
+    "へいたく",
+    "へいてん",
+    "へいねつ",
+    "へいわ",
+    "へきが",
+    "へこむ",
+    "べにいろ",
+    "べにしょうが",
+    "へらす",
+    "へんかん",
+    "べんきょう",
+    "べんごし",
+    "へんさい",
+    "へんたい",
+    "べんり",
+    "ほあん",
+    "ほいく",
+    "ぼうぎょ",
+    "ほうこく",
+    "ほうそう",
+    "ほうほう",
+    "ほうもん",
+    "ほうりつ",
+    "ほえる",
+    "ほおん",
+    "ほかん",
+    "ほきょう",
+    "ぼきん",
+    "ほくろ",
+    "ほけつ",
+    "ほけん",
+    "ほこう",
+    "ほこる",
+    "ほしい",
+    "ほしつ",
+    "ほしゅ",
+    "ほしょう",
+    "ほせい",
+    "ほそい",
+    "ほそく",
+    "ほたて",
+    "ほたる",
+    "ぽちぶくろ",
+    "ほっきょく",
+    "ほっさ",
+    "ほったん",
+    "ほとんど",
+    "ほめる",
+    "ほんい",
+    "ほんき",
+    "ほんけ",
+    "ほんしつ",
+    "ほんやく",
+    "まいにち",
+    "まかい",
+    "まかせる",
+    "まがる",
+    "まける",
+    "まこと",
+    "まさつ",
+    "まじめ",
+    "ますく",
+    "まぜる",
+    "まつり",
+    "まとめ",
+    "まなぶ",
+    "まぬけ",
+    "まねく",
+    "まほう",
+    "まもる",
+    "まゆげ",
+    "まよう",
+    "まろやか",
+    "まわす",
+    "まわり",
+    "まわる",
+    "まんが",
+    "まんきつ",
+    "まんぞく",
+    "まんなか",
+    "みいら",
+    "みうち",
+    "みえる",
+    "みがく",
+    "みかた",
+    "みかん",
+    "みけん",
+    "みこん",
+    "みじかい",
+    "みすい",
+    "みすえる",
+    "みせる",
+    "みっか",
+    "みつかる",
+    "みつける",
+    "みてい",
+    "みとめる",
+    "みなと",
+    "みなみかさい",
+    "みねらる",
+    "みのう",
+    "みのがす",
+    "みほん",
+    "みもと",
+    "みやげ",
+    "みらい",
+    "みりょく",
+    "みわく",
+    "みんか",
+    "みんぞく",
+    "むいか",
+    "むえき",
+    "むえん",
+    "むかい",
+    "むかう",
+    "むかえ",
+    "むかし",
+    "むぎちゃ",
+    "むける",
+    "むげん",
+    "むさぼる",
+    "むしあつい",
+    "むしば",
+    "むじゅん",
+    "むしろ",
+    "むすう",
+    "むすこ",
+    "むすぶ",
+    "むすめ",
+    "むせる",
+    "むせん",
+    "むちゅう",
+    "むなしい",
+    "むのう",
+    "むやみ",
+    "むよう",
+    "むらさき",
+    "むりょう",
+    "むろん",
+    "めいあん",
+    "めいうん",
+    "めいえん",
+    "めいかく",
+    "めいきょく",
+    "めいさい",
+    "めいし",
+    "めいそう",
+    "めいぶつ",
+    "めいれい",
+    "めいわく",
+    "めぐまれる",
+    "めざす",
+    "めした",
+    "めずらしい",
+    "めだつ",
+    "めまい",
+    "めやす",
+    "めんきょ",
+    "めんせき",
+    "めんどう",
+    "もうしあげる",
+    "もうどうけん",
+    "もえる",
+    "もくし",
+    "もくてき",
+    "もくようび",
+    "もちろん",
+    "もどる",
+    "もらう",
+    "もんく",
+    "もんだい",
+    "やおや",
+    "やける",
+    "やさい",
+    "やさしい",
+    "やすい",
+    "やすたろう",
+    "やすみ",
+    "やせる",
+    "やそう",
+    "やたい",
+    "やちん",
+    "やっと",
+    "やっぱり",
+    "やぶる",
+    "やめる",
+    "ややこしい",
+    "やよい",
+    "やわらかい",
+    "ゆうき",
+    "ゆうびんきょく",
+    "ゆうべ",
+    "ゆうめい",
+    "ゆけつ",
+    "ゆしゅつ",
+    "ゆせん",
+    "ゆそう",
+    "ゆたか",
+    "ゆちゃく",
+    "ゆでる",
+    "ゆにゅう",
+    "ゆびわ",
+    "ゆらい",
+    "ゆれる",
+    "ようい",
+    "ようか",
+    "ようきゅう",
+    "ようじ",
+    "ようす",
+    "ようちえん",
+    "よかぜ",
+    "よかん",
+    "よきん",
+    "よくせい",
+    "よくぼう",
+    "よけい",
+    "よごれる",
+    "よさん",
+    "よしゅう",
+    "よそう",
+    "よそく",
+    "よっか",
+    "よてい",
+    "よどがわく",
+    "よねつ",
+    "よやく",
+    "よゆう",
+    "よろこぶ",
+    "よろしい",
+    "らいう",
+    "らくがき",
+    "らくご",
+    "らくさつ",
+    "らくだ",
+    "らしんばん",
+    "らせん",
+    "らぞく",
+    "らたい",
+    "らっか",
+    "られつ",
+    "りえき",
+    "りかい",
+    "りきさく",
+    "りきせつ",
+    "りくぐん",
+    "りくつ",
+    "りけん",
+    "りこう",
+    "りせい",
+    "りそう",
+    "りそく",
+    "りてん",
+    "りねん",
+    "りゆう",
+    "りゅうがく",
+    "りよう",
+    "りょうり",
+    "りょかん",
+    "りょくちゃ",
+    "りょこう",
+    "りりく",
+    "りれき",
+    "りろん",
+    "りんご",
+    "るいけい",
+    "るいさい",
+    "るいじ",
+    "るいせき",
+    "るすばん",
+    "るりがわら",
+    "れいかん",
+    "れいぎ",
+    "れいせい",
+    "れいぞうこ",
+    "れいとう",
+    "れいぼう",
+    "れきし",
+    "れきだい",
+    "れんあい",
+    "れんけい",
+    "れんこん",
+    "れんさい",
+    "れんしゅう",
+    "れんぞく",
+    "れんらく",
+    "ろうか",
+    "ろうご",
+    "ろうじん",
+    "ろうそく",
+    "ろくが",
+    "ろこつ",
+    "ろじうら",
+    "ろしゅつ",
+    "ろせん",
+    "ろてん",
+    "ろめん",
+    "ろれつ",
+    "ろんぎ",
+    "ろんぱ",
+    "ろんぶん",
+    "ろんり",
+    "わかす",
+    "わかめ",
+    "わかやま",
+    "わかれる",
+    "わしつ",
+    "わじまし",
+    "わすれもの",
+    "わらう",
+    "われる"
+]
+
+},{}],42:[function(require,module,exports){
 // Reference https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki
 // Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
 // NOTE: SIGHASH byte ignored AND restricted, truncate before use
@@ -6796,7 +10900,7 @@ module.exports = {
   encode: encode
 }
 
-},{"safe-buffer":144}],41:[function(require,module,exports){
+},{"safe-buffer":146}],43:[function(require,module,exports){
 module.exports={
   "OP_FALSE": 0,
   "OP_0": 0,
@@ -6931,7 +11035,7 @@ module.exports={
   "OP_INVALIDOPCODE": 255
 }
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var OPS = require('./index.json')
 
 var map = {}
@@ -6942,7 +11046,7 @@ for (var op in OPS) {
 
 module.exports = map
 
-},{"./index.json":41}],43:[function(require,module,exports){
+},{"./index.json":43}],45:[function(require,module,exports){
 let createHash = require('create-hash')
 let createHmac = require('create-hmac')
 
@@ -6961,7 +11065,7 @@ function hmacSHA512 (key, data) {
 
 module.exports = { hash160, hmacSHA512 }
 
-},{"create-hash":95,"create-hmac":97}],44:[function(require,module,exports){
+},{"create-hash":97,"create-hmac":99}],46:[function(require,module,exports){
 let Buffer = require('safe-buffer').Buffer
 let bs58check = require('bs58check')
 let crypto = require('./crypto')
@@ -7264,7 +11368,7 @@ module.exports = {
   fromSeed
 }
 
-},{"./crypto":43,"bs58check":93,"safe-buffer":144,"tiny-secp256k1":153,"typeforce":157,"wif":160}],45:[function(require,module,exports){
+},{"./crypto":45,"bs58check":95,"safe-buffer":146,"tiny-secp256k1":155,"typeforce":159,"wif":162}],47:[function(require,module,exports){
 const Buffer = require('safe-buffer').Buffer
 const bech32 = require('bech32')
 const bs58check = require('bs58check')
@@ -7363,7 +11467,7 @@ module.exports = {
   toOutputScript: toOutputScript
 }
 
-},{"./networks":52,"./payments":54,"./script":62,"./types":88,"bech32":34,"bs58check":93,"safe-buffer":144,"typeforce":157}],46:[function(require,module,exports){
+},{"./networks":54,"./payments":56,"./script":64,"./types":90,"bech32":34,"bs58check":95,"safe-buffer":146,"typeforce":159}],48:[function(require,module,exports){
 const Buffer = require('safe-buffer').Buffer
 const bcrypto = require('./crypto')
 const fastMerkleRoot = require('merkle-lib/fastRoot')
@@ -7542,7 +11646,7 @@ Block.prototype.checkProofOfWork = function () {
 
 module.exports = Block
 
-},{"./crypto":49,"./transaction":86,"./types":88,"merkle-lib/fastRoot":133,"safe-buffer":144,"typeforce":157,"varuint-bitcoin":159}],47:[function(require,module,exports){
+},{"./crypto":51,"./transaction":88,"./types":90,"merkle-lib/fastRoot":135,"safe-buffer":146,"typeforce":159,"varuint-bitcoin":161}],49:[function(require,module,exports){
 // https://github.com/feross/buffer/blob/master/index.js#L1127
 function verifuint (value, max) {
   if (typeof value !== 'number') throw new Error('cannot write a non-number as a number')
@@ -7573,7 +11677,7 @@ module.exports = {
   writeUInt64LE: writeUInt64LE
 }
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 const decompile = require('./script').decompile
 const multisig = require('./templates/multisig')
 const nullData = require('./templates/nulldata')
@@ -7645,7 +11749,7 @@ module.exports = {
   types: types
 }
 
-},{"./script":62,"./templates/multisig":65,"./templates/nulldata":68,"./templates/pubkey":69,"./templates/pubkeyhash":72,"./templates/scripthash":75,"./templates/witnesscommitment":78,"./templates/witnesspubkeyhash":80,"./templates/witnessscripthash":83}],49:[function(require,module,exports){
+},{"./script":64,"./templates/multisig":67,"./templates/nulldata":70,"./templates/pubkey":71,"./templates/pubkeyhash":74,"./templates/scripthash":77,"./templates/witnesscommitment":80,"./templates/witnesspubkeyhash":82,"./templates/witnessscripthash":85}],51:[function(require,module,exports){
 const createHash = require('create-hash')
 
 function ripemd160 (buffer) {
@@ -7676,7 +11780,7 @@ module.exports = {
   sha256: sha256
 }
 
-},{"create-hash":95}],50:[function(require,module,exports){
+},{"create-hash":97}],52:[function(require,module,exports){
 const ecc = require('tiny-secp256k1')
 const randomBytes = require('randombytes')
 const typeforce = require('typeforce')
@@ -7784,7 +11888,7 @@ module.exports = {
   fromWIF
 }
 
-},{"./networks":52,"./types":88,"randombytes":142,"tiny-secp256k1":153,"typeforce":157,"wif":160}],51:[function(require,module,exports){
+},{"./networks":54,"./types":90,"randombytes":144,"tiny-secp256k1":155,"typeforce":159,"wif":162}],53:[function(require,module,exports){
 const script = require('./script')
 
 module.exports = {
@@ -7802,7 +11906,7 @@ module.exports = {
   script: script
 }
 
-},{"./address":45,"./block":46,"./crypto":49,"./ecpair":50,"./networks":52,"./payments":54,"./script":62,"./transaction":86,"./transaction_builder":87,"bip32":44,"bitcoin-ops":41}],52:[function(require,module,exports){
+},{"./address":47,"./block":48,"./crypto":51,"./ecpair":52,"./networks":54,"./payments":56,"./script":64,"./transaction":88,"./transaction_builder":89,"bip32":46,"bitcoin-ops":43}],54:[function(require,module,exports){
 // https://en.bitcoin.it/wiki/List_of_address_prefixes
 // Dogecoin BIP32 is a proposed standard: https://bitcointalk.org/index.php?topic=409731
 
@@ -7853,7 +11957,7 @@ module.exports = {
   }
 }
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 const lazy = require('./lazy')
 const typef = require('typeforce')
 const OPS = require('bitcoin-ops')
@@ -7911,7 +12015,7 @@ function p2data (a, opts) {
 
 module.exports = p2data
 
-},{"../networks":52,"../script":62,"./lazy":55,"bitcoin-ops":41,"typeforce":157}],54:[function(require,module,exports){
+},{"../networks":54,"../script":64,"./lazy":57,"bitcoin-ops":43,"typeforce":159}],56:[function(require,module,exports){
 const embed = require('./embed')
 const p2ms = require('./p2ms')
 const p2pk = require('./p2pk')
@@ -7925,7 +12029,7 @@ module.exports = { embed, p2ms, p2pk, p2pkh, p2sh, p2wpkh, p2wsh }
 // TODO
 // witness commitment
 
-},{"./embed":53,"./p2ms":56,"./p2pk":57,"./p2pkh":58,"./p2sh":59,"./p2wpkh":60,"./p2wsh":61}],55:[function(require,module,exports){
+},{"./embed":55,"./p2ms":58,"./p2pk":59,"./p2pkh":60,"./p2sh":61,"./p2wpkh":62,"./p2wsh":63}],57:[function(require,module,exports){
 function prop (object, name, f) {
   Object.defineProperty(object, name, {
     configurable: true,
@@ -7957,7 +12061,7 @@ function value (f) {
 
 module.exports = { prop, value }
 
-},{}],56:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 const lazy = require('./lazy')
 const typef = require('typeforce')
 const OPS = require('bitcoin-ops')
@@ -8099,7 +12203,7 @@ function p2ms (a, opts) {
 
 module.exports = p2ms
 
-},{"../networks":52,"../script":62,"./lazy":55,"bitcoin-ops":41,"tiny-secp256k1":153,"typeforce":157}],57:[function(require,module,exports){
+},{"../networks":54,"../script":64,"./lazy":57,"bitcoin-ops":43,"tiny-secp256k1":155,"typeforce":159}],59:[function(require,module,exports){
 const lazy = require('./lazy')
 const typef = require('typeforce')
 const OPS = require('bitcoin-ops')
@@ -8181,7 +12285,7 @@ function p2pk (a, opts) {
 
 module.exports = p2pk
 
-},{"../networks":52,"../script":62,"./lazy":55,"bitcoin-ops":41,"tiny-secp256k1":153,"typeforce":157}],58:[function(require,module,exports){
+},{"../networks":54,"../script":64,"./lazy":57,"bitcoin-ops":43,"tiny-secp256k1":155,"typeforce":159}],60:[function(require,module,exports){
 (function (Buffer){
 const lazy = require('./lazy')
 const typef = require('typeforce')
@@ -8322,7 +12426,7 @@ function p2pkh (a, opts) {
 module.exports = p2pkh
 
 }).call(this,require("buffer").Buffer)
-},{"../crypto":49,"../networks":52,"../script":62,"./lazy":55,"bitcoin-ops":41,"bs58check":93,"buffer":3,"tiny-secp256k1":153,"typeforce":157}],59:[function(require,module,exports){
+},{"../crypto":51,"../networks":54,"../script":64,"./lazy":57,"bitcoin-ops":43,"bs58check":95,"buffer":3,"tiny-secp256k1":155,"typeforce":159}],61:[function(require,module,exports){
 (function (Buffer){
 const lazy = require('./lazy')
 const typef = require('typeforce')
@@ -8519,7 +12623,7 @@ function p2sh (a, opts) {
 module.exports = p2sh
 
 }).call(this,require("buffer").Buffer)
-},{"../crypto":49,"../networks":52,"../script":62,"./lazy":55,"bitcoin-ops":41,"bs58check":93,"buffer":3,"typeforce":157}],60:[function(require,module,exports){
+},{"../crypto":51,"../networks":54,"../script":64,"./lazy":57,"bitcoin-ops":43,"bs58check":95,"buffer":3,"typeforce":159}],62:[function(require,module,exports){
 (function (Buffer){
 const lazy = require('./lazy')
 const typef = require('typeforce')
@@ -8658,7 +12762,7 @@ function p2wpkh (a, opts) {
 module.exports = p2wpkh
 
 }).call(this,require("buffer").Buffer)
-},{"../crypto":49,"../networks":52,"../script":62,"./lazy":55,"bech32":34,"bitcoin-ops":41,"buffer":3,"tiny-secp256k1":153,"typeforce":157}],61:[function(require,module,exports){
+},{"../crypto":51,"../networks":54,"../script":64,"./lazy":57,"bech32":34,"bitcoin-ops":43,"buffer":3,"tiny-secp256k1":155,"typeforce":159}],63:[function(require,module,exports){
 (function (Buffer){
 const lazy = require('./lazy')
 const typef = require('typeforce')
@@ -8842,7 +12946,7 @@ function p2wsh (a, opts) {
 module.exports = p2wsh
 
 }).call(this,require("buffer").Buffer)
-},{"../crypto":49,"../networks":52,"../script":62,"./lazy":55,"bech32":34,"bitcoin-ops":41,"buffer":3,"typeforce":157}],62:[function(require,module,exports){
+},{"../crypto":51,"../networks":54,"../script":64,"./lazy":57,"bech32":34,"bitcoin-ops":43,"buffer":3,"typeforce":159}],64:[function(require,module,exports){
 const Buffer = require('safe-buffer').Buffer
 const bip66 = require('bip66')
 const ecc = require('tiny-secp256k1')
@@ -9049,7 +13153,7 @@ module.exports = {
   isDefinedHashType: isDefinedHashType
 }
 
-},{"./script_number":63,"./script_signature":64,"./types":88,"bip66":40,"bitcoin-ops":41,"bitcoin-ops/map":42,"pushdata-bitcoin":141,"safe-buffer":144,"tiny-secp256k1":153,"typeforce":157}],63:[function(require,module,exports){
+},{"./script_number":65,"./script_signature":66,"./types":90,"bip66":42,"bitcoin-ops":43,"bitcoin-ops/map":44,"pushdata-bitcoin":143,"safe-buffer":146,"tiny-secp256k1":155,"typeforce":159}],65:[function(require,module,exports){
 const Buffer = require('safe-buffer').Buffer
 
 function decode (buffer, maxLength, minimal) {
@@ -9118,7 +13222,7 @@ module.exports = {
   encode: encode
 }
 
-},{"safe-buffer":144}],64:[function(require,module,exports){
+},{"safe-buffer":146}],66:[function(require,module,exports){
 const bip66 = require('bip66')
 const Buffer = require('safe-buffer').Buffer
 const typeforce = require('typeforce')
@@ -9184,13 +13288,13 @@ module.exports = {
   encode: encode
 }
 
-},{"./types":88,"bip66":40,"safe-buffer":144,"typeforce":157}],65:[function(require,module,exports){
+},{"./types":90,"bip66":42,"safe-buffer":146,"typeforce":159}],67:[function(require,module,exports){
 module.exports = {
   input: require('./input'),
   output: require('./output')
 }
 
-},{"./input":66,"./output":67}],66:[function(require,module,exports){
+},{"./input":68,"./output":69}],68:[function(require,module,exports){
 // OP_0 [signatures ...]
 
 const bscript = require('../../script')
@@ -9215,7 +13319,7 @@ check.toJSON = function () { return 'multisig input' }
 
 module.exports = { check }
 
-},{"../../script":62,"bitcoin-ops":41}],67:[function(require,module,exports){
+},{"../../script":64,"bitcoin-ops":43}],69:[function(require,module,exports){
 // m [pubKeys ...] n OP_CHECKMULTISIG
 
 const bscript = require('../../script')
@@ -9246,7 +13350,7 @@ check.toJSON = function () { return 'multi-sig output' }
 
 module.exports = { check }
 
-},{"../../script":62,"../../types":88,"bitcoin-ops":41}],68:[function(require,module,exports){
+},{"../../script":64,"../../types":90,"bitcoin-ops":43}],70:[function(require,module,exports){
 // OP_RETURN {data}
 
 const bscript = require('../script')
@@ -9262,9 +13366,9 @@ check.toJSON = function () { return 'null data output' }
 
 module.exports = { output: { check: check } }
 
-},{"../script":62,"bitcoin-ops":41}],69:[function(require,module,exports){
-arguments[4][65][0].apply(exports,arguments)
-},{"./input":70,"./output":71,"dup":65}],70:[function(require,module,exports){
+},{"../script":64,"bitcoin-ops":43}],71:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./input":72,"./output":73,"dup":67}],72:[function(require,module,exports){
 // {signature}
 
 const bscript = require('../../script')
@@ -9281,7 +13385,7 @@ module.exports = {
   check: check
 }
 
-},{"../../script":62}],71:[function(require,module,exports){
+},{"../../script":64}],73:[function(require,module,exports){
 // {pubKey} OP_CHECKSIG
 
 const bscript = require('../../script')
@@ -9298,9 +13402,9 @@ check.toJSON = function () { return 'pubKey output' }
 
 module.exports = { check }
 
-},{"../../script":62,"bitcoin-ops":41}],72:[function(require,module,exports){
-arguments[4][65][0].apply(exports,arguments)
-},{"./input":73,"./output":74,"dup":65}],73:[function(require,module,exports){
+},{"../../script":64,"bitcoin-ops":43}],74:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./input":75,"./output":76,"dup":67}],75:[function(require,module,exports){
 // {signature} {pubKey}
 
 const bscript = require('../../script')
@@ -9316,7 +13420,7 @@ check.toJSON = function () { return 'pubKeyHash input' }
 
 module.exports = { check }
 
-},{"../../script":62}],74:[function(require,module,exports){
+},{"../../script":64}],76:[function(require,module,exports){
 // OP_DUP OP_HASH160 {pubKeyHash} OP_EQUALVERIFY OP_CHECKSIG
 
 const bscript = require('../../script')
@@ -9336,9 +13440,9 @@ check.toJSON = function () { return 'pubKeyHash output' }
 
 module.exports = { check }
 
-},{"../../script":62,"bitcoin-ops":41}],75:[function(require,module,exports){
-arguments[4][65][0].apply(exports,arguments)
-},{"./input":76,"./output":77,"dup":65}],76:[function(require,module,exports){
+},{"../../script":64,"bitcoin-ops":43}],77:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./input":78,"./output":79,"dup":67}],78:[function(require,module,exports){
 // <scriptSig> {serialized scriptPubKey script}
 
 const Buffer = require('safe-buffer').Buffer
@@ -9388,7 +13492,7 @@ check.toJSON = function () { return 'scriptHash input' }
 
 module.exports = { check }
 
-},{"../../script":62,"../multisig/":65,"../pubkey/":69,"../pubkeyhash/":72,"../witnesspubkeyhash/output":82,"../witnessscripthash/output":85,"safe-buffer":144}],77:[function(require,module,exports){
+},{"../../script":64,"../multisig/":67,"../pubkey/":71,"../pubkeyhash/":74,"../witnesspubkeyhash/output":84,"../witnessscripthash/output":87,"safe-buffer":146}],79:[function(require,module,exports){
 // OP_HASH160 {scriptHash} OP_EQUAL
 
 const bscript = require('../../script')
@@ -9406,12 +13510,12 @@ check.toJSON = function () { return 'scriptHash output' }
 
 module.exports = { check }
 
-},{"../../script":62,"bitcoin-ops":41}],78:[function(require,module,exports){
+},{"../../script":64,"bitcoin-ops":43}],80:[function(require,module,exports){
 module.exports = {
   output: require('./output')
 }
 
-},{"./output":79}],79:[function(require,module,exports){
+},{"./output":81}],81:[function(require,module,exports){
 // OP_RETURN {aa21a9ed} {commitment}
 
 const Buffer = require('safe-buffer').Buffer
@@ -9455,9 +13559,9 @@ module.exports = {
   encode: encode
 }
 
-},{"../../script":62,"../../types":88,"bitcoin-ops":41,"safe-buffer":144,"typeforce":157}],80:[function(require,module,exports){
-arguments[4][65][0].apply(exports,arguments)
-},{"./input":81,"./output":82,"dup":65}],81:[function(require,module,exports){
+},{"../../script":64,"../../types":90,"bitcoin-ops":43,"safe-buffer":146,"typeforce":159}],82:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./input":83,"./output":84,"dup":67}],83:[function(require,module,exports){
 // {signature} {pubKey}
 
 const bscript = require('../../script')
@@ -9477,7 +13581,7 @@ check.toJSON = function () { return 'witnessPubKeyHash input' }
 
 module.exports = { check }
 
-},{"../../script":62}],82:[function(require,module,exports){
+},{"../../script":64}],84:[function(require,module,exports){
 // OP_0 {pubKeyHash}
 
 const bscript = require('../../script')
@@ -9496,9 +13600,9 @@ module.exports = {
   check
 }
 
-},{"../../script":62,"bitcoin-ops":41}],83:[function(require,module,exports){
-arguments[4][65][0].apply(exports,arguments)
-},{"./input":84,"./output":85,"dup":65}],84:[function(require,module,exports){
+},{"../../script":64,"bitcoin-ops":43}],85:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"./input":86,"./output":87,"dup":67}],86:[function(require,module,exports){
 (function (Buffer){
 // <scriptSig> {serialized scriptPubKey script}
 
@@ -9541,7 +13645,7 @@ check.toJSON = function () { return 'witnessScriptHash input' }
 module.exports = { check }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":8,"../../script":62,"../../types":88,"../multisig/":65,"../pubkey/":69,"../pubkeyhash/":72,"typeforce":157}],85:[function(require,module,exports){
+},{"../../is-buffer/index.js":8,"../../script":64,"../../types":90,"../multisig/":67,"../pubkey/":71,"../pubkeyhash/":74,"typeforce":159}],87:[function(require,module,exports){
 // OP_0 {scriptHash}
 
 const bscript = require('../../script')
@@ -9558,7 +13662,7 @@ check.toJSON = function () { return 'Witness scriptHash output' }
 
 module.exports = { check }
 
-},{"../../script":62,"bitcoin-ops":41}],86:[function(require,module,exports){
+},{"../../script":64,"bitcoin-ops":43}],88:[function(require,module,exports){
 const Buffer = require('safe-buffer').Buffer
 const bcrypto = require('./crypto')
 const bscript = require('./script')
@@ -10073,7 +14177,7 @@ Transaction.prototype.setWitness = function (index, witness) {
 
 module.exports = Transaction
 
-},{"./bufferutils":47,"./crypto":49,"./script":62,"./types":88,"bitcoin-ops":41,"cuint":99,"safe-buffer":144,"typeforce":157,"varuint-bitcoin":159}],87:[function(require,module,exports){
+},{"./bufferutils":49,"./crypto":51,"./script":64,"./types":90,"bitcoin-ops":43,"cuint":101,"safe-buffer":146,"typeforce":159,"varuint-bitcoin":161}],89:[function(require,module,exports){
 const Buffer = require('safe-buffer').Buffer
 const baddress = require('./address')
 const bcrypto = require('./crypto')
@@ -10863,7 +14967,7 @@ TransactionBuilder.prototype.__overMaximumFees = function (bytes) {
 
 module.exports = TransactionBuilder
 
-},{"./address":45,"./classify":48,"./crypto":49,"./ecpair":50,"./networks":52,"./payments":54,"./script":62,"./transaction":86,"./types":88,"bitcoin-ops":41,"safe-buffer":144,"typeforce":157}],88:[function(require,module,exports){
+},{"./address":47,"./classify":50,"./crypto":51,"./ecpair":52,"./networks":54,"./payments":56,"./script":64,"./transaction":88,"./types":90,"bitcoin-ops":43,"safe-buffer":146,"typeforce":159}],90:[function(require,module,exports){
 const typeforce = require('typeforce')
 
 const UINT31_MAX = Math.pow(2, 31) - 1
@@ -10914,7 +15018,7 @@ for (var typeName in typeforce) {
 
 module.exports = types
 
-},{"typeforce":157}],89:[function(require,module,exports){
+},{"typeforce":159}],91:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -14343,7 +18447,7 @@ module.exports = types
   };
 })(typeof module === 'undefined' || module, this);
 
-},{"buffer":2}],90:[function(require,module,exports){
+},{"buffer":2}],92:[function(require,module,exports){
 var r;
 
 module.exports = function rand(len) {
@@ -14410,13 +18514,13 @@ if (typeof self === 'object') {
   }
 }
 
-},{"crypto":2}],91:[function(require,module,exports){
+},{"crypto":2}],93:[function(require,module,exports){
 var basex = require('base-x')
 var ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 module.exports = basex(ALPHABET)
 
-},{"base-x":33}],92:[function(require,module,exports){
+},{"base-x":33}],94:[function(require,module,exports){
 'use strict'
 
 var base58 = require('bs58')
@@ -14468,7 +18572,7 @@ module.exports = function (checksumFn) {
   }
 }
 
-},{"bs58":91,"safe-buffer":144}],93:[function(require,module,exports){
+},{"bs58":93,"safe-buffer":146}],95:[function(require,module,exports){
 'use strict'
 
 var createHash = require('create-hash')
@@ -14482,7 +18586,7 @@ function sha256x2 (buffer) {
 
 module.exports = bs58checkBase(sha256x2)
 
-},{"./base":92,"create-hash":95}],94:[function(require,module,exports){
+},{"./base":94,"create-hash":97}],96:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
 var StringDecoder = require('string_decoder').StringDecoder
@@ -14583,7 +18687,7 @@ CipherBase.prototype._toString = function (value, enc, fin) {
 
 module.exports = CipherBase
 
-},{"inherits":131,"safe-buffer":144,"stream":27,"string_decoder":28}],95:[function(require,module,exports){
+},{"inherits":133,"safe-buffer":146,"stream":27,"string_decoder":28}],97:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var MD5 = require('md5.js')
@@ -14615,14 +18719,14 @@ module.exports = function createHash (alg) {
   return new Hash(sha(alg))
 }
 
-},{"cipher-base":94,"inherits":131,"md5.js":132,"ripemd160":143,"sha.js":146}],96:[function(require,module,exports){
+},{"cipher-base":96,"inherits":133,"md5.js":134,"ripemd160":145,"sha.js":148}],98:[function(require,module,exports){
 var MD5 = require('md5.js')
 
 module.exports = function (buffer) {
   return new MD5().update(buffer).digest()
 }
 
-},{"md5.js":132}],97:[function(require,module,exports){
+},{"md5.js":134}],99:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var Legacy = require('./legacy')
@@ -14686,7 +18790,7 @@ module.exports = function createHmac (alg, key) {
   return new Hmac(alg, key)
 }
 
-},{"./legacy":98,"cipher-base":94,"create-hash/md5":96,"inherits":131,"ripemd160":143,"safe-buffer":144,"sha.js":146}],98:[function(require,module,exports){
+},{"./legacy":100,"cipher-base":96,"create-hash/md5":98,"inherits":133,"ripemd160":145,"safe-buffer":146,"sha.js":148}],100:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var Buffer = require('safe-buffer').Buffer
@@ -14734,10 +18838,10 @@ Hmac.prototype._final = function () {
 }
 module.exports = Hmac
 
-},{"cipher-base":94,"inherits":131,"safe-buffer":144}],99:[function(require,module,exports){
+},{"cipher-base":96,"inherits":133,"safe-buffer":146}],101:[function(require,module,exports){
 exports.UINT32 = require('./lib/uint32')
 exports.UINT64 = require('./lib/uint64')
-},{"./lib/uint32":100,"./lib/uint64":101}],100:[function(require,module,exports){
+},{"./lib/uint32":102,"./lib/uint64":103}],102:[function(require,module,exports){
 /**
 	C-like unsigned 32 bits integers in Javascript
 	Copyright (C) 2013, Pierre Curto
@@ -15190,7 +19294,7 @@ exports.UINT64 = require('./lib/uint64')
 
 })(this)
 
-},{}],101:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 /**
 	C-like unsigned 64 bits integers in Javascript
 	Copyright (C) 2013, Pierre Curto
@@ -15840,7 +19944,7 @@ exports.UINT64 = require('./lib/uint64')
 
 })(this)
 
-},{}],102:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 var elliptic = exports;
@@ -15855,7 +19959,7 @@ elliptic.curves = require('./elliptic/curves');
 elliptic.ec = require('./elliptic/ec');
 elliptic.eddsa = require('./elliptic/eddsa');
 
-},{"./elliptic/curve":105,"./elliptic/curves":108,"./elliptic/ec":109,"./elliptic/eddsa":112,"./elliptic/utils":116,"brorand":90}],103:[function(require,module,exports){
+},{"./elliptic/curve":107,"./elliptic/curves":110,"./elliptic/ec":111,"./elliptic/eddsa":114,"./elliptic/utils":118,"brorand":92}],105:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -16231,7 +20335,7 @@ BasePoint.prototype.dblp = function dblp(k) {
   return r;
 };
 
-},{"../utils":116,"bn.js":89}],104:[function(require,module,exports){
+},{"../utils":118,"bn.js":91}],106:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -16665,7 +20769,7 @@ Point.prototype.eqXToP = function eqXToP(x) {
 Point.prototype.toP = Point.prototype.normalize;
 Point.prototype.mixedAdd = Point.prototype.add;
 
-},{"../utils":116,"./base":103,"bn.js":89,"inherits":131}],105:[function(require,module,exports){
+},{"../utils":118,"./base":105,"bn.js":91,"inherits":133}],107:[function(require,module,exports){
 'use strict';
 
 var curve = exports;
@@ -16675,7 +20779,7 @@ curve.short = require('./short');
 curve.mont = require('./mont');
 curve.edwards = require('./edwards');
 
-},{"./base":103,"./edwards":104,"./mont":106,"./short":107}],106:[function(require,module,exports){
+},{"./base":105,"./edwards":106,"./mont":108,"./short":109}],108:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -16855,7 +20959,7 @@ Point.prototype.getX = function getX() {
   return this.x.fromRed();
 };
 
-},{"../utils":116,"./base":103,"bn.js":89,"inherits":131}],107:[function(require,module,exports){
+},{"../utils":118,"./base":105,"bn.js":91,"inherits":133}],109:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -17793,7 +21897,7 @@ JPoint.prototype.isInfinity = function isInfinity() {
   return this.z.cmpn(0) === 0;
 };
 
-},{"../utils":116,"./base":103,"bn.js":89,"inherits":131}],108:[function(require,module,exports){
+},{"../utils":118,"./base":105,"bn.js":91,"inherits":133}],110:[function(require,module,exports){
 'use strict';
 
 var curves = exports;
@@ -18001,7 +22105,7 @@ defineCurve('secp256k1', {
   ]
 });
 
-},{"./curve":105,"./precomputed/secp256k1":115,"./utils":116,"hash.js":118}],109:[function(require,module,exports){
+},{"./curve":107,"./precomputed/secp256k1":117,"./utils":118,"hash.js":120}],111:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -18244,7 +22348,7 @@ EC.prototype.getKeyRecoveryParam = function(e, signature, Q, enc) {
   throw new Error('Unable to find valid recovery factor');
 };
 
-},{"../curves":108,"../utils":116,"./key":110,"./signature":111,"bn.js":89,"brorand":90,"hmac-drbg":130}],110:[function(require,module,exports){
+},{"../curves":110,"../utils":118,"./key":112,"./signature":113,"bn.js":91,"brorand":92,"hmac-drbg":132}],112:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -18364,7 +22468,7 @@ KeyPair.prototype.inspect = function inspect() {
          ' pub: ' + (this.pub && this.pub.inspect()) + ' >';
 };
 
-},{"../utils":116,"bn.js":89}],111:[function(require,module,exports){
+},{"../utils":118,"bn.js":91}],113:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -18500,7 +22604,7 @@ Signature.prototype.toDER = function toDER(enc) {
   return utils.encode(res, enc);
 };
 
-},{"../utils":116,"bn.js":89}],112:[function(require,module,exports){
+},{"../utils":118,"bn.js":91}],114:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -18620,7 +22724,7 @@ EDDSA.prototype.isPoint = function isPoint(val) {
   return val instanceof this.pointClass;
 };
 
-},{"../curves":108,"../utils":116,"./key":113,"./signature":114,"hash.js":118}],113:[function(require,module,exports){
+},{"../curves":110,"../utils":118,"./key":115,"./signature":116,"hash.js":120}],115:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -18717,7 +22821,7 @@ KeyPair.prototype.getPublic = function getPublic(enc) {
 
 module.exports = KeyPair;
 
-},{"../utils":116}],114:[function(require,module,exports){
+},{"../utils":118}],116:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -18784,7 +22888,7 @@ Signature.prototype.toHex = function toHex() {
 
 module.exports = Signature;
 
-},{"../utils":116,"bn.js":89}],115:[function(require,module,exports){
+},{"../utils":118,"bn.js":91}],117:[function(require,module,exports){
 module.exports = {
   doubles: {
     step: 4,
@@ -19566,7 +23670,7 @@ module.exports = {
   }
 };
 
-},{}],116:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -19688,7 +23792,7 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 
 
-},{"bn.js":89,"minimalistic-assert":134,"minimalistic-crypto-utils":135}],117:[function(require,module,exports){
+},{"bn.js":91,"minimalistic-assert":136,"minimalistic-crypto-utils":137}],119:[function(require,module,exports){
 'use strict'
 var Buffer = require('safe-buffer').Buffer
 var Transform = require('stream').Transform
@@ -19785,7 +23889,7 @@ HashBase.prototype._digest = function () {
 
 module.exports = HashBase
 
-},{"inherits":131,"safe-buffer":144,"stream":27}],118:[function(require,module,exports){
+},{"inherits":133,"safe-buffer":146,"stream":27}],120:[function(require,module,exports){
 var hash = exports;
 
 hash.utils = require('./hash/utils');
@@ -19802,7 +23906,7 @@ hash.sha384 = hash.sha.sha384;
 hash.sha512 = hash.sha.sha512;
 hash.ripemd160 = hash.ripemd.ripemd160;
 
-},{"./hash/common":119,"./hash/hmac":120,"./hash/ripemd":121,"./hash/sha":122,"./hash/utils":129}],119:[function(require,module,exports){
+},{"./hash/common":121,"./hash/hmac":122,"./hash/ripemd":123,"./hash/sha":124,"./hash/utils":131}],121:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -19896,7 +24000,7 @@ BlockHash.prototype._pad = function pad() {
   return res;
 };
 
-},{"./utils":129,"minimalistic-assert":134}],120:[function(require,module,exports){
+},{"./utils":131,"minimalistic-assert":136}],122:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -19945,7 +24049,7 @@ Hmac.prototype.digest = function digest(enc) {
   return this.outer.digest(enc);
 };
 
-},{"./utils":129,"minimalistic-assert":134}],121:[function(require,module,exports){
+},{"./utils":131,"minimalistic-assert":136}],123:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -20093,7 +24197,7 @@ var sh = [
   8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ];
 
-},{"./common":119,"./utils":129}],122:[function(require,module,exports){
+},{"./common":121,"./utils":131}],124:[function(require,module,exports){
 'use strict';
 
 exports.sha1 = require('./sha/1');
@@ -20102,7 +24206,7 @@ exports.sha256 = require('./sha/256');
 exports.sha384 = require('./sha/384');
 exports.sha512 = require('./sha/512');
 
-},{"./sha/1":123,"./sha/224":124,"./sha/256":125,"./sha/384":126,"./sha/512":127}],123:[function(require,module,exports){
+},{"./sha/1":125,"./sha/224":126,"./sha/256":127,"./sha/384":128,"./sha/512":129}],125:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -20178,7 +24282,7 @@ SHA1.prototype._digest = function digest(enc) {
     return utils.split32(this.h, 'big');
 };
 
-},{"../common":119,"../utils":129,"./common":128}],124:[function(require,module,exports){
+},{"../common":121,"../utils":131,"./common":130}],126:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -20210,7 +24314,7 @@ SHA224.prototype._digest = function digest(enc) {
 };
 
 
-},{"../utils":129,"./256":125}],125:[function(require,module,exports){
+},{"../utils":131,"./256":127}],127:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -20317,7 +24421,7 @@ SHA256.prototype._digest = function digest(enc) {
     return utils.split32(this.h, 'big');
 };
 
-},{"../common":119,"../utils":129,"./common":128,"minimalistic-assert":134}],126:[function(require,module,exports){
+},{"../common":121,"../utils":131,"./common":130,"minimalistic-assert":136}],128:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -20354,7 +24458,7 @@ SHA384.prototype._digest = function digest(enc) {
     return utils.split32(this.h.slice(0, 12), 'big');
 };
 
-},{"../utils":129,"./512":127}],127:[function(require,module,exports){
+},{"../utils":131,"./512":129}],129:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -20686,7 +24790,7 @@ function g1_512_lo(xh, xl) {
   return r;
 }
 
-},{"../common":119,"../utils":129,"minimalistic-assert":134}],128:[function(require,module,exports){
+},{"../common":121,"../utils":131,"minimalistic-assert":136}],130:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -20737,7 +24841,7 @@ function g1_256(x) {
 }
 exports.g1_256 = g1_256;
 
-},{"../utils":129}],129:[function(require,module,exports){
+},{"../utils":131}],131:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -21017,7 +25121,7 @@ function shr64_lo(ah, al, num) {
 }
 exports.shr64_lo = shr64_lo;
 
-},{"inherits":131,"minimalistic-assert":134}],130:[function(require,module,exports){
+},{"inherits":133,"minimalistic-assert":136}],132:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -21132,9 +25236,9 @@ HmacDRBG.prototype.generate = function generate(len, enc, add, addEnc) {
   return utils.encode(res, enc);
 };
 
-},{"hash.js":118,"minimalistic-assert":134,"minimalistic-crypto-utils":135}],131:[function(require,module,exports){
+},{"hash.js":120,"minimalistic-assert":136,"minimalistic-crypto-utils":137}],133:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],132:[function(require,module,exports){
+},{"dup":7}],134:[function(require,module,exports){
 'use strict'
 var inherits = require('inherits')
 var HashBase = require('hash-base')
@@ -21282,7 +25386,7 @@ function fnI (a, b, c, d, m, k, s) {
 
 module.exports = MD5
 
-},{"hash-base":117,"inherits":131,"safe-buffer":144}],133:[function(require,module,exports){
+},{"hash-base":119,"inherits":133,"safe-buffer":146}],135:[function(require,module,exports){
 (function (Buffer){
 // constant-space merkle root calculation algorithm
 module.exports = function fastRoot (values, digestFn) {
@@ -21310,7 +25414,7 @@ module.exports = function fastRoot (values, digestFn) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3}],134:[function(require,module,exports){
+},{"buffer":3}],136:[function(require,module,exports){
 module.exports = assert;
 
 function assert(val, msg) {
@@ -21323,7 +25427,7 @@ assert.equal = function assertEqual(l, r, msg) {
     throw new Error(msg || ('Assertion failed: ' + l + ' != ' + r));
 };
 
-},{}],135:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -21383,11 +25487,11 @@ utils.encode = function encode(arr, enc) {
     return arr;
 };
 
-},{}],136:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 exports.pbkdf2 = require('./lib/async')
 exports.pbkdf2Sync = require('./lib/sync')
 
-},{"./lib/async":137,"./lib/sync":140}],137:[function(require,module,exports){
+},{"./lib/async":139,"./lib/sync":142}],139:[function(require,module,exports){
 (function (process,global){
 var checkParameters = require('./precondition')
 var defaultEncoding = require('./default-encoding')
@@ -21491,7 +25595,7 @@ module.exports = function (password, salt, iterations, keylen, digest, callback)
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./default-encoding":138,"./precondition":139,"./sync":140,"_process":11,"safe-buffer":144}],138:[function(require,module,exports){
+},{"./default-encoding":140,"./precondition":141,"./sync":142,"_process":11,"safe-buffer":146}],140:[function(require,module,exports){
 (function (process){
 var defaultEncoding
 /* istanbul ignore next */
@@ -21505,7 +25609,7 @@ if (process.browser) {
 module.exports = defaultEncoding
 
 }).call(this,require('_process'))
-},{"_process":11}],139:[function(require,module,exports){
+},{"_process":11}],141:[function(require,module,exports){
 (function (Buffer){
 var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
 
@@ -21536,8 +25640,8 @@ module.exports = function (password, salt, iterations, keylen) {
   }
 }
 
-}).call(this,{"isBuffer":require("../../../../../.nvm/versions/node/v10.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../../.nvm/versions/node/v10.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":8}],140:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../is-buffer/index.js")})
+},{"../../is-buffer/index.js":8}],142:[function(require,module,exports){
 var md5 = require('create-hash/md5')
 var RIPEMD160 = require('ripemd160')
 var sha = require('sha.js')
@@ -21643,7 +25747,7 @@ function pbkdf2 (password, salt, iterations, keylen, digest) {
 
 module.exports = pbkdf2
 
-},{"./default-encoding":138,"./precondition":139,"create-hash/md5":96,"ripemd160":143,"safe-buffer":144,"sha.js":146}],141:[function(require,module,exports){
+},{"./default-encoding":140,"./precondition":141,"create-hash/md5":98,"ripemd160":145,"safe-buffer":146,"sha.js":148}],143:[function(require,module,exports){
 var OPS = require('bitcoin-ops')
 
 function encodingLength (i) {
@@ -21722,7 +25826,7 @@ module.exports = {
   decode: decode
 }
 
-},{"bitcoin-ops":41}],142:[function(require,module,exports){
+},{"bitcoin-ops":43}],144:[function(require,module,exports){
 (function (process,global){
 'use strict'
 
@@ -21776,7 +25880,7 @@ function randomBytes (size, cb) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":11,"safe-buffer":144}],143:[function(require,module,exports){
+},{"_process":11,"safe-buffer":146}],145:[function(require,module,exports){
 'use strict'
 var Buffer = require('buffer').Buffer
 var inherits = require('inherits')
@@ -21941,7 +26045,7 @@ function fn5 (a, b, c, d, e, m, k, s) {
 
 module.exports = RIPEMD160
 
-},{"buffer":3,"hash-base":117,"inherits":131}],144:[function(require,module,exports){
+},{"buffer":3,"hash-base":119,"inherits":133}],146:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -22007,7 +26111,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":3}],145:[function(require,module,exports){
+},{"buffer":3}],147:[function(require,module,exports){
 var Buffer = require('safe-buffer').Buffer
 
 // prototype class for hash functions
@@ -22090,7 +26194,7 @@ Hash.prototype._update = function () {
 
 module.exports = Hash
 
-},{"safe-buffer":144}],146:[function(require,module,exports){
+},{"safe-buffer":146}],148:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -22107,7 +26211,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":147,"./sha1":148,"./sha224":149,"./sha256":150,"./sha384":151,"./sha512":152}],147:[function(require,module,exports){
+},{"./sha":149,"./sha1":150,"./sha224":151,"./sha256":152,"./sha384":153,"./sha512":154}],149:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
  * in FIPS PUB 180-1
@@ -22203,7 +26307,7 @@ Sha.prototype._hash = function () {
 
 module.exports = Sha
 
-},{"./hash":145,"inherits":131,"safe-buffer":144}],148:[function(require,module,exports){
+},{"./hash":147,"inherits":133,"safe-buffer":146}],150:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -22304,7 +26408,7 @@ Sha1.prototype._hash = function () {
 
 module.exports = Sha1
 
-},{"./hash":145,"inherits":131,"safe-buffer":144}],149:[function(require,module,exports){
+},{"./hash":147,"inherits":133,"safe-buffer":146}],151:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -22359,7 +26463,7 @@ Sha224.prototype._hash = function () {
 
 module.exports = Sha224
 
-},{"./hash":145,"./sha256":150,"inherits":131,"safe-buffer":144}],150:[function(require,module,exports){
+},{"./hash":147,"./sha256":152,"inherits":133,"safe-buffer":146}],152:[function(require,module,exports){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
  * in FIPS 180-2
@@ -22496,7 +26600,7 @@ Sha256.prototype._hash = function () {
 
 module.exports = Sha256
 
-},{"./hash":145,"inherits":131,"safe-buffer":144}],151:[function(require,module,exports){
+},{"./hash":147,"inherits":133,"safe-buffer":146}],153:[function(require,module,exports){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
 var Hash = require('./hash')
@@ -22555,7 +26659,7 @@ Sha384.prototype._hash = function () {
 
 module.exports = Sha384
 
-},{"./hash":145,"./sha512":152,"inherits":131,"safe-buffer":144}],152:[function(require,module,exports){
+},{"./hash":147,"./sha512":154,"inherits":133,"safe-buffer":146}],154:[function(require,module,exports){
 var inherits = require('inherits')
 var Hash = require('./hash')
 var Buffer = require('safe-buffer').Buffer
@@ -22817,7 +26921,7 @@ Sha512.prototype._hash = function () {
 
 module.exports = Sha512
 
-},{"./hash":145,"inherits":131,"safe-buffer":144}],153:[function(require,module,exports){
+},{"./hash":147,"inherits":133,"safe-buffer":146}],155:[function(require,module,exports){
 (function (Buffer){
 const BN = require('bn.js')
 const EC = require('elliptic').ec
@@ -23097,7 +27201,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./rfc6979":154,"bn.js":89,"buffer":3,"elliptic":102}],154:[function(require,module,exports){
+},{"./rfc6979":156,"bn.js":91,"buffer":3,"elliptic":104}],156:[function(require,module,exports){
 (function (Buffer){
 const createHmac = require('create-hmac')
 
@@ -23163,7 +27267,7 @@ function deterministicGenerateK (hash, x, checkSig, isPrivate, extraEntropy) {
 module.exports = deterministicGenerateK
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":3,"create-hmac":97}],155:[function(require,module,exports){
+},{"buffer":3,"create-hmac":99}],157:[function(require,module,exports){
 var native = require('./native')
 
 function getTypeName (fn) {
@@ -23275,7 +27379,7 @@ module.exports = {
   getValueTypeName: getValueTypeName
 }
 
-},{"./native":158}],156:[function(require,module,exports){
+},{"./native":160}],158:[function(require,module,exports){
 (function (Buffer){
 var NATIVE = require('./native')
 var ERRORS = require('./errors')
@@ -23369,8 +27473,8 @@ for (var typeName in types) {
 
 module.exports = types
 
-}).call(this,{"isBuffer":require("../../../../.nvm/versions/node/v10.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../.nvm/versions/node/v10.16.0/lib/node_modules/browserify/node_modules/is-buffer/index.js":8,"./errors":155,"./native":158}],157:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../is-buffer/index.js")})
+},{"../../is-buffer/index.js":8,"./errors":157,"./native":160}],159:[function(require,module,exports){
 var ERRORS = require('./errors')
 var NATIVE = require('./native')
 
@@ -23632,7 +27736,7 @@ typeforce.TfPropertyTypeError = TfPropertyTypeError
 
 module.exports = typeforce
 
-},{"./errors":155,"./extra":156,"./native":158}],158:[function(require,module,exports){
+},{"./errors":157,"./extra":158,"./native":160}],160:[function(require,module,exports){
 var types = {
   Array: function (value) { return value !== null && value !== undefined && value.constructor === Array },
   Boolean: function (value) { return typeof value === 'boolean' },
@@ -23655,7 +27759,7 @@ for (var typeName in types) {
 
 module.exports = types
 
-},{}],159:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 'use strict'
 var Buffer = require('safe-buffer').Buffer
 
@@ -23747,7 +27851,7 @@ function encodingLength (number) {
 
 module.exports = { encode: encode, decode: decode, encodingLength: encodingLength }
 
-},{"safe-buffer":144}],160:[function(require,module,exports){
+},{"safe-buffer":146}],162:[function(require,module,exports){
 (function (Buffer){
 var bs58check = require('bs58check')
 
@@ -23814,5 +27918,5 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bs58check":93,"buffer":3}]},{},[32])(32)
+},{"bs58check":95,"buffer":3}]},{},[32])(32)
 });
