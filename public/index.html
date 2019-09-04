@@ -134,6 +134,41 @@ pastel.ready = function() {
   });
 }
 pastel.load();
+var camDevice = (function() {
+  var cam_ids = [];
+  var selcam = null;
+  var sel_cam_index = 0;
+  navigator.mediaDevices.enumerateDevices().then(function(devices) {
+    devices.forEach(function(device) {
+      if(device.kind == 'videoinput') {
+        cam_ids.push(device);
+        console.log(device);
+      }
+    });
+    sel_cam_index = cam_ids.length - 1;
+    sel_cam = cam_ids[sel_cam_index].deviceId;
+  });
+  return {
+    next: function() {
+      if(cam_ids.length > 0) {
+        sel_cam_index++;
+        if(sel_cam_index >= cam_ids.length) {
+          sel_cam_index = 0;
+        }
+        sel_cam = cam_ids[sel_cam_index].deviceId;
+      }
+      return sel_cam;
+    },
+    count: function() {
+      return cam_ids.length;
+    }
+  };
+})();
+
+setInterval(function() {
+  console.log(camDevice.count());
+  console.log(camDevice.next());
+}, 3000);
 </script>
 </body>
 </html>
