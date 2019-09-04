@@ -424,9 +424,3 @@ proc afterScript() =
   jq(".ui.dropdown").dropdown()
 
 setRenderer appMain, "main", afterScript
-
-
-
-#            tdiv(class="ui small basic icon buttons"):
-#              button(id="bt-camchange", class="ui button"):
-#                italic(class="retweet icon")
