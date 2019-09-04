@@ -249,7 +249,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
   else:
     autocompleteWords = @[]
 
-proc selectWord(input_id: cstring, word: cstring): proc() =
+proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
     var s = x.value
@@ -257,17 +257,30 @@ proc selectWord(input_id: cstring, word: cstring): proc() =
       var input_elm = document.getElementById(input_id)
       var cur = input_elm.selectionStart
       var newcur = cur
-      asm """
-        var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-        if(t && t.length > 0) {
-          var tail = `s`.substr(`cur`) || '';
-          `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
-          `newcur` = `s`.length - tail.length;
-        }
-      """
-      x.setInputText(s)
-      input_elm.focus()
-      input_elm.selectionEnd = newcur
+      if whole_replace:
+        asm """
+          var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
+          if(t && t.length > 0) {
+            `s` = `s`.substr(0, `cur` - t.length) + `word`;
+            `newcur` = `s`.length;
+          }
+        """
+        x.setInputText(s)
+        input_elm.focus()
+        input_elm.selectionStart = newcur
+        input_elm.selectionEnd = newcur
+      else:
+        asm """
+          var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
+          if(t && t.length > 0) {
+            var tail = `s`.substr(`cur`) || '';
+            `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
+            `newcur` = `s`.length - tail.length;
+          }
+        """
+        x.setInputText(s)
+        input_elm.focus()
+        input_elm.selectionEnd = newcur
     autocompleteWords = @[]
 
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
