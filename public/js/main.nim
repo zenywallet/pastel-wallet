@@ -170,6 +170,7 @@ proc showQr(): proc() =
 proc camChange(): proc() =
   result = proc() =
     asm """
+      $('.camtools button').blur();
       qrReader.show();
     """
 

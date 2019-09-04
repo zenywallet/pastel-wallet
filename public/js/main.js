@@ -2570,7 +2570,8 @@ function show_qr_214137() {
 function cam_change_214170() {
 
 		function HEX3Aanonymous_214175() {
-				      qrReader.show();
+				      $('.camtools button').blur();
+      qrReader.show();
     
 
 			
