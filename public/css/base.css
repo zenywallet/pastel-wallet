@@ -115,7 +115,7 @@ section h1 {
   width: 100%;
   height: calc(100% - 212px);
 }
-.intro-body .seed-seg {
+.intro-body .seed-seg, .intro-body .mnemonic-seg {
   height: 100%;
   margin: 0 14px;
   bottom: 30px;
@@ -123,12 +123,43 @@ section h1 {
   min-width: 324px;
   z-index: 2;
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
-  background-color: transparent;
+}
+.intro-body .mnemonic-seg {
+  min-height: 342px;
 }
 .intro-body .medit-seg {
+  position: absolute;
+  top: 14px;
   z-index: 2;
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
-  background-color: transparent;
+  height: 274px;
+  width: calc(100% - 28px);
+}
+.intro-body .medit-autocomp {
+  position: absolute;
+  bottom: 14px;
+  z-index: 2;
+  display: inline-block;
+  height: calc(100% - 274px - 21px - 35px + 14px);
+  width: calc(100% - 28px);
+  overflow: auto;
+}
+.intro-body .form {
+  position: relative;
+  top: 0;
+  height: 210px;
+  width: 100%;
+}
+#minput {
+  height: 98px;
+  min-height: 98px;
+  resize: none;
+}
+.medit-seg button {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  height: 35px;
 }
 .intro .caption {
   color: #fff;

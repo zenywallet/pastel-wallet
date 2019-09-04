@@ -351,7 +351,7 @@ proc mnemonicEditor(): VNode =
           label:
             text "Select mnemonic language"
           tdiv(class="ui selection dropdown"):
-            input(type="hidden", name="mnmonic-language", value="0", onchange = changeLanguage)
+            input(type="hidden", name="mnemonic-language", value="0", onchange=changeLanguage)
             italic(class="dropdown icon")
             tdiv(class="default text"):
               text "Mnemonic Language"
@@ -360,27 +360,28 @@ proc mnemonicEditor(): VNode =
                 text "Japanese"
               tdiv(class="item", data-value="1"):
                 text "English"
-        tdiv(class="field"):
+        tdiv(class="field minput-field"):
           label:
             text "Import your mnemonic you already have"
-          textarea(id = input_id, rows = "5", value=editingWords, onkeyup = checkMnemonic, onmouseup = checkMnemonic, spellcheck="false")
-        button(class="ui right floated primary button", onclick = confirmMnemonic(input_id)):
-          text "Check"
-    for word in autocompleteWords:
-      tdiv(class="ui mini teal label", onclick = selectWord(input_id, word)):
-        text word
-    for i in chklist.low..chklist.high:
-      if chklist[i].flag:
-        tdiv(class="ui mini green label"):
-          italic(class="check circle icon"):
-            text " " & chklist[i].word
-      else:
-        tdiv(class="ui mini pink label"):
-          italic(class="x icon"):
-            text " " & chklist[i].word
-          for lev in chklist[i].levs:
-            tdiv(class="ui mini blue basic label", onclick = fixWord(input_id, chklist[i].idx, lev)):
-              text lev
+          textarea(id=input_id, value=editingWords, onkeyup=checkMnemonic, onmouseup=checkMnemonic, spellcheck="false")
+      button(class="ui right floated primary button", onclick=confirmMnemonic(input_id)):
+        text "Check"
+    tdiv(class="medit-autocomp"):
+      for word in autocompleteWords:
+        button(class="ui mini teal label", onclick=selectWord(input_id, word)):
+          text word
+      for i in chklist.low..chklist.high:
+        if chklist[i].flag:
+          button(class="ui mini green label"):
+            italic(class="check circle icon"):
+              text " " & chklist[i].word
+        else:
+          button(class="ui mini pink label"):
+            italic(class="x icon"):
+              text " " & chklist[i].word
+            for lev in chklist[i].levs:
+              button(class="ui mini blue basic label", onclick=fixWord(input_id, chklist[i].idx, lev)):
+                text lev
 
 proc appMain(): VNode =
   result = buildHtml(tdiv):
@@ -417,7 +418,7 @@ proc appMain(): VNode =
                     italic(class="window close icon")
               video(id="qrvideo")
           else:
-            tdiv(class="ui enter aligned segment seed-seg"):
+            tdiv(class="ui enter aligned segment mnemonic-seg"):
               mnemonicEditor()
 
 proc afterScript() =
