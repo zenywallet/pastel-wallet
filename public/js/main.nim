@@ -7,7 +7,11 @@ import strutils
 import unicode
 import sequtils
 
+var appInst: KaraxInstance
+
 {.emit: """
+var jsViewSelector = function() {}
+
 var camDevice = (function() {
   var cam_ids = [];
   var sel_cam = null;
@@ -90,7 +94,7 @@ var qrReader = (function() {
   }
 
   return {
-    show: function() {
+    show: function(cb) {
       stop_qr_instance(function() {
         mode_show = true;
         var scandata = "";
@@ -119,7 +123,11 @@ var qrReader = (function() {
               }
               cb_once = 1;
               qr_stop();
-              cb_done(result);
+              if(cb) {
+                cb(result);
+              } else {
+                cb_done(result);
+              }
             }
             scandata = result;
           }
@@ -147,6 +155,41 @@ type ImportType {.pure.} = enum
 
 var currentImportType = ImportType.SeedCard
 
+type ViewType = enum
+  SeedNone
+  SeedScanning
+  SeedAfterScan
+
+var showScanSeedBtn = true
+var showScanning = true
+var showCamTools = true
+var showScanResult = false
+
+proc viewSelector(view: ViewType) =
+  echo "view", view
+  case view
+  of SeedNone:
+    showScanSeedBtn = true
+    showScanning = true
+    showCamTools = true
+    showScanResult = false
+  of SeedScanning:
+    showScanSeedBtn = true
+    showScanning = true
+    showCamTools = true
+    showScanResult = false
+  of SeedAfterScan:
+    showScanSeedBtn = false
+    showScanning = false
+    showCamTools = false
+    showScanResult = true
+  appInst.redraw()
+
+var jsViewSelector {.importc, nodecl.}: JsObject
+asm """
+  jsViewSelector = `viewSelector`
+"""
+
 proc importTypeButtonClass(importType: ImportType): cstring =
   if importType == currentImportType:
     "ui olive button"
@@ -157,21 +200,47 @@ proc importSelector(importType: ImportType): proc() =
   result = proc() =
     currentImportType = importType
 
-var showScanSeedBtn = true
-var showScanning = true
-var showCamTools = true
+type SeedCardInfo = object
+  seed: cstring
+  gen: cstring
+  tag: cstring
+  orig: cstring
+
+var seedCardInfo: SeedCardInfo
+
+proc cbSeedQrDone(data: cstring) =
+  echo "cbQrDone:", data
+  var sdata = $data
+  var ds = sdata.split(',')
+  for d in ds:
+    if d.startsWith("seed:"):
+      seedCardInfo.seed = d[5..^1]
+      echo seedCardInfo.seed
+    elif d.startsWith("tag:"):
+      seedCardInfo.tag = d[4..^1]
+      echo seedCardInfo.tag
+    elif d.startsWith("gen:"):
+      seedCardInfo.gen = d[4..^1]
+      echo seedCardInfo.gen
+  seedCardInfo.orig = data
+  echo seedCardInfo
+
+  asm """
+    qrReader.hide();
+  """
+  viewSelector(SeedAfterScan)
 
 proc showQr(): proc() =
   result = proc() =
     asm """
-      qrReader.show();
+      qrReader.show(`cbSeedQrDone`);
     """
 
 proc camChange(): proc() =
   result = proc() =
     asm """
       $('.camtools button').blur();
-      qrReader.show();
+      qrReader.show(`cbSeedQrDone`);
     """
 
 proc camClose(): proc() =
@@ -396,6 +465,30 @@ proc mnemonicEditor(): VNode =
               button(class="ui mini blue basic label", onclick=fixWord(input_id, chklist[i].idx, lev)):
                 text lev
 
+proc seedCard(cardInfo: SeedCardInfo): VNode =
+  result = buildHtml(tdiv(class="ui card seed-card")):
+    tdiv(class="image"):
+      tdiv(class="seed-qrcode", data-orig=cardInfo.orig):
+        canvas(width="196", height="196")
+    tdiv(class="content"):
+      tdiv(class="ui tag label mini tag"): text cardInfo.tag
+      tdiv(class="header"): text "Seed"
+      tdiv(class="meta"):
+        span(class="date"): text cardInfo.gen
+      var clen = cardInfo.seed.len
+      if clen > 0:
+        var half = clen - toInt(clen / 2)
+        var seed = $cardInfo.seed
+        var seed_upper = seed[0..<half]
+        var seed_lower = seed[half..^1]
+        tdiv(): text seed_upper
+        tdiv(): text seed_lower
+    tdiv(class="extra content"):
+      tdiv(class="inline field"):
+        tdiv(class="vector-lavel"): text "Seed Vector:"
+        tdiv(class="ui mini input vector-input"):
+          input(type="text", placeholder="Type your seed vector")
+
 proc appMain(): VNode =
   result = buildHtml(tdiv):
     section(id="section1", class="section"):
@@ -415,6 +508,11 @@ proc appMain(): VNode =
         tdiv(class="intro-body"):
           if currentImportType == ImportType.SeedCard:
             tdiv(class="ui enter aligned segment seed-seg"):
+              if showScanResult:
+                tdiv(class="ui link cards seed-card-holder"):
+                  seedCard(seedCardInfo)
+                  seedCard(seedCardInfo)
+                  seedCard(seedCardInfo)
               if showScanning:
                 tdiv(class="qr-scanning"):
                   tdiv()
@@ -430,6 +528,7 @@ proc appMain(): VNode =
                   button(class="ui button", onclick=camClose()):
                     italic(class="window close icon")
               video(id="qrvideo")
+
           else:
             tdiv(class="ui enter aligned segment mnemonic-seg"):
               mnemonicEditor()
@@ -437,5 +536,22 @@ proc appMain(): VNode =
 proc afterScript() =
   jq("#section0").remove()
   jq(".ui.dropdown").dropdown()
+  if showScanResult:
+    asm """
+      $('.seed-qrcode canvas').remove();
+      $('.seed-qrcode').each(function() {
+        $(this).qrcode({
+          render: 'canvas',
+          ecLevel: 'Q',
+          radius: 0.39,
+          text: $(this).data('orig'),
+          size: 196,
+          mode: 2,
+          label: '',
+          fontname: 'sans',
+          fontcolor: '#393939'
+        });
+      });
+    """
 
-setRenderer appMain, "main", afterScript
+appInst = setRenderer(appMain, "main", afterScript)

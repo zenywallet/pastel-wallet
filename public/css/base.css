@@ -99,7 +99,6 @@ section h1 {
     transform: rotate(-45deg) translate(0, 0);
   }
 }
-
 .intro {
   position: relative;
   width: 100%;
@@ -119,10 +118,12 @@ section h1 {
   height: 100%;
   margin: 0 14px;
   bottom: 30px;
-  min-height: 50px;
   min-width: 324px;
   z-index: 2;
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
+}
+.intro-body .seed-seg {
+  min-height: 398px;
 }
 .intro-body .mnemonic-seg {
   min-height: 342px;
@@ -196,7 +197,6 @@ section h1 {
 .method-selector {
   text-align: center;
 }
-
 .method-selector .title {
   color: #fff;
   font : normal 300 14px/1 'Josefin Sans', sans-serif;
@@ -251,4 +251,58 @@ section h1 {
   z-index: 4;
   background-color: rgba(136,136,136,0.6);
   visibility: hidden;
+}
+.ui.cards.seed-card-holder {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: auto;
+  top: -14px;
+  left: -7px;
+  margin-left: auto !important;
+  margin-top: auto !important;
+  width: calc(100% + 14px);
+  height: 390px;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 7px;
+  z-index: 4;
+}
+.ui.card.seed-card {
+  position: relative;
+  width: 220px;
+  height: 356px;
+  flex: 0 0 auto;
+  z-index: 4;
+  box-shadow: 1px 1px 7px #4b4861;
+}
+.seed-qrcode {
+  margin: 12px 12px 7px 12px;
+}
+.seed-card .tag {
+  float: right;
+  margin-top: -7px;
+  margin-right: -7px;
+}
+.ui.card.seed-card > .content > .header {
+  margin-top: -8px;
+  z-index: 4;
+}
+.vector-input input {
+  width: 125px;
+  margin-right: 4px;
+}
+.ui.card.seed-card > .content {
+  font-size: 12px;
+}
+.ui.card.seed-card > .content .meta {
+  font-size: 10px;
+}
+.seed-card .vector-lavel {
+  display: inline;
+  font-size: 12px;
+  margin-right: 4px;
+}
+.ui.card.seed-card > .extra {
+  padding: 0.25em 1em;
 }
