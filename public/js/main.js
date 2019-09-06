@@ -930,8 +930,6 @@ var qrReader = (function() {
     show: function(cb) {
       stop_qr_instance(function() {
         mode_show = true;
-        var scandata = "";
-        var cb_once = 0;
         var qr = new QCodeDecoder();
         qr_instance = qr;
         var qr_stop = function() {
@@ -947,22 +945,17 @@ var qrReader = (function() {
 
           function resultHandler(err, result) {
             if(err) {
-              qr_stop();
+              console.log(err);
+              console.log(err.message);
+              //qr_stop();
               return;
             }
-            if(scandata == result) {
-              if(cb_once) {
-                return;
-              }
-              cb_once = 1;
-              qr_stop();
-              if(cb) {
-                cb(result);
-              } else {
-                cb_done(result);
-              }
+            qr_stop();
+            if(cb) {
+              cb(result);
+            } else {
+              cb_done(result);
             }
-            scandata = result;
           }
           qr.setSourceId(camDevice.next());
           qr.decodeFromCamera(video, resultHandler);
