@@ -114,7 +114,9 @@ var qrReader = (function() {
 
           function resultHandler(err, result) {
             if(err) {
-              qr_stop();
+              console.log(err);
+              console.log(err.message);
+              //qr_stop();
               return;
             }
             if(scandata == result) {
