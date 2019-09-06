@@ -39,11 +39,12 @@ section h1 {
 #section2 { background: #8fbc8f; }
 #section3 { background: #d2b48c; }
 
-.section a {
+@media (min-height: 682px) {
+.section a.pagenext {
   position: absolute;
-  bottom: 20px;
   left: 50%;
-  z-index: 2;
+  bottom: -20px;
+  z-index: 5;
   display: inline-block;
   margin-left: -24px;
   -webkit-transform: translate(0, -50%);
@@ -55,14 +56,32 @@ section h1 {
   transition: opacity .3s;
   outline : none;
 }
-.section a:hover {
+}
+@media (max-height: 683px) {
+.section a.pagenext {
+  position: absolute;
+  left: 50%;
+  top: 420px;
+  z-index: 5;
+  display: inline-block;
+  margin-left: -24px;
+  -webkit-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+  color: #fff;
+  font : normal 400 20px/1 'Josefin Sans', sans-serif;
+  letter-spacing: .1em;
+  text-decoration: none;
+  transition: opacity .3s;
+  outline : none;
+}
+}
+.section a.pagenext:hover {
   opacity: .5;
 }
-
-.section a {
-  padding-top: 60px;
+.section a.pagenext {
+  padding-top: 50px;
 }
-.section a span {
+.section a.pagenext span {
   position: absolute;
   top: 0;
   left: 50%;
@@ -123,7 +142,7 @@ section h1 {
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
 }
 .intro-body .seed-seg {
-  min-height: 398px;
+  min-height: 464px;
 }
 .intro-body .mnemonic-seg {
   min-height: 342px;

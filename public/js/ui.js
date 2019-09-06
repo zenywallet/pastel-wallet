@@ -59,22 +59,23 @@ function scrollPos(pos, duration, done) {
   window.requestAnimationFrame(step);
 }
 
-
 var lastSection = null;
-function goSection(selector) {
+function goSection(selector, cb) {
   var section = document.querySelector(selector);
   var rect = section.getBoundingClientRect();
   var offset_top = rect.top + (window.pageYOffset || document.documentElement.scrollTop);
-  scrollPos(offset_top, 800);
+  scrollPos(offset_top, 800, cb);
   lastSection = selector;
 }
 
-function reloadSection() {
+function reloadSection(cb) {
   if(lastSection) {
-    goSection(lastSection);
+    goSection(lastSection, cb);
   }
 }
 
+var target_page_scroll = null;
+var page_scroll_done = function () {};
 var scroll_tval = null;
 window.onscroll = function() {
   if(scroll_tval != null) {
@@ -101,7 +102,11 @@ window.onscroll = function() {
   }
   scroll_tval = setTimeout(function() {
     if(lastSection) {
-      goSection(lastSection);
+      if(lastSection == target_page_scroll) {
+        goSection(lastSection, page_scroll_done);
+      } else {
+        goSection(lastSection);
+      }
     }
   }, 1200);
 }

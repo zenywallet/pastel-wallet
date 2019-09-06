@@ -159,11 +159,15 @@ type ViewType = enum
   SeedNone
   SeedScanning
   SeedAfterScan
+  SetPassphrase
 
 var showScanSeedBtn = true
 var showScanning = true
 var showCamTools = true
 var showScanResult = false
+
+var showPage1 = true
+var showPage2 = false
 
 proc viewSelector(view: ViewType) =
   echo "view", view
@@ -183,6 +187,11 @@ proc viewSelector(view: ViewType) =
     showScanning = false
     showCamTools = false
     showScanResult = true
+    showPage2 = true
+  of SetPassphrase:
+    showPage1 = false
+    showPage2 = true
+
   appInst.redraw()
 
 var jsViewSelector {.importc, nodecl.}: JsObject
@@ -491,47 +500,55 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
 
 proc appMain(): VNode =
   result = buildHtml(tdiv):
-    section(id="section1", class="section"):
-      tdiv(class="intro"):
-        tdiv(class="intro-head"):
-          tdiv(class="caption"): text "Pastel Wallet"
-          tdiv(class="ui container method-selector"):
-            tdiv(class="title"): text "Import the master seed to start your wallet."
-            tdiv(class="ui buttons"):
-              button(class=importTypeButtonClass(ImportType.SeedCard), onclick=importSelector(ImportType.SeedCard)):
-                italic(class="qrcode icon")
-                text "Seed card"
-              tdiv(class="or")
-              button(class=importTypeButtonClass(ImportType.Mnemonic), onclick=importSelector(ImportType.Mnemonic)):
-                italic(class="list alternate icon")
-                text "Mnemonic"
-        tdiv(class="intro-body"):
-          if currentImportType == ImportType.SeedCard:
-            tdiv(class="ui enter aligned segment seed-seg"):
-              if showScanResult:
-                tdiv(class="ui link cards seed-card-holder"):
-                  seedCard(seedCardInfo)
-                  seedCard(seedCardInfo)
-                  seedCard(seedCardInfo)
-              if showScanning:
-                tdiv(class="qr-scanning"):
-                  tdiv()
-                  tdiv()
-              if showScanSeedBtn:
-                tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showQr()):
-                  text "Scan seed card with camera"
-                  italic(class="camera icon")
-              if showCamTools:
-                tdiv(class="ui small basic icon buttons camtools"):
-                  button(class="ui button", onclick=camChange()):
+    if showPage1:
+      section(id="section1", class="section"):
+        tdiv(class="intro"):
+          tdiv(class="intro-head"):
+            tdiv(class="caption"): text "Pastel Wallet"
+            tdiv(class="ui container method-selector"):
+              tdiv(class="title"): text "Import the master seed to start your wallet."
+              tdiv(class="ui buttons"):
+                button(class=importTypeButtonClass(ImportType.SeedCard), onclick=importSelector(ImportType.SeedCard)):
+                  italic(class="qrcode icon")
+                  text "Seed card"
+                tdiv(class="or")
+                button(class=importTypeButtonClass(ImportType.Mnemonic), onclick=importSelector(ImportType.Mnemonic)):
+                  italic(class="list alternate icon")
+                  text "Mnemonic"
+          tdiv(class="intro-body"):
+            if currentImportType == ImportType.SeedCard:
+              tdiv(class="ui enter aligned segment seed-seg"):
+                if showScanResult:
+                  tdiv(class="ui link cards seed-card-holder"):
+                    seedCard(seedCardInfo)
+                    seedCard(seedCardInfo)
+                    seedCard(seedCardInfo)
+                  a(class="pagenext", href="#section2"):
+                    span()
+                    text "Next"
+                if showScanning:
+                  tdiv(class="qr-scanning"):
+                    tdiv()
+                    tdiv()
+                if showScanSeedBtn:
+                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showQr()):
+                    text "Scan seed card with camera"
                     italic(class="camera icon")
-                  button(class="ui button", onclick=camClose()):
-                    italic(class="window close icon")
-              video(id="qrvideo")
+                if showCamTools:
+                  tdiv(class="ui small basic icon buttons camtools"):
+                    button(class="ui button", onclick=camChange()):
+                      italic(class="camera icon")
+                    button(class="ui button", onclick=camClose()):
+                      italic(class="window close icon")
+                video(id="qrvideo")
 
-          else:
-            tdiv(class="ui enter aligned segment mnemonic-seg"):
-              mnemonicEditor()
+            else:
+              tdiv(class="ui enter aligned segment mnemonic-seg"):
+                mnemonicEditor()
+    if showPage2:
+      section(id="section2", class="section"):
+        tdiv(): text "hello!"
+
 
 proc afterScript() =
   jq("#section0").remove()
@@ -552,6 +569,27 @@ proc afterScript() =
           fontcolor: '#393939'
         });
       });
+
+      target_page_scroll = '#section2';
+      page_scroll_done = function() {
+        $('a.pagenext').css('visibility', 'hidden');
+        jsViewSelector(3);
+        page_scroll_done = function() {};
+      }
+      var elms = document.querySelectorAll('a.pagenext');
+      Array.prototype.forEach.call(elms, function(elm) {
+        var href = elm.getAttribute("href");
+        if(href && href.startsWith('#')) {
+          var cb = function(e) {
+            e.preventDefault();
+            var href = this.getAttribute('href');
+            goSection(href, page_scroll_done);
+          }
+          registerEventList.push({elm: elm, type: 'click', cb: cb});
+          elm.addEventListener('click', cb);
+        }
+      });
     """
 
 appInst = setRenderer(appMain, "main", afterScript)
+#viewSelector(SeedAfterScan)
