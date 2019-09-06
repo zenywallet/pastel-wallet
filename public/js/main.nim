@@ -112,9 +112,11 @@ var qrReader = (function() {
 
           function resultHandler(err, result) {
             if(err) {
-              console.log(err);
-              console.log(err.message);
-              //qr_stop();
+              if(err.message) {
+                console.log(err.message);
+              } else {
+                console.log(err);
+              }
               return;
             }
             qr_stop();
