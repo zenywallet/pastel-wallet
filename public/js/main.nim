@@ -339,6 +339,7 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
           }
         """
         x.setInputText(s)
+        editingWords = s
         input_elm.focus()
         input_elm.selectionStart = newcur
         input_elm.selectionEnd = newcur
@@ -352,6 +353,7 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
           }
         """
         x.setInputText(s)
+        editingWords = s
         input_elm.focus()
         input_elm.selectionEnd = newcur
     autocompleteWords = @[]
@@ -416,6 +418,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
         }
       """
       x.setInputText(ret)
+      editingWords = ret
 
 proc changeLanguage(ev: Event; n: VNode) =
   var langId = cast[int](n.value)
@@ -585,6 +588,5 @@ proc afterScript() =
         }
       });
     """
-
 appInst = setRenderer(appMain, "main", afterScript)
 #viewSelector(SeedAfterScan)
