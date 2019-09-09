@@ -7,7 +7,7 @@ proc layout_base*(debug: bool): string =
 <script type="text/javascript" src="/js/coinlibs.js"></script>
 <script type="text/javascript" src="/js/zopfli.raw.min.js"></script>
 <script type="text/javascript" src="/js/rawinflate.min.js"></script>
-<script type="text/javascript" src="/js/qcode-decoder.min.js"></script>
+<script type="text/javascript" src="/js/jsQR.js"></script>
 <script type="text/javascript" src="/js/jquery-3.4.1.slim.js"></script>
 <script type="text/javascript" src="/semantic/semantic.js"></script>
 <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
