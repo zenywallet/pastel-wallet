@@ -314,6 +314,9 @@ section h1 {
 .ui.card.seed-card > .content {
   font-size: 12px;
 }
+.ui.card.seed-card > .content .seed {
+  font-family: "Courier New", Courier, Consolas, Monaco, monospace;
+}
 .ui.card.seed-card > .content .meta {
   font-size: 10px;
 }

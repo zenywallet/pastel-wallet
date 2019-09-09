@@ -2945,9 +2945,11 @@ function seed_card_218624(card_info_218626) {
 		var seed_upper_218839 = HEX5BHEX5D_84681(seed_218684, HEX2EHEX2E_84620(0, subInt(half_218683, 1)));
 		var seed_lower_218872 = HEX5BHEX5D_111704(seed_218684, HEX2EHEX2E_111639(half_218683, 1));
 		var tmp_218637 = tree_172246(43, []);
+		tmp_218637.class = "seed";
 		add_170800(tmp_218637, text_172364(seed_upper_218839));
 		add_170800(tmp_218632, tmp_218637);
 		var tmp_218638 = tree_172246(43, []);
+		tmp_218638.class = "seed";
 		add_170800(tmp_218638, text_172364(seed_lower_218872));
 		add_170800(tmp_218632, tmp_218638);
 		}

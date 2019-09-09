@@ -580,8 +580,8 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
         var seed = $cardInfo.seed
         var seed_upper = seed[0..<half]
         var seed_lower = seed[half..^1]
-        tdiv(): text seed_upper
-        tdiv(): text seed_lower
+        tdiv(class="seed"): text seed_upper
+        tdiv(class="seed"): text seed_lower
     tdiv(class="extra content"):
       tdiv(class="inline field"):
         tdiv(class="vector-lavel"): text "Seed Vector:"
