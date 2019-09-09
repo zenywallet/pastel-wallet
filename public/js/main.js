@@ -945,9 +945,11 @@ var qrReader = (function() {
 
           function resultHandler(err, result) {
             if(err) {
-              console.log(err);
-              console.log(err.message);
-              //qr_stop();
+              if(err.message) {
+                console.log(err.message);
+              } else {
+                console.log(err);
+              }
               return;
             }
             qr_stop();
@@ -3478,6 +3480,7 @@ function select_word_217909(input_id_217911, word_217912, whole_replace_217913) 
           }
         
 				set_input_text_199812(x_217919, s_217920);
+				editing_words_217789[0] = s_217920;
 				input_elm_217933.focus();
 				input_elm_217933.selectionStart = newcur_217938;
 				input_elm_217933.selectionEnd = newcur_217938;
@@ -3491,6 +3494,7 @@ function select_word_217909(input_id_217911, word_217912, whole_replace_217913) 
           }
         
 					set_input_text_199812(x_217919, s_217920);
+					editing_words_217789[0] = s_217920;
 					input_elm_217933.focus();
 					input_elm_217933.selectionEnd = newcur_217938;
 				}
@@ -3545,6 +3549,7 @@ function fix_word_218307(input_id_218309, idx_218310, word_218311) {
         }
       
 				set_input_text_199812(x_218317, ret_218321);
+				editing_words_217789[0] = ret_218321;
 				}
 				
 
@@ -3853,19 +3858,40 @@ function after_script_219110() {
 		$("#section0").remove();
 		$(".ui.dropdown").dropdown();
 		if (show_scan_result_214060[0]) {
-		      $('.seed-qrcode canvas').remove();
-      $('.seed-qrcode').each(function() {
-        $(this).qrcode({
-          render: 'canvas',
-          ecLevel: 'Q',
-          radius: 0.39,
-          text: $(this).data('orig'),
-          size: 196,
-          mode: 2,
-          label: '',
-          fontname: 'sans',
-          fontcolor: '#393939'
+		      function seedCardQrUpdate() {
+        $('.seed-qrcode').each(function() {
+          $(this).find('canvas').remove();
+          var fillcolor;
+          if($(this).hasClass('active')) {
+            fillcolor = '#000'
+          } else {
+            fillcolor = '#f8f8f8';
+          }
+          $(this).qrcode({
+            render: 'canvas',
+            ecLevel: 'Q',
+            radius: 0.39,
+            text: $(this).data('orig'),
+            size: 196,
+            mode: 2,
+            label: '',
+            fontname: 'sans',
+            fontcolor: '#393939',
+            fill: fillcolor
+          });
         });
+      }
+      $('.seed-qrcode').last().addClass('active');
+      seedCardQrUpdate();
+
+      $('.seed-card').off('click').on('click', function() {
+        if(!$(this).find('.seed-qrcode').hasClass('active')) {
+          $('.seed-card').each(function() {
+            $(this).find('.seed-qrcode').removeClass('active');
+          });
+          $(this).find('.seed-qrcode').addClass('active');
+          seedCardQrUpdate();
+        }
       });
 
       target_page_scroll = '#section2';

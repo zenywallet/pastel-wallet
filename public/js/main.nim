@@ -553,19 +553,40 @@ proc afterScript() =
   jq(".ui.dropdown").dropdown()
   if showScanResult:
     asm """
-      $('.seed-qrcode canvas').remove();
-      $('.seed-qrcode').each(function() {
-        $(this).qrcode({
-          render: 'canvas',
-          ecLevel: 'Q',
-          radius: 0.39,
-          text: $(this).data('orig'),
-          size: 196,
-          mode: 2,
-          label: '',
-          fontname: 'sans',
-          fontcolor: '#393939'
+      function seedCardQrUpdate() {
+        $('.seed-qrcode').each(function() {
+          $(this).find('canvas').remove();
+          var fillcolor;
+          if($(this).hasClass('active')) {
+            fillcolor = '#000'
+          } else {
+            fillcolor = '#f8f8f8';
+          }
+          $(this).qrcode({
+            render: 'canvas',
+            ecLevel: 'Q',
+            radius: 0.39,
+            text: $(this).data('orig'),
+            size: 196,
+            mode: 2,
+            label: '',
+            fontname: 'sans',
+            fontcolor: '#393939',
+            fill: fillcolor
+          });
         });
+      }
+      $('.seed-qrcode').last().addClass('active');
+      seedCardQrUpdate();
+
+      $('.seed-card').off('click').on('click', function() {
+        if(!$(this).find('.seed-qrcode').hasClass('active')) {
+          $('.seed-card').each(function() {
+            $(this).find('.seed-qrcode').removeClass('active');
+          });
+          $(this).find('.seed-qrcode').addClass('active');
+          seedCardQrUpdate();
+        }
       });
 
       target_page_scroll = '#section2';
@@ -588,5 +609,6 @@ proc afterScript() =
         }
       });
     """
+
 appInst = setRenderer(appMain, "main", afterScript)
 #viewSelector(SeedAfterScan)
