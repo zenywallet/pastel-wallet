@@ -587,6 +587,10 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
         tdiv(class="vector-lavel"): text "Seed Vector:"
         tdiv(class="ui mini input vector-input"):
           input(type="text", placeholder="Type your seed vector")
+    tdiv(class="bt-seed-del"):
+      button(class="circular ui icon mini button"):
+        italic(class="cut icon")
+
 
 proc appMain(): VNode =
   result = buildHtml(tdiv):
@@ -612,7 +616,9 @@ proc appMain(): VNode =
                   tdiv(class="ui link cards seed-card-holder"):
                     seedCard(seedCardInfo)
                     seedCard(seedCardInfo)
-                    seedCard(seedCardInfo)
+                    tdiv(class="seed-add-container"):
+                      button(class="circular ui icon button bt-add-seed"):
+                        italic(class="plus icon")
                   a(class="pagenext", href="#section2"):
                     span()
                     text "Next"
