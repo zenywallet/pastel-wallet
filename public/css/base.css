@@ -195,6 +195,9 @@ section h1 {
   transform: translate(-50%, -50%);
   z-index: 3;
 }
+.ui.buttons .or::before {
+  line-height: 1.65em;
+}
 #qrcanvas {
   position: absolute;
   top: 0;
