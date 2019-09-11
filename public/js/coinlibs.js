@@ -6532,7 +6532,7 @@ const INVALID_CHECKSUM = 'Invalid mnemonic checksum';
 const WORDLIST_REQUIRED = 'A wordlist is required but a default could not be found.\n' +
     'Please explicitly pass a 2048 word array explicitly.';
 function normalize(str) {
-    return (str || '').normalize('NFKC');
+    return (str || '').normalize('NFKD');
 }
 function lpad(str, padString, length) {
     while (str.length < length)
