@@ -11,6 +11,7 @@ proc layout_base*(debug: bool): string =
 <script type="text/javascript" src="/js/jquery-3.4.1.slim.js"></script>
 <script type="text/javascript" src="/semantic/semantic.js"></script>
 <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
+<script type="text/javascript" src="/js/wallet.js"></script>
 <script type="text/javascript" src="/js/ui.js"></script>
 <script type="text/javascript" src="/js/pastel.js"></script>
 """.indent(2).strip
