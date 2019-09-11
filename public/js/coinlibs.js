@@ -6534,6 +6534,9 @@ const WORDLIST_REQUIRED = 'A wordlist is required but a default could not be fou
 function normalize(str) {
     return (str || '').normalize('NFKD');
 }
+function normalize_nfkc(str) {
+    return (str || '').normalize('NFKC');
+}
 function lpad(str, padString, length) {
     while (str.length < length)
         str = padString + str;
@@ -6585,7 +6588,7 @@ function mnemonicToEntropy(mnemonic, wordlist) {
     if (!wordlist) {
         throw new Error(WORDLIST_REQUIRED);
     }
-    const words = normalize(mnemonic).split(' ');
+    const words = normalize_nfkc(mnemonic).split(' ');
     if (words.length % 3 !== 0)
         throw new Error(INVALID_MNEMONIC);
     // convert word indices to 11 bit binary strings
