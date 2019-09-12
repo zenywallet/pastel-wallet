@@ -151,6 +151,10 @@ var Stream = (function() {
     if(this instanceof Stream) {
       this.ws_url = ws_url;
       this.ws_protocol = ws_protocol;
+      var self = this;
+      $(window).on('beforeunload', function() {
+        self.stop();
+      });
     } else {
       return new Stream(url, protocol);
     }
@@ -194,7 +198,9 @@ var Stream = (function() {
   Stream.prototype.stop = function() {
     reconnect = false;
     clearTimeout(reconnect_timer);
-    this.ws.close();
+    if(this.ws) {
+      this.ws.close();
+    }
   }
 
   return Stream;
