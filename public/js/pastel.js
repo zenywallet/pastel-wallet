@@ -247,7 +247,18 @@ pastel.ready = function() {
     stream.send(sdata);
   }
 
-  pastel.recv = function(json) { console.log(JSON.stringify(json)); } // callback
+  pastel.secure_recv = function(json) {
+    //console.log(JSON.stringify(json));
+  }
+
+  pastel.unsecure_recv = function(data) {
+    try {
+      var json = JSON.parse(data);
+      //console.log(JSON.stringify(json));
+    } catch(ex) {
+      //console.log(data);
+    }
+  }
 
   stream.onMessage = function(evt) {
     if(typeof evt.data == 'object') {
@@ -275,7 +286,7 @@ pastel.ready = function() {
         console.log('decomp=', decomp);
         var json = JSON.parse(new TextDecoder("utf-8").decode(decomp));
         console.log(JSON.stringify(json));
-        pastel.recv(json);
+        pastel.secure_recv(json);
       } else if(stage == 0 && !shared && data.length == 96) {
         console.log('stage=0, length=96');
         var pub = data.slice(0, 32);
@@ -319,6 +330,7 @@ pastel.ready = function() {
       }
     } else if(typeof evt.data == 'string') {
       console.log(evt.data);
+      pastel.unsecure_recv(evt.data);
     }
   }
 
