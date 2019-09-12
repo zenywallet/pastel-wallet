@@ -112,7 +112,7 @@ pastel.load = function() {
   };
   cipherMod = Cipher(cipherMod);
 
-  pastel.coin = coin;
+  pastel.coin = coinlibs.coin;
   ready_flag.coin = true;
 
   stime = new Date();
@@ -140,3 +140,125 @@ pastel.load = function() {
   }
   check_ready();
 }
+
+String.prototype.toByteArray=String.prototype.toByteArray||(function(e){for(var b=[],c=0,f=this.length;c<f;c++){var a=this.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=this.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b})
+
+pastel.ready = function() {
+  console.log('pastel ready');
+  console.log(pastel);
+  var supercop = pastel.supercop;
+  var cipher = pastel.cipher;
+  var coin = pastel.coin;
+
+  var seed = supercop.createSeed();
+  var kp = supercop.createKeyPair(seed);
+  var shared = null;
+  var ws = new WebSocket(pastel.config.ws_url, pastel.config.ws_protocol);
+  ws.binaryType = 'arraybuffer';
+  var stage = 0;
+  ws.onmessage = function(evt) {
+    if(typeof evt.data == 'object') {
+      var data = new Uint8Array(evt.data, 0, evt.data.length);
+      console.log('object=', data);
+      if(stage == 1) {
+        var rdata = new Uint8Array(data.length);
+        var pos = 0, next_pos = 16;
+        while(next_pos < data.length) {
+          var dec = cipher.dec(data.slice(pos, next_pos));
+          rdata.set(dec, pos);
+          pos = next_pos;
+          next_pos += 16;
+        }
+        if(pos < data.length) {
+          var buf = new Uint8Array(16);
+          var plen = data.length - pos;
+          buf.fill(plen);
+          buf.set(data.slice(pos, data.length), 0)
+          var dec = cipher.dec(buf).slice(0, plen);
+          rdata.set(dec, pos);
+        }
+        console.log('rdata=', rdata);
+        var decomp = new Zlib.RawInflate(rdata, {verify: true}).decompress();
+        console.log('decomp=', decomp);
+        var json = JSON.parse(new TextDecoder("utf-8").decode(decomp));
+        console.log(JSON.stringify(json));
+        pastel.recv(json);
+      } else if(stage == 0 && !shared && data.length == 96) {
+        console.log('stage=0, length=96');
+        var pub = data.slice(0, 32);
+        console.log('server publicKey=' + JSON.stringify(pub));
+        shared = supercop.keyExchange(pub, kp.secretKey);
+        console.log('shared=' + JSON.stringify(shared));
+        var shared_key = coin.crypto.sha256(shared);
+        var shared_key_uint8array = new Uint8Array(shared_key);
+        console.log('shared hash=' + JSON.stringify(shared_key));
+        console.log('shared hash=' + JSON.stringify(shared_key_uint8array));
+        console.log('shared hash=' + shared_key.toString('hex'));
+        shared = shared_key_uint8array;
+
+        var seed_srv = data.slice(32, 64);
+        var seed_cli = data.slice(64, 96);
+        var rs = new Uint8Array(32);
+        var rc = new Uint8Array(32);
+        for(var i = 0; i < 32; i++) {
+          rs[i] = shared[i] ^ seed_srv[i];
+          rc[i] = shared[i] ^ seed_cli[i];
+        }
+        var iv_srv = coin.crypto.sha256(rs);
+        var iv_cli = coin.crypto.sha256(rc);
+        console.log(cipher.buf2hex(shared));
+        console.log(cipher.buf2hex(iv_srv));
+        console.log(cipher.buf2hex(iv_cli));
+        cipher.init(shared, iv_cli, iv_srv);
+
+        pastel.send = function(json) {
+          var d = JSON.stringify(json);
+          var comp =  new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+          console.log(comp.length);
+          var sdata = new Uint8Array(comp.length);
+          var pos = 0, next_pos = 16;
+          while(next_pos < comp.length) {
+            var enc = cipher.enc(comp.slice(pos, next_pos));
+            sdata.set(enc, pos);
+            pos = next_pos;
+            next_pos += 16;
+          }
+          if(pos < comp.length) {
+            var buf = new Uint8Array(16);
+            var plen = comp.length - pos;
+            buf.fill(plen);
+            buf.set(comp.slice(pos, comp.length), 0)
+            var enc = cipher.enc(buf).slice(0, plen);
+            sdata.set(enc, pos);
+          }
+          console.log('sdata=', sdata);
+          console.log(cipher.buf2hex(sdata));
+          ws.send(sdata);
+        }
+        pastel.recv = function(json) { console.log(JSON.stringify(json)); } // callback
+
+        stage = 1;
+
+
+        pastel.send({test: "日本語", test1: 1234, test2: 5678901234, test3: 1234, test4: 123, test5: 123, test6: 123});
+        /*var comp = new Zopfli.RawDeflate("日本".toByteArray(false)).compress();
+        console.log('comp length=', comp.length);
+        console.log(comp);
+        var enc = cipher.enc(comp).slice(0, comp.length);
+        console.log('enc=', enc);
+        console.log(cipher.buf2hex(enc));
+        ws.send(enc);*/
+      } else {
+        console.log(data);
+      }
+    } else if(typeof evt.data == 'string') {
+      console.log(evt.data);
+    }
+  }
+
+  ws.onopen = function(evt) {
+    ws.send(kp.publicKey);
+    console.log('client publicKey=' + JSON.stringify(kp.publicKey));
+  }
+}
+pastel.load();
