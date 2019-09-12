@@ -24,7 +24,8 @@ proc stream_main() {.thread.} =
 
   proc clientDelete(fd: int) =
     acquire(clientsLock)
-    closedclients.add(fd)
+    if not closedclients.contains(fd):
+      closedclients.add(fd)
     let client_count = clients.len - closedclients.len
     release(clientsLock)
     echo "client count=", client_count
@@ -155,12 +156,14 @@ proc stream_main() {.thread.} =
     while true:
       try:
         for fd, client in clients:
+          echo "fd=", fd
           asyncCheck client.ws.sendText("test")
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
       await sleepAsync(2000)
       deleteClosedClient()
+      echo "clients.len=", clients.len
 
   proc clientManager() {.async.} =
    while true:
