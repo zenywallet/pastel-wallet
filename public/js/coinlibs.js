@@ -6583,7 +6583,7 @@ function mnemonicToSeed(mnemonic, password) {
     });
 }
 exports.mnemonicToSeed = mnemonicToSeed;
-function mnemonicToEntropy(mnemonic, wordlist) {
+function mnemonicToEntropy(mnemonic, wordlist, rawflag) {
     wordlist = wordlist || DEFAULT_WORDLIST;
     if (!wordlist) {
         throw new Error(WORDLIST_REQUIRED);
@@ -6616,6 +6616,9 @@ function mnemonicToEntropy(mnemonic, wordlist) {
     const newChecksum = deriveChecksumBits(entropy);
     if (newChecksum !== checksumBits)
         throw new Error(INVALID_CHECKSUM);
+    if(rawflag) {
+      return entropy;
+    }
     return entropy.toString('hex');
 }
 exports.mnemonicToEntropy = mnemonicToEntropy;
