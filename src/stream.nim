@@ -178,12 +178,12 @@ proc stream_main() {.thread.} =
       echo "server publicKey=", kp.publicKey
       asyncCheck ch.ws.sendBinary(kp.publicKey.toStr & salt.toStr)
       asyncCheck recvdata(fd, ch.ws)
-      asyncCheck senddata()
     else:
       await sleepAsync(500)
 
   channel.open()
   asyncCheck clientManager()
+  asyncCheck senddata()
 
   proc cb(req: Request) {.async, gcsafe.} =
     let (ws, error) = await verifyWebsocketRequest(req, "pastel-v0.1")
