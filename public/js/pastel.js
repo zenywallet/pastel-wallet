@@ -143,6 +143,63 @@ pastel.load = function() {
 
 String.prototype.toByteArray=String.prototype.toByteArray||(function(e){for(var b=[],c=0,f=this.length;c<f;c++){var a=this.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=this.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b})
 
+var Stream = (function() {
+  var reconnect_timer;
+  var reconnect = true;
+
+  function Stream(ws_url, ws_protocol) {
+    if(this instanceof Stream) {
+      this.ws_url = ws_url;
+      this.ws_protocol = ws_protocol;
+    } else {
+      return new Stream(url, protocol);
+    }
+  }
+
+  Stream.prototype.onOpen = function(evt) {}
+
+  Stream.prototype.onMessage = function(evt) {}
+
+  Stream.prototype.send = function(data) {
+    if(this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(data);
+      return true;
+    }
+    return false;
+  }
+
+  Stream.prototype.connect = function() {
+    reconnect = true;
+    this.ws = new WebSocket(this.ws_url, this.ws_protocol);
+    this.ws.binaryType = 'arraybuffer';
+    this.ws.onopen = this.onOpen;
+    this.ws.onmessage = this.onMessage;
+    var self = this;
+    this.ws.onclose = function() {
+      console.log('onclose');
+      clearTimeout(reconnect_timer);
+      if(reconnect) {
+        reconnect_timer = setTimeout(function() {
+          console.log('reconnect');
+          self.connect();
+        }, 10000 + Math.round(Math.random() * 20) * 1000);
+      }
+    }
+  }
+
+  Stream.prototype.start = function() {
+    this.connect();
+  }
+
+  Stream.prototype.stop = function() {
+    reconnect = false;
+    clearTimeout(reconnect_timer);
+    this.ws.close();
+  }
+
+  return Stream;
+}());
+
 pastel.ready = function() {
   console.log('pastel ready');
   console.log(pastel);
@@ -153,10 +210,46 @@ pastel.ready = function() {
   var seed = supercop.createSeed();
   var kp = supercop.createKeyPair(seed);
   var shared = null;
-  var ws = new WebSocket(pastel.config.ws_url, pastel.config.ws_protocol);
-  ws.binaryType = 'arraybuffer';
   var stage = 0;
-  ws.onmessage = function(evt) {
+  var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
+
+  stream.onOpen = function(evt) {
+    seed = supercop.createSeed();
+    kp = supercop.createKeyPair(seed);
+    shared = null;
+    stage = 0;
+    stream.send(kp.publicKey);
+    console.log('client publicKey=' + JSON.stringify(kp.publicKey));
+  }
+
+  pastel.send = function(json) {
+    var d = JSON.stringify(json);
+    var comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+    console.log(comp.length);
+    var sdata = new Uint8Array(comp.length);
+    var pos = 0, next_pos = 16;
+    while(next_pos < comp.length) {
+      var enc = cipher.enc(comp.slice(pos, next_pos));
+      sdata.set(enc, pos);
+      pos = next_pos;
+      next_pos += 16;
+    }
+    if(pos < comp.length) {
+      var buf = new Uint8Array(16);
+      var plen = comp.length - pos;
+      buf.fill(plen);
+      buf.set(comp.slice(pos, comp.length), 0)
+      var enc = cipher.enc(buf).slice(0, plen);
+      sdata.set(enc, pos);
+    }
+    console.log('sdata=', sdata);
+    console.log(cipher.buf2hex(sdata));
+    stream.send(sdata);
+  }
+
+  pastel.recv = function(json) { console.log(JSON.stringify(json)); } // callback
+
+  stream.onMessage = function(evt) {
     if(typeof evt.data == 'object') {
       var data = new Uint8Array(evt.data, 0, evt.data.length);
       console.log('object=', data);
@@ -211,34 +304,7 @@ pastel.ready = function() {
         console.log(cipher.buf2hex(iv_cli));
         cipher.init(shared, iv_cli, iv_srv);
 
-        pastel.send = function(json) {
-          var d = JSON.stringify(json);
-          var comp =  new Zopfli.RawDeflate(d.toByteArray(false)).compress();
-          console.log(comp.length);
-          var sdata = new Uint8Array(comp.length);
-          var pos = 0, next_pos = 16;
-          while(next_pos < comp.length) {
-            var enc = cipher.enc(comp.slice(pos, next_pos));
-            sdata.set(enc, pos);
-            pos = next_pos;
-            next_pos += 16;
-          }
-          if(pos < comp.length) {
-            var buf = new Uint8Array(16);
-            var plen = comp.length - pos;
-            buf.fill(plen);
-            buf.set(comp.slice(pos, comp.length), 0)
-            var enc = cipher.enc(buf).slice(0, plen);
-            sdata.set(enc, pos);
-          }
-          console.log('sdata=', sdata);
-          console.log(cipher.buf2hex(sdata));
-          ws.send(sdata);
-        }
-        pastel.recv = function(json) { console.log(JSON.stringify(json)); } // callback
-
         stage = 1;
-
 
         pastel.send({test: "日本語", test1: 1234, test2: 5678901234, test3: 1234, test4: 123, test5: 123, test6: 123});
         /*var comp = new Zopfli.RawDeflate("日本".toByteArray(false)).compress();
@@ -256,9 +322,6 @@ pastel.ready = function() {
     }
   }
 
-  ws.onopen = function(evt) {
-    ws.send(kp.publicKey);
-    console.log('client publicKey=' + JSON.stringify(kp.publicKey));
-  }
+  stream.start();
 }
 pastel.load();

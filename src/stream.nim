@@ -155,7 +155,7 @@ proc stream_main() {.thread.} =
     while true:
       try:
         for fd, client in clients:
-          asyncCheck client.ws.sendBinary("test")
+          asyncCheck client.ws.sendText("test")
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
@@ -178,7 +178,7 @@ proc stream_main() {.thread.} =
       echo "server publicKey=", kp.publicKey
       asyncCheck ch.ws.sendBinary(kp.publicKey.toStr & salt.toStr)
       asyncCheck recvdata(fd, ch.ws)
-      #asyncCheck senddata()
+      asyncCheck senddata()
     else:
       await sleepAsync(500)
 
