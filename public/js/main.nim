@@ -283,11 +283,11 @@ asm """
   jsViewSelector = `viewSelector`
 """
 
-proc importTypeButtonClass(importType: ImportType): cstring =
-  if importType == currentImportType:
-    "ui olive button"
-  else:
-    "ui grey button"
+#proc importTypeButtonClass(importType: ImportType): cstring =
+#  if importType == currentImportType:
+#    "ui olive button"
+#  else:
+#    "ui grey button"
 
 proc importSelector(importType: ImportType): proc() =
   result = proc() =
@@ -295,6 +295,17 @@ proc importSelector(importType: ImportType): proc() =
       qrReader.hide(true);
     """
     currentImportType = importType
+
+    if currentImportType == ImportType.SeedCard:
+      asm """
+        $('#seedselector').removeClass('grey').addClass('olive');
+        $('#mnemonicselector').removeClass('olive').addClass('grey');
+      """
+    else:
+      asm """
+        $('#mnemonicselector').removeClass('grey').addClass('olive');
+        $('#seedselector').removeClass('olive').addClass('grey');
+      """
 
 type SeedCardInfo = object
   seed: cstring
@@ -605,11 +616,11 @@ proc appMain(): VNode =
             tdiv(class="ui container method-selector"):
               tdiv(class="title"): text "Import the master seed to start your wallet."
               tdiv(class="ui buttons"):
-                button(class=importTypeButtonClass(ImportType.SeedCard), onclick=importSelector(ImportType.SeedCard)):
+                button(id="seedselector", class="ui olive button", onclick=importSelector(ImportType.SeedCard)):
                   italic(class="qrcode icon")
                   text "Seed card"
                 tdiv(class="or")
-                button(class=importTypeButtonClass(ImportType.Mnemonic), onclick=importSelector(ImportType.Mnemonic)):
+                button(id="mnemonicselector", class="ui grey button", onclick=importSelector(ImportType.Mnemonic)):
                   italic(class="list alternate icon")
                   text "Mnemonic"
           tdiv(class="intro-body"):
