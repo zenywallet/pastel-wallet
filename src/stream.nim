@@ -184,14 +184,15 @@ proc stream_main() {.thread.} =
   proc senddata() {.async.} =
     while true:
       try:
+        deleteClosedClient()
         for fd, client in clients:
           echo "fd=", fd
-          asyncCheck client.ws.sendText("test")
+          if not client.req.client.isClosed:
+            asyncCheck client.ws.sendText("test")
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
       await sleepAsync(2000)
-      deleteClosedClient()
       echo "clients.len=", clients.len
 
   proc clientManager() {.async.} =
