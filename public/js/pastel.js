@@ -190,7 +190,7 @@ var Stream = (function() {
         reconnect_timer = setTimeout(function() {
           console.log('reconnect');
           self.connect();
-        }, 10000 + Math.round(Math.random() * 20) * 1000);
+        }, 5000);//10000 + Math.round(Math.random() * 20) * 1000);
       }
     }
   }

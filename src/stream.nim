@@ -17,6 +17,7 @@ proc stream_main() {.thread.} =
 
   var clients: Table[int, ClientData]
   var closedclients: seq[int]
+  var pingclients = initTable[int, bool]()
   var clientsLock: Lock
   initLock(clientsLock)
   var clientsdirty = false
@@ -131,6 +132,11 @@ proc stream_main() {.thread.} =
               echo sdata, " ", sdata.len
               asyncCheck client.ws.sendBinary(sdata.toStr)
 
+        of Opcode.Pong:
+          if fd in pingclients:
+            pingclients[fd] = false
+            echo "pong fd=", fd
+
         of Opcode.Close:
           echo "del=", fd
           clientDelete(fd)
@@ -145,12 +151,35 @@ proc stream_main() {.thread.} =
         echo e.name, ": ", e.msg
         return
 
+
   proc deleteClosedClient() =
     acquire(clientsLock)
     for fd in closedclients:
       clients.del(fd)
     closedclients = @[]
     release(clientsLock)
+
+  proc activecheck() {.async.} =
+    while true:
+      try:
+        deleteClosedClient()
+        for fd, client in clients:
+          echo "fd=", fd
+          if fd in pingclients and pingclients[fd]:
+            clientDelete(fd)
+            waitFor client.ws.close()
+        clear(pingclients)
+        deleteClosedClient()
+        for fd, client in clients:
+          echo "fd=", fd
+          pingclients.add(fd, true)
+          await client.ws.sendPing()
+      except:
+        let e = getCurrentException()
+        echo e.name, ": ", e.msg
+      await sleepAsync(10000)
+      echo "clients.len=", clients.len
+
 
   proc senddata() {.async.} =
     while true:
@@ -186,6 +215,7 @@ proc stream_main() {.thread.} =
 
   channel.open()
   asyncCheck clientManager()
+  asyncCheck activecheck()
   asyncCheck senddata()
 
   proc cb(req: Request) {.async, gcsafe.} =
