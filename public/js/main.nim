@@ -243,6 +243,8 @@ type ViewType = enum
   SeedNone
   SeedScanning
   SeedAfterScan
+  MnemonicEdit
+  MnemonicFulfill
   SetPassphrase
 
 var showScanSeedBtn = true
@@ -252,6 +254,7 @@ var showScanResult = false
 
 var showPage1 = true
 var showPage2 = false
+var mnemonicFulfill = false
 
 proc viewSelector(view: ViewType) =
   echo "view", view
@@ -261,16 +264,22 @@ proc viewSelector(view: ViewType) =
     showScanning = true
     showCamTools = true
     showScanResult = false
+    showPage2 = false
   of SeedScanning:
     showScanSeedBtn = true
     showScanning = true
     showCamTools = true
     showScanResult = false
+    showPage2 = false
   of SeedAfterScan:
     showScanSeedBtn = false
     showScanning = false
     showCamTools = false
     showScanResult = true
+    showPage2 = true
+  of MnemonicEdit:
+    showPage2 = false
+  of MnemonicFulfill:
     showPage2 = true
   of SetPassphrase:
     showPage1 = false
@@ -295,6 +304,11 @@ proc importSelector(importType: ImportType): proc() =
       qrReader.hide(true);
     """
     currentImportType = importType
+
+    if currentImportType == ImportType.SeedCard:
+      showPage2 = showScanResult
+    elif currentImportType == ImportType.Mnemonic:
+      showPage2 = mnemonicFulfill
 
     if currentImportType == ImportType.SeedCard:
       asm """
@@ -408,6 +422,9 @@ var autocompleteWords: seq[cstring] = @[]
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
   if not s.isNil and s.len > 0:
+    if mnemonicFulfill and editingWords != s:
+      mnemonicFulfill = false
+      viewSelector(MnemonicEdit)
     editingWords = s;
     var cur = document.getElementById(n.id).selectionStart
     asm """
@@ -477,13 +494,18 @@ proc confirmMnemonic(input_id: cstring): proc() =
       """
       chklist = @[]
       var idx: int = 0
+      var allvalid = true
       for word in words:
         if wl_select.includes(cast[cstring](word)):
           chklist.add (idx, word, true, @[])
         else:
           let levs = cast[seq[cstring]](levens(word.toJs, bip39_wordlist))
           chklist.add (idx, word, false, levs)
+          allvalid = false
         inc(idx)
+      if allvalid and idx >= 12 and idx mod 3 == 0:
+        mnemonicFulfill = true
+        viewSelector(MnemonicFulfill)
     else:
       chklist = @[]
     autocompleteWords = @[]
@@ -654,6 +676,10 @@ proc appMain(): VNode =
             else:
               tdiv(class="ui enter aligned segment mnemonic-seg"):
                 mnemonicEditor()
+                if mnemonicFulfill:
+                  a(class="pagenext", href="#section2"):
+                      span()
+                      text "Next"
     if showPage2:
       section(id="section2", class="section"):
         tdiv(): text "hello!"
@@ -699,11 +725,14 @@ proc afterScript() =
           seedCardQrUpdate();
         }
       });
+    """
 
+  if showScanResult or mnemonicFulfill:
+    asm """
       target_page_scroll = '#section2';
       page_scroll_done = function() {
         $('a.pagenext').css('visibility', 'hidden');
-        jsViewSelector(3);
+        jsViewSelector(5);
         page_scroll_done = function() {};
       }
       var elms = document.querySelectorAll('a.pagenext');
@@ -714,6 +743,7 @@ proc afterScript() =
             e.preventDefault();
             var href = this.getAttribute('href');
             goSection(href, page_scroll_done);
+
           }
           registerEventList.push({elm: elm, type: 'click', cb: cb});
           elm.addEventListener('click', cb);
