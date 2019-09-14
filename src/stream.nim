@@ -21,7 +21,6 @@ proc stream_main() {.thread.} =
   var clientsLock: Lock
   initLock(clientsLock)
   var clientsdirty = false
-  var shared_key: MDigest[256]
 
   proc clientDelete(fd: int) =
     acquire(clientsLock)
@@ -41,6 +40,7 @@ proc stream_main() {.thread.} =
       result[i] = a[i] xor b[i]
 
   proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
+    var shared_key: MDigest[256]
     var exchange = false
     while true:
       try:
