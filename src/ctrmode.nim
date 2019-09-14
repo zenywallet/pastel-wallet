@@ -1,11 +1,12 @@
 # Copyright (c) 2019 zenywallet
 
-import serpent
+import serpent_threadsafe
 
 type
   CTR* = object
     enc_iv: array[32, byte]
     dec_iv: array[32, byte]
+    l_key: array[140, uint32]
 
 proc countup(val: var array[32, byte]) =
   for i in val.low..val.high:
@@ -14,13 +15,13 @@ proc countup(val: var array[32, byte]) =
       break
 
 proc init*(ctr: var CTR, key: array[32, byte], enc_iv: array[32, byte], dec_iv: array[32, byte]) =
-  discard set_key(cast[ptr uint32](unsafeAddr key[0]), key.len * 8)
+  discard set_key(cast[ptr uint32](unsafeAddr key[0]), key.len * 8, cast[ptr array[140, uint32]](addr ctr.l_key[0]))
   copyMem(addr ctr.enc_iv[0], unsafeAddr enc_iv[0], sizeof(ctr.enc_iv))
   copyMem(addr ctr.dec_iv[0], unsafeAddr dec_iv[0], sizeof(ctr.dec_iv))
 
 proc encrypt*(ctr: var CTR, in_blk: ptr UncheckedArray[byte], out_blk: ptr UncheckedArray[byte]) =
   var enc: array[16, byte]
-  encrypt(cast[ptr array[4, uint32]](addr ctr.enc_iv[0]), cast[ptr array[4, uint32]](addr enc[0]))
+  encrypt(cast[ptr array[140, uint32]](addr ctr.l_key[0]), cast[ptr array[4, uint32]](addr ctr.enc_iv[0]), cast[ptr array[4, uint32]](addr enc[0]))
   var enc_u32p = cast[ptr array[4, uint32]](addr enc[0])
   var in_u32p = cast[ptr array[4, uint32]](in_blk)
   var out_u32p = cast[ptr array[4, uint32]](out_blk)
@@ -30,7 +31,7 @@ proc encrypt*(ctr: var CTR, in_blk: ptr UncheckedArray[byte], out_blk: ptr Unche
 
 proc decrypt*(ctr: var CTR, in_blk: ptr UncheckedArray[byte], out_blk: ptr UncheckedArray[byte]) =
   var dec: array[16, byte]
-  encrypt(cast[ptr array[4, uint32]](addr ctr.dec_iv[0]), cast[ptr array[4, uint32]](addr dec[0]))
+  encrypt(cast[ptr array[140, uint32]](addr ctr.l_key[0]), cast[ptr array[4, uint32]](addr ctr.dec_iv[0]), cast[ptr array[4, uint32]](addr dec[0]))
   var dec_u32p = cast[ptr array[4, uint32]](addr dec[0])
   var in_u32p = cast[ptr array[4, uint32]](in_blk)
   var out_u32p = cast[ptr array[4, uint32]](out_blk)
