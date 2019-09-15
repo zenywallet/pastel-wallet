@@ -39,8 +39,27 @@ proc stream_main() {.thread.} =
     for i in a.low..a.high:
       result[i] = a[i] xor b[i]
 
+  proc clientKeyExchange(client: ClientData, data: string) =
+    var clientPublicKey: PublicKey
+    copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
+    echo "client publicKey=", clientPublicKey
+    let shared = keyExchange(clientPublicKey, client.kp.privateKey)
+    echo "shared=", shared
+    let shared_key = sha256.digest(shared)
+    echo "shared key=", shared_key
+    echo "shared key=", shared_key.data
+    var seed_srv: array[32, byte]
+    var seed_cli: array[32, byte]
+    copyMem(addr seed_srv[0], addr client.salt[0], 32)
+    copyMem(addr seed_cli[0], addr client.salt[32], 32)
+    let iv_srv = sha256.digest(shared_key.data xor seed_srv)
+    let iv_cli = sha256.digest(shared_key.data xor seed_cli)
+    echo "shared_key.data=", shared_key.data
+    echo "iv_srv=", iv_srv
+    echo "iv_cli=", iv_cli
+    client.ctr.init(shared_key.data, iv_srv.data, iv_cli.data)
+
   proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
-    var shared_key: MDigest[256]
     var exchange = false
     while true:
       try:
@@ -54,25 +73,7 @@ proc stream_main() {.thread.} =
             if not data.len == 32:
               echo "error: client data len=", data.len
               break
-            var client = clients[fd]
-            var clientPublicKey: PublicKey
-            copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
-            echo "client publicKey=", clientPublicKey
-            let shared = keyExchange(clientPublicKey, client.kp.privateKey)
-            echo "shared=", shared
-            shared_key = sha256.digest(shared)
-            echo "shared key=", shared_key
-            echo "shared key=", shared_key.data
-            var seed_srv: array[32, byte]
-            var seed_cli: array[32, byte]
-            copyMem(addr seed_srv[0], addr client.salt[0], 32)
-            copyMem(addr seed_cli[0], addr client.salt[32], 32)
-            let iv_srv = sha256.digest(shared_key.data xor seed_srv)
-            let iv_cli = sha256.digest(shared_key.data xor seed_cli)
-            echo "shared_key.data=", shared_key.data
-            echo "iv_srv=", iv_srv
-            echo "iv_cli=", iv_cli
-            client.ctr.init(shared_key.data, iv_srv.data, iv_cli.data)
+            clientKeyExchange(clients[fd], data)
             exchange = true
 
           else:
