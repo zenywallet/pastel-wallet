@@ -53,9 +53,7 @@ proc stream_main() {.thread.} =
           if not exchange:
             if not data.len == 32:
               echo "error: client data len=", data.len
-              clientDelete(fd)
-              waitFor ws.close()
-              return
+              break
             var client = clients[fd]
             var clientPublicKey: PublicKey
             copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
@@ -139,18 +137,23 @@ proc stream_main() {.thread.} =
 
         of Opcode.Close:
           echo "del=", fd
-          clientDelete(fd)
-          waitFor ws.close()
           let (closeCode, reason) = extractCloseData(data)
           echo "socket went away, close code: ", closeCode, ", reason: ", reason
-          return
+          break
+
         else: discard
       except:
         clientsdirty = true
         let e = getCurrentException()
         echo e.name, ": ", e.msg
-        return
+        break
 
+    try:
+      clientDelete(fd)
+      waitFor ws.close()
+    except:
+      echo "close error"
+      discard
 
   proc deleteClosedClient() =
     acquire(clientsLock)
