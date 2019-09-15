@@ -39,6 +39,10 @@ proc stream_main() {.thread.} =
     for i in a.low..a.high:
       result[i] = a[i] xor b[i]
 
+  proc `xor`(a: array[32, byte], b: ptr array[32, byte]): array[32, byte] =
+    for i in a.low..a.high:
+      result[i] = a[i] xor b[i]
+
   proc clientKeyExchange(client: ClientData, data: string) =
     var clientPublicKey: PublicKey
     copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
@@ -48,10 +52,8 @@ proc stream_main() {.thread.} =
     let shared_key = sha256.digest(shared)
     echo "shared key=", shared_key
     echo "shared key=", shared_key.data
-    var seed_srv: array[32, byte]
-    var seed_cli: array[32, byte]
-    copyMem(addr seed_srv[0], addr client.salt[0], 32)
-    copyMem(addr seed_cli[0], addr client.salt[32], 32)
+    let seed_srv = cast[ptr array[32, byte]](addr client.salt[0])
+    let seed_cli = cast[ptr array[32, byte]](addr client.salt[32])
     let iv_srv = sha256.digest(shared_key.data xor seed_srv)
     let iv_cli = sha256.digest(shared_key.data xor seed_cli)
     echo "shared_key.data=", shared_key.data
@@ -82,15 +84,14 @@ proc stream_main() {.thread.} =
             var rdata = newSeq[byte](data.len)
             var pos = 0
             var next_pos = 16
-            var dec: array[16, byte]
             while next_pos < data.len:
               client.ctr.decrypt(cast[ptr UncheckedArray[byte]](unsafeAddr data[pos]),
-                                cast[ptr UncheckedArray[byte]](addr dec[0]));
-              copyMem(addr rdata[pos], addr dec[0], 16)
+                                cast[ptr UncheckedArray[byte]](addr rdata[pos]));
               pos = next_pos;
               next_pos = next_pos + 16;
             if pos < data.len:
               var src: array[16, byte]
+              var dec: array[16, byte]
               var plen = data.len - pos
               src.fill(cast[byte](plen))
               copyMem(addr src[0], unsafeAddr data[pos], plen)
@@ -113,15 +114,14 @@ proc stream_main() {.thread.} =
               var sdata = newSeq[byte](comp.len)
               var pos = 0
               var next_pos = 16
-              var enc: array[16, byte]
               while next_pos < comp.len:
                 client.ctr.encrypt(cast[ptr UncheckedArray[byte]](unsafeAddr comp[pos]),
-                                  cast[ptr UncheckedArray[byte]](addr enc[0]));
-                copyMem(addr sdata[pos], addr enc[0], 16)
+                                  cast[ptr UncheckedArray[byte]](addr sdata[pos]));
                 pos = next_pos;
                 next_pos = next_pos + 16;
               if pos < comp.len:
                 var src: array[16, byte]
+                var enc: array[16, byte]
                 var plen = comp.len - pos
                 src.fill(cast[byte](plen))
                 copyMem(addr src[0], unsafeAddr comp[pos], plen)
