@@ -232,7 +232,14 @@ pastel.ready = function() {
     console.log('client publicKey=' + JSON.stringify(kp.publicKey));
   }
 
+  pastel.stream_ready = function() {
+    return stage == 1;
+  }
+
   pastel.send = function(json) {
+    if(stage != 1) {
+      return false;
+    }
     var d = JSON.stringify(json);
     var comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
     console.log(comp.length);
@@ -255,6 +262,7 @@ pastel.ready = function() {
     console.log('sdata=', sdata);
     console.log(cipher.buf2hex(sdata));
     stream.send(sdata);
+    return true;
   }
 
   pastel.secure_recv = function(json) {
