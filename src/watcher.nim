@@ -58,6 +58,7 @@ proc main() =
 
     for d in db.getWallets(""):
       echo "wid=", d.wallet_id, " ", d.xpubkey
+      echo "max_sequence=", max_sequence, " d.sequence=", d.sequence
       if max_sequence <= d.sequence:
         echo "skip - wid=", d.wallet_id
         continue
@@ -269,11 +270,25 @@ proc threadWorkerFunc(cb: int) {.thread.} =
 proc doWork*() =
   event.setEvent()
 
-proc start*() =
-  echo "watcher start"
-  active = true
-  btc_ecc_start()
-  createThread(worker, threadWorkerFunc, 0)
+proc watcher_main() {.thread.} =
+  while true:
+    if ready:
+      echo "doWork"
+      doWork()
+      echo "---getWallet"
+      for d in db.getWallets(""):
+        echo "wid=", d.wallet_id, " ", d.xpubkey
+        echo "---getAddrvals"
+        for g in db.getAddrvals(d.wallet_id):
+          echo g
+        echo "---getAddrlogs"
+        for g in db.getAddrlogs(d.wallet_id):
+          echo g
+        echo "---getUnspents"
+        for g in db.getUnspents(d.wallet_id):
+          echo g
+
+    sleep(3000)
 
 proc stop*() =
   active = false
@@ -282,34 +297,16 @@ proc stop*() =
   btc_ecc_stop()
   echo "watcher stop"
 
-block start:
-  start()
-
-  proc quit() {.noconv.} =
+proc quit() {.noconv.} =
     stop()
 
+var watcher_thread: Thread[void]
+
+proc start*(): Thread[void] =
+  echo "watcher start"
+  active = true
+  btc_ecc_start()
+  createThread(worker, threadWorkerFunc, 0)
+  createThread(watcher_thread, watcher_main)
   addQuitProc(quit)
-
-when isMainModule:
-  #[
-  proc test() {.async.} =
-    for i in 1..20:
-      echo i
-      while ready == false:
-        echo "wait ready"
-        await sleepAsync(200)
-      echo "ready=", ready
-      doWork()
-      await sleepAsync(200)
-
-  proc test2() {.async.} =
-    await sleepAsync(5000)
-    stop()
-    await sleepAsync(1000)
-    start()
-    await sleepAsync(5000)
-
-  asyncCheck test()
-  waitFor test2()
-  ]#
-  joinThread(worker)
+  watcher_thread
