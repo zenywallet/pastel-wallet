@@ -3,6 +3,7 @@ import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, js
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
+import db
 
 type ClientData* = ref object
   req: Request
@@ -104,6 +105,8 @@ proc stream_main() {.thread.} =
             echo uncomp.toRunes
             let json = parseJson(uncomp)
             echo json
+            if json.hasKey("xpub"):
+              echo getOrCreateWallet(json["xpub"].getStr)
 
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
