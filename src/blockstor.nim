@@ -17,9 +17,13 @@ type
     TOO_MANY
     TOO_HIGH
 
+var client {.threadvar.}: HttpClient
+var clientAsync {.threadvar.}: AsyncHttpClient
+
 proc get(cmdurl: string): JsonNode =
   try:
-    let client = newHttpClient()
+    if client.isNil:
+      client = newHttpClient()
     let url = baseurl & cmdurl
     let res = client.request(url)
     if res.status == Http200:
@@ -34,7 +38,8 @@ proc get(cmdurl: string): JsonNode =
 
 proc post(cmdurl: string, postdata: JsonNode): JsonNode =
   try:
-    let client = newHttpClient()
+    if client.isNil:
+      client = newHttpClient()
     client.headers = newHttpHeaders({"Content-Type": "application/json"})
     let url = baseurl & cmdurl
     let res = client.request(url, httpMethod = HttpPost, body = $postdata)
@@ -50,9 +55,10 @@ proc post(cmdurl: string, postdata: JsonNode): JsonNode =
 
 proc getAsync(cmdurl: string, cb: proc(data: JsonNode)) {.async.} =
   try:
-    let client = newAsyncHttpClient()
+    if clientAsync.isNil:
+      clientAsync = newAsyncHttpClient()
     let url = baseurl & cmdurl
-    let res = await client.request(url)
+    let res = await clientAsync.request(url)
     if res.status == Http200:
       cb(parseJson(await res.body))
     else:
@@ -65,10 +71,11 @@ proc getAsync(cmdurl: string, cb: proc(data: JsonNode)) {.async.} =
 
 proc postAsync(cmdurl: string, postdata: JsonNode, cb: proc(data: JsonNode)) {.async.} =
   try:
-    let client = newAsyncHttpClient()
+    if clientAsync.isNil:
+      clientAsync = newAsyncHttpClient()
     client.headers = newHttpHeaders({"Content-Type": "application/json"})
     let url = baseurl & cmdurl
-    let res = await client.request(url, httpMethod = HttpPost, body = $postdata)
+    let res = await clientAsync.request(url, httpMethod = HttpPost, body = $postdata)
     if res.status == Http200:
       echo res.status
       cb(parseJson(await res.body))
