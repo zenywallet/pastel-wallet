@@ -132,7 +132,7 @@ proc stream_main() {.thread.} =
                                   cast[ptr UncheckedArray[byte]](addr enc[0]));
                 copyMem(addr sdata[pos], addr enc[0], plen)
               echo sdata, " ", sdata.len
-              asyncCheck client.ws.sendBinary(sdata.toStr)
+              waitFor client.ws.sendBinary(sdata.toStr)
 
         of Opcode.Pong:
           if fd in pingclients:
@@ -195,7 +195,7 @@ proc stream_main() {.thread.} =
         for fd, client in clients:
           echo "fd=", fd
           if not client.req.client.isClosed:
-            asyncCheck client.ws.sendText("test")
+            waitFor client.ws.sendText("test")
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
@@ -216,7 +216,7 @@ proc stream_main() {.thread.} =
       clients[fd] = ClientData(req: ch.req, ws: ch.ws, kp: kp, ctr: ctr, salt: salt)
       echo "client count=", clients.len
       echo "server publicKey=", kp.publicKey
-      asyncCheck ch.ws.sendBinary(kp.publicKey.toStr & salt.toStr)
+      waitFor ch.ws.sendBinary(kp.publicKey.toStr & salt.toStr)
       asyncCheck recvdata(fd, ch.ws)
     else:
       await sleepAsync(500)
