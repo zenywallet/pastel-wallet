@@ -18,7 +18,6 @@ proc stream_main() {.thread.} =
   var pingclients = initTable[int, bool]()
   var clientsLock: Lock
   initLock(clientsLock)
-  var clientsdirty = false
 
   proc clientDelete(fd: int) =
     acquire(clientsLock)
@@ -144,7 +143,6 @@ proc stream_main() {.thread.} =
 
         else: discard
       except:
-        clientsdirty = true
         let e = getCurrentException()
         echo e.name, ": ", e.msg
         break
