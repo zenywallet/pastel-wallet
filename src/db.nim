@@ -14,6 +14,7 @@ type Prefix {.pure.} = enum
   addrlogs    # wallet_id, sequence, type (0 - out | 1 - in),
               #   change, index, address = value, txid, height, time
   unspents    # wallet_id, sequence, txid, n = address, value
+  balances    # wallet_id = value, utxo_count, address_count
   rawtxs      # txid = rawtx, transmission_time
   hashcash    # hashcash_id = header_block(80bytes)
               #               version(4), previous_block(32), merkle_root(32),
@@ -414,6 +415,30 @@ proc delUnspents_gt*(wid: uint64, sequence: uint64) =
       let d_key = concat(Prefix.unspents.toByte, d_wid, d_sequence, txid, n)
       db.del(d_key)
 
+proc setBalance*(wid: uint64, value: uint64, utxo_count: uint32,
+                address_count: uint32) =
+  let key = concat(Prefix.balances.toByte, wid.toByte)
+  let val = concat(value.toByte, utxo_count.toByte, address_count.toByte)
+  db.put(key, val)
+
+proc getBalance*(wid: uint64): tuple[err: DbStatus,
+                res: tuple[value: uint64, utxo_cunt: uint32,
+                address_count: uint32]] =
+  let key = concat(Prefix.balances.toByte, wid.toByte)
+  var d = db.get(key)
+  if d.len > 0:
+    let value = d[0..7].toUint64
+    let utxo_count = d[8..11].toUint32
+    let address_count = d[12..15].toUint32
+    result = (DbStatus.Success, (value, utxo_count, address_count))
+  else:
+    result = (DbStatus.NotFound, (cast[uint64](nil), cast[uint32](nil),
+              cast[uint32](nil)))
+
+proc delBalance*(wid: uint64) =
+  let key = concat(Prefix.balances.toByte, wid.toByte)
+  db.del(key)
+
 block start:
   echo "db open"
   db.open(".pasteldb", ".pasteldb_backup")
@@ -477,3 +502,7 @@ when isMainModule:
   db.dels(key2)
   echo db.gets(key2)
 
+  setBalance(1, 1, 2, 3)
+  echo getBalance(1)
+  delBalance(1)
+  echo getBalance(1)
