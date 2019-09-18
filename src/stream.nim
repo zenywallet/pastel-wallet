@@ -13,8 +13,6 @@ type ClientData* = ref object
 
 proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
-  var channel: Channel[AsyncWebSocket]
-
   var clients: Table[int, ClientData]
   var closedclients: seq[int]
   var pingclients = initTable[int, bool]()
@@ -201,27 +199,20 @@ proc stream_main() {.thread.} =
       await sleepAsync(2000)
       echo "clients.len=", clients.len
 
-  proc clientManager() {.async.} =
-   while true:
-    if channel.peek() > 0:
-      var ws = channel.recv()
-      let kp = createKeyPair(seed())
-      var fd = cast[int](ws.sock.getFd)
-      var ctr: ctrmode.CTR
-      var salt: array[64, byte]
-      salt[0..31] = seed()
-      salt[32..63] = seed()
-      echo "salt=", salt
-      clients[fd] = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
-      echo "client count=", clients.len
-      echo "server publicKey=", kp.publicKey
-      waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
-      asyncCheck recvdata(fd, ws)
-    else:
-      await sleepAsync(500)
+  proc clientStart(ws: AsyncWebSocket) {.async.} =
+    let kp = createKeyPair(seed())
+    var fd = cast[int](ws.sock.getFd)
+    var ctr: ctrmode.CTR
+    var salt: array[64, byte]
+    salt[0..31] = seed()
+    salt[32..63] = seed()
+    echo "salt=", salt
+    clients[fd] = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
+    echo "client count=", clients.len
+    echo "server publicKey=", kp.publicKey
+    waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
+    asyncCheck recvdata(fd, ws)
 
-  channel.open()
-  asyncCheck clientManager()
   asyncCheck activecheck()
   asyncCheck senddata()
 
@@ -232,7 +223,7 @@ proc stream_main() {.thread.} =
       await req.respond(Http400, "Websocket negotiation failed: " & error)
       req.client.close()
       return
-    channel.send(ws)
+    asyncCheck clientStart(ws)
 
   waitFor server.serve(Port(5001), cb)
 
