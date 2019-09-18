@@ -6,7 +6,6 @@ import ../src/ctrmode
 import db
 
 type ClientData* = ref object
-  req: Request
   ws: AsyncWebSocket
   kp: KeyPair
   ctr: ctrmode.CTR
@@ -14,7 +13,7 @@ type ClientData* = ref object
 
 proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
-  var channel: Channel[tuple[req: Request, ws: AsyncWebSocket]]
+  var channel: Channel[AsyncWebSocket]
 
   var clients: Table[int, ClientData]
   var closedclients: seq[int]
@@ -194,7 +193,7 @@ proc stream_main() {.thread.} =
         deleteClosedClient()
         for fd, client in clients:
           echo "fd=", fd
-          if not client.req.client.isClosed:
+          if not client.ws.sock.isClosed:
             waitFor client.ws.sendText("test")
       except:
         let e = getCurrentException()
@@ -205,19 +204,19 @@ proc stream_main() {.thread.} =
   proc clientManager() {.async.} =
    while true:
     if channel.peek() > 0:
-      var ch = channel.recv()
+      var ws = channel.recv()
       let kp = createKeyPair(seed())
-      var fd = cast[int](ch.req.client.getFd)
+      var fd = cast[int](ws.sock.getFd)
       var ctr: ctrmode.CTR
       var salt: array[64, byte]
       salt[0..31] = seed()
       salt[32..63] = seed()
       echo "salt=", salt
-      clients[fd] = ClientData(req: ch.req, ws: ch.ws, kp: kp, ctr: ctr, salt: salt)
+      clients[fd] = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
       echo "client count=", clients.len
       echo "server publicKey=", kp.publicKey
-      waitFor ch.ws.sendBinary(kp.publicKey.toStr & salt.toStr)
-      asyncCheck recvdata(fd, ch.ws)
+      waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
+      asyncCheck recvdata(fd, ws)
     else:
       await sleepAsync(500)
 
@@ -233,7 +232,7 @@ proc stream_main() {.thread.} =
       await req.respond(Http400, "Websocket negotiation failed: " & error)
       req.client.close()
       return
-    channel.send((req, ws))
+    channel.send(ws)
 
   waitFor server.serve(Port(5001), cb)
 
