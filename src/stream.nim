@@ -70,6 +70,7 @@ proc stream_main() {.thread.} =
 
   proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
     var exchange = false
+    var client = clients[fd]
     while true:
       try:
         let (opcode, data) = await ws.readData()
@@ -82,11 +83,10 @@ proc stream_main() {.thread.} =
             if not data.len == 32:
               echo "error: client data len=", data.len
               break
-            clientKeyExchange(clients[fd], data)
+            clientKeyExchange(client, data)
             exchange = true
 
           else:
-            var client = clients[fd] # key not found
             echo "data=", data.toHex
             var rdata = newSeq[byte](data.len)
             var pos = 0
@@ -164,7 +164,6 @@ proc stream_main() {.thread.} =
         echo e.name, ": ", e.msg
         break
 
-    var client = clients[fd]
     withLock clientsLock:
       for wid in client.wallets:
         if walletmap.hasKey(wid):
