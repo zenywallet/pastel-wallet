@@ -15,6 +15,7 @@ proc createEvent*(): Event =
   initLock(ev.lock)
   when not defined(Windows):
     ev.signal = false
+  ev
 
 proc closeEvent*(ev: var Event) {.inline.} =
   deinitLock(ev.lock)
