@@ -30,12 +30,11 @@ proc stream_main() {.thread.} =
   initLock(clientsLock)
 
   proc clientDelete(fd: int) =
-    acquire(clientsLock)
-    if not closedclients.contains(fd):
-      closedclients.add(fd)
-    let client_count = clients.len - closedclients.len
-    release(clientsLock)
-    echo "client count=", client_count
+    withLock clientsLock:
+      if not closedclients.contains(fd):
+        closedclients.add(fd)
+      let client_count = clients.len - closedclients.len
+      echo "client count=", client_count
 
   proc toStr(oa: openarray[byte]): string =
     result = newString(oa.len)
@@ -116,10 +115,9 @@ proc stream_main() {.thread.} =
               if client.wallets.find(w.wallet_id) < 0:
                 client.wallets.add(w.wallet_id)
               let wmdata = WalletMapData(fd: fd, salt: client.salt)
-              acquire(clientsLock)
-              if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
-                walletmap[w.wallet_id].add(wmdata)
-              release(clientsLock)
+              withLock clientsLock:
+                if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
+                  walletmap[w.wallet_id].add(wmdata)
 
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
@@ -164,17 +162,17 @@ proc stream_main() {.thread.} =
         echo e.name, ": ", e.msg
         break
 
-    withLock clientsLock:
-      for wid in client.wallets:
-        if walletmap.hasKey(wid):
-          var wmdatas = walletmap[wid]
-          wmdatas.keepIf(proc (x: WalletMapData): bool = x.fd != fd)
-          if wmdatas.len > 0:
-            walletmap[wid] = wmdatas
-          else:
-            walletmap.del(wid)
-      client.wallets = @[]
     try:
+      withLock clientsLock:
+        for wid in client.wallets:
+          if walletmap.hasKey(wid):
+            var wmdatas = walletmap[wid]
+            wmdatas.keepIf(proc (x: WalletMapData): bool = x.fd != fd)
+            if wmdatas.len > 0:
+              walletmap[wid] = wmdatas
+            else:
+              walletmap.del(wid)
+        client.wallets = @[]
       clientDelete(fd)
       waitFor ws.close()
     except:
@@ -182,11 +180,10 @@ proc stream_main() {.thread.} =
       discard
 
   proc deleteClosedClient() =
-    acquire(clientsLock)
-    for fd in closedclients:
-      clients.del(fd)
-    closedclients = @[]
-    release(clientsLock)
+    withLock clientsLock:
+      for fd in closedclients:
+        clients.del(fd)
+      closedclients = @[]
 
   proc activecheck() {.async.} =
     while true:
