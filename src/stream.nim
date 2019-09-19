@@ -4,16 +4,26 @@ import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
 import db
+import events
 
 type ClientData* = ref object
   ws: AsyncWebSocket
   kp: KeyPair
   ctr: ctrmode.CTR
   salt: array[64, byte]
+  wallets: seq[uint64]
+
+type WalletMapData = ref object
+  fd: int
+  salt: array[64, byte]
+
+var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
+sendMesChannel.open()
 
 proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
   var clients: Table[int, ClientData]
+  var walletmap: Table[uint64, seq[WalletMapData]]
   var closedclients: seq[int]
   var pingclients = initTable[int, bool]()
   var clientsLock: Lock
@@ -102,7 +112,14 @@ proc stream_main() {.thread.} =
             let json = parseJson(uncomp)
             echo json
             if json.hasKey("xpub"):
-              echo getOrCreateWallet(json["xpub"].getStr)
+              let w = getOrCreateWallet(json["xpub"].getStr)
+              if client.wallets.find(w.wallet_id) < 0:
+                client.wallets.add(w.wallet_id)
+              let wmdata = WalletMapData(fd: fd, salt: client.salt)
+              acquire(clientsLock)
+              if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
+                walletmap[w.wallet_id].add(wmdata)
+              release(clientsLock)
 
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
@@ -147,6 +164,17 @@ proc stream_main() {.thread.} =
         echo e.name, ": ", e.msg
         break
 
+    var client = clients[fd]
+    withLock clientsLock:
+      for wid in client.wallets:
+        if walletmap.hasKey(wid):
+          var wmdatas = walletmap[wid]
+          wmdatas.keepIf(proc (x: WalletMapData): bool = x.fd != fd)
+          if wmdatas.len > 0:
+            walletmap[wid] = wmdatas
+          else:
+            walletmap.del(wid)
+      client.wallets = @[]
     try:
       clientDelete(fd)
       waitFor ws.close()
@@ -182,7 +210,6 @@ proc stream_main() {.thread.} =
       await sleepAsync(10000)
       echo "clients.len=", clients.len
 
-
   proc senddata() {.async.} =
     while true:
       try:
@@ -196,6 +223,21 @@ proc stream_main() {.thread.} =
         echo e.name, ": ", e.msg
       await sleepAsync(2000)
       echo "clients.len=", clients.len
+
+  proc sendManager() {.async.} =
+    while true:
+      while sendMesChannel.peek() > 0:
+        let sdata = sendMesChannel.recv()
+        echo "sendManager wid=", sdata.wallet_id, " data=", sdata.data
+        if walletmap.hasKey(sdata.wallet_id):
+          let wmdatas = walletmap[sdata.wallet_id]
+          for wmdata in wmdatas:
+            if clients.hasKey(wmdata.fd):
+              let client = clients[wmdata.fd]
+              if not client.ws.sock.isClosed and client.salt == wmdata.salt:
+                waitFor client.ws.sendText(sdata.data)
+        await sleepAsync(1)
+      await sleepAsync(100)
 
   proc clientStart(ws: AsyncWebSocket) {.async.} =
     let kp = createKeyPair(seed())
@@ -213,6 +255,7 @@ proc stream_main() {.thread.} =
 
   asyncCheck activecheck()
   asyncCheck senddata()
+  asyncCheck sendManager()
 
   proc cb(req: Request) {.async, gcsafe.} =
     let (ws, error) = await verifyWebsocketRequest(req, "pastel-v0.1")
@@ -231,3 +274,6 @@ var stream_thread: Thread[void]
 proc start*(): Thread[void] =
   createThread(stream_thread, stream_main)
   stream_thread
+
+proc send*(wallet_id: uint64, data: string) =
+  sendMesChannel.send((wallet_id, data))
