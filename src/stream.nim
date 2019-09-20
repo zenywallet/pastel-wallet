@@ -67,6 +67,29 @@ proc stream_main() {.thread.} =
     echo "iv_cli=", iv_cli
     client.ctr.init(shared_key.data, iv_srv.data, iv_cli.data)
 
+  proc sendClient(client: var ClientData, data: string) =
+    let comp = compress(data, stream = RAW_DEFLATE)
+    echo cast[seq[byte]](comp.toSeq), ' ', comp.len
+    var sdata = newSeq[byte](comp.len)
+    var pos = 0
+    var next_pos = 16
+    while next_pos < comp.len:
+      client.ctr.encrypt(cast[ptr UncheckedArray[byte]](unsafeAddr comp[pos]),
+                        cast[ptr UncheckedArray[byte]](addr sdata[pos]));
+      pos = next_pos;
+      next_pos = next_pos + 16;
+    if pos < comp.len:
+      var src: array[16, byte]
+      var enc: array[16, byte]
+      var plen = comp.len - pos
+      src.fill(cast[byte](plen))
+      copyMem(addr src[0], unsafeAddr comp[pos], plen)
+      client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                        cast[ptr UncheckedArray[byte]](addr enc[0]));
+      copyMem(addr sdata[pos], addr enc[0], plen)
+    echo sdata, " ", sdata.len
+    waitFor client.ws.sendBinary(sdata.toStr)
+
   proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
     var exchange = false
     var client = clients[fd]
@@ -123,27 +146,7 @@ proc stream_main() {.thread.} =
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
                           "test3": 1234, "test4": 123, "test5": 123, "test6": 123}
               echo "json=", $json
-              let comp = compress($json, stream = RAW_DEFLATE)
-              echo cast[seq[byte]](comp.toSeq), ' ', comp.len
-              var sdata = newSeq[byte](comp.len)
-              var pos = 0
-              var next_pos = 16
-              while next_pos < comp.len:
-                client.ctr.encrypt(cast[ptr UncheckedArray[byte]](unsafeAddr comp[pos]),
-                                  cast[ptr UncheckedArray[byte]](addr sdata[pos]));
-                pos = next_pos;
-                next_pos = next_pos + 16;
-              if pos < comp.len:
-                var src: array[16, byte]
-                var enc: array[16, byte]
-                var plen = comp.len - pos
-                src.fill(cast[byte](plen))
-                copyMem(addr src[0], unsafeAddr comp[pos], plen)
-                client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
-                                  cast[ptr UncheckedArray[byte]](addr enc[0]));
-                copyMem(addr sdata[pos], addr enc[0], plen)
-              echo sdata, " ", sdata.len
-              waitFor client.ws.sendBinary(sdata.toStr)
+              sendClient(client, $json)
 
         of Opcode.Pong:
           if fd in pingclients:
@@ -229,9 +232,9 @@ proc stream_main() {.thread.} =
           let wmdatas = walletmap[sdata.wallet_id]
           for wmdata in wmdatas:
             if clients.hasKey(wmdata.fd):
-              let client = clients[wmdata.fd]
+              var client = clients[wmdata.fd]
               if not client.ws.sock.isClosed and client.salt == wmdata.salt:
-                waitFor client.ws.sendText(sdata.data)
+                sendClient(client, sdata.data)
         await sleepAsync(1)
       await sleepAsync(100)
 
