@@ -490,7 +490,7 @@ when isMainModule:
     let v = concat(cast[uint64](i * 10).toByte)
     db.put(k, v)
 
-  var i = 0;
+  var i = 0
   for d in db.gets_nobreak(Prefix.rewards.toByte):
     echo "d=", d
     inc(i)

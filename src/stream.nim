@@ -70,9 +70,9 @@ proc stream_main() {.thread.} =
     var next_pos = 16
     while next_pos < comp.len:
       client.ctr.encrypt(cast[ptr UncheckedArray[byte]](unsafeAddr comp[pos]),
-                        cast[ptr UncheckedArray[byte]](addr sdata[pos]));
-      pos = next_pos;
-      next_pos = next_pos + 16;
+                        cast[ptr UncheckedArray[byte]](addr sdata[pos]))
+      pos = next_pos
+      next_pos = next_pos + 16
     if pos < comp.len:
       var src: array[16, byte]
       var enc: array[16, byte]
@@ -80,7 +80,7 @@ proc stream_main() {.thread.} =
       src.fill(cast[byte](plen))
       copyMem(addr src[0], unsafeAddr comp[pos], plen)
       client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
-                        cast[ptr UncheckedArray[byte]](addr enc[0]));
+                        cast[ptr UncheckedArray[byte]](addr enc[0]))
       copyMem(addr sdata[pos], addr enc[0], plen)
     waitFor client.ws.sendBinary(sdata.toStr)
 
@@ -108,9 +108,9 @@ proc stream_main() {.thread.} =
             var next_pos = 16
             while next_pos < data.len:
               client.ctr.decrypt(cast[ptr UncheckedArray[byte]](unsafeAddr data[pos]),
-                                cast[ptr UncheckedArray[byte]](addr rdata[pos]));
-              pos = next_pos;
-              next_pos = next_pos + 16;
+                                cast[ptr UncheckedArray[byte]](addr rdata[pos]))
+              pos = next_pos
+              next_pos = next_pos + 16
             if pos < data.len:
               var src: array[16, byte]
               var dec: array[16, byte]
@@ -118,7 +118,7 @@ proc stream_main() {.thread.} =
               src.fill(cast[byte](plen))
               copyMem(addr src[0], unsafeAddr data[pos], plen)
               client.ctr.decrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
-                                cast[ptr UncheckedArray[byte]](addr dec[0]));
+                                cast[ptr UncheckedArray[byte]](addr dec[0]))
               copyMem(addr rdata[pos], addr dec[0], plen)
             let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
             let json = parseJson(uncomp)
