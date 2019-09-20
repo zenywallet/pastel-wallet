@@ -177,25 +177,6 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
   else:
     (DbStatus.NotFound, cast[string](nil))
 
-var wallet_id: uint64
-var L: Lock
-initLock(L)
-
-proc acquireWalletId(): uint64 =
-  acquire(L)
-  inc(wallet_id)
-  setParam(0, wallet_id)
-  result = wallet_id
-  release(L)
-
-proc loadWalletId() =
-  let (err, wid) = getParamUint64(0)
-  if err == DbStatus.Success:
-    wallet_id = wid
-  else:
-    wallet_id = 0
-  echo "load wallet_id=", wallet_id
-
 proc setWallet*(xpubkey: string, wid: uint64, sequence: uint64,
                 last_0_index: uint32, last_1_index: uint32) =
   let key = concat(Prefix.wallets.toByte,
@@ -236,18 +217,32 @@ iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
 var createWalletLock: Lock
 initLock(createWalletLock)
 
+var wallet_id: uint64
+
+proc loadWalletId() =
+  let (err, wid) = getParamUint64(0)
+  if err == DbStatus.Success:
+    wallet_id = wid
+  else:
+    wallet_id = 0
+  echo "load wallet_id=", wallet_id
+
+proc acquireWalletId(): uint64 =
+  inc(wallet_id)
+  setParam(0, wallet_id)
+  result = wallet_id
+
 proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
                         sequence: uint64, last_0_index: uint32,
                         last_1_index: uint32] =
-  acquire(createWalletLock)
-  let d = getWallet(xpubkey)
-  if d.err == DbStatus.Success:
-    result = d.res
-  else:
-    setWallet(xpubkey, acquireWalletId(), 0, 0, 0)
-    let d2 = getWallet(xpubkey)
-    result = d2.res
-  release(createWalletLock)
+  withLock createWalletLock:
+    let d = getWallet(xpubkey)
+    if d.err == DbStatus.Success:
+      result = d.res
+    else:
+      setWallet(xpubkey, acquireWalletId(), 0, 0, 0)
+      let d2 = getWallet(xpubkey)
+      result = d2.res
 
 proc setAddress*(address: string, change: uint32, index: uint32,
                 wid: uint64, sequence: uint64) =
