@@ -262,7 +262,6 @@ proc main() =
 proc threadWorkerFunc(cb: int) {.thread.} =
   while active:
     ready = false
-    echo "do work"
     main()
     ready = true
     waitFor event
@@ -273,9 +272,7 @@ proc doWork*() =
 proc watcher_main() {.thread.} =
   while true:
     if ready:
-      echo "doWork"
       doWork()
-      echo "---getWallet"
       for d in db.getWallets(""):
         echo "wid=", d.wallet_id, " ", d.xpubkey
         echo "---getAddrvals"
