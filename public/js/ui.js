@@ -82,8 +82,11 @@ window.onscroll = function() {
     clearTimeout(scroll_tval);
     scroll_tval = null;
   }
-  var difflist = {};
   var sections = document.getElementsByClassName('section');
+  if(sections.length <= 1) {
+    return;
+  }
+  var difflist = {};
   Array.prototype.forEach.call(sections, function(section) {
     var rect = section.getBoundingClientRect();
     var section_id = section.getAttribute('id');
