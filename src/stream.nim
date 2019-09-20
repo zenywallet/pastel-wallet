@@ -52,24 +52,19 @@ proc stream_main() {.thread.} =
   proc clientKeyExchange(client: ClientData, data: string) =
     var clientPublicKey: PublicKey
     copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
-    echo "client publicKey=", clientPublicKey
     let shared = keyExchange(clientPublicKey, client.kp.privateKey)
-    echo "shared=", shared
     let shared_key = sha256.digest(shared)
-    echo "shared key=", shared_key
-    echo "shared key=", shared_key.data
     let seed_srv = cast[ptr array[32, byte]](addr client.salt[0])
     let seed_cli = cast[ptr array[32, byte]](addr client.salt[32])
     let iv_srv = sha256.digest(shared_key.data xor seed_srv)
     let iv_cli = sha256.digest(shared_key.data xor seed_cli)
-    echo "shared_key.data=", shared_key.data
+    echo "shared=", shared_key
     echo "iv_srv=", iv_srv
     echo "iv_cli=", iv_cli
     client.ctr.init(shared_key.data, iv_srv.data, iv_cli.data)
 
   proc sendClient(client: var ClientData, data: string) =
     let comp = compress(data, stream = RAW_DEFLATE)
-    echo cast[seq[byte]](comp.toSeq), ' ', comp.len
     var sdata = newSeq[byte](comp.len)
     var pos = 0
     var next_pos = 16
@@ -87,7 +82,6 @@ proc stream_main() {.thread.} =
       client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
                         cast[ptr UncheckedArray[byte]](addr enc[0]));
       copyMem(addr sdata[pos], addr enc[0], plen)
-    echo sdata, " ", sdata.len
     waitFor client.ws.sendBinary(sdata.toStr)
 
   proc recvdata(fd: int, ws: AsyncWebSocket) {.async.} =
@@ -96,20 +90,19 @@ proc stream_main() {.thread.} =
     while true:
       try:
         let (opcode, data) = await ws.readData()
-        echo "(opcode: ", opcode, ", data length: ", data.len, ")"
+        echo "opcode=", opcode, " len=", data.len
         case opcode
         of Opcode.Text:
-          echo data
+          echo "text: ", data
         of Opcode.Binary:
           if not exchange:
             if not data.len == 32:
-              echo "error: client data len=", data.len
+              echo "error: invalid data len=", data.len
               break
             clientKeyExchange(client, data)
             exchange = true
 
           else:
-            echo "data=", data.toHex
             var rdata = newSeq[byte](data.len)
             var pos = 0
             var next_pos = 16
@@ -128,9 +121,6 @@ proc stream_main() {.thread.} =
                                 cast[ptr UncheckedArray[byte]](addr dec[0]));
               copyMem(addr rdata[pos], addr dec[0], plen)
             let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
-            echo "uncomp=", uncomp
-            echo runeLen(uncomp)
-            echo uncomp.toRunes
             let json = parseJson(uncomp)
             echo json
             if json.hasKey("xpub"):
@@ -145,18 +135,15 @@ proc stream_main() {.thread.} =
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
                           "test3": 1234, "test4": 123, "test5": 123, "test6": 123}
-              echo "json=", $json
               sendClient(client, $json)
 
         of Opcode.Pong:
           if fd in pingclients:
             pingclients[fd] = false
-            echo "pong fd=", fd
 
         of Opcode.Close:
-          echo "del=", fd
           let (closeCode, reason) = extractCloseData(data)
-          echo "socket went away, close code: ", closeCode, ", reason: ", reason
+          echo "client close code=", closeCode, " reason=", reason
           break
 
         else: discard
@@ -207,7 +194,7 @@ proc stream_main() {.thread.} =
         let e = getCurrentException()
         echo e.name, ": ", e.msg
       await sleepAsync(10000)
-      echo "clients.len=", clients.len
+      echo "client count=", clients.len
 
   proc senddata() {.async.} =
     while true:
@@ -221,7 +208,7 @@ proc stream_main() {.thread.} =
         let e = getCurrentException()
         echo e.name, ": ", e.msg
       await sleepAsync(2000)
-      echo "clients.len=", clients.len
+      echo "client count=", clients.len
 
   proc sendManager() {.async.} =
     while true:
@@ -245,10 +232,8 @@ proc stream_main() {.thread.} =
     var salt: array[64, byte]
     salt[0..31] = seed()
     salt[32..63] = seed()
-    echo "salt=", salt
     clients[fd] = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
     echo "client count=", clients.len
-    echo "server publicKey=", kp.publicKey
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
     asyncCheck recvdata(fd, ws)
 
