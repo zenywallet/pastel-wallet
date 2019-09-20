@@ -123,14 +123,15 @@ proc stream_main() {.thread.} =
             let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
             let json = parseJson(uncomp)
             echo json
-            if json.hasKey("xpub"):
-              let w = getOrCreateWallet(json["xpub"].getStr)
-              if client.wallets.find(w.wallet_id) < 0:
-                client.wallets.add(w.wallet_id)
-              let wmdata = WalletMapData(fd: fd, salt: client.salt)
-              withLock clientsLock:
-                if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
-                  walletmap[w.wallet_id].add(wmdata)
+            if json.hasKey("cmd"):
+              if json["cmd"].getStr == "xpub" and json.hasKey("data"):
+                let w = getOrCreateWallet(json["data"].getStr)
+                if client.wallets.find(w.wallet_id) < 0:
+                  client.wallets.add(w.wallet_id)
+                let wmdata = WalletMapData(fd: fd, salt: client.salt)
+                withLock clientsLock:
+                  if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
+                    walletmap[w.wallet_id].add(wmdata)
 
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
