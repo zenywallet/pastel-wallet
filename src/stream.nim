@@ -237,8 +237,8 @@ proc stream_main() {.thread.} =
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
     asyncCheck recvdata(fd, ws)
 
-  asyncCheck activecheck()
-  asyncCheck senddata()
+  #asyncCheck activecheck()
+  #asyncCheck senddata()
   asyncCheck sendManager()
 
   proc cb(req: Request) {.async, gcsafe.} =
