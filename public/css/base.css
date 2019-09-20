@@ -39,6 +39,10 @@ section h1 {
 #section2 { background: #8fbc8f; }
 #section3 { background: #d2b48c; }
 
+#section0, #section1, #section2, #section3 {
+  min-height: 667px;
+}
+
 @media (min-height: 682px) {
 .section a.pagenext {
   position: absolute;
@@ -126,12 +130,12 @@ section h1 {
 .intro-head {
   position: relative;
   width: 100%;
-  height: 212px;
-  top: 40px;
+  height: 202px;
+  top: 30px;
 }
 .intro-body {
   width: 100%;
-  height: calc(100% - 212px);
+  height: calc(100% - 202px);
 }
 .intro-body .seed-seg, .intro-body .mnemonic-seg {
   height: 100%;
