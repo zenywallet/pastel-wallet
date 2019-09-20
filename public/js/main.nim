@@ -732,6 +732,8 @@ proc afterScript() =
       target_page_scroll = '#section2';
       page_scroll_done = function() {
         $('a.pagenext').css('visibility', 'hidden');
+        $('#section1').hide();
+        window.scrollTo(0, 0);
         jsViewSelector(5);
         page_scroll_done = function() {};
       }
