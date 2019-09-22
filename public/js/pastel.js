@@ -221,7 +221,7 @@ var Stor = (function() {
   }
 
   Stor.prototype.add_xpub = function(xpub) {
-    var xpubs = db.getItem('xpubs');
+    var xpubs = db['xpubs'];
     if(xpubs) {
       xpubs = JSON.parse(xpubs);
     } else {
@@ -229,12 +229,12 @@ var Stor = (function() {
     }
     if(!xpubs.includes(xpub)) {
       xpubs.push(xpub);
-      db.setItem('xpubs', JSON.stringify(xpubs));
+      db['xpubs'] = JSON.stringify(xpubs);
     }
   }
 
   Stor.prototype.get_xpubs = function() {
-    var xpubs = db.getItem('xpubs');
+    var xpubs = db['xpubs'];
     if(xpubs) {
       xpubs = JSON.parse(xpubs);
     } else {
@@ -244,13 +244,13 @@ var Stor = (function() {
   }
 
   Stor.prototype.del_xpub = function(xpub) {
-    var xpubs = db.getItem('xpubs');
+    var xpubs = db['xpubs'];
     if(xpubs) {
       xpubs = JSON.parse(xpubs);
       var idx = xpubs.indexOf(xpub);
       if(idx >= 0) {
         xpubs.splice(idx, 1);
-        db.setItem('xpubs', JSON.stringify(xpubs));
+        db['xpubs'] = JSON.stringify(xpubs);
       }
     } else {
       xpubs = [];
@@ -262,6 +262,10 @@ var Stor = (function() {
 
   Stor.prototype.del_xpubs = function() {
     db.removeItem('xpubs');
+  }
+
+  Stor.prototype.del_all = function() {
+    db.clear();
   }
 
   return Stor;
