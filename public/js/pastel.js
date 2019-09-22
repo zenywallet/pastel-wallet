@@ -410,5 +410,31 @@ pastel.ready = function() {
   }
 
   stream.start();
+
+  var stor = new Stor();
+
+  var send_xpub_retry_count = 0;
+  function send_xpub() {
+    if(pastel.stream_ready()) {
+      var xpubs = stor.get_xpubs();
+      var sendflag = true;
+      for(var i in xpubs) {
+        var ret = pastel.send({cmd: 'xpub', data: xpubs[i]});
+        if(!ret) {
+          sendflag = false;
+        }
+      }
+      if(sendflag) {
+        return;
+      }
+    }
+    if(send_xpub_retry_count < 300) {
+      send_xpub_retry_count++;
+      setTimeout(send_xpub, 1000);
+    } else {
+      // giveup
+    }
+  }
+  send_xpub();
 }
 pastel.load();
