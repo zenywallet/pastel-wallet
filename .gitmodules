@@ -7,3 +7,6 @@
 [submodule "deps/zip"]
 	path = deps/zip
 	url = https://github.com/zenywallet/zip
+[submodule "deps/ed25519"]
+	path = deps/ed25519
+	url = https://github.com/orlp/ed25519
