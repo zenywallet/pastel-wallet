@@ -4,6 +4,12 @@ pastel.config = pastel.config || {
   ws_protocol: 'pastel-v0.1'
 };
 
+String.prototype.toByteArray=String.prototype.toByteArray||(function(e){for(var b=[],c=0,f=this.length;c<f;c++){var a=this.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=this.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b})
+Object.defineProperty(String.prototype, 'toByteArray', {
+  enumerable: false
+});
+//function StringByteArray(s, e){for(var b=[],c=0,f=s.length;c<f;c++){var a=s.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=s.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b}
+
 pastel.ready = function() {}
 pastel.load = function() {
   var ready_flag = {supercop: false, cipher: false, coin: false};
@@ -19,6 +25,12 @@ pastel.load = function() {
       cipher.mod_init = Module.cwrap('cipher_init', null, ['number', 'number', 'number']);
       cipher.mod_enc = Module.cwrap('cipher_enc', null, ['number', 'number']);
       cipher.mod_dec = Module.cwrap('cipher_dec', null, ['number', 'number']);
+
+      cipher.mod_create_keypair = Module.cwrap('ed25519_create_keypair', null, ['number', 'number', 'number']);
+      cipher.mod_sign = Module.cwrap('ed25519_sign', null, ['number', 'number', 'number', 'number', 'number']);
+      cipher.mod_verify = Module.cwrap('ed25519_verify', 'number', ['number', 'number', 'number', 'number']);
+      cipher.mod_key_exchange = Module.cwrap('ed25519_key_exchange', null, ['number', 'number', 'number']);
+      cipher.mod_get_publickey = Module.cwrap('ed25519_get_publickey', null, ['number', 'number']);
 
       cipher.alloclist = cipher.alloclist || [];
 
@@ -106,10 +118,94 @@ pastel.load = function() {
         return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
       }
 
+      var crypto = window.crypto || window.msCrypto;
+
+      cipher.createSeed = function() {
+        if(crypto && crypto.getRandomValues) {
+          var seed = new Uint8Array(32);
+          crypto.getRandomValues(seed);
+          return seed;
+        } else {
+          throw new Error('no secure crypto random');
+        }
+      }
+
+      cipher.createKeyPair = function(seed) {
+        var a_seed = cipher.alloc(32);
+        var a_pubkey = cipher.alloc(32);
+        var a_seckey = cipher.alloc(64);
+        a_seed.set(seed);
+        cipher.mod_create_keypair(a_pubkey, a_seckey, a_seed)
+        var ret = {publicKey: a_pubkey.get(), secretKey: a_seckey.get()};
+        a_seckey.free();
+        a_pubkey.free();
+        a_seed.free();
+        return ret;
+      }
+
+      cipher.sign = function(msg, pubkey, seckey) {
+        var msg_bytes = new Uint8Array(msg.toByteArray())
+        var a_msg = cipher.alloc(msg_bytes.length);
+        var a_pubkey = cipher.alloc(32);
+        var a_seckey = cipher.alloc(64);
+        var a_sig = cipher.alloc(64);
+        a_msg.set(msg);
+        a_pubkey.set(pubkey);
+        a_seckey.set(seckey);
+        cipher.sign(a_sig, a_msg, msg_bytes.length, a_pubkey, a_seckey);
+        var sig = a_sig.get();
+        a_sig.free();
+        a_seckey.free();
+        a_pubkey.free();
+        a_msg.free();
+        return sig;
+      }
+
+      cipher.verify = function(sig, msg, pubkey) {
+        var a_sig = cipher.alloc(64);
+        var msg_bytes = new Uint8Array(msg.toByteArray())
+        var a_msg = cipher.alloc(msg_bytes.length);
+        var a_pubkey = cipher.alloc(32);
+        a_sig.set(sig);
+        a_msg.set(msg_bytes);
+        a_pubkey.set(pubkey);
+        var ret = cipher.verify(a_sig, a_msg, msg_bytes.length, a_pubkey);
+        a_pubkey.free();
+        a_msg.free();
+        a_sig.free();
+        return (ret == 1);
+      }
+
+      cipher.keyExchange = function(pubkey, seckey) {
+        var a_pubkey = cipher.alloc(32);
+        var a_seckey = cipher.alloc(64);
+        var a_shared = cipher.alloc(32);
+        a_pubkey.set(pubkey);
+        a_seckey.set(seckey);
+        cipher.mod_key_exchange(a_shared, a_pubkey, a_seckey);
+        var ret = a_shared.get();
+        a_shared.free();
+        a_seckey.free();
+        a_pubkey.free();
+        return ret;
+      }
+
+      cipher.getPublicKey = function(seckey) {
+        var a_pubkey = cipher.alloc(32);
+        var a_seckey = cipher.alloc(64);
+        a_seckey.set(seckey);
+        cipher.mod_get_publickey(a_pubkey, a_seckey)
+        var ret = a_pubkey.get();
+        a_seckey.free();
+        a_pubkey.free();
+        return ret;
+      }
+
       pastel.cipher = cipher;
       ready_flag.cipher = true;
     }
   };
+
   cipherMod = Cipher(cipherMod);
 
   pastel.coin = coinlibs.coin;
@@ -140,12 +236,6 @@ pastel.load = function() {
   }
   check_ready();
 }
-
-String.prototype.toByteArray=String.prototype.toByteArray||(function(e){for(var b=[],c=0,f=this.length;c<f;c++){var a=this.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=this.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b})
-Object.defineProperty(String.prototype, 'toByteArray', {
-  enumerable: false
-});
-//function StringByteArray(s, e){for(var b=[],c=0,f=s.length;c<f;c++){var a=s.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=s.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b}
 
 var Stream = (function() {
   var reconnect_timer;
@@ -274,7 +364,7 @@ var Stor = (function() {
 pastel.ready = function() {
   console.log('pastel ready');
   console.log(pastel);
-  var supercop = pastel.supercop;
+  var supercop = pastel.cipher;
   var cipher = pastel.cipher;
   var coin = pastel.coin;
 
