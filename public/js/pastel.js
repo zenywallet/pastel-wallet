@@ -26,6 +26,7 @@ pastel.load = function() {
       cipher.mod_verify = Module.cwrap('ed25519_verify', 'number', ['number', 'number', 'number', 'number']);
       cipher.mod_key_exchange = Module.cwrap('ed25519_key_exchange', null, ['number', 'number', 'number']);
       cipher.mod_get_publickey = Module.cwrap('ed25519_get_publickey', null, ['number', 'number']);
+      cipher.mod_add_scalar = Module.cwrap('ed25519_add_scalar', null, ['number', 'number', 'number']);
 
       cipher.alloclist = cipher.alloclist || [];
 
@@ -191,6 +192,21 @@ pastel.load = function() {
         a_seckey.set(seckey);
         cipher.mod_get_publickey(a_pubkey, a_seckey)
         var ret = a_pubkey.get();
+        a_seckey.free();
+        a_pubkey.free();
+        return ret;
+      }
+
+      cipher.addScalar = function(pubkey, seckey, scalar) {
+        var a_pubkey = cipher.alloc(32);
+        var a_seckey = cipher.alloc(64);
+        var a_scalar = cipher.alloc(32);
+        a_pubkey.set(pubkey);
+        a_seckey.set(seckey);
+        a_scalar.set(scalar);
+        cipher.mod_add_scalar(a_pubkey, a_seckey, a_scalar);
+        var ret = {publicKey: a_pubkey.get(), secretKey: a_seckey.get()};
+        a_scalar.free();
         a_seckey.free();
         a_pubkey.free();
         return ret;
