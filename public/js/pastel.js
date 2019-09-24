@@ -12,12 +12,7 @@ Object.defineProperty(String.prototype, 'toByteArray', {
 
 pastel.ready = function() {}
 pastel.load = function() {
-  var ready_flag = {supercop: false, cipher: false, coin: false};
-  supercop_wasm.ready(function() {
-    pastel.supercop = supercop_wasm;
-    ready_flag.supercop = true;
-  });
-
+  var ready_flag = {cipher: false, coin: false};
   var cipher = pastel.cipher || {};
   var cipherMod = {
     onRuntimeInitialized: function() {
@@ -364,19 +359,18 @@ var Stor = (function() {
 pastel.ready = function() {
   console.log('pastel ready');
   console.log(pastel);
-  var supercop = pastel.cipher;
   var cipher = pastel.cipher;
   var coin = pastel.coin;
 
-  var seed = supercop.createSeed();
-  var kp = supercop.createKeyPair(seed);
+  var seed = cipher.createSeed();
+  var kp = cipher.createKeyPair(seed);
   var shared = null;
   var stage = 0;
   var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
 
   stream.onOpen = function(evt) {
-    seed = supercop.createSeed();
-    kp = supercop.createKeyPair(seed);
+    seed = cipher.createSeed();
+    kp = cipher.createKeyPair(seed);
     shared = null;
     stage = 0;
     stream.send(kp.publicKey);
@@ -460,7 +454,7 @@ pastel.ready = function() {
         console.log('stage=0, length=96');
         var pub = data.slice(0, 32);
         console.log('server publicKey=' + JSON.stringify(pub));
-        shared = supercop.keyExchange(pub, kp.secretKey);
+        shared = cipher.keyExchange(pub, kp.secretKey);
         console.log('shared=' + JSON.stringify(shared));
         var shared_key = coin.crypto.sha256(shared);
         var shared_key_uint8array = new Uint8Array(shared_key);
