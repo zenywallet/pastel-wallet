@@ -1,5 +1,5 @@
 # Copyright (c) 2019 zenywallet
-# nim c -d:release -d:emscripten -o:ed25519.js ed25519.nim
+# nim c -d:release -d:emscripten -o:ed25519.js orlp_ed25519.nim
 
 {.emit: """
 #define ED25519_NO_SEED true
@@ -19,6 +19,7 @@ void ed25519_get_publickey(unsigned char *private_key, unsigned char *public_key
 }
 """.}
 
+{.compile: "../deps/ed25519/src/add_scalar.c".}
 {.compile: "../deps/ed25519/src/fe.c".}
 {.compile: "../deps/ed25519/src/ge.c".}
 {.compile: "../deps/ed25519/src/key_exchange.c".}
