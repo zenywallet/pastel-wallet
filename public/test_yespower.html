@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/yespower.js"></script>
+  <title>test yespower</title>
+</head>
+<body>
+<script>
+var yespower = {};
+var yespowerMod = {
+  onRuntimeInitialized: function() {
+    var Module = yespowerMod;
+    for(var o in Module) {
+      console.log(o);
+    }
+    yespower.yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number']);
+
+    yespower.alloclist = yespower.alloclist || [];
+
+    yespower.free = function() {
+      var p = yespower.alloclist.shift();
+      while(p) {
+        Module._free(p);
+        p = yespower.alloclist.shift();
+      }
+    }
+
+    if(yespower.alloclist.length > 0) {
+      yespower.free();
+    }
+
+    var isBigEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x12;
+    function endian_swap(array) {
+      var ret_array = new Uint8Array(array.length);
+      var pos = 0;
+      for(var i = 0; i < array.length; i+= 4) {
+        for(var j = 3; j >= 0; j--) {
+          ret_array[pos] = array[i + j];
+          pos++;
+        }
+      }
+      return ret_array;
+    }
+
+    yespower.alloc = function(size) {
+      var p = new Number(Module._malloc(size));
+      if(isBigEndian) {
+        p.set = function(array) {
+          Module.HEAPU8.set(endian_swap(array), p);
+        }
+        p.get = function() {
+          return endian_swap((new Uint8Array(Module.HEAPU8.buffer, p, size)).slice());
+        }
+      } else {
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+      }
+      p.free = function() {
+        Module._free(p);
+        yespower.alloclist.splice(yespower.alloclist.indexOf(p), 1);
+      }
+      yespower.alloclist.push(p);
+      return p;
+    }
+  }
+};
+yespowerMod = Yespower(yespowerMod);
+setTimeout(function() {
+  var input = yespower.alloc(80);
+  var output = yespower.alloc(32);
+  var a = new Uint8Array(80);
+  for(var i = 0; i < 80; i++) {
+    a[i] = i;
+  }
+  input.set(a);
+  var startTime = new Date();
+  for(var i = 0; i < 100; i++) {
+    if(yespower.yespower_hash(input, output)) {
+      console.log('error');
+      break;
+    }
+  }
+  var endTime = new Date();
+  var timeDiff = endTime - startTime;
+  timeDiff /= 1000;
+  console.log(timeDiff);
+  console.log(input.get());
+  console.log(output.get());
+  output.free();
+  input.free();
+}, 3000);
+</script>
+</body>
+</html>
