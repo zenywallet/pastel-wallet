@@ -485,7 +485,7 @@ pastel.ready = function() {
         console.log('server publicKey=' + JSON.stringify(pub));
         shared = cipher.keyExchange(pub, kp.secretKey);
         console.log('shared=' + JSON.stringify(shared));
-        var shared_key = coin.crypto.sha256(shared);
+        var shared_key = cipher.yespower(coin.crypto.sha256(shared), 32);
         var shared_key_uint8array = new Uint8Array(shared_key);
         console.log('shared hash=' + JSON.stringify(shared_key));
         console.log('shared hash=' + JSON.stringify(shared_key_uint8array));
@@ -500,8 +500,8 @@ pastel.ready = function() {
           rs[i] = shared[i] ^ seed_srv[i];
           rc[i] = shared[i] ^ seed_cli[i];
         }
-        var iv_srv = coin.crypto.sha256(rs);
-        var iv_cli = coin.crypto.sha256(rc);
+        var iv_srv = cipher.yespower(coin.crypto.sha256(rs), 32);
+        var iv_cli = cipher.yespower(coin.crypto.sha256(rc), 32);
         console.log(cipher.buf2hex(shared));
         console.log(cipher.buf2hex(iv_srv));
         console.log(cipher.buf2hex(iv_cli));

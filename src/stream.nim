@@ -5,6 +5,7 @@ import unicode
 import ../src/ctrmode
 import db
 import events
+import yespower
 
 type ClientData* = ref object
   ws: AsyncWebSocket
@@ -49,19 +50,27 @@ proc stream_main() {.thread.} =
     for i in a.low..a.high:
       result[i] = a[i] xor b[i]
 
+  proc yespower(a: array[32, byte]): array[32, byte] =
+    var b: array[32, byte]
+    discard yespower_hash(cast[ptr UncheckedArray[byte]](unsafeAddr a[0]), 32, cast[ptr UncheckedArray[byte]](addr b[0]))
+    b
+
   proc clientKeyExchange(client: ClientData, data: string) =
     var clientPublicKey: PublicKey
     copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
     let shared = keyExchange(clientPublicKey, client.kp.privateKey)
-    let shared_key = sha256.digest(shared)
+    let shared_sha256 = sha256.digest(shared)
+    let shared_key = yespower(shared_sha256.data)
     let seed_srv = cast[ptr array[32, byte]](addr client.salt[0])
     let seed_cli = cast[ptr array[32, byte]](addr client.salt[32])
-    let iv_srv = sha256.digest(shared_key.data xor seed_srv)
-    let iv_cli = sha256.digest(shared_key.data xor seed_cli)
+    let iv_srv_sha256 = sha256.digest(shared_key xor seed_srv)
+    let iv_cli_sha256 = sha256.digest(shared_key xor seed_cli)
+    let iv_srv = yespower(iv_srv_sha256.data)
+    let iv_cli = yespower(iv_cli_sha256.data)
     echo "shared=", shared_key
     echo "iv_srv=", iv_srv
     echo "iv_cli=", iv_cli
-    client.ctr.init(shared_key.data, iv_srv.data, iv_cli.data)
+    client.ctr.init(shared_key, iv_srv, iv_cli)
 
   proc sendClient(client: var ClientData, data: string) =
     let comp = compress(data, stream = RAW_DEFLATE)
