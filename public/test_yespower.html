@@ -14,7 +14,7 @@ var yespowerMod = {
     for(var o in Module) {
       console.log(o);
     }
-    yespower.yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number']);
+    yespower.yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number', 'number']);
 
     yespower.alloclist = yespower.alloclist || [];
 
@@ -80,7 +80,7 @@ setTimeout(function() {
   input.set(a);
   var startTime = new Date();
   for(var i = 0; i < 100; i++) {
-    if(yespower.yespower_hash(input, output)) {
+    if(yespower.yespower_hash(input, 80, output)) {
       console.log('error');
       break;
     }

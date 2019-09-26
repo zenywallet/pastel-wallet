@@ -27,7 +27,8 @@ pastel.load = function() {
       cipher.mod_key_exchange = Module.cwrap('ed25519_key_exchange', null, ['number', 'number', 'number']);
       cipher.mod_get_publickey = Module.cwrap('ed25519_get_publickey', null, ['number', 'number']);
       cipher.mod_add_scalar = Module.cwrap('ed25519_add_scalar', null, ['number', 'number', 'number']);
-      cipher.mod_yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number']);
+
+      cipher.mod_yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number', 'number']);
 
       cipher.alloclist = cipher.alloclist || [];
 
@@ -213,11 +214,11 @@ pastel.load = function() {
         return ret;
       }
 
-      cipher.yespower = function(input) {
-        var a_input = cipher.alloc(80);
+      cipher.yespower = function(input, size) {
+        var a_input = cipher.alloc(size);
         var a_output = cipher.alloc(32);
         a_input.set(input);
-        cipher.mod_yespower_hash(a_input, a_output);
+        cipher.mod_yespower_hash(a_input, size, a_output);
         var ret = a_output.get();
         a_output.free();
         a_input.free();

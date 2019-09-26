@@ -9,7 +9,7 @@ static yespower_params_t params = {
   .perslen = strlen("Client Key")
 };
 
-int yespower_hash(const char *input, char *output)
+int yespower_hash(const char *input, int input_size, char *output)
 {
-  return yespower_tls((uint8_t *)input, 80, &params, output);
+  return yespower_tls((uint8_t *)input, input_size, &params, output);
 }

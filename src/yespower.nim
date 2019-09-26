@@ -5,7 +5,7 @@
 {.compile: "../deps/yespower-1.0.1/yespower-opt.c".}
 {.compile: "yespower_hash.c".}
 
-proc yespower_hash(input, output: ptr UncheckedArray[byte]): int {.importc.}
+proc yespower_hash*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}
 
 when isMainModule:
   var a: array[80, byte]
@@ -14,6 +14,6 @@ when isMainModule:
     a[i] = cast[byte](i)
 
   for i in 0..<1000:
-    discard yespower_hash(cast[ptr UncheckedArray[byte]](addr a[0]), cast[ptr UncheckedArray[byte]](addr b[0]))
+    discard yespower_hash(cast[ptr UncheckedArray[byte]](addr a[0]), 80, cast[ptr UncheckedArray[byte]](addr b[0]))
   echo a
   echo b
