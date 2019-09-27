@@ -239,6 +239,12 @@ type ImportType {.pure.} = enum
 
 var currentImportType = ImportType.SeedCard
 
+type ProtectType {.pure.} = enum
+  KeyCard
+  Passphrase
+
+var currentProtectType = ProtectType.KeyCard
+
 type ViewType = enum
   SeedNone
   SeedScanning
@@ -246,15 +252,28 @@ type ViewType = enum
   MnemonicEdit
   MnemonicFulfill
   SetPassphrase
+  KeyNone
+  KeyScanning
+  KeyAfterScan
+  PassphraseEdit
+  PassphraseDone
+  Wallet
 
 var showScanSeedBtn = true
 var showScanning = true
 var showCamTools = true
 var showScanResult = false
 
+var showScanSeedBtn2 = true
+var showScanning2 = true
+var showCamTools2 = true
+var showScanResult2 = false
+
 var showPage1 = true
 var showPage2 = false
+var showPage3 = false
 var mnemonicFulfill = false
+var passphraseFulfill = false
 
 proc viewSelector(view: ViewType) =
   echo "view", view
@@ -282,8 +301,28 @@ proc viewSelector(view: ViewType) =
   of MnemonicFulfill:
     showPage2 = true
   of SetPassphrase:
+    showScanSeedBtn = true
+    showScanning = true
+    showCamTools = true
+    showScanResult = false
+
+    showScanSeedBtn2 = true
+    showScanning2 = true
+    showCamTools2 = true
+    showScanResult2 = false
+
     showPage1 = false
     showPage2 = true
+  of KeyAfterScan:
+    showPage3 = true
+  of PassphraseDone:
+    showPage3 = true
+  of Wallet:
+    showPage1 = false
+    showPage2 = false
+    showPage3 = true
+  else:
+    discard
 
   appInst.redraw()
 
@@ -319,6 +358,31 @@ proc importSelector(importType: ImportType): proc() =
       asm """
         $('#mnemonicselector').removeClass('grey').addClass('olive');
         $('#seedselector').removeClass('olive').addClass('grey');
+      """
+
+proc protectSelector(protectType: ProtectType): proc() =
+  result = proc() =
+    asm """
+      qrReader.hide(true);
+    """
+    currentProtectType = protectType
+    showPage1 = false
+    showPage2 = true
+
+    #if currentProtectType == ProtectType.KeyCard:
+    #  showPage2 = showScanResult
+    #elif currentProtectType == ProtectType.Passphrase:
+    #  showPage2 = mnemonicFulfill
+
+    if currentProtectType == ProtectType.KeyCard:
+      asm """
+        $('#keyselector').removeClass('grey').addClass('olive');
+        $('#passselector').removeClass('olive').addClass('grey');
+      """
+    else:
+      asm """
+        $('#passselector').removeClass('grey').addClass('olive');
+        $('#keyselector').removeClass('olive').addClass('grey');
       """
 
 type SeedCardInfo = object
@@ -627,6 +691,23 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
       button(class="circular ui icon mini button"):
         italic(class="cut icon")
 
+proc changePassphrase(ev: Event; n: VNode) =
+  discard
+
+proc confirmPassphrase(ev: Event; n: VNode) =
+  passphraseFulfill = true
+  showPage3 = true
+
+proc passphraseEditor(): VNode =
+  result = buildHtml(tdiv):
+    tdiv(class="ui clearing segment medit-seg"):
+      tdiv(class="ui form"):
+        tdiv(class="field"):
+          label:
+            text "Input passphrase"
+          input(type="text", name="input-passphrase", value="", onchange=changePassphrase)
+      button(class="ui right floated primary button", onclick=confirmPassphrase):
+        text "Save"
 
 proc appMain(): VNode =
   result = buildHtml(tdiv):
@@ -682,8 +763,61 @@ proc appMain(): VNode =
                       text "Next"
     if showPage2:
       section(id="section2", class="section"):
-        tdiv(): text "hello!"
-
+        tdiv(class="intro"):
+          tdiv(class="intro-head"):
+            tdiv(class="caption"): text "Pastel Wallet"
+            tdiv(class="ui container method-selector"):
+              tdiv(class="title"): text "A key card or passphrase is required to encrypt and save the private key in your browser."
+              tdiv(class="ui buttons"):
+                button(id="keyselector", class="ui olive button", onclick=protectSelector(ProtectType.KeyCard)):
+                  italic(class="qrcode icon")
+                  text "Key card"
+                tdiv(class="or")
+                button(id="passselector", class="ui grey button", onclick=protectSelector(ProtectType.Passphrase)):
+                  italic(class="list alternate icon")
+                  text "Passphrase"
+          tdiv(class="intro-body"):
+            if currentProtectType == ProtectType.KeyCard:
+              tdiv(id="seed-seg", class="ui enter aligned segment seed-seg"):
+                if showScanResult2:
+                  tdiv(class="ui link cards seed-card-holder"):
+                    seedCard(seedCardInfo)
+                    seedCard(seedCardInfo)
+                    tdiv(class="seed-add-container"):
+                      button(class="circular ui icon button bt-add-seed"):
+                        italic(class="plus icon")
+                  a(class="pagenext", href="#section2"):
+                    span()
+                    text "Next"
+                if showScanning2:
+                  tdiv(class="qr-scanning"):
+                    tdiv()
+                    tdiv()
+                if showScanSeedBtn2:
+                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showQr()):
+                    text "Scan key card with camera"
+                    italic(class="camera icon")
+                if showCamTools2:
+                  tdiv(class="ui small basic icon buttons camtools"):
+                    button(class="ui button", onclick=camChange()):
+                      italic(class="camera icon")
+                    button(class="ui button", onclick=camClose()):
+                      italic(class="window close icon")
+                canvas(id="qrcanvas")
+            else:
+              tdiv(class="ui enter aligned segment mnemonic-seg"):
+                passphraseEditor()
+                if passphraseFulfill:
+                  a(class="pagenext", href="#section3"):
+                      span()
+                      text "Next"
+    if showPage3:
+      section(id="section3", class="section"):
+        tdiv(class="intro"):
+          tdiv(class="intro-head"):
+            tdiv(class="caption"): text "Pastel Wallet"
+          tdiv(class="intro-body"):
+            tdiv(id="seed-seg", class="ui enter aligned segment seed-seg")
 
 proc afterScript() =
   jq("#section0").remove()
@@ -737,6 +871,20 @@ proc afterScript() =
         jsViewSelector(5);
         page_scroll_done = function() {};
       }
+    """
+  if showScanResult2 or passphraseFulfill:
+    asm """
+      target_page_scroll = '#section3';
+      page_scroll_done = function() {
+        $('a.pagenext').css('visibility', 'hidden');
+        $('#section2').hide();
+        window.scrollTo(0, 0);
+        jsViewSelector(8);
+        page_scroll_done = function() {};
+      }
+    """
+  if showScanResult or mnemonicFulfill or showScanResult2 or passphraseFulfill:
+    asm """        
       var elms = document.querySelectorAll('a.pagenext');
       Array.prototype.forEach.call(elms, function(elm) {
         var href = elm.getAttribute("href");
@@ -744,8 +892,11 @@ proc afterScript() =
           var cb = function(e) {
             e.preventDefault();
             var href = this.getAttribute('href');
-            goSection(href, page_scroll_done);
-
+            if(href == '#section2') {
+              goSection(href, page_scroll_done);
+            } else if(href == '#section3') {
+              goSection(href, page_scroll_done);
+            }
           }
           registerEventList.push({elm: elm, type: 'click', cb: cb});
           elm.addEventListener('click', cb);
