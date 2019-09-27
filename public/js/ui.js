@@ -32,6 +32,9 @@ function scrollPos(pos, duration, done) {
   target_scroll_pos = pos;
   var sy = window.scrollY;
   if(pos == sy) {
+    if(done) {
+      done();
+    }
     return;
   }
   var rad = 0;
