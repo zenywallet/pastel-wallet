@@ -20,6 +20,9 @@ pastel.load = function() {
       cipher.mod_init = Module.cwrap('cipher_init', null, ['number', 'number', 'number']);
       cipher.mod_enc = Module.cwrap('cipher_enc', null, ['number', 'number']);
       cipher.mod_dec = Module.cwrap('cipher_dec', null, ['number', 'number']);
+      cipher.mod_set_key = Module.cwrap('serpent_set_key', 'number', ['number', 'number', 'number']);
+      cipher.mod_encrypt = Module.cwrap('serpent_encrypt', null, ['number', 'number', 'number']);
+      cipher.mod_decrypt = Module.cwrap('serpent_decrypt', null, ['number', 'number', 'number']);
 
       cipher.mod_create_keypair = Module.cwrap('ed25519_create_keypair', null, ['number', 'number', 'number']);
       cipher.mod_sign = Module.cwrap('ed25519_sign', null, ['number', 'number', 'number', 'number', 'number']);
@@ -97,6 +100,120 @@ pastel.load = function() {
 
       cipher.buf2hex = function(buffer) {
         return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+      }
+
+      cipher.setkey = function(key) {
+        var pkey = cipher.alloc(key.length);
+        var pl_key = cipher.alloc(140 * 4);
+        pkey.set(key);
+        cipher.mod_set_key(pkey, key.length * 8, pl_key);
+        pkey.free();
+        return pl_key;
+      }
+
+      cipher.encrypt = function(handle, data) {
+        var src = cipher.alloc(16);
+        var dst = cipher.alloc(16);
+        src.set(data);
+        cipher.mod_encrypt(handle, src, dst);
+        ret = dst.get();
+        dst.free();
+        src.free();
+        return ret;
+      }
+
+      cipher.decrypt = function(handle, data) {
+        var src = cipher.alloc(16);
+        var dst = cipher.alloc(16);
+        src.set(data);
+        cipher.mod_decrypt(handle, src, dst);
+        ret = dst.get();
+        dst.free();
+        src.free();
+        return ret;
+      }
+
+      cipher.countup = function(data) {
+        for(var i in data) {
+          data[i] = (data[i] + 1) & 0xff;
+          if(data[i] != 0) {
+            break;
+          }
+        }
+      }
+
+      var coin = coinlibs.coin;
+
+      cipher.enc_json = function(key, json) {
+        var h = cipher.setkey(key);
+        var d = JSON.stringify(json);
+        var comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+        var encdata = new Uint8Array(comp.length);
+        var enc_iv = cipher.yespower(coin.crypto.sha256(key), 32).slice(0, 16);
+        var pos = 0, next_pos = 16;
+        while(next_pos < comp.length) {
+          var enc = cipher.encrypt(h, enc_iv);
+          cipher.countup(enc_iv);
+          var dtmp = comp.slice(pos, next_pos);
+          for(var i in enc) {
+            enc[i] ^= dtmp[i];
+          }
+          encdata.set(enc, pos);
+          pos = next_pos;
+          next_pos += 16;
+        }
+        if(pos < comp.length) {
+          var buf = new Uint8Array(16);
+          var plen = comp.length - pos;
+          buf.fill(plen);
+          buf.set(comp.slice(pos, comp.length), 0)
+          var enc = cipher.encrypt(h, enc_iv).slice(0, plen);
+          for(var i in enc) {
+            enc[i] ^= buf[i];
+          }
+          encdata.set(enc, pos);
+        }
+        console.log('encdata=', encdata);
+        console.log(cipher.buf2hex(encdata));
+        h.free();
+        return encdata;
+      }
+
+      cipher.dec_json = function(key, encdata) {
+        var h = cipher.setkey(key);
+        var data = new Uint8Array(encdata, 0, encdata.length);
+        var decdata = new Uint8Array(data.length);
+        var dec_iv = cipher.yespower(coin.crypto.sha256(key), 32).slice(0, 16);
+        var pos = 0, next_pos = 16;
+        while(next_pos < data.length) {
+          var dec = cipher.encrypt(h, dec_iv);
+          cipher.countup(dec_iv);
+          var dtmp = data.slice(pos, next_pos);
+          for(var i in dec) {
+            dec[i] ^= dtmp[i];
+          }
+          decdata.set(dec, pos);
+          pos = next_pos;
+          next_pos += 16;
+        }
+        if(pos < data.length) {
+          var buf = new Uint8Array(16);
+          var plen = data.length - pos;
+          buf.fill(plen);
+          buf.set(data.slice(pos, data.length), 0)
+          var dec = cipher.encrypt(h, dec_iv).slice(0, plen);
+          for(var i in dec) {
+            dec[i] ^= buf[i];
+          }
+          decdata.set(dec, pos);
+        }
+        console.log('decdata=', decdata);
+        var decomp = new Zlib.RawInflate(decdata, {verify: true}).decompress();
+        console.log('decomp=', decomp);
+        var json = JSON.parse(new TextDecoder("utf-8").decode(decomp));
+        console.log(JSON.stringify(json));
+        h.free();
+        return json;
       }
 
       var crypto = window.crypto || window.msCrypto;
