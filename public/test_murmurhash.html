@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/murmurhash.js"></script>
+  <title>test murmurhash</title>
+</head>
+<body>
+<script>
+var buf2hex = function(buffer) {
+  return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+}
+
+var murmurhash = {};
+
+murmurhash.load = function(cb) {
+  var Module = Murmurhash({
+    onRuntimeInitialized: function() {
+      var Module = this;
+      for(var o in Module) {
+        console.log(o);
+      }
+      murmurhash.mod_hash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+
+      murmurhash.alloclist = murmurhash.alloclist || [];
+
+      murmurhash.free = function() {
+        var p = murmurhash.alloclist.shift();
+        while(p) {
+          Module._free(p);
+          p = murmurhash.alloclist.shift();
+        }
+      }
+
+      if(murmurhash.alloclist.length > 0) {
+        murmurhash.free();
+      }
+
+      murmurhash.alloc = function(size) {
+        var p = new Number(Module._malloc(size));
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+        p.free = function() {
+          Module._free(p);
+          murmurhash.alloclist.splice(murmurhash.alloclist.indexOf(p), 1);
+        }
+        murmurhash.alloclist.push(p);
+        return p;
+      }
+
+      murmurhash.hash = function(data) {
+        var input = murmurhash.alloc(data.length);
+        var output = murmurhash.alloc(16);
+        input.set(data);
+        murmurhash.mod_hash(input, data.length, output);
+        var ret = output.get();
+        output.free();
+        input.free();
+        return ret;
+      }
+
+      cb();
+      murmurhash.ready_flag = true;
+    }
+  });
+  return Module;
+}
+
+murmurhash.run = function(cb) {
+  if(this.ready_flag) {
+    if(this.pending) {
+      clearTimeout(this.worker_tval);
+      var p = this.pending.shift();
+      while(p) {
+        p();
+        p = this.pending.shift();
+      }
+    }
+    cb();
+  } else {
+    if(!this.load_flag) {
+      this.load_flag = true;
+      this.load(cb);
+    } else {
+      if(this.pending) {
+        this.pending.push(cb);
+      } else {
+        this.pending = [cb];
+        var self = this;
+        function worker() {
+          if(self.ready_flag) {
+            var p = self.pending.shift();
+            while(p) {
+              p();
+              p = self.pending.shift();
+            }
+          } else {
+            self.worker_tval = setTimeout(worker, 100);
+          }
+        }
+        worker();
+      }
+    }
+  }
+}
+
+murmurhash.run(function() {
+  //var a = new Uint8Array(1);
+  //a[0] = "1".charCodeAt(0);
+  var a = (new TextEncoder).encode('1');
+  console.log(a);
+  console.log(buf2hex(murmurhash.hash(a)));
+});
+</script>
+</body>
+</html>
