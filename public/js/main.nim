@@ -482,6 +482,7 @@ proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
 
 var editingWords: cstring = ""
 var autocompleteWords: seq[cstring] = @[]
+var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
 
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
@@ -505,6 +506,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
       autocompleteWords = @[]
   else:
     autocompleteWords = @[]
+  chklist = @[]
 
 proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): proc() =
   result = proc() =
@@ -542,7 +544,6 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
         input_elm.selectionEnd = newcur
     autocompleteWords = @[]
 
-var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
 var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObject): cstring = cast[cstring](x)))
 var wl_english = cast[seq[cstring]](bip39.wordlists.english.map(proc(x: JsObject): cstring = cast[cstring](x)))
 var wl_select = wl_japanese
