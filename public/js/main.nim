@@ -609,6 +609,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
       """
       x.setInputText(ret)
       editingWords = ret
+      confirmMnemonic(input_id)()
 
 proc changeLanguage(ev: Event; n: VNode) =
   var langId = cast[int](n.value)
