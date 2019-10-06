@@ -98,7 +98,7 @@ window.onscroll = function() {
   var min_val = 0;
   var min_item = null;
   for(var key in difflist) {
-    if(min_item == null || difflist[key] < min_val) {
+    if(min_item == null || difflist[key] < min_val || (key == target_page_scroll && difflist[key] <= min_val)) {
       min_val = difflist[key];
       min_item = key;
     }
