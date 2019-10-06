@@ -483,9 +483,13 @@ proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
 var editingWords: cstring = ""
 var autocompleteWords: seq[cstring] = @[]
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
+var prevCheckWord: cstring = ""
 
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
+  if s != prevCheckWord:
+    chklist = @[]
+  prevCheckWord = s
   if not s.isNil and s.len > 0:
     if mnemonicFulfill and editingWords != s:
       mnemonicFulfill = false
@@ -506,7 +510,6 @@ proc checkMnemonic(ev: Event; n: VNode) =
       autocompleteWords = @[]
   else:
     autocompleteWords = @[]
-  chklist = @[]
 
 proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): proc() =
   result = proc() =
