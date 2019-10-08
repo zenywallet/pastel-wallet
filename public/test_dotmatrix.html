@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/murmurhash.js"></script>
+  <title>test dotmatrix</title>
+</head>
+<body>
+<script>
+var DotMatrix = (function() {
+  function Color() {
+    if(!(this instanceof Color)) {
+      return new Color();
+    }
+
+    var _r, _g, _b, _a;
+
+    this.rgba = function(color_array) {
+      _r = color_array[0];
+      _g = color_array[1];
+      _b = color_array[2];
+      _a = color_array[3];
+
+      return this;
+    }
+
+    this.rgb = function(red, green, blue) {
+      _r = red;
+      _g = green;
+      _b = blue;
+      _a = 0xff;
+
+      return this;
+    }
+
+    this.string = function() {
+      return '#' + ('0' + _r.toString(16)).substr(-2)
+        + ('0' + _g.toString(16)).substr(-2)
+        + ('0' + _b.toString(16)).substr(-2);
+    }
+
+    this.red = function() {
+      return _r;
+    }
+    this.green = function() {
+      return _g;
+    }
+    this.blue = function() {
+      return _b;
+    }
+    this.alpha = function() {
+      return _a;
+    }
+  }
+
+
+  var SIZE = 96;
+  var BG_COLOR = 0xffeeeeee;
+  var STEP_SIZE = Math.PI / 50;
+  var TWO_PI = Math.PI * 2;
+
+  function hexToBytes(hex) {
+    for (var bytes = [], c = 0; c < hex.length; c += 2) {
+      bytes.push(parseInt(hex.substr(c, 2), 16));
+    }
+    return bytes;
+  }
+
+  function bytesToHex(bytes) {
+    for (var hex = [], i = 0; i < bytes.length; i++) {
+      hex.push((bytes[i] >>> 4).toString(16));
+      hex.push((bytes[i] & 0xF).toString(16));
+    }
+    return hex.join("");
+  }
+
+  function UIntToColor(uint_color)
+  {
+    var a = (uint_color >> 24) & 0xff;
+    var r = (uint_color >> 16) & 0xff;
+    var g = (uint_color >> 8) & 0xff;
+    var b = (uint_color >> 0) & 0xff;
+    return Color().rgba([r, g, b, a]);
+  }
+
+  function ColorToUInt(color)
+  {
+    return (color.alpha() << 24) | (color.red() << 16) |
+      (color.green() << 8) | (color.blue() << 0);
+  }
+
+  function getColorDistance(e1, e2)
+  {
+    var rmean = (e1.red() + e2.red()) / 2;
+    var r = e1.red() - e2.red();
+    var g = e1.green() - e2.green();
+    var b = e1.blue() - e2.blue();
+    return Math.sqrt((((512 + rmean) * r * r) >> 8) + 4 * g * g + (((767 - rmean) * b * b) >> 8));
+  }
+
+  function getComplementaryColor(colorToInvert)
+  {
+    var rgbaColor = ColorToUInt(colorToInvert);
+    return UIntToColor(0xFFFFFF00 ^ rgbaColor);
+  }
+
+  var DotMatrix = {};
+
+  DotMatrix.getImage = function(hash_data, size = SIZE, round = 0) {
+    var hash;
+    if (typeof hash_data === 'string') {
+      var hash = new Uint8Array(hexToBytes(hash_data));
+    } else {
+      var hash = hash_data;
+    }
+    var canvas = document.createElement('canvas');
+    canvas.width  = size;
+    canvas.height = size;
+
+    if (hash.length != 16) {
+      return canvas.toDataURL('image/png');
+    }
+    var ctx = canvas.getContext('2d');
+    var gb_color = UIntToColor(BG_COLOR);
+
+    var blue = (hash[13] & 0x01f) << 3;
+    var green = (hash[14] & 0x01f) << 3;
+    var red = (hash[15] & 0x01f) << 3;
+    var color = Color().rgb(red, green, blue);
+    if (getColorDistance(color, gb_color) <= 64.0) {
+      color = getComplementaryColor(color);
+    }
+
+    var blue2 = (hash[9] & 0x01f) << 3;
+    var green2 = (hash[10] & 0x01f) << 3;
+    var red2 = (hash[12] & 0x01f) << 3;
+    var color2 = Color().rgb(red2, green2, blue2);
+    if (getColorDistance(color2, color) <= 64.0) {
+      color2 = getComplementaryColor(color2);
+    }
+
+    ctx.fillStyle = color2.string();
+    ctx.beginPath();
+    ctx.fillRect(0, 0, size, size);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = color.string();
+    for (var y = 0; y < 5; y++) {
+      for (var x = 0; x < 5; x++) {
+        var index = y * 5 + x;
+        var radius;
+        if ((index & 1) == 0) {
+          radius = hash[index/2] & 0x0F;
+        } else {
+          radius = (hash[index/2] >> 4) & 0x0F;
+        }
+        radius *= size / SIZE
+
+        ctx.beginPath();
+        ctx.arc(x * size / 5 + size / 10, y * size / 5 + size / 10, radius, 0, 360 * Math.PI / 180, true);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    if(round) {
+      ctx.beginPath();
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, false);
+      ctx.closePath();
+      ctx.fill()
+    }
+
+    return canvas.toDataURL('image/png');
+  }
+
+  return DotMatrix;
+})();
+
+var buf2hex = function(buffer) {
+  return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+}
+
+var murmurhash = {};
+
+murmurhash.load = function(cb) {
+  var Module = Murmurhash({
+    onRuntimeInitialized: function() {
+      var Module = this;
+      for(var o in Module) {
+        console.log(o);
+      }
+      murmurhash.mod_hash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+
+      murmurhash.alloclist = murmurhash.alloclist || [];
+
+      murmurhash.free = function() {
+        var p = murmurhash.alloclist.shift();
+        while(p) {
+          Module._free(p);
+          p = murmurhash.alloclist.shift();
+        }
+      }
+
+      if(murmurhash.alloclist.length > 0) {
+        murmurhash.free();
+      }
+
+      murmurhash.alloc = function(size) {
+        var p = new Number(Module._malloc(size));
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+        p.free = function() {
+          Module._free(p);
+          murmurhash.alloclist.splice(murmurhash.alloclist.indexOf(p), 1);
+        }
+        murmurhash.alloclist.push(p);
+        return p;
+      }
+
+      murmurhash.hash = function(data) {
+        var input = murmurhash.alloc(data.length);
+        var output = murmurhash.alloc(16);
+        input.set(data);
+        murmurhash.mod_hash(input, data.length, output);
+        var ret = output.get();
+        output.free();
+        input.free();
+        return ret;
+      }
+
+      cb();
+      murmurhash.ready_flag = true;
+    }
+  });
+  return Module;
+}
+
+murmurhash.run = function(cb) {
+  if(this.ready_flag) {
+    if(this.pending) {
+      clearTimeout(this.worker_tval);
+      var p = this.pending.shift();
+      while(p) {
+        p();
+        p = this.pending.shift();
+      }
+    }
+    cb();
+  } else {
+    if(!this.load_flag) {
+      this.load_flag = true;
+      this.load(cb);
+    } else {
+      if(this.pending) {
+        this.pending.push(cb);
+      } else {
+        this.pending = [cb];
+        var self = this;
+        function worker() {
+          if(self.ready_flag) {
+            var p = self.pending.shift();
+            while(p) {
+              p();
+              p = self.pending.shift();
+            }
+          } else {
+            self.worker_tval = setTimeout(worker, 100);
+          }
+        }
+        worker();
+      }
+    }
+  }
+}
+
+murmurhash.run(function() {
+  var s = 64;
+  for(var i = 0; i < 100; i++) {
+    var img = document.createElement('img');
+    img.src = DotMatrix.getImage(buf2hex(murmurhash.hash((new TextEncoder).encode(String(i)))), s, 1);
+    document.body.appendChild(img);
+
+    // https://github.com/zenywallet/identicon-address
+    var img2 = document.createElement('img');
+    img2.src = 'http://localhost:7000/coin/' + String(i) + '?s=' + s + '&r=1';
+    document.body.appendChild(img2);
+  }
+});
+</script>
+</body>
+</html>
