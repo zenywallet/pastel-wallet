@@ -33,6 +33,8 @@ pastel.load = function() {
 
       cipher.mod_yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number', 'number']);
 
+      cipher.mod_murmurhash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+
       cipher.alloclist = cipher.alloclist || [];
 
       cipher.free = function() {
@@ -322,6 +324,17 @@ pastel.load = function() {
         var ret = a_output.get();
         a_output.free();
         a_input.free();
+        return ret;
+      }
+
+      cipher.murmurhash = function(data) {
+        var input = murmurhash.alloc(data.length);
+        var output = murmurhash.alloc(16);
+        input.set(data);
+        murmurhash.mod_murmurhash(input, data.length, output);
+        var ret = output.get();
+        output.free();
+        input.free();
         return ret;
       }
 
