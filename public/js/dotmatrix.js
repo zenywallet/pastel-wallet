@@ -97,7 +97,7 @@ var DotMatrix = (function() {
 
   var DotMatrix = {};
 
-  DotMatrix.getImage = function(hash_data, size = SIZE, round = 0) {
+  DotMatrix.getImage = function(hash_data, size = SIZE, round = 0, label) {
     var hash;
     if (typeof hash_data === 'string') {
       var hash = new Uint8Array(hexToBytes(hash_data));
@@ -155,9 +155,24 @@ var DotMatrix = (function() {
       }
     }
 
+    if(label) {
+      var blue3 = (hash[6] & 0x01f) << 3;
+      var green3 = (hash[7] & 0x01f) << 3;
+      var red3 = (hash[8] & 0x01f) << 3;
+      var color3 = Color().rgb(red3, green3, blue3);
+      if (getColorDistance(color3, color) <= 64.0) {
+        color3 = getComplementaryColor(color3);
+      }
+
+      ctx.fillStyle = color3.string();
+      ctx.font = 'bold 14px arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, size / 2, size / 2 + 6);
+    }
+
     if(round) {
       ctx.beginPath();
-      ctx.globalCompositeOperation = "destination-in";
+      ctx.globalCompositeOperation = 'destination-in';
       ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, false);
       ctx.closePath();
       ctx.fill()
