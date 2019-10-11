@@ -19,6 +19,19 @@ type WalletMapData = ref object
   fd: int
   salt: array[64, byte]
 
+type UnspentsData = object
+  sequence: uint64
+  txid: string
+  n: uint32
+  address: string
+  value: uint64
+  change: uint32
+  index: uint32
+  xpub_idx: int
+
+proc UnspentsDataCmp(x, y: UnspentsData): int =
+  if x.sequence > y.sequence: 1 else: -1
+
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
 
@@ -153,6 +166,30 @@ proc stream_main() {.thread.} =
 
               if json["cmd"].getStr == "xpubs":
                 send_xpubs()
+
+              if json["cmd"].getStr == "unspents":
+                var unspents: seq[UnspentsData]
+                var xpub_idx = 0
+                for wid in client.wallets:
+                  var count = 0;
+                  for u in getUnspents(wid):
+                    for a in getAddresses(u.address):
+                      var ud = UnspentsData(sequence: u.sequence,
+                                            txid: u.txid, n: u.n,
+                                            address: u.address, value: u.value,
+                                            change: a.change, index: a.index,
+                                            xpub_idx: xpub_idx)
+                      unspents.add(ud)
+                      break
+                    inc(count)
+                    if count >= 1000:
+                      break
+                  inc(xpub_idx)
+                unspents.sort(UnspentsDataCmp)
+                if unspents.len > 1000:
+                  unspents.delete(1000, unspents.high)
+                var json = %* {"type": "unspents", "data": unspents}
+                sendClient(client, $json)
 
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
