@@ -147,7 +147,7 @@ proc stream_main() {.thread.} =
             let json = parseJson(uncomp)
             echo json
 
-            template send_xpubs {.dirty.} =
+            template send_xpubs() {.dirty.} =
               var json = %* {"type": "xpubs", "data": client.xpubs}
               sendClient(client, $json)
 
