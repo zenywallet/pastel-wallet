@@ -148,7 +148,7 @@ proc stream_main() {.thread.} =
             echo json
 
             template send_xpubs() {.dirty.} =
-              var json = %* {"type": "xpubs", "data": client.xpubs}
+              var json = %*{"type": "xpubs", "data": client.xpubs}
               sendClient(client, $json)
 
             if json.hasKey("cmd"):
@@ -188,7 +188,7 @@ proc stream_main() {.thread.} =
                 unspents.sort(UnspentsDataCmp)
                 if unspents.len > 1000:
                   unspents.delete(1000, unspents.high)
-                var json = %* {"type": "unspents", "data": unspents}
+                var json = %*{"type": "unspents", "data": unspents}
                 sendClient(client, $json)
 
             block test:
