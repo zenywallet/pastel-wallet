@@ -17,6 +17,7 @@ type ClientData* = ref object
 type WalletMapData = ref object
   fd: int
   salt: array[64, byte]
+  xpub: string
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
@@ -132,15 +133,32 @@ proc stream_main() {.thread.} =
             let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
             let json = parseJson(uncomp)
             echo json
+
+            template send_xpubs {.dirty.} =
+              var json = %* {"type": "xpubs", "data": []}
+              for wid in client.wallets:
+                if walletmap.hasKey(wid):
+                  let wmdatas = walletmap[wid]
+                  for wd in wmdatas:
+                    if fd == wd.fd and client.salt == wd.salt:
+                      json["data"].add(newJString(wd.xpub))
+              echo $json
+              sendClient(client, $json)
+
             if json.hasKey("cmd"):
               if json["cmd"].getStr == "xpub" and json.hasKey("data"):
-                let w = getOrCreateWallet(json["data"].getStr)
+                var xpub = json["data"].getStr
+                let w = getOrCreateWallet(xpub)
                 if client.wallets.find(w.wallet_id) < 0:
                   client.wallets.add(w.wallet_id)
-                let wmdata = WalletMapData(fd: fd, salt: client.salt)
+                let wmdata = WalletMapData(fd: fd, salt: client.salt, xpub: xpub)
                 withLock clientsLock:
                   if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
                     walletmap[w.wallet_id].add(wmdata)
+                send_xpubs()
+
+              if json["cmd"].getStr == "xpubs":
+                send_xpubs()
 
             block test:
               var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
