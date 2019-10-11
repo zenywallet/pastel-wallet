@@ -13,11 +13,11 @@ type ClientData* = ref object
   ctr: ctrmode.CTR
   salt: array[64, byte]
   wallets: seq[uint64]
+  xpubs: seq[string]
 
 type WalletMapData = ref object
   fd: int
   salt: array[64, byte]
-  xpub: string
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
@@ -135,14 +135,7 @@ proc stream_main() {.thread.} =
             echo json
 
             template send_xpubs {.dirty.} =
-              var json = %* {"type": "xpubs", "data": []}
-              for wid in client.wallets:
-                if walletmap.hasKey(wid):
-                  let wmdatas = walletmap[wid]
-                  for wd in wmdatas:
-                    if fd == wd.fd and client.salt == wd.salt:
-                      json["data"].add(newJString(wd.xpub))
-              echo $json
+              var json = %* {"type": "xpubs", "data": client.xpubs}
               sendClient(client, $json)
 
             if json.hasKey("cmd"):
@@ -151,7 +144,8 @@ proc stream_main() {.thread.} =
                 let w = getOrCreateWallet(xpub)
                 if client.wallets.find(w.wallet_id) < 0:
                   client.wallets.add(w.wallet_id)
-                let wmdata = WalletMapData(fd: fd, salt: client.salt, xpub: xpub)
+                  client.xpubs.add(xpub)
+                let wmdata = WalletMapData(fd: fd, salt: client.salt)
                 withLock clientsLock:
                   if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
                     walletmap[w.wallet_id].add(wmdata)
@@ -191,6 +185,7 @@ proc stream_main() {.thread.} =
             else:
               walletmap.del(wid)
         client.wallets = @[]
+        client.xpubs = @[]
       clientDelete(fd)
       waitFor ws.close()
     except:
