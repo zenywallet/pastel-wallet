@@ -647,14 +647,8 @@ pastel.ready = function() {
   function send_xpub() {
     if(pastel.stream_ready()) {
       var xpubs = stor.get_xpubs();
-      var sendflag = true;
-      for(var i in xpubs) {
-        var ret = pastel.send({cmd: 'xpub', data: xpubs[i]});
-        if(!ret) {
-          sendflag = false;
-        }
-      }
-      if(sendflag) {
+      var ret = pastel.send({cmd: 'xpubs', data: xpubs});
+      if(ret) {
         return;
       }
     }

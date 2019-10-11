@@ -147,25 +147,24 @@ proc stream_main() {.thread.} =
             let json = parseJson(uncomp)
             echo json
 
-            template send_xpubs() {.dirty.} =
-              var json = %*{"type": "xpubs", "data": client.xpubs}
-              sendClient(client, $json)
-
+            # set: xpubs, data
+            # get: xpubs
             if json.hasKey("cmd"):
-              if json["cmd"].getStr == "xpub" and json.hasKey("data"):
-                var xpub = json["data"].getStr
-                let w = getOrCreateWallet(xpub)
-                if client.wallets.find(w.wallet_id) < 0:
-                  client.wallets.add(w.wallet_id)
-                  client.xpubs.add(xpub)
-                let wmdata = WalletMapData(fd: fd, salt: client.salt)
-                withLock clientsLock:
-                  if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
-                    walletmap[w.wallet_id].add(wmdata)
-                send_xpubs()
-
               if json["cmd"].getStr == "xpubs":
-                send_xpubs()
+                if json.hasKey("data"):
+                  var xpubs = json["data"]
+                  for xpub in xpubs:
+                    let xpub_str = xpub.getStr
+                    let w = getOrCreateWallet(xpub_str)
+                    if client.wallets.find(w.wallet_id) < 0:
+                      client.wallets.add(w.wallet_id)
+                      client.xpubs.add(xpub_str)
+                    let wmdata = WalletMapData(fd: fd, salt: client.salt)
+                    withLock clientsLock:
+                      if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
+                        walletmap[w.wallet_id].add(wmdata)
+                var json = %*{"type": "xpubs", "data": client.xpubs}
+                sendClient(client, $json)
 
               if json["cmd"].getStr == "unspents":
                 var unspents: seq[UnspentsData]
