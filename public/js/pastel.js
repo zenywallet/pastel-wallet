@@ -212,7 +212,7 @@ pastel.load = function() {
         console.log('decdata=', decdata);
         var decomp = new Zlib.RawInflate(decdata, {verify: true}).decompress();
         console.log('decomp=', decomp);
-        var json = JSON.parse(new TextDecoder("utf-8").decode(decomp));
+        var json = JSON.parse(new TextDecoder().decode(decomp));
         console.log(JSON.stringify(json));
         h.free();
         return json;
@@ -589,7 +589,7 @@ pastel.ready = function() {
         console.log('rdata=', rdata);
         var decomp = new Zlib.RawInflate(rdata, {verify: true}).decompress();
         console.log('decomp=', decomp);
-        var json = JSON.parse(new TextDecoder("utf-8").decode(decomp));
+        var json = JSON.parse(new TextDecoder().decode(decomp));
         console.log(JSON.stringify(json));
         pastel.secure_recv(json);
       } else if(stage == 0 && !shared && data.length == 96) {
