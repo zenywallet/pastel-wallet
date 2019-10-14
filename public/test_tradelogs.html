@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/semantic/semantic.min.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <script type="text/javascript" src="/js/jquery-3.4.1.slim.js"></script>
+  <script type="text/javascript" src="/semantic/semantic.js"></script>
+  <script type="text/javascript" src="/js/murmurhash.js"></script>
+  <script type="text/javascript" src="/js/dotmatrix.js"></script>
+  <script type="text/javascript" src="/js/coinlibs.js"></script>
+  <title>test tradelogs</title>
+<style>
+.ui.cards.tradelogs {
+  display: block;
+}
+.ui.cards.tradelogs > .card {
+  width: 600px;
+}
+i.receive {
+  color: #23b195;
+}
+i.send {
+  color: #d57171;
+}
+.ui.cards.tradelogs > .card > .extra.confirmed {
+  background-color: #f3fff3;
+}
+.ui.cards.tradelogs > .card > .extra.unconfirmed {
+  background-color: #fff3f3;
+}
+</style>
+</head>
+<body>
+<div id="tradelogs" class="ui cards tradelogs"></div>
+<script>
+var buf2hex = function(buffer) {
+  return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+}
+
+var murmurhash = {};
+
+murmurhash.load = function(cb) {
+  var Module = Murmurhash({
+    onRuntimeInitialized: function() {
+      var Module = this;
+      for(var o in Module) {
+        console.log(o);
+      }
+      murmurhash.mod_hash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+
+      murmurhash.alloclist = murmurhash.alloclist || [];
+
+      murmurhash.free = function() {
+        var p = murmurhash.alloclist.shift();
+        while(p) {
+          Module._free(p);
+          p = murmurhash.alloclist.shift();
+        }
+      }
+
+      if(murmurhash.alloclist.length > 0) {
+        murmurhash.free();
+      }
+
+      murmurhash.alloc = function(size) {
+        var p = new Number(Module._malloc(size));
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+        p.free = function() {
+          Module._free(p);
+          murmurhash.alloclist.splice(murmurhash.alloclist.indexOf(p), 1);
+        }
+        murmurhash.alloclist.push(p);
+        return p;
+      }
+
+      murmurhash.hash = function(data) {
+        var input = murmurhash.alloc(data.length);
+        var output = murmurhash.alloc(16);
+        input.set(data);
+        murmurhash.mod_hash(input, data.length, output);
+        var ret = output.get();
+        output.free();
+        input.free();
+        return ret;
+      }
+
+      cb();
+      murmurhash.ready_flag = true;
+    }
+  });
+  return Module;
+}
+
+murmurhash.run = function(cb) {
+  if(this.ready_flag) {
+    if(this.pending) {
+      clearTimeout(this.worker_tval);
+      var p = this.pending.shift();
+      while(p) {
+        p();
+        p = this.pending.shift();
+      }
+    }
+    cb();
+  } else {
+    if(!this.load_flag) {
+      this.load_flag = true;
+      this.load(cb);
+    } else {
+      if(this.pending) {
+        this.pending.push(cb);
+      } else {
+        this.pending = [cb];
+        var self = this;
+        function worker() {
+          if(self.ready_flag) {
+            var p = self.pending.shift();
+            while(p) {
+              p();
+              p = self.pending.shift();
+            }
+          } else {
+            self.worker_tval = setTimeout(worker, 100);
+          }
+        }
+        worker();
+      }
+    }
+  }
+}
+
+murmurhash.run(function() {
+  var coin = coinlibs.coin;
+  var network = coin.networks.bitzeny;
+  var crypto = window.crypto || window.msCrypto;
+
+  function get_test_tx() {
+    var data = new Uint8Array(32);
+    crypto.getRandomValues(data);
+    var hash = coin.crypto.sha256(data);
+    var txid = hash.toString('hex');
+
+    const keyPair = coin.ECPair.makeRandom();
+    const { address } = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
+    console.log(address);
+
+    return {address: address, txid: txid};
+  }
+
+  for(var i = 0 ; i < 10; i++) {
+    var data = get_test_tx();
+    imgsrc = DotMatrix.getImage(buf2hex(murmurhash.hash((new TextEncoder).encode(String(i)))), 36, 1);
+    var send = Math.round(Math.random()) == 0;
+    var confirm = Math.round(Math.random()) == 0;
+    var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
+    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (12345)' : '<i class="red dont icon"></i> Unconfirmed';
+    var amount = Math.round(Math.random() * 100000 * 100000000) / 100000000;
+    var h = '<div class="card">'
+      + '<div class="content">'
+      + '<img class="right floated mini ui image" src="' + imgsrc + '">'
+      + '<div class="header">'
+      + '<i class="sign-in icon receive"></i> ' + (send ? 'SEND' : 'RECEIVE')
+      + '</div>'
+      + '<div class="meta">'
+      + '0000-00-00 00:00:00<br>'
+      + '1 months ago'
+      + '</div>'
+      + '<div class="description">'
+      + '<span class="right floated">' + amount + ' ZNY</span>'
+      + data.address
+      + '<div class="meta">'
+      + data.txid
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + extra
+      + '<span class="right floated">'
+      + '0000-00-00 00:00:00'
+      + '</span>'
+      + '<span>'
+      + confirm_msg
+      + '</span>'
+      + '</div>'
+      + '</div>';
+
+    $('#tradelogs').append(h);
+  }
+});
+</script>
+</body>
+</html>
