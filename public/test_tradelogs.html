@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="/semantic/semantic.min.css">
   <link rel="stylesheet" href="/css/base.css">
-  <script type="text/javascript" src="/js/jquery-3.4.1.slim.js"></script>
+  <script type="text/javascript" src="/js/jquery-3.4.1.js"></script>
   <script type="text/javascript" src="/semantic/semantic.js"></script>
   <script type="text/javascript" src="/js/murmurhash.js"></script>
   <script type="text/javascript" src="/js/dotmatrix.js"></script>
@@ -33,6 +33,7 @@ i.send {
 </head>
 <body>
 <div id="tradelogs" class="ui cards tradelogs"></div>
+<div style="height: 120px;"></div>
 <script>
 var buf2hex = function(buffer) {
   return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
@@ -135,62 +136,162 @@ murmurhash.run = function(cb) {
   }
 }
 
+var coin = coinlibs.coin;
+var network = coin.networks.bitzeny;
+var crypto = window.crypto || window.msCrypto;
+
+function get_test_tx() {
+  var data = new Uint8Array(32);
+  crypto.getRandomValues(data);
+  var hash = coin.crypto.sha256(data);
+  var txid = hash.toString('hex');
+
+  const keyPair = coin.ECPair.makeRandom();
+  const { address } = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
+
+  return {address: address, txid: txid};
+}
+
+var test_tx_count = 0;
+function get_txlogs(limit, sequence, cb) {
+  setTimeout(function() {
+    var items = [];
+    for(var i = 0; i < limit; i++) {
+      if(test_tx_count >= 550) {
+        cb(items);
+        return;
+      }
+      test_tx_count++;
+      items.push(get_test_tx());
+    }
+    cb(items);
+  }, 200);
+}
+
+function txlogs_item(item) {
+  var data = item;
+  imgsrc = DotMatrix.getImage(buf2hex(murmurhash.hash((new TextEncoder).encode(data.address))), 36, 1);
+  var send = Math.round(Math.random()) == 0;
+  var confirm = Math.round(Math.random()) == 0;
+  var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
+  confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (12345)' : '<i class="red dont icon"></i> Unconfirmed';
+  var amount = Math.round(Math.random() * 100000 * 100000000) / 100000000;
+  var h = '<div class="card">'
+    + '<div class="content">'
+    + '<img class="right floated mini ui image" src="' + imgsrc + '">'
+    + '<div class="header">'
+    + '<i class="sign-in icon ' + (send ? 'send' : 'receive') + '"></i> ' + (send ? 'SEND' : 'RECEIVE')
+    + '</div>'
+    + '<div class="meta">'
+    + '0000-00-00 00:00:00<br>'
+    + '1 months ago'
+    + '</div>'
+    + '<div class="description">'
+    + '<span class="right floated">' + amount + ' ZNY</span>'
+    + data.address
+    + '<div class="meta">'
+    + data.txid
+    + '</div>'
+    + '</div>'
+    + '</div>'
+    + extra
+    + '<span class="right floated">'
+    + '0000-00-00 00:00:00'
+    + '</span>'
+    + '<span>'
+    + confirm_msg
+    + '</span>'
+    + '</div>'
+    + '</div>';
+  return h;
+}
+
+function infinite_scroll() {
+  if(!$('#tradelogs').length) {
+    return;
+  }
+
+  var itemcache = [];
+  var sequence = 0;
+  var limit = 100;
+  var cachelimit = 100;
+  var eof = false;
+
+  function infinite_additem(item) {
+    var h = txlogs_item(item);
+    $(h).hide().appendTo('#tradelogs').fadeIn(600);
+  }
+
+  var check_scroll_busy = false;
+  function check_scroll() {
+    var spos = $(window).scrollTop() + $(window).height();
+    var dpos = $(document).height();
+    if(spos + 600 > dpos) {
+      check_scroll_busy = true;
+
+      var item = itemcache.shift();
+      if(item) {
+        infinite_additem(item);
+        loadcache();
+
+        setTimeout(function() {
+          check_scroll();
+        }, 10);
+      } else {
+        loadcache();
+      }
+    } else {
+      check_scroll_busy = false;
+    }
+  }
+
+  var loadcache_loading = false;
+  function loadcache() {
+    if(itemcache.length < cachelimit && !eof && !loadcache_loading) {
+      loadcache_loading = true;
+      get_txlogs(limit, sequence, function(data) {
+        if(data.length <= 0) {
+          eof = true;
+        } else {
+          itemcache = itemcache.concat(data);
+          check_scroll();
+        }
+        loadcache_loading = false;
+      });
+    }
+  }
+
+  function scroll_listener(e) {
+    console.log('listener');
+    var spos = $(window).scrollTop() + $(window).height();
+    var dpos = $(document).height();
+    if(spos + 600 > dpos) {
+      if(!check_scroll_busy) {
+        check_scroll();
+      }
+    }
+  }
+
+  this.start = function() {
+    console.log('start');
+    loadcache();
+    window.addEventListener('scroll', scroll_listener);
+  }
+
+  this.stop = function() {
+    console.log('stop');
+    window.removeEventListener('scroll', scroll_listener);
+  }
+
+  return this;
+}
+
 murmurhash.run(function() {
-  var coin = coinlibs.coin;
-  var network = coin.networks.bitzeny;
-  var crypto = window.crypto || window.msCrypto;
-
-  function get_test_tx() {
-    var data = new Uint8Array(32);
-    crypto.getRandomValues(data);
-    var hash = coin.crypto.sha256(data);
-    var txid = hash.toString('hex');
-
-    const keyPair = coin.ECPair.makeRandom();
-    const { address } = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
-    console.log(address);
-
-    return {address: address, txid: txid};
-  }
-
-  for(var i = 0 ; i < 10; i++) {
-    var data = get_test_tx();
-    imgsrc = DotMatrix.getImage(buf2hex(murmurhash.hash((new TextEncoder).encode(String(i)))), 36, 1);
-    var send = Math.round(Math.random()) == 0;
-    var confirm = Math.round(Math.random()) == 0;
-    var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
-    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (12345)' : '<i class="red dont icon"></i> Unconfirmed';
-    var amount = Math.round(Math.random() * 100000 * 100000000) / 100000000;
-    var h = '<div class="card">'
-      + '<div class="content">'
-      + '<img class="right floated mini ui image" src="' + imgsrc + '">'
-      + '<div class="header">'
-      + '<i class="sign-in icon ' + (send ? 'send' : 'receive') + '"></i> ' + (send ? 'SEND' : 'RECEIVE')
-      + '</div>'
-      + '<div class="meta">'
-      + '0000-00-00 00:00:00<br>'
-      + '1 months ago'
-      + '</div>'
-      + '<div class="description">'
-      + '<span class="right floated">' + amount + ' ZNY</span>'
-      + data.address
-      + '<div class="meta">'
-      + data.txid
-      + '</div>'
-      + '</div>'
-      + '</div>'
-      + extra
-      + '<span class="right floated">'
-      + '0000-00-00 00:00:00'
-      + '</span>'
-      + '<span>'
-      + confirm_msg
-      + '</span>'
-      + '</div>'
-      + '</div>';
-
-    $('#tradelogs').append(h);
-  }
+  var infinite = infinite_scroll();
+  infinite.start();
+  //setTimeout(function() {
+  //  infinite.stop();
+  //}, 10000)
 });
 </script>
 </body>
