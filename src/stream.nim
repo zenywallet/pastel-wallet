@@ -150,7 +150,8 @@ proc stream_main() {.thread.} =
             # set: xpubs, data
             # get: xpubs
             if json.hasKey("cmd"):
-              if json["cmd"].getStr == "xpubs":
+              let cmd = json["cmd"].getStr
+              if cmd == "xpubs":
                 if json.hasKey("data"):
                   var xpubs = json["data"]
                   for xpub in xpubs:
@@ -166,7 +167,7 @@ proc stream_main() {.thread.} =
                 var json = %*{"type": "xpubs", "data": client.xpubs}
                 sendClient(client, $json)
 
-              if json["cmd"].getStr == "unspents":
+              elif cmd == "unspents":
                 var unspents: seq[UnspentsData]
                 var xpub_idx = 0
                 for wid in client.wallets:
@@ -188,6 +189,10 @@ proc stream_main() {.thread.} =
                 if unspents.len > 1000:
                   unspents.delete(1000, unspents.high)
                 var json = %*{"type": "unspents", "data": unspents}
+                sendClient(client, $json)
+
+              elif cmd == "ready":
+                var json = %*{"type": "ready"}
                 sendClient(client, $json)
 
             block test:
