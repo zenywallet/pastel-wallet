@@ -1,3 +1,5 @@
+# Copyright (c) 2019 zenywallet
+
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
 import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, json, algorithm
 import ../deps/zip/zip/zlib
@@ -171,7 +173,7 @@ proc stream_main() {.thread.} =
                 var unspents: seq[UnspentsData]
                 var xpub_idx = 0
                 for wid in client.wallets:
-                  var count = 0;
+                  var count = 0
                   for u in getUnspents(wid):
                     for a in getAddresses(u.address):
                       var ud = UnspentsData(sequence: u.sequence,
