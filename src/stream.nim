@@ -195,11 +195,6 @@ proc stream_main() {.thread.} =
                 var json = %*{"type": "ready"}
                 sendClient(client, $json)
 
-            block test:
-              var json = %*{"test": "日本語", "test1": 1234, "test2": 5678901234,
-                          "test3": 1234, "test4": 123, "test5": 123, "test6": 123}
-              sendClient(client, $json)
-
         of Opcode.Pong:
           if fd in pingclients:
             pingclients[fd] = false
