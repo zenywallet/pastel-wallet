@@ -447,6 +447,7 @@ pastel.ready = function() {
   var kp = cipher.createKeyPair(seed);
   var shared = null;
   var stage = 0;
+  var wallet = new Wallet();
   var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
 
   stream.onOpen = function(evt) {
@@ -492,15 +493,33 @@ pastel.ready = function() {
   }
 
   pastel.secure_recv = function(json) {
-    //console.log(JSON.stringify(json));
+    var type = json['type'];
+    if(type == 'xpubs') {
+      var xpubs = json['data'];
+      if(!wallet.checkXpubs(xpubs)) {
+        throw new Error('check xpubs');
+      }
+      console.log('xpubs: ' + JSON.stringify(xpubs));
+      pastel.send({cmd: 'unspents'});
+    } else if(type == 'unspents') {
+      var utxos = json['data'];
+      console.log('unspents: ' + JSON.stringify(utxos));
+      wallet.setUtxos(utxos);
+    } else if(type == 'ready') {
+      console.log('server ready');
+      var xpubs = wallet.getXpubs();
+      pastel.send({cmd: 'xpubs', data: xpubs});
+    } else {
+      console.log('unknown: ' + JSON.stringify(json));
+    }
   }
 
   pastel.unsecure_recv = function(data) {
     try {
       var json = JSON.parse(data);
-      //console.log(JSON.stringify(json));
+      console.log(JSON.stringify(json));
     } catch(ex) {
-      //console.log(data);
+      console.log(data);
     }
   }
 
@@ -529,7 +548,6 @@ pastel.ready = function() {
         var decomp = new Zlib.RawInflate(rdata, {verify: true}).decompress();
         console.log('decomp=', decomp);
         var json = JSON.parse(new TextDecoder().decode(decomp));
-        console.log(JSON.stringify(json));
         pastel.secure_recv(json);
       } else if(stage == 0 && !shared && data.length == 96) {
         console.log('stage=0, length=96');
@@ -560,44 +578,15 @@ pastel.ready = function() {
         cipher.init(shared, iv_cli, iv_srv);
 
         stage = 1;
-
-        pastel.send({test: "日本語", test1: 1234, test2: 5678901234, test3: 1234, test4: 123, test5: 123, test6: 123});
-        /*var comp = new Zopfli.RawDeflate("日本".toByteArray(false)).compress();
-        console.log('comp length=', comp.length);
-        console.log(comp);
-        var enc = cipher.enc(comp).slice(0, comp.length);
-        console.log('enc=', enc);
-        console.log(cipher.buf2hex(enc));
-        ws.send(enc);*/
+        pastel.send({cmd: 'ready'});
       } else {
         console.log(data);
       }
     } else if(typeof evt.data == 'string') {
-      console.log(evt.data);
       pastel.unsecure_recv(evt.data);
     }
   }
 
   stream.start();
-
-  var stor = new Stor();
-
-  var send_xpub_retry_count = 0;
-  function send_xpub() {
-    if(pastel.stream_ready()) {
-      var xpubs = stor.get_xpubs();
-      var ret = pastel.send({cmd: 'xpubs', data: xpubs});
-      if(ret) {
-        return;
-      }
-    }
-    if(send_xpub_retry_count < 300) {
-      send_xpub_retry_count++;
-      setTimeout(send_xpub, 1000);
-    } else {
-      // giveup
-    }
-  }
-  send_xpub();
 }
 pastel.load();
