@@ -27,13 +27,19 @@
       <div class="caption">Pastel Wallet</div>
       <div class="ui container wallet-btns">
         <div class="two ui basic buttons sendrecv">
-          <button class="ui small button send"><i class="icon sign-out send"></i> Send</button>
-          <button class="ui small button receive"><i class="icon sign-in receive"></i> Receive</button>
+          <button class="ui small button send"><i class="counterclockwise rotated icon sign-out send"></i> Send</button>
+          <button class="ui small button receive"><i class="clockwise rotated icon sign-in receive"></i> Receive</button>
         </div>
       </div>
     </div>
     <div class="intro-body wallet-body">
-      <div id="seed-seg" class="ui center aligned segment seed-seg"></div>
+      <div id="wallet-balance" class="ui center aligined segment">
+        <div class="ui top left attached tiny label send">456.789 <i class="counterclockwise rotated icon sign-out"></i></div>
+        <div class="ui top right attached tiny label receive"><i class="clockwise rotated icon sign-in"></i>123.456</div>
+        <div class="ui bottom right attached tiny label symbol">ZNY</div>
+        12345.6789
+      </div>
+      <div id="wallet-seg" class="ui center aligned segment seed-seg"></div>
     </div>
     <div class="ui two bottom attached buttons settings">
       <div class="ui button"><i class="icon cog"></i> Settings</div>
@@ -166,7 +172,7 @@ UtxoBalls.simple = function() {
   var engine = Engine.create();
   var world = engine.world;
 
-  var target_elm = document.getElementById('seed-seg');
+  var target_elm = document.getElementById('wallet-seg');
   var w = target_elm.clientWidth - 14 * 2;
   var h = target_elm.clientHeight - 14 * 2;
 

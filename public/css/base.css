@@ -190,6 +190,8 @@ section h1 {
   font : normal 300 44px/1 'Josefin Sans', sans-serif;
   text-align: center;
   white-space: nowrap;
+  min-width: 324px;
+  margin: 0 14px;
 }
 .bt-scan-seed {
   position: absolute;
@@ -401,12 +403,29 @@ section h1 {
 }
 .ui.buttons.sendrecv {
   width: 300px;
+  min-width: 300px;
+  margin: 0 12px;
 }
 i.send {
   color: #d57171;
 }
 i.receive {
   color: #23b195;
+}
+.ui.attached.label.send {
+  background-color: rgba(213, 113, 113, 0.5);
+  color: #eee;
+  padding: 6px 0px 6px 6px;
+}
+.ui.attached.label.receive {
+  background-color: rgba(35, 177, 149, 0.5);
+  color: #eee;
+  padding: 6px 6px 6px 6px;
+}
+.ui.attached.label.symbol {
+  background-color: rgba(118, 118, 118, 0.5);
+  color: #eee;
+  padding: 6px 6px 6px 6px;
 }
 .wallet-head {
   position: relative;
@@ -428,4 +447,19 @@ i.receive {
 }
 .ui.buttons.settings > .button:hover {
   background: rgba(167,225,226,0.1);
+}
+#wallet-balance {
+  position: absolute;
+  top: 152px;
+  left: 28px;
+  z-index: 3;
+  background: rgba(128,128,128,0.3);
+  width: calc(100% - 56px);
+  min-width: 296px;
+  text-align: center;
+  color: #fafafa;
+  font: normal 400 20px/1 'arial', sans-serif;
+}
+.ui.segment.seed-seg {
+  border: 1px solid rgba(214,216,218,.25);
 }
