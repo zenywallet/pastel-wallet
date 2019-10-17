@@ -12,25 +12,32 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="/semantic/semantic.min.css">
   <link rel="stylesheet" href="/css/base.css">
+  <script type="text/javascript" src="/js/jquery-3.4.1.slim.js"></script>
+  <script type="text/javascript" src="/semantic/semantic.js"></script>
   <script type="text/javascript" src="/js/dotmatrix.js"></script>
   <script type="text/javascript" src="/js/murmurhash.js"></script>
   <script type="text/javascript" src="/js/matter.js"></script>
   <title>test matter.js</title>
-<style>
-.seed-seg canvas {
-  opacity: 0.4;
-}
-</style>
 </head>
 <body>
 <div id="canvas-container"></div>
 <section id="section3" class="section">
   <div class="intro">
-    <div class="intro-head">
+    <div class="intro-head wallet-head">
       <div class="caption">Pastel Wallet</div>
+      <div class="ui container wallet-btns">
+        <div class="two ui basic buttons sendrecv">
+          <button class="ui small button send"><i class="icon sign-out send"></i> Send</button>
+          <button class="ui small button receive"><i class="icon sign-in receive"></i> Receive</button>
+        </div>
+      </div>
     </div>
-    <div class="intro-body">
-      <div id="seed-seg" class="ui enter aligned segment seed-seg"></div>
+    <div class="intro-body wallet-body">
+      <div id="seed-seg" class="ui center aligned segment seed-seg"></div>
+    </div>
+    <div class="ui two bottom attached buttons settings">
+        <div class="ui button"><i class="icon cog"></i> Settings</div>
+        <div class="ui button"><i class="icon list alternate outline"></i> Logs</div>
     </div>
   </div>
 </section>

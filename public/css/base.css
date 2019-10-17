@@ -389,3 +389,43 @@ section h1 {
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
+.seed-seg canvas {
+  opacity: 0.4;
+}
+.ui.buttons.sendrecv > .button, .ui.buttons.settings > .button {
+  z-index: 3;
+}
+.wallet-btns {
+  text-align: center;
+  margin-top: 16px;
+}
+.ui.buttons.sendrecv {
+  width: 300px;
+}
+i.send {
+  color: #d57171;
+}
+i.receive {
+  color: #23b195;
+}
+.wallet-head {
+  position: relative;
+  width: 100%;
+  height: 167px;
+  top: 16px;
+}
+.wallet-body {
+    width: 100%;
+    height: calc(100% - 202px);
+}
+.wallet-body .seed-seg {
+  min-height: 482px;
+}
+.ui.buttons.settings > .button {
+  font-weight: 400;
+  background-color: transparent;
+  color: #aaa;
+}
+.ui.buttons.settings > .button:hover {
+  background: rgba(167,225,226,0.1);
+}
