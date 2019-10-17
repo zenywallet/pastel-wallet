@@ -389,7 +389,7 @@ section h1 {
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
-.seed-seg canvas {
+.wallet-body .seed-seg canvas {
   opacity: 0.4;
 }
 .ui.buttons.sendrecv > .button, .ui.buttons.settings > .button {
