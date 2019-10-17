@@ -772,7 +772,11 @@ proc appMain(): VNode =
           tdiv(class="intro-head"):
             tdiv(class="caption"): text "Pastel Wallet"
             tdiv(class="ui container method-selector"):
-              tdiv(class="title"): text "A key card or passphrase is required to encrypt and save the private key in your browser."
+              tdiv(class="title"):
+                text """
+                  A key card or passphrase is required to encrypt and save the private key in your browser.
+                   You will need key card or passphrase before sending your coins.
+                """
               tdiv(class="ui buttons"):
                 button(id="keyselector", class="ui olive button", onclick=protectSelector(ProtectType.KeyCard)):
                   italic(class="qrcode icon")
