@@ -733,7 +733,7 @@ proc appMain(): VNode =
                   text "Mnemonic"
           tdiv(class="intro-body"):
             if currentImportType == ImportType.SeedCard:
-              tdiv(id="seed-seg", class="ui enter aligned segment seed-seg"):
+              tdiv(id="seed-seg", class="ui center aligned segment seed-seg"):
                 if showScanResult:
                   tdiv(class="ui link cards seed-card-holder"):
                     seedCard(seedCardInfo)
@@ -760,7 +760,7 @@ proc appMain(): VNode =
                       italic(class="window close icon")
                 canvas(id="qrcanvas")
             else:
-              tdiv(class="ui enter aligned segment mnemonic-seg"):
+              tdiv(class="ui center aligned segment mnemonic-seg"):
                 mnemonicEditor()
                 if mnemonicFulfill:
                   a(class="pagenext", href="#section2"):
@@ -787,7 +787,7 @@ proc appMain(): VNode =
                   text "Passphrase"
           tdiv(class="intro-body"):
             if currentProtectType == ProtectType.KeyCard:
-              tdiv(id="seed-seg", class="ui enter aligned segment seed-seg"):
+              tdiv(id="seed-seg", class="ui center aligned segment seed-seg"):
                 if showScanResult2:
                   tdiv(class="ui link cards seed-card-holder"):
                     seedCard(seedCardInfo)
@@ -814,7 +814,7 @@ proc appMain(): VNode =
                       italic(class="window close icon")
                 canvas(id="qrcanvas")
             else:
-              tdiv(class="ui enter aligned segment mnemonic-seg"):
+              tdiv(class="ui center aligned segment mnemonic-seg"):
                 passphraseEditor()
                 if passphraseFulfill:
                   a(class="pagenext", href="#section3"):
@@ -826,7 +826,7 @@ proc appMain(): VNode =
           tdiv(class="intro-head"):
             tdiv(class="caption"): text "Pastel Wallet"
           tdiv(class="intro-body"):
-            tdiv(id="seed-seg", class="ui enter aligned segment seed-seg")
+            tdiv(id="seed-seg", class="ui center aligned segment seed-seg")
 
 proc afterScript() =
   jq("#section0").remove()
