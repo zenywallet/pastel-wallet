@@ -21,7 +21,7 @@ proc cmd_main() {.thread.} =
           break
         elif p.key == "delwallets":
           db.delWallets()
-          discard blockstor.setMarker(blockstor_apikey, 0)
+          echo blockstor.setMarker(blockstor_apikey, 0)
           break
       else: discard
 
