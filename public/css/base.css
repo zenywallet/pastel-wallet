@@ -463,3 +463,16 @@ i.receive {
 .ui.segment.seed-seg {
   border: 1px solid rgba(214,216,218,.25);
 }
+.ui.basic.buttons > .ui.button.send {
+  color: #eee !important;
+  font-weight: 400;
+  background: rgba(170,170,170,0.6) !important;
+}
+.ui.basic.buttons > .ui.button.receive {
+  color: #eee !important;
+  font-weight: 400;
+  background: rgba(170,170,170,0.6) !important;
+}
+.ui.basic.buttons > .ui.button.send:hover, .ui.basic.buttons > .ui.button.receive:hover {
+  background: rgba(190,190,190,0.6) !important;
+}
