@@ -81,6 +81,22 @@ var Wallet = (function() {
     return child.neutered().toBase58();
   }
 
+  Wallet.prototype.resetXpubFromSeed = function(seed) {
+    stor.del_xpubs();
+    var xpub = wallet.getHdNodePublic(seed, "m/44'/123'/0'");
+    stor.add_xpub(xpub);
+  }
+
+  Wallet.prototype.resetXpubFromMnemonic = function(mnemonic, mlang, password) {
+    var seeds = wallet.getMnemonicToSeeds(mnemonic, mlang, password);
+    stor.del_xpubs();
+    for(var i in seeds) {
+      var seed = seeds[i].seed;
+      var xpub = wallet.getHdNodePublic(seed, "m/44'/123'/0'");
+      stor.add_xpub(xpub);
+    }
+  }
+
   function error(msg) {
     console.log('ERROR: ' + msg);
   }
