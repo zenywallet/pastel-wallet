@@ -476,3 +476,9 @@ i.receive {
 .ui.basic.buttons > .ui.button.send:hover, .ui.basic.buttons > .ui.button.receive:hover {
   background: rgba(190,190,190,0.6) !important;
 }
+.ui.buttons.settings > .ui.button {
+  padding-left: 30px;
+}
+.ui.buttons.settings > .ui.button span {
+  padding-left: 4px;
+}
