@@ -894,7 +894,7 @@ proc afterScript() =
       }
     """
   if showScanResult or mnemonicFulfill or showScanResult2 or passphraseFulfill:
-    asm """        
+    asm """
       var elms = document.querySelectorAll('a.pagenext');
       Array.prototype.forEach.call(elms, function(elm) {
         var href = elm.getAttribute("href");
