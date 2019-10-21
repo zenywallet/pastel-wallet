@@ -23,11 +23,31 @@ i.receive {
 i.send {
   color: #d57171;
 }
+.ui.cards.tradelogs > .card > .content {
+  padding: 0.5em 0.5em;
+}
+.ui.cards.tradelogs > .card > .content > .header {
+  font-size: 1.18em;
+  line-height: 1.18em;
+  padding-bottom: 0.16em;
+}
 .ui.cards.tradelogs > .card > .extra.confirmed {
   background-color: #f3fff3;
+  padding: 0.1em 0.5em 0.2em;
 }
 .ui.cards.tradelogs > .card > .extra.unconfirmed {
   background-color: #fff3f3;
+  padding: 0.1em 0.5em 0.2em;
+}
+.ui.cards.tradelogs > .card .meta {
+  font-size: 11px;
+  line-height: 1.2em;
+}
+.ui.cards.tradelogs > .card .txid {
+  margin-top: 0.8em;
+}
+.ui.cards.tradelogs > .card > .content > .description span {
+  margin-left: 1em;
 }
 </style>
 </head>
@@ -184,12 +204,12 @@ function txlogs_item(item) {
     + '</div>'
     + '<div class="meta">'
     + '0000-00-00 00:00:00<br>'
-    + '1 months ago'
+    + '2 months ago'
     + '</div>'
     + '<div class="description">'
     + '<span class="right floated">' + amount + ' ZNY</span>'
     + data.address
-    + '<div class="meta">'
+    + '<div class="meta txid">'
     + data.txid
     + '</div>'
     + '</div>'
