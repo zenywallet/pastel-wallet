@@ -275,7 +275,7 @@ var showPage3 = false
 var mnemonicFulfill = false
 var passphraseFulfill = false
 
-proc viewSelector(view: ViewType) =
+proc viewSelector(view: ViewType, redraw: bool = true) =
   echo "view", view
   case view
   of SeedNone:
@@ -324,7 +324,8 @@ proc viewSelector(view: ViewType) =
   else:
     discard
 
-  appInst.redraw()
+  if redraw:
+    appInst.redraw()
 
 var jsViewSelector {.importc, nodecl.}: JsObject
 asm """
@@ -913,5 +914,5 @@ proc afterScript() =
       });
     """
 
+viewSelector(Wallet, false)
 appInst = setRenderer(appMain, "main", afterScript)
-#viewSelector(SeedAfterScan)
