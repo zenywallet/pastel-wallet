@@ -824,10 +824,36 @@ proc appMain(): VNode =
     if showPage3:
       section(id="section3", class="section"):
         tdiv(class="intro"):
-          tdiv(class="intro-head"):
+          tdiv(class="intro-head  wallet-head"):
             tdiv(class="caption"): text "Pastel Wallet"
-          tdiv(class="intro-body"):
-            tdiv(id="seed-seg", class="ui left aligned segment seed-seg")
+            tdiv(class="ui container wallet-btns"):
+              tdiv(class="two ui basic buttons sendrecv"):
+                button(id="btn-send", class="ui small button send"):
+                  italic(class="counterclockwise rotated icon sign-out send")
+                  text "Send"
+                button(id="btn-receive", class="ui small button receive"):
+                  italic(class="clockwise rotated icon sign-in receive")
+                  text "Receive"
+          tdiv(class="intro-body wallet-body"):
+            tdiv(id="wallet-balance", class="ui center aligined segment"):
+              tdiv(class="ui top left attached tiny label send"):
+                text "456.789" & " "
+                italic(class="counterclockwise rotated icon sign-out")
+              tdiv(class="ui top right attached tiny label receive"):
+                italic(class="clockwise rotated icon sign-in")
+                text "123.456"
+              tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
+              text "12345.6789"
+            tdiv(id="wallet-seg", class="ui center aligned segment seed-seg")
+          tdiv(class="ui two bottom attached buttons settings"):
+            tdiv(class="ui button"):
+              italic(class="icon cog")
+              text "Settings"
+              span: italic(class="chevron down icon")
+            tdiv(class="ui button"):
+              italic(class="icon list alternate outline")
+              text "Logs"
+              span: italic(class="chevron down icon")
 
 proc afterScript() =
   jq("#section0").remove()
