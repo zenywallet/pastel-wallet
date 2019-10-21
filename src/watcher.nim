@@ -59,7 +59,7 @@ proc main() =
     for d in db.getWallets(""):
       echo "wid=", d.wallet_id, " ", d.xpubkey
       echo "max_sequence=", max_sequence, " d.sequence=", d.sequence
-      if max_sequence <= d.sequence:
+      if max_sequence <= d.sequence and d.sequence != 0'u64:
         echo "skip - wid=", d.wallet_id
         continue
       var address_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string]]
