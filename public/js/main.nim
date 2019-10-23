@@ -258,6 +258,8 @@ type ViewType = enum
   PassphraseEdit
   PassphraseDone
   Wallet
+  WalletLogs
+  WalletSettings
 
 var showScanSeedBtn = true
 var showScanning = true
@@ -272,10 +274,11 @@ var showScanResult2 = false
 var showPage1 = true
 var showPage2 = false
 var showPage3 = false
+var showPage4 = false
 var mnemonicFulfill = false
 var passphraseFulfill = false
 
-proc viewSelector(view: ViewType, redraw: bool = true) =
+proc viewSelector(view: ViewType, no_redraw: bool = false) =
   echo "view", view
   case view
   of SeedNone:
@@ -321,10 +324,21 @@ proc viewSelector(view: ViewType, redraw: bool = true) =
     showPage1 = false
     showPage2 = false
     showPage3 = true
+    showPage4 = false
+  of WalletLogs:
+    showPage1 = false
+    showPage2 = false
+    showPage3 = true
+    showPage4 = true
+  of WalletSettings:
+    showPage1 = false
+    showPage2 = false
+    showPage3 = true
+    showPage4 = true
   else:
     discard
 
-  if redraw:
+  if not no_redraw:
     appInst.redraw()
 
 var jsViewSelector {.importc, nodecl.}: JsObject
@@ -715,6 +729,21 @@ proc passphraseEditor(): VNode =
       button(class="ui right floated primary button", onclick=confirmPassphrase):
         text "Save"
 
+var scrollSetting = false
+proc goSettings(): proc() =
+  result = proc() =
+    viewSelector(WalletLogs)
+    scrollSetting = true
+
+proc goLogs(): proc() =
+  result = proc() =
+    viewSelector(WalletLogs)
+    scrollSetting = true
+
+proc backWallet(): proc() =
+  result = proc() =
+    scrollSetting = false
+
 proc appMain(): VNode =
   result = buildHtml(tdiv):
     if showPage1:
@@ -829,32 +858,45 @@ proc appMain(): VNode =
             tdiv(class="ui container wallet-btns"):
               tdiv(class="two ui basic buttons sendrecv"):
                 button(id="btn-send", class="ui small button send"):
-                  italic(class="counterclockwise rotated icon sign-out send")
+                  italic(class="counterclockwise rotated sign-out icon send")
                   text "Send"
                 button(id="btn-receive", class="ui small button receive"):
-                  italic(class="clockwise rotated icon sign-in receive")
+                  italic(class="clockwise rotated sign-in icon receive")
                   text "Receive"
           tdiv(class="intro-body wallet-body"):
             tdiv(id="wallet-balance", class="ui center aligined segment"):
               tdiv(class="ui top left attached tiny label send"):
                 text "456.789" & " "
-                italic(class="counterclockwise rotated icon sign-out")
+                italic(class="counterclockwise rotated sign-out icon")
               tdiv(class="ui top right attached tiny label receive"):
-                italic(class="clockwise rotated icon sign-in")
+                italic(class="clockwise rotated sign-in icon")
                 text "123.456"
               tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
               text "12345.6789"
-            tdiv(id="ball-info", class="ui center aligined segment")
-            tdiv(id="wallet-seg", class="ui center aligned segment seed-seg")
+            tdiv(id="ball-info", class="ui center aligined segment"):
+              text ""
+              br()
+              text ""
+            tdiv(id="wallet-seg", class="ui center aligned segment seed-seg"):
+              canvas(width="0", height="0")
           tdiv(class="ui two bottom attached buttons settings"):
-            tdiv(class="ui button"):
-              italic(class="icon cog")
+            tdiv(class="ui button", onclick=goSettings()):
+              italic(class="cog icon")
               text "Settings"
               span: italic(class="chevron down icon")
-            tdiv(class="ui button"):
-              italic(class="icon list alternate outline")
+            tdiv(class="ui button", onclick=goLogs()):
+              italic(class="list alternate outline icon")
               text "Logs"
               span: italic(class="chevron down icon")
+    if showPage4:
+      section(id="section4", class="section"):
+        tdiv(class="ui buttons settings backpage"):
+          tdiv(class="ui button", onclick=backWallet()):
+            italic(class="dot circle icon")
+            text "Back"
+            span: italic(class="chevron up icon")
+        tdiv(class="ui container"):
+          tdiv(id="tradelogs", class="ui cards tradelogs")
 
 proc afterScript() =
   jq("#section0").remove()
@@ -940,6 +982,23 @@ proc afterScript() =
         }
       });
     """
+  if showPage4:
+    if scrollSetting:
+      asm """
+        goSection('#section4', function() {
+          target_page_scroll = '#section3';
+          page_scroll_done = function() {
+            $('#section4').hide();
+            window.scrollTo(0, 0);
+            jsViewSelector(11);
+            page_scroll_done = function() {};
+          }
+        });
+      """
+    else:
+      asm """
+        goSection('#section3', page_scroll_done);
+      """
 
-viewSelector(Wallet, false)
+viewSelector(Wallet, true)
 appInst = setRenderer(appMain, "main", afterScript)
