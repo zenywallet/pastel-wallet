@@ -214,6 +214,11 @@ iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
     let last_1_index = d.value[12..15].toUint32
     yield (xpubkey, wid, sequence, last_0_index, last_1_index)
 
+proc delWallets*() =
+  let key = concat(Prefix.wallets.toByte)
+  for d in db.gets(key):
+    db.del(d.key)
+
 var createWalletLock: Lock
 initLock(createWalletLock)
 
