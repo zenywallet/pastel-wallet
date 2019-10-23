@@ -28,6 +28,7 @@ UtxoBalls.simple = function() {
   var w = target_elm.clientWidth - 14 * 2;
   var h = target_elm.clientHeight - 14 * 2;
 
+  $('#wallet-seg').empty();
   var render = Render.create({
     element: target_elm,
     engine: engine,
@@ -145,6 +146,10 @@ UtxoBalls.simple = function() {
   });
 
   var cur_id = -1;
+  var tval = null;
+  $('#wallet-seg').mouseout(function() {
+    $('#ball-info').fadeOut(800);
+  });
   Events.on(mouseConstraint, 'mousemove', function (e) {
     var foundPhysics = Matter.Query.point(bodies, e.mouse.position);
     if(foundPhysics.length == 1 && !dragging) {
@@ -161,6 +166,13 @@ UtxoBalls.simple = function() {
         $('#ball-info').fadeOut(800);
       }
     }
+    clearTimeout(tval);
+    tval = setTimeout(function() {
+      if(cur_id != -1) {
+        cur_id = -1;
+        $('#ball-info').fadeOut(800);
+      }
+    }, 5000);
   });
 
   World.add(world, mouseConstraint);
