@@ -6,6 +6,13 @@
 html, body {
   height: 100%;
 }
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
 section, #main {
   position: relative;
   width: 100%;
