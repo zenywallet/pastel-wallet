@@ -482,3 +482,41 @@ i.receive {
 .ui.buttons.settings > .ui.button span {
   padding-left: 4px;
 }
+#receive-address {
+  position: absolute;
+  top: 216px;
+  left: 28px;
+  z-index: 3;
+  background: rgba(128,128,128,0.3);
+  width: calc(100% - 56px);
+  min-width: 296px;
+  text-align: center;
+  color: #fafafa;
+  font: normal 400 13px/1 'arial', sans-serif;
+  padding: 7px 0;
+}
+#receive-address .btn-close {
+  position: absolute;
+  right: 0em;
+  top: 0.42em;
+}
+#receive-address .btn-maximize {
+  position: absolute;
+  right: 1.5em;
+  top: 0.42em;
+}
+#ball-info {
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-transform: translate(-50%, 0%);
+  transform: translate(-50%, 0%);
+  z-index: 3;
+  text-align: center;
+  color: #fafafa;
+  font: normal 400 9px/1 'arial', sans-serif;
+  display: block;
+  background: rgba(128,128,128,0.3);
+  padding: 4px 4px;
+  display: none;
+}

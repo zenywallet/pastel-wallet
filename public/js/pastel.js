@@ -328,10 +328,10 @@ pastel.load = function() {
       }
 
       cipher.murmurhash = function(data) {
-        var input = murmurhash.alloc(data.length);
-        var output = murmurhash.alloc(16);
+        var input = cipher.alloc(data.length);
+        var output = cipher.alloc(16);
         input.set(data);
-        murmurhash.mod_murmurhash(input, data.length, output);
+        cipher.mod_murmurhash(input, data.length, output);
         var ret = output.get();
         output.free();
         input.free();
@@ -505,6 +505,17 @@ pastel.ready = function() {
       var utxos = json['data'];
       console.log('unspents: ' + JSON.stringify(utxos));
       wallet.setUtxos(utxos);
+
+      var utxoballs = UtxoBalls.simple();
+      var resize_tval;
+      window.addEventListener("resize", function() {
+        utxoballs.stop();
+        clearTimeout(resize_tval);
+        resize_tval = setTimeout(function() {
+          utxoballs.canvas.remove();
+          utxoballs = UtxoBalls.simple();
+        }, 1400);
+      });
     } else if(type == 'ready') {
       console.log('server ready');
       var xpubs = wallet.getXpubs();

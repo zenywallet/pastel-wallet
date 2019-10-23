@@ -844,6 +844,7 @@ proc appMain(): VNode =
                 text "123.456"
               tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
               text "12345.6789"
+            tdiv(id="ball-info", class="ui center aligined segment")
             tdiv(id="wallet-seg", class="ui center aligned segment seed-seg")
           tdiv(class="ui two bottom attached buttons settings"):
             tdiv(class="ui button"):
