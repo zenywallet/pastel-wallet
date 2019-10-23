@@ -520,3 +520,72 @@ i.receive {
   padding: 4px 4px;
   display: none;
 }
+.ui.cards.tradelogs {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 120px;
+  min-width: 324px;
+}
+.ui.cards.tradelogs > .card {
+  width: 600px;
+  background-color: rgba(255, 253, 250, 1);
+}
+.ui.cards.tradelogs > i.receive {
+  color: #23b195;
+}
+.ui.cards.tradelogs > i.send {
+  color: #d57171;
+}
+.ui.cards.tradelogs > .card > .content {
+  padding: 0.5em 0.5em;
+}
+.ui.cards.tradelogs > .card > .content > .header {
+  font-size: 1.18em;
+  line-height: 1.18em;
+  padding-bottom: 0.16em;
+}
+.ui.cards.tradelogs > .card > .extra.confirmed {
+  background-color: rgba(243, 255, 243, 0.54);
+  padding: 0.1em 0.5em 0.2em;
+}
+.ui.cards.tradelogs > .card > .extra.unconfirmed {
+  background-color: rgba(255, 243, 243, 0.54);
+  padding: 0.1em 0.5em 0.2em;
+}
+.ui.cards.tradelogs > .card .meta {
+  font-size: 11px;
+  line-height: 1.2em;
+}
+.ui.cards.tradelogs > .card .txid {
+  margin-top: 0.8em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ui.cards.tradelogs > .card > .content > .description span {
+  margin-left: 1em;
+}
+.ui.buttons.settings.backpage {
+  width: 100%;
+  background-color: #4a4a4a;
+}
+.ui.cards.tradelogs > .card.metal {
+  min-width: 324px;
+  background-size: 50px 216px;
+  background-image: -webkit-repeating-linear-gradient(left, hsla(0,0%,100%,0) 0%, hsla(0,0%,100%,0) 6%, hsla(0,0%,100%,.1) 7.5%, hsla(0,0%, 100%,0) 9%),
+  -webkit-repeating-linear-gradient(left, hsla(0,0%,40%,0) 0%, hsla(0,0%,40%,0) 4%, hsla(0,0%,40%,.03) 4.5%, hsla(0,0%,40%,0) 6%),
+  -webkit-repeating-linear-gradient(left, hsla(0,0%,100%,0) 0%, hsla(0,0%,100%,0) 1.2%, hsla(0,0%,100%,.15) 2.2%, hsla(0,0%,100%,0) 4%),
+  -webkit-linear-gradient(-90deg, hsl(0,0%,88%) 0%, hsl(0,0%,94%) 40%, hsl(0,0%,84%) 53%, hsl(0,0%,96%) 100%);
+}
+.ui.cards.tradelogs > .card.metal2 {
+  background: -webkit-radial-gradient(center, circle, rgba(255,255,255,.35), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 21%), -webkit-radial-gradient(center, circle, rgba(0,0,0,.2), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 21%), -webkit-radial-gradient(center, circle farthest-corner, #f0f0f0, #c0c0c0);
+  background: -moz-radial-gradient(center, circle, rgba(255,255,255,.35), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 21%), -webkit-radial-gradient(center, circle, rgba(0,0,0,.2), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 21%), -webkit-radial-gradient(center, circle farthest-corner, #f0f0f0, #c0c0c0);
+  background: -ms-radial-gradient(center, circle, rgba(255,255,255,.35), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 21%), -webkit-radial-gradient(center, circle, rgba(0,0,0,.2), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 21%), -webkit-radial-gradient(center, circle farthest-corner, #f0f0f0, #c0c0c0);
+  background: -o-radial-gradient(center, circle, rgba(255,255,255,.35), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 21%), -webkit-radial-gradient(center, circle, rgba(0,0,0,.2), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 21%), -webkit-radial-gradient(center, circle farthest-corner, #f0f0f0, #c0c0c0);
+  background: radial-gradient(center, circle, rgba(255,255,255,.35), rgba(255,255,255,0) 20%, rgba(255,255,255,0) 21%), -webkit-radial-gradient(center, circle, rgba(0,0,0,.2), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 21%), -webkit-radial-gradient(center, circle farthest-corner, #f0f0f0, #c0c0c0);
+  background-size: 10px 10px, 10px 10px, 100% 100%;
+  background-position: 1px 1px, 0px 0px, center center;
+}
+.ui.cards.tradelogs > .card .image {
+  opacity: 0.54;
+}
