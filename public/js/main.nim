@@ -744,7 +744,7 @@ proc backWallet(): proc() =
   result = proc() =
     scrollSetting = false
 
-proc appMain(): VNode =
+proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
     if showPage1:
       section(id="section1", class="section"):
@@ -898,7 +898,7 @@ proc appMain(): VNode =
         tdiv(class="ui container"):
           tdiv(id="tradelogs", class="ui cards tradelogs")
 
-proc afterScript() =
+proc afterScript(data: RouterData) =
   jq("#section0").remove()
   jq(".ui.dropdown").dropdown()
   if showScanResult:
@@ -1001,4 +1001,4 @@ proc afterScript() =
       """
 
 viewSelector(Wallet, true)
-appInst = setRenderer(appMain, "main", afterScript)
+appInst = setInitializer(appMain, "main", afterScript)
