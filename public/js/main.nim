@@ -913,6 +913,8 @@ proc appMain(data: RouterData): VNode =
               italic(class="list alternate outline icon")
               text "Logs"
               span: italic(class="chevron down icon")
+            tdiv(id="bottom-blink")
+
     if showPage4:
       section(id="section4", class="tradelogs-section"):
         tdiv(class="ui buttons settings backpage"):
@@ -1026,9 +1028,10 @@ proc afterScript(data: RouterData) =
           jsSupressRedraw = false;
           jsViewSelector(11);
           page_scroll_done = function() {};
+          $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
     """
 
-#viewSelector(Wallet, true)
+viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)
