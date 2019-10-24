@@ -527,7 +527,6 @@ i.receive {
   text-align: center;
   color: #fafafa;
   font: normal 400 9px/1 'arial', sans-serif;
-  display: block;
   background: rgba(128,128,128,0.3);
   padding: 4px 4px;
   display: none;
