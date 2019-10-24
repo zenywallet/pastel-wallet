@@ -11,6 +11,11 @@ Ball.get = function(name, size, label) {
 
 var UtxoBalls = UtxoBalls || {};
 UtxoBalls.simple = function() {
+  var target_elm = document.getElementById('wallet-seg');
+  if(!target_elm) {
+    return null;
+  }
+
   var Engine = Matter.Engine,
     Render = Matter.Render,
     Runner = Matter.Runner,
@@ -24,7 +29,6 @@ UtxoBalls.simple = function() {
   var engine = Engine.create();
   var world = engine.world;
 
-  var target_elm = document.getElementById('wallet-seg');
   var w = target_elm.clientWidth - 14 * 2;
   var h = target_elm.clientHeight - 14 * 2;
 
