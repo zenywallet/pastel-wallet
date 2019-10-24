@@ -9,6 +9,7 @@ import sequtils
 
 var appInst: KaraxInstance
 
+
 {.emit: """
 var jsViewSelector = function() {}
 
@@ -277,6 +278,7 @@ var showPage3 = false
 var showPage4 = false
 var mnemonicFulfill = false
 var passphraseFulfill = false
+var supressRedraw = false
 
 proc viewSelector(view: ViewType, no_redraw: bool = false) =
   echo "view", view
@@ -344,6 +346,7 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
 var jsViewSelector {.importc, nodecl.}: JsObject
 asm """
   jsViewSelector = `viewSelector`
+  jsSupressRedraw = `supressRedraw`
 """
 
 #proc importTypeButtonClass(importType: ImportType): cstring =
@@ -729,20 +732,29 @@ proc passphraseEditor(): VNode =
       button(class="ui right floated primary button", onclick=confirmPassphrase):
         text "Save"
 
-var scrollSetting = false
 proc goSettings(): proc() =
   result = proc() =
-    viewSelector(WalletLogs)
-    scrollSetting = true
+    if not showPage4:
+      viewSelector(WalletLogs, false)
+      supressRedraw = true
 
 proc goLogs(): proc() =
   result = proc() =
-    viewSelector(WalletLogs)
-    scrollSetting = true
+    if not showPage4:
+      viewSelector(WalletLogs, false)
+      supressRedraw = true
+    else:
+      asm """
+        goSection('#section4');
+      """
 
 proc backWallet(): proc() =
   result = proc() =
-    scrollSetting = false
+    viewSelector(Wallet, true)
+    supressRedraw = false
+    asm """
+      goSection('#section3', page_scroll_done);
+    """
 
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
@@ -889,9 +901,9 @@ proc appMain(data: RouterData): VNode =
               text "Logs"
               span: italic(class="chevron down icon")
     if showPage4:
-      section(id="section4", class="section"):
+      section(id="section4", class="tradelogs-section"):
         tdiv(class="ui buttons settings backpage"):
-          tdiv(class="ui button", onclick=backWallet()):
+          tdiv(id="backwallet", class="ui button", onclick=backWallet()):
             italic(class="dot circle icon")
             text "Back"
             span: italic(class="chevron up icon")
@@ -982,23 +994,28 @@ proc afterScript(data: RouterData) =
         }
       });
     """
+
   if showPage4:
-    if scrollSetting:
-      asm """
-        goSection('#section4', function() {
-          target_page_scroll = '#section3';
-          page_scroll_done = function() {
-            $('#section4').hide();
-            window.scrollTo(0, 0);
-            jsViewSelector(11);
-            page_scroll_done = function() {};
-          }
-        });
-      """
-    else:
-      asm """
-        goSection('#section3', page_scroll_done);
-      """
+    asm """
+      $('.backpage').visibility({
+        type: 'fixed',
+        offset: 0
+      });
+      TradeLogs.start();
+      goSection('#section4', function() {
+        target_page_scroll = '#section3';
+        page_scroll_done = function() {
+          TradeLogs.stop();
+          $('.backpage').visibility();
+          $('#tradelogs').empty();
+          $('#section4').hide();
+          window.scrollTo(0, 0);
+          jsSupressRedraw = false;
+          jsViewSelector(11);
+          page_scroll_done = function() {};
+        }
+      });
+    """
 
 viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)

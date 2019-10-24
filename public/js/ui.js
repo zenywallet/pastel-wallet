@@ -86,7 +86,8 @@ window.onscroll = function() {
     scroll_tval = null;
   }
   var sections = document.getElementsByClassName('section');
-  if(sections.length <= 1) {
+  var tradelogs_section = document.getElementById('section4');
+  if(sections.length <= 1 && !tradelogs_section) {
     return;
   }
   var difflist = {};
@@ -95,6 +96,14 @@ window.onscroll = function() {
     var section_id = section.getAttribute('id');
     difflist['#' + section_id] = Math.abs(rect.top);
   });
+  if(tradelogs_section) {
+    var rect = tradelogs_section.getBoundingClientRect();
+    if(rect.top <= 0) {
+      return;
+    }
+    difflist['#section4'] = Math.abs(rect.top);
+  }
+
   var min_val = 0;
   var min_item = null;
   for(var key in difflist) {
