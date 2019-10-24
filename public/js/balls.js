@@ -135,6 +135,9 @@ UtxoBalls.simple = function() {
     }
   });
 
+  mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
+  mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
+
   var dragging = false;
   Events.on(mouseConstraint, "startdrag", function(e) {
     console.log(e.body.address);
