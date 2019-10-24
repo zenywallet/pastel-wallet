@@ -349,6 +349,10 @@ asm """
   jsSupressRedraw = `supressRedraw`
 """
 
+proc viewUpdate() =
+  if not supressRedraw:
+    appInst.redraw()
+
 #proc importTypeButtonClass(importType: ImportType): cstring =
 #  if importType == currentImportType:
 #    "ui olive button"
@@ -377,6 +381,7 @@ proc importSelector(importType: ImportType): proc() =
         $('#mnemonicselector').removeClass('grey').addClass('olive');
         $('#seedselector').removeClass('olive').addClass('grey');
       """
+    viewUpdate()
 
 proc protectSelector(protectType: ProtectType): proc() =
   result = proc() =
@@ -402,6 +407,7 @@ proc protectSelector(protectType: ProtectType): proc() =
         $('#passselector').removeClass('grey').addClass('olive');
         $('#keyselector').removeClass('olive').addClass('grey');
       """
+    viewUpdate()
 
 type SeedCardInfo = object
   seed: cstring
@@ -528,6 +534,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
       autocompleteWords = @[]
   else:
     autocompleteWords = @[]
+  viewUpdate()
 
 proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): proc() =
   result = proc() =
@@ -564,6 +571,7 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
         input_elm.focus()
         input_elm.selectionEnd = newcur
     autocompleteWords = @[]
+    viewUpdate()
 
 var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObject): cstring = cast[cstring](x)))
 var wl_english = cast[seq[cstring]](bip39.wordlists.english.map(proc(x: JsObject): cstring = cast[cstring](x)))
@@ -595,6 +603,7 @@ proc confirmMnemonic(input_id: cstring): proc() =
     else:
       chklist = @[]
     autocompleteWords = @[]
+    viewUpdate()
 
 proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
   result = proc() =
@@ -642,6 +651,7 @@ proc changeLanguage(ev: Event; n: VNode) =
     wl_select = wl_english
   autocompleteWords = @[]
   chklist = @[]
+  viewUpdate()
 
 proc mnemonicEditor(): VNode =
   let input_id: cstring = "minput"
@@ -715,11 +725,14 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
         italic(class="cut icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
+  viewUpdate()
   discard
 
 proc confirmPassphrase(ev: Event; n: VNode) =
   passphraseFulfill = true
   showPage3 = true
+  viewUpdate()
+
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
@@ -1017,5 +1030,5 @@ proc afterScript(data: RouterData) =
       });
     """
 
-viewSelector(Wallet, true)
+#viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)
