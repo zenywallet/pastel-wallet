@@ -142,9 +142,13 @@ UtxoBalls.simple = function() {
   mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
   mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
 
+  var click_cb = function(address) {
+    console.log(address);
+  }
+
   var dragging = false;
   Events.on(mouseConstraint, "startdrag", function(e) {
-    console.log(e.body.address);
+    click_cb(e.body.address);
     dragging = true;
   });
 
@@ -198,6 +202,12 @@ UtxoBalls.simple = function() {
     stop: function() {
       Matter.Render.stop(render);
       Matter.Runner.stop(runner);
+    },
+    click: function(cb) {
+      click_cb = cb;
+    },
+    click_cb: function() {
+      return click_cb;
     }
   };
 }
