@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description" content="Pastel WALLET">
+  <meta name="author" content="zenywallet">
+  <meta name="keywords" content="wallet">
+  <meta name="format-detection" content="telephone=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="msapplication-TileColor" content="#00aba9">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="/semantic/semantic.min.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <script type="text/javascript" src="/js/jquery-3.4.1.js"></script>
+  <script type="text/javascript" src="/semantic/semantic.js"></script>
+  <script type="text/javascript" src="/js/dotmatrix.js"></script>
+  <script type="text/javascript" src="/js/balls.js"></script>
+  <script type="text/javascript" src="/js/murmurhash.js"></script>
+  <script type="text/javascript" src="/js/matter.js"></script>
+  <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
+  <script type="text/javascript" src="/js/dotmatrix.js"></script>
+  <script type="text/javascript" src="/js/coinlibs.js"></script>
+  <script type="text/javascript" src="/js/encoding.js"></script>
+  <title>test recvaddress</title>
+</head>
+<body>
+<div id="canvas-container"></div>
+<section id="section3" class="section">
+  <div class="intro">
+    <div class="intro-head wallet-head">
+      <div class="caption">Pastel Wallet</div>
+      <div class="ui container wallet-btns">
+        <div class="two ui basic buttons sendrecv">
+          <button id="btn-send" class="ui small button send"><i class="counterclockwise rotated icon sign-out send"></i> Send</button>
+          <button id ="btn-receive" class="ui small button receive"><i class="clockwise rotated icon sign-in receive"></i> Receive</button>
+        </div>
+      </div>
+    </div>
+    <div class="intro-body wallet-body">
+      <div id="wallet-balance" class="ui center aligined segment">
+        <div class="ui top left attached tiny label send">456.789 <i class="counterclockwise rotated icon sign-out"></i></div>
+        <div class="ui top right attached tiny label receive"><i class="clockwise rotated icon sign-in"></i>123.456</div>
+        <div class="ui bottom right attached tiny label symbol">ZNY</div>
+        12345.6789
+      </div>
+<style>
+#receive-address {
+  display: none;
+}
+#receive-address .address {
+  margin: 14px 7px 14px;
+  height: 13px;
+}
+#receive-address .balls {
+  display: inline-block;
+  margin: 7px 7px;
+  height: 52px;
+}
+#receive-address .used {
+  display: inline-block;
+  vertical-align: top;
+  height: 52px;
+  margin-right: 7px;
+  visibility: hidden;
+  width: 0;
+}
+#receive-address .new {
+  display: inline-block;
+  vertical-align: top;
+  height: 52px;
+}
+#receive-address .ui.icon.button {
+  padding: 3px 3px 3px 3px;
+  width: 34px;
+  height: 34px;
+}
+#receive-address .ball {
+  display: inline-block;
+  margin: 8px 4px 0;
+  width: 42px;
+  height: 52px;
+
+}
+#receive-address img {
+}
+.ball:after {
+  content: '';
+  border-top: 10.3923px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+  position: relative;
+  top: -32px;
+}
+.ball:hover:after {
+  content: '';
+  position: relative;
+  border-top: 10.3923px solid rgba(255, 120, 120, 0.4);
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+  position: relative;
+  top: -32px;
+}
+.ball.active:after {
+  border-top: 10.3923px solid rgba(255, 120, 120, 1);
+}
+</style>
+      <div id="receive-address" class="ui center aligined segment">
+        <div class="ui top attached label symbol">Receive Address <span><i class="window maximize outline icon btn-maximize"></i><i class="close icon btn-close"></i></span></div>
+        <div class="ui mini basic icon buttons">
+          <button id="btn-recv-copy" class="ui button" title="copy"><i class="copy outline icon"></i></button>
+          <button id="btn-recv-qrcode" class="ui button" title="QR code"><i class="qrcode icon"></i></button>
+        </div>
+        <div class="address"></div>
+        <div class="balls">
+          <div class="used">
+            <div class="circular ui icon mini button ball"><img src=""></div>
+          </div>
+          <div class="new">
+            <div class="circular ui icon mini button ball"><img src=""></div>
+            <div class="circular ui icon mini button ball"><img src=""></div>
+            <div class="circular ui icon mini button ball"><img src=""></div>
+            <div class="circular ui icon mini button ball"><img src=""></div>
+            <div class="circular ui icon mini button ball"><img src=""></div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div id="wallet-seg" class="ui center aligned segment seed-seg"></div>
+    </div>
+    <div class="ui two bottom attached buttons settings">
+      <div class="ui button"><i class="icon cog"></i> Settings</div>
+      <div class="ui button"><i class="icon list alternate outline"></i> Logs</div>
+    </div>
+  </div>
+</section>
+
+
+<style>
+#recv-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 324px;
+  min-height: 667px;
+  background-color: #fff;
+  z-index: 4;
+  text-align: center;
+  display: none;
+}
+#recv-modal .close-arc {
+  position: absolute;
+  border: 0px solid #000;
+  display: inline-block;
+  min-width: 6em;
+  min-height: 6em;
+  padding: 0em;
+  border-radius: 50%;
+  background-color: rgba(200, 200, 200, 0.5);
+  right: -3em;
+  top: -3em;
+}
+#recv-modal .close-arc:hover {
+  background-color: rgba(210, 210, 210, 0.5);
+}
+#recv-modal .btn-close-arc {
+  position: absolute;
+  right: 0.3em;
+  top: 0.3em;
+}
+#recv-modal .qrcode {
+  margin-top: 3em;
+}
+#recv-modal .uri-container {
+  display: inline-block;
+  text-align: center;
+}
+#recv-qrcode-uri {
+  margin: 7px 0;
+  word-break : break-all;
+  word-wrap: break-word;
+  text-align: left;
+  font-size: 7px;
+  line-height: 1em;
+}
+#recvaddr-form {
+  text-align: left;
+  margin-top: 1em;
+}
+#recvaddr-form .ui.input > input.right {
+  text-align: right;
+}
+#recvaddr-form .ui.dropdown > .text, #recvaddr-form .ui.dropdown .menu > .item {
+  font-size: 13px;
+}
+</style>
+<div id="recv-modal" class="ui">
+  <i class="close icon btn-close-arc"></i>
+  <div class="close-arc"></div>
+  <div id="recv-qrcode" class="qrcode">
+  </div>
+  <!--div class="uri-container">
+    <div id="recv-qrcode-uri"></div>
+  </div-->
+  <div id="recvaddr-form" class="ui container">
+    <form class="ui form" action="#" method="post">
+      <div class="two fields">
+        <div class="field">
+          <label>Receive Address</label>
+          <!--input class="address" type="text" name="address" placeholder="Address" readonly=""-->
+          <div class="ui selection dropdown addr-selection">
+            <input type="hidden" name="address">
+            <i class="dropdown icon"></i>
+            <div class="default text"></div>
+            <div class="menu"></div>
+        </div>
+        </div>
+        <div class="field">
+          <label>Amount</label>
+          <div class="ui right labeled input">
+            <input class="right" type="text" name="amount" placeholder="Amount">
+            <div class="ui basic label">ZNY</div>
+          </div>
+        </div>
+      </div>
+      <div class="two fields">
+        <div class="field">
+          <label>Label</label>
+          <input type="text" name="label" placeholder="Label">
+        </div>
+        <div class="field">
+          <label>Message</label>
+          <textarea rows="2" name="message" placeholder="Message"></textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+var coin = coinlibs.coin;
+var network = coin.networks.bitzeny;
+var crypto = window.crypto || window.msCrypto;
+
+var dummy_address = [];
+for(var i = 0; i < 5; i++) {
+  var keyPair = coin.ECPair.makeRandom();
+  var p2pkh = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
+  dummy_address.push(p2pkh.address);
+}
+
+function getUnusedAddressList(count) {
+  var addrs = [];
+  for(var i = 0; i < count; i++) {
+    var keyPair = coin.ECPair.makeRandom();
+    var p2pkh = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
+    addrs.push(p2pkh.address);
+  }
+  return addrs;
+}
+
+function str2sjis(str) {
+  var array = [];
+  for(var i = 0; i < str.length; i++) {
+    array.push(str.charCodeAt(i));
+  }
+  console.log('array=', array);
+  sjis_array = Encoding.convert(array, 'SJIS', 'UNICODE');
+  console.log('sjis_array=', sjis_array);
+  sjis = Encoding.codeToString(sjis_array);
+  console.log('sjis=', sjis);
+  return sjis;
+}
+
+var amount_pasted = false;
+$('#recvaddr-form form input[name="amount"]').on('paste', function() {
+  amount_pasted = true;
+});
+
+function recvform_change() {
+  var uri = 'bitzeny:' + $('#recvaddr-form input[name="address"]').val();
+  var amount_elm = $('#recvaddr-form form input[name="amount"]');
+  var amount = amount_elm.val();
+  var label = $('#recvaddr-form input[name="label"]').val();
+  var message = $('#recvaddr-form textarea[name="message"]').val();
+  var firstflag = true;
+  if(amount) {
+    if(amount.indexOf('.') == amount.length - 1 && amount[amount.length - 1] == '.') {
+      amount = amount.slice(0, -1);
+    }
+    if(amount_pasted && amount.indexOf("'") >= 0) {
+      amount = amount.replace(/'/g, '');
+      if(amount_pasted) {
+        amount_elm.val(amount);
+      }
+    }
+    amount_pasted = false;
+    if(/^\d+\.?\d{0,8}$/.test(amount)) {
+      amount_elm.closest('.field').removeClass('error');
+    } else {
+      amount_elm.closest('.field').addClass('error');
+    }
+    if(amount.indexOf("'") >= 0) {
+      amount = amount.replace(/'/g, '');
+    }
+    if(amount) {
+      uri += (firstflag ? '?' : '&') + 'amount=' + Encoding.convert(amount, 'SJIS', 'UNICODE');
+      firstflag = false;
+    }
+  }
+  if(label) {
+    uri += (firstflag ? '?' : '&') + 'label=' + Encoding.convert(label, 'SJIS', 'UNICODE');
+    firstflag = false;
+  }
+  if(message) {
+    uri += (firstflag ? '?' : '&') + 'message=' + Encoding.convert(message, 'SJIS', 'UNICODE');
+    firstflag = false;
+  }
+  bip21_uri = encodeURI(uri);
+  draw_qrcode();
+}
+
+$('#recvaddr-form input[name="address"]').change(function() {
+  console.log('change');
+  recvform_change();
+});
+$('#recvaddr-form input[name="amount"],#recvaddr-form input[name="label"],#recvaddr-form textarea[name="message"]').keyup(function() {
+  console.log('keyup');
+  recvform_change();
+});
+
+function show_recv_modal() {
+  $('#recv-modal').fadeIn(600);
+  window.addEventListener("resize", draw_qrcode);
+}
+function hide_recv_modal() {
+  window.removeEventListener("resize", draw_qrcode);
+  $('#recv-modal').fadeOut(600);
+}
+$('#btn-send').click(function() {
+});
+$('#btn-receive').click(function() {
+  show_recv_modal();
+});
+$('#recv-modal .close-arc').click(function() {
+  hide_recv_modal();
+});
+
+var draw_qrcode_animate = false;
+function draw_qrcode() {
+  var w = $(window).width() - 120;
+  var h = $(window).height() - 440;
+  var s = (w < h) ? w : h;
+  s = s > 200 ? s : 200;
+
+  if(bip21_uri) {
+    function draw() {
+      $('#recv-qrcode').empty();
+      $('#recv-qrcode').attr('title', '');
+      $('#recv-qrcode').qrcode({
+        render: 'canvas',
+        ecLevel: 'Q',
+        radius: 0.39,
+        text: bip21_uri,
+        size: s,
+        mode: 0,
+        label: '',
+        fontname: 'sans',
+        fontcolor: '#393939'
+      });
+      if($('#recv-qrcode canvas').length) {
+        $('#recv-qrcode').attr('title', bip21_uri);
+        if(draw_qrcode_animate) {
+          $('#recv-qrcode').stop(true, false).animate({opacity: 1}, 200);
+        }
+      } else {
+        console.log('qrcode error');
+        $('#recv-qrcode').append('<div style="text-align:center;display:inline-block;">unable to display qrcode</div>');
+      }
+    }
+    if(draw_qrcode_animate && $('#recv-qrcode canvas').length) {
+      $('#recv-qrcode').stop(true, false).animate({opacity: 0}, 200, function() {
+        draw();
+      });
+    } else {
+      draw();
+    }
+  }
+}
+
+var buf2hex = function(buffer) {
+  return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+}
+
+var murmurhash = {};
+
+murmurhash.load = function(cb) {
+  var Module = Murmurhash({
+    onRuntimeInitialized: function() {
+      var Module = this;
+      for(var o in Module) {
+        console.log(o);
+      }
+      murmurhash.mod_hash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+
+      murmurhash.alloclist = murmurhash.alloclist || [];
+
+      murmurhash.free = function() {
+        var p = murmurhash.alloclist.shift();
+        while(p) {
+          Module._free(p);
+          p = murmurhash.alloclist.shift();
+        }
+      }
+
+      if(murmurhash.alloclist.length > 0) {
+        murmurhash.free();
+      }
+
+      murmurhash.alloc = function(size) {
+        var p = new Number(Module._malloc(size));
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+        p.free = function() {
+          Module._free(p);
+          murmurhash.alloclist.splice(murmurhash.alloclist.indexOf(p), 1);
+        }
+        murmurhash.alloclist.push(p);
+        return p;
+      }
+
+      murmurhash.hash = function(data) {
+        var input = murmurhash.alloc(data.length);
+        var output = murmurhash.alloc(16);
+        input.set(data);
+        murmurhash.mod_hash(input, data.length, output);
+        var ret = output.get();
+        output.free();
+        input.free();
+        return ret;
+      }
+
+      cb();
+      murmurhash.ready_flag = true;
+    }
+  });
+  return Module;
+}
+
+murmurhash.run = function(cb) {
+  if(this.ready_flag) {
+    if(this.pending) {
+      clearTimeout(this.worker_tval);
+      var p = this.pending.shift();
+      while(p) {
+        p();
+        p = this.pending.shift();
+      }
+    }
+    cb();
+  } else {
+    if(!this.load_flag) {
+      this.load_flag = true;
+      this.load(cb);
+    } else {
+      if(this.pending) {
+        this.pending.push(cb);
+      } else {
+        this.pending = [cb];
+        var self = this;
+        function worker() {
+          if(self.ready_flag) {
+            var p = self.pending.shift();
+            while(p) {
+              p();
+              p = self.pending.shift();
+            }
+          } else {
+            self.worker_tval = setTimeout(worker, 100);
+          }
+        }
+        worker();
+      }
+    }
+  }
+}
+
+var pastel = {};
+
+murmurhash.run(function() {
+  pastel.cipher = {};
+  pastel.cipher.buf2hex = buf2hex;
+  pastel.cipher.murmurhash = murmurhash.hash;
+
+  var utxoballs = UtxoBalls.simple();
+  var resize_tval;
+  window.addEventListener("resize", function() {
+    utxoballs.stop();
+    clearTimeout(resize_tval);
+    resize_tval = setTimeout(function() {
+      utxoballs.canvas.remove();
+      var click_cb = utxoballs.click_cb();
+      utxoballs = UtxoBalls.simple();
+      utxoballs.click(click_cb);
+    }, 1400);
+  });
+
+  $('#receive-address .new').hide();
+  $('#receive-address .new').empty();
+  var addrs = getUnusedAddressList(5);
+  for(var i in addrs) {
+    var addr = addrs[i];
+    $('#receive-address .new').append('<div class="circular ui icon mini button ball" data-idx="' + i + '"><img src="' + Ball.get(addr, 28) + '"></div>');
+  }
+
+  function ball_selector_event(sel) {
+    $(sel).off('click').click(function() {
+      var idx = $(this).data('idx');
+      if(addrs[idx].length > 0) {
+        $('#receive-address .ball').each(function() {
+          $(this).removeClass('active');
+        });
+        $(this).addClass('active');
+        $('#receive-address .address').stop(true, true).fadeOut(200, function() {
+          $(this).text(addrs[idx]).fadeIn(400);
+          if(idx != 5 && addrs[5].length > 0) {
+            addrs[5] = "";
+            $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0}, 100);
+          }
+        });
+      }
+    });
+  }
+
+  var utxoballs_click = function(addr) {
+    console.log('address=' + addr);
+    if(addrs[5].length > 0) {
+      addrs[5] = addr;
+      $('#receive-address .used .ball').animate({opacity: 0}, 200, function() {
+        $('#receive-address .used').animate({width: 0}, 100, function() {
+          $('#receive-address .used .ball img').replaceWith('<img src="' + Ball.get(addr, 28) + '">');
+          $('#receive-address .used').animate({width: 42}, 100, function() {
+            $('#receive-address .ball').animate({opacity: 1}, 400);
+            if($('#receive-address .used .ball').hasClass('active')) {
+              $('#receive-address .address').stop(true, true).fadeOut(200, function() {
+                if(addrs[5].length > 0) {
+                  $(this).text(addrs[5]).fadeIn(400);
+                }
+              });
+            }
+          });
+        });
+      });
+    } else {
+      addrs[5] = addr;
+      $('#receive-address .used').stop().css("opacity", 0).animate({width: 42}, 100, function() {
+        $('#receive-address .used .ball').replaceWith('<div class="circular ui icon mini button ball" data-idx="5"><img src="' + Ball.get(addr, 28) + '"></div>');
+        $('#receive-address .used').stop().css("visibility", "visible").animate({opacity: 1}, 400);
+        ball_selector_event('#receive-address .used .ball');
+      });
+    }
+  }
+
+  ball_selector_event('#receive-address .new .ball');
+  $('#receive-address').show();
+  $('#receive-address .new').fadeIn(800, function() {
+    $('#receive-address .new .ball:first').addClass('active');
+    setTimeout(function() {
+      $('#receive-address .address').hide().text(addrs[0]).fadeIn(400);
+      addrs.push("");
+      utxoballs.click(utxoballs_click);
+    }, 400);
+  });
+
+  $('#btn-recv-qrcode').click(function() {
+    var bip21_uri = 'bitzeny:' + addrs[0];
+    $('#recvaddr-form .menu').empty();
+    var item_addrs = [];
+    if(addrs[5].length > 0) {
+      item_addrs.push(addrs[5]);
+    }
+    for(var i = 0; i < 5; i++) {
+      item_addrs.push(addrs[i]);
+    }
+    for(var i in item_addrs) {
+      var addr = item_addrs[i];
+      $('#recvaddr-form .menu').append('<div class="item" data-value="' + addr + '"><img class="ui mini avatar image" src="' + Ball.get(addr, 28) + '">' + addr + '</div>');
+    }
+
+    var idx = $('#receive-address .ball.active').data('idx');
+    var sel_addr;
+    if(idx == null) {
+      sel_addr = addrs[0];
+    } else {
+      sel_addr = addrs[idx];
+    }
+    $('#recvaddr-form .ui.dropdown').dropdown('set selected', sel_addr);
+    $('#recv-modal .text').html('<img class="ui mini avatar image" src="' + Ball.get(sel_addr, 28) + '">' + sel_addr + '</div>');
+    show_recv_modal();
+  });
+});
+</script>
+</body>
+</html>
