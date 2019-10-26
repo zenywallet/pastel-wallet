@@ -294,11 +294,10 @@ function recvform_change() {
     if(amount.indexOf('.') == amount.length - 1 && amount[amount.length - 1] == '.') {
       amount = amount.slice(0, -1);
     }
-    if(amount_pasted && amount.indexOf("'") >= 0) {
-      amount = amount.replace(/'/g, '');
-      if(amount_pasted) {
-        amount_elm.val(amount);
-      }
+    var desep_amount = amount.replace(/[',]/g, '');
+    if(amount_pasted) {
+      amount = desep_amount;
+      amount_elm.val(amount);
     }
     amount_pasted = false;
     if(/^\d+\.?\d{0,8}$/.test(amount)) {
@@ -306,9 +305,7 @@ function recvform_change() {
     } else {
       amount_elm.closest('.field').addClass('error');
     }
-    if(amount.indexOf("'") >= 0) {
-      amount = amount.replace(/'/g, '');
-    }
+    amount = desep_amount;
     if(amount) {
       uri += (firstflag ? '?' : '&') + 'amount=' + Encoding.convert(amount, 'SJIS', 'UNICODE');
       firstflag = false;
