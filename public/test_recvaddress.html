@@ -338,6 +338,7 @@ function show_recv_modal() {
   window.addEventListener("resize", draw_qrcode);
 }
 function hide_recv_modal() {
+  $('#recv-qrcode').attr('title', '');
   window.removeEventListener("resize", draw_qrcode);
   $('#recv-modal').fadeOut(600);
   $('html').css('background-color', '#444');
