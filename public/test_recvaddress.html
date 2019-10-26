@@ -338,6 +338,7 @@ function show_recv_modal() {
   $('html').css('background-color', '#fff');
   $('#recv-modal').fadeIn(600);
   window.addEventListener("resize", draw_qrcode);
+  draw_qrcode(true);
 }
 function hide_recv_modal() {
   $('#recv-qrcode').attr('title', '');
@@ -355,11 +356,16 @@ $('#recv-modal .close-arc').click(function() {
 });
 
 var draw_qrcode_animate = false;
-function draw_qrcode() {
+var draw_qrcode_prev_size = 0;
+function draw_qrcode(check_resize) {
   var w = $(window).width() - 120;
   var h = $(window).height() - 440;
   var s = (w < h) ? w : h;
   s = s > 200 ? s : 200;
+  if(check_resize && draw_qrcode_prev_size == s) {
+    return;
+  }
+  draw_qrcode_prev_size = s;
 
   if(bip21_uri) {
     function draw() {
