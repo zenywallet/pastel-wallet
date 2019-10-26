@@ -333,12 +333,14 @@ $('#recvaddr-form input[name="amount"],#recvaddr-form input[name="label"],#recva
 });
 
 function show_recv_modal() {
+  $('html').css('background-color', '#fff');
   $('#recv-modal').fadeIn(600);
   window.addEventListener("resize", draw_qrcode);
 }
 function hide_recv_modal() {
   window.removeEventListener("resize", draw_qrcode);
   $('#recv-modal').fadeOut(600);
+  $('html').css('background-color', '#444');
 }
 $('#btn-send').click(function() {
 });
