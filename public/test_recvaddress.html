@@ -363,6 +363,9 @@ function draw_qrcode(check_resize) {
   var s = (w < h) ? w : h;
   s = s > 200 ? s : 200;
   if(check_resize && draw_qrcode_prev_size == s) {
+    if(bip21_uri) {
+      $('#recv-qrcode').attr('title', bip21_uri);
+    }
     return;
   }
   draw_qrcode_prev_size = s;
