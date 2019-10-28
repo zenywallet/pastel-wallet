@@ -610,3 +610,122 @@ i.receive {
   background: linear-gradient(0deg, rgba(255,255,255,0.2) 0%, rgba(252,250,250,0.2) 23%, rgba(59,59,59,0.2) 100%, rgba(255,255,255,0.2) 100%);
   z-index: 5;
 }
+#receive-address {
+  display: none;
+}
+#receive-address .address {
+  margin: 14px 7px 14px;
+  height: 13px;
+}
+#receive-address .balls {
+  display: inline-block;
+  margin: 7px 7px;
+  height: 52px;
+}
+#receive-address .used {
+  display: inline-block;
+  vertical-align: top;
+  height: 52px;
+  margin-right: 7px;
+  visibility: hidden;
+  width: 0;
+}
+#receive-address .new {
+  display: inline-block;
+  vertical-align: top;
+  height: 52px;
+}
+#receive-address .ui.icon.button {
+  padding: 3px 3px 3px 3px;
+  width: 34px;
+  height: 34px;
+}
+#receive-address .ball {
+  display: inline-block;
+  margin: 8px 4px 0;
+  width: 42px;
+  height: 52px;
+
+}
+#receive-address img {
+}
+#receive-address .ball:after {
+  content: '';
+  border-top: 10.3923px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+  position: relative;
+  top: -32px;
+}
+#receive-address .ball:hover:after {
+  content: '';
+  position: relative;
+  border-top: 10.3923px solid rgba(255, 120, 120, 0.4);
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+  position: relative;
+  top: -32px;
+}
+#receive-address .ball.active:after {
+  border-top: 10.3923px solid rgba(255, 120, 120, 1);
+}
+#recv-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 324px;
+  min-height: 667px;
+  background-color: #fff;
+  z-index: 4;
+  text-align: center;
+  display: none;
+}
+#recv-modal .close-arc {
+  position: absolute;
+  border: 0px solid #000;
+  display: inline-block;
+  min-width: 6em;
+  min-height: 6em;
+  padding: 0em;
+  border-radius: 50%;
+  background-color: rgba(200, 200, 200, 0.5);
+  right: -3em;
+  top: -3em;
+}
+#recv-modal .close-arc:hover {
+  background-color: rgba(210, 210, 210, 0.5);
+}
+#recv-modal .btn-close-arc {
+  position: absolute;
+  right: 0.3em;
+  top: 0.3em;
+}
+#recv-modal .qrcode {
+  margin-top: 3em;
+}
+#recv-modal .uri-container {
+  display: inline-block;
+  text-align: center;
+}
+#recv-qrcode-uri {
+  margin: 7px 0;
+  word-break : break-all;
+  word-wrap: break-word;
+  text-align: left;
+  font-size: 7px;
+  line-height: 1em;
+}
+#recvaddr-form {
+  text-align: left;
+  margin-top: 1em;
+}
+#recvaddr-form .ui.input > input.right {
+  text-align: right;
+}
+#recvaddr-form .ui.dropdown > .text, #recvaddr-form .ui.dropdown .menu > .item {
+  font-size: 13px;
+}
