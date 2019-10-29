@@ -175,5 +175,15 @@ var Wallet = (function() {
     return _utxos;
   }
 
+  Wallet.prototype.getUnusedAddressList = function(count) {
+    var addrs = [];
+    for(var i = 0; i < count; i++) {
+      var keyPair = coin.ECPair.makeRandom();
+      var p2pkh = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
+      addrs.push(p2pkh.address);
+    }
+    return addrs;
+  }
+
   return Wallet;
 }());

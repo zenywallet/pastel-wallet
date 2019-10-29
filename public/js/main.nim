@@ -279,6 +279,7 @@ var showPage4 = false
 var mnemonicFulfill = false
 var passphraseFulfill = false
 var supressRedraw = false
+var showRecvAddressSelector = true
 
 proc viewSelector(view: ViewType, no_redraw: bool = false) =
   echo "view", view
@@ -769,6 +770,35 @@ proc backWallet(): proc() =
       goSection('#section3', page_scroll_done);
     """
 
+proc recvAddressSelector(): VNode =
+  result = buildHtml(tdiv(id="receive-address", class="ui center aligined segment")):
+    tdiv(class="ui top attached label symbol"):
+      text "Receive Address "
+      span:
+        italic(class="window maximize outline icon btn-maximize")
+        italic(class="close icon btn-close")
+    tdiv(class="ui mini basic icon buttons"):
+      button(id="btn-recv-copy", class="ui button", title="copy"):
+        italic(class="copy outline icon")
+      button(id="btn-recv-qrcode", class="ui button", title="QR code"):
+        italic(class="qrcode icon")
+    tdiv(class="address"): text ""
+    tdiv(class="balls"):
+      tdiv(class="used"):
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+      tdiv(class="new"):
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+
+proc btnReceive: proc() =
+  result = proc() =
+    asm """
+      showRecvAddress()
+    """
+
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
     if showPage1:
@@ -885,7 +915,7 @@ proc appMain(data: RouterData): VNode =
                 button(id="btn-send", class="ui small button send"):
                   italic(class="counterclockwise rotated sign-out icon send")
                   text " Send"
-                button(id="btn-receive", class="ui small button receive"):
+                button(id="btn-receive", class="ui small button receive", onclick=btnReceive()):
                   italic(class="clockwise rotated sign-in icon receive")
                   text " Receive"
           tdiv(class="intro-body wallet-body"):
@@ -898,6 +928,8 @@ proc appMain(data: RouterData): VNode =
                 text "123.456"
               tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
               text "12345.6789"
+            if showRecvAddressSelector:
+              recvAddressSelector()
             tdiv(id="ball-info", class="ui center aligined segment"):
               text ""
               br()

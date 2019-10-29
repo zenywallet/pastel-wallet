@@ -448,6 +448,7 @@ pastel.ready = function() {
   var shared = null;
   var stage = 0;
   var wallet = new Wallet();
+  pastel.wallet = wallet;
   var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
 
   stream.onOpen = function(evt) {
@@ -507,6 +508,7 @@ pastel.ready = function() {
       wallet.setUtxos(utxos);
 
       var utxoballs = UtxoBalls.simple();
+      pastel.utxoballs = utxoballs;
       var resize_tval;
       window.addEventListener("resize", function() {
         utxoballs.stop();
