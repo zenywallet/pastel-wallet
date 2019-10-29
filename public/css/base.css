@@ -727,5 +727,14 @@ i.receive {
   text-align: right;
 }
 #recvaddr-form .ui.dropdown > .text, #recvaddr-form .ui.dropdown .menu > .item {
-  font-size: 13px;
+  font-size: 12px;
+}
+#recvaddr-form .ui.dropdown, #recvaddr-form .ui.input {
+  min-width: 324px;
+}
+#recvaddr-form .ui.dropdown > .text > .image, #recvaddr-form .ui.dropdown > .text > img {
+  margin-right: 0.5em;
+}
+#recvaddr-form .ui.dropdown .menu > .item > .image, #recvaddr-form .ui.dropdown .menu > .item > img {
+  margin-right: 0.5em;
 }
