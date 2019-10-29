@@ -1137,6 +1137,8 @@ var show_page4_254084 = [false];
 var mnemonic_fulfill_254085 = [false];
 var passphrase_fulfill_254086 = [false];
 var supress_redraw_254087 = [false];
+var show_recv_address_selector_254088 = [true];
+var show_recv_address_modal_254089 = [true];
 
 function new_seq_64336(len_64339) {
 	var result_64341 = null;
@@ -1431,15 +1433,15 @@ function apply_events_231086(n_231088) {
 		var dest_231089 = n_231088.dom;
 		L1: do {
 			var i_231102 = 0;
-			var colontmp__254209 = 0;
-			colontmp__254209 = (n_231088.events != null ? n_231088.events.length : 0);
-			var i_254210 = 0;
+			var colontmp__254211 = 0;
+			colontmp__254211 = (n_231088.events != null ? n_231088.events.length : 0);
+			var i_254212 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254210 < colontmp__254209)) break L3;
-						i_231102 = i_254210;
+					if (!(i_254212 < colontmp__254211)) break L3;
+						i_231102 = i_254212;
 						n_231088.events[chckIndx(i_231102, 0, n_231088.events.length+0-1)-0]["Field2"] = wrap_event_230390(dest_231089, n_231088, n_231088.events[chckIndx(i_231102, 0, n_231088.events.length+0-1)-0]["Field0"], n_231088.events[chckIndx(i_231102, 0, n_231088.events.length+0-1)-0]["Field1"]);
-						i_254210 = addInt(i_254210, 1);
+						i_254212 = addInt(i_254212, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1451,15 +1453,15 @@ function apply_style_99025(n_99027, s_99028) {
 		n_99027.style = {};
 		L1: do {
 			var i_99221 = 0;
-			var colontmp__254221 = 0;
-			colontmp__254221 = subInt(s_99028.length, 1);
-			var res_254222 = 0;
+			var colontmp__254223 = 0;
+			colontmp__254223 = subInt(s_99028.length, 1);
+			var res_254224 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(res_254222 <= colontmp__254221)) break L3;
-						i_99221 = res_254222;
+					if (!(res_254224 <= colontmp__254223)) break L3;
+						i_99221 = res_254224;
 						n_99027.style[s_99028[i_99221]] = s_99028[addInt(i_99221, 1)];
-						res_254222 = addInt(res_254222, 2);
+						res_254224 = addInt(res_254224, 2);
 					}
 			} while(false);
 		} while(false);
@@ -1555,17 +1557,17 @@ function vnode_to_dom_231167(n_231169, kxi_231170) {
 			L1: do {
 				var k_231831 = null;
 				L2: do {
-					var i_254179 = 0;
-					var colontmp__254180 = 0;
-					colontmp__254180 = (n_231169.kids != null ? n_231169.kids.length : 0);
 					var i_254181 = 0;
+					var colontmp__254182 = 0;
+					colontmp__254182 = (n_231169.kids != null ? n_231169.kids.length : 0);
+					var i_254183 = 0;
 					L3: do {
 							L4: while (true) {
-							if (!(i_254181 < colontmp__254180)) break L4;
-								i_254179 = i_254181;
-								k_231831 = n_231169.kids[chckIndx(i_254179, 0, n_231169.kids.length+0-1)-0];
+							if (!(i_254183 < colontmp__254182)) break L4;
+								i_254181 = i_254183;
+								k_231831 = n_231169.kids[chckIndx(i_254181, 0, n_231169.kids.length+0-1)-0];
 								result_231171.appendChild(vnode_to_dom_231167(k_231831, kxi_231170));
-								i_254181 = addInt(i_254181, 1);
+								i_254183 = addInt(i_254183, 1);
 							}
 					} while(false);
 				} while(false);
@@ -1588,21 +1590,21 @@ function vnode_to_dom_231167(n_231169, kxi_231170) {
 			var k_231832 = null;
 			var v_231833 = null;
 			L6: do {
-				var i_254192 = 0;
-				var colontmp__254193 = 0;
-				colontmp__254193 = subInt((n_231169.attrs != null ? n_231169.attrs.length : 0), 2);
-				var res_254194 = 0;
+				var i_254194 = 0;
+				var colontmp__254195 = 0;
+				colontmp__254195 = subInt((n_231169.attrs != null ? n_231169.attrs.length : 0), 2);
+				var res_254196 = 0;
 				L7: do {
 						L8: while (true) {
-						if (!(res_254194 <= colontmp__254193)) break L8;
-							i_254192 = res_254194;
-							k_231832 = n_231169.attrs[chckIndx(i_254192, 0, n_231169.attrs.length+0-1)-0];
-							v_231833 = n_231169.attrs[chckIndx(addInt(i_254192, 1), 0, n_231169.attrs.length+0-1)-0];
+						if (!(res_254196 <= colontmp__254195)) break L8;
+							i_254194 = res_254196;
+							k_231832 = n_231169.attrs[chckIndx(i_254194, 0, n_231169.attrs.length+0-1)-0];
+							v_231833 = n_231169.attrs[chckIndx(addInt(i_254194, 1), 0, n_231169.attrs.length+0-1)-0];
 							if (!((v_231833 == null))) {
 							result_231171.setAttribute(k_231832, v_231833);
 							}
 							
-							res_254194 = addInt(res_254194, 2);
+							res_254196 = addInt(res_254196, 2);
 						}
 				} while(false);
 			} while(false);
@@ -1683,19 +1685,19 @@ function same_231920(n_231922, e_231923, nesting_231924) {
 		
 		L3: do {
 			var i_231994 = 0;
-			var colontmp__254228 = 0;
-			colontmp__254228 = len_210728(n_231922);
-			var i_254229 = 0;
+			var colontmp__254230 = 0;
+			colontmp__254230 = len_210728(n_231922);
+			var i_254231 = 0;
 			L4: do {
 					L5: while (true) {
-					if (!(i_254229 < colontmp__254228)) break L5;
-						i_231994 = i_254229;
+					if (!(i_254231 < colontmp__254230)) break L5;
+						i_231994 = i_254231;
 						if (!(same_231920(HEX5BHEX5D_210750(n_231922, i_231994), e_231923.childNodes[i_231994], addInt(nesting_231924, 1)))) {
 						result_231926 = false;
 						break BeforeRet;
 						}
 						
-						i_254229 = addInt(i_254229, 1);
+						i_254231 = addInt(i_254231, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1740,19 +1742,19 @@ function eq_97814(a_97816, b_97817) {
 		
 		L1: do {
 			var i_97916 = 0;
-			var colontmp__254266 = 0;
-			colontmp__254266 = a_97816.length;
-			var i_254267 = 0;
+			var colontmp__254268 = 0;
+			colontmp__254268 = a_97816.length;
+			var i_254269 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254267 < colontmp__254266)) break L3;
-						i_97916 = i_254267;
+					if (!(i_254269 < colontmp__254268)) break L3;
+						i_97916 = i_254269;
 						if (!((a_97816[i_97916] == b_97817[i_97916]))) {
 						result_97818 = false;
 						break BeforeRet;
 						}
 						
-						i_254267 = addInt(i_254267, 1);
+						i_254269 = addInt(i_254269, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1772,19 +1774,19 @@ function same_attrs_212480(a_212482, b_212483) {
 		result_212484 = true;
 		L1: do {
 			var i_212507 = 0;
-			var colontmp__254271 = 0;
-			colontmp__254271 = (a_212482.attrs != null ? a_212482.attrs.length : 0);
-			var i_254272 = 0;
+			var colontmp__254273 = 0;
+			colontmp__254273 = (a_212482.attrs != null ? a_212482.attrs.length : 0);
+			var i_254274 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254272 < colontmp__254271)) break L3;
-						i_212507 = i_254272;
+					if (!(i_254274 < colontmp__254273)) break L3;
+						i_212507 = i_254274;
 						if (!((a_212482.attrs[chckIndx(i_212507, 0, a_212482.attrs.length+0-1)-0] == b_212483.attrs[chckIndx(i_212507, 0, b_212483.attrs.length+0-1)-0]))) {
 						result_212484 = false;
 						break BeforeRet;
 						}
 						
-						i_254272 = addInt(i_254272, 1);
+						i_254274 = addInt(i_254274, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1840,19 +1842,19 @@ function eq_232214(a_232216, b_232217) {
 		
 		L1: do {
 			var i_233014 = 0;
-			var colontmp__254261 = 0;
-			colontmp__254261 = len_210728(a_232216);
-			var i_254262 = 0;
+			var colontmp__254263 = 0;
+			colontmp__254263 = len_210728(a_232216);
+			var i_254264 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254262 < colontmp__254261)) break L3;
-						i_233014 = i_254262;
+					if (!(i_254264 < colontmp__254263)) break L3;
+						i_233014 = i_254264;
 						if ((eq_232214(HEX5BHEX5D_210750(a_232216, i_233014), HEX5BHEX5D_210750(b_232217, i_233014)) == 1)) {
 						result_232218 = 1;
 						break BeforeRet;
 						}
 						
-						i_254262 = addInt(i_254262, 1);
+						i_254264 = addInt(i_254264, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1928,18 +1930,18 @@ function update_attributes_233677(new_node_233679, old_node_233680) {
 			var k_233689 = null;
 			var __233690 = null;
 			L2: do {
-				var i_254278 = 0;
-				var colontmp__254279 = 0;
-				colontmp__254279 = subInt((old_node_233680.attrs != null ? old_node_233680.attrs.length : 0), 2);
-				var res_254280 = 0;
+				var i_254280 = 0;
+				var colontmp__254281 = 0;
+				colontmp__254281 = subInt((old_node_233680.attrs != null ? old_node_233680.attrs.length : 0), 2);
+				var res_254282 = 0;
 				L3: do {
 						L4: while (true) {
-						if (!(res_254280 <= colontmp__254279)) break L4;
-							i_254278 = res_254280;
-							k_233689 = old_node_233680.attrs[chckIndx(i_254278, 0, old_node_233680.attrs.length+0-1)-0];
-							__233690 = old_node_233680.attrs[chckIndx(addInt(i_254278, 1), 0, old_node_233680.attrs.length+0-1)-0];
+						if (!(res_254282 <= colontmp__254281)) break L4;
+							i_254280 = res_254282;
+							k_233689 = old_node_233680.attrs[chckIndx(i_254280, 0, old_node_233680.attrs.length+0-1)-0];
+							__233690 = old_node_233680.attrs[chckIndx(addInt(i_254280, 1), 0, old_node_233680.attrs.length+0-1)-0];
 							old_node_233680.dom.removeAttribute(k_233689);
-							res_254280 = addInt(res_254280, 2);
+							res_254282 = addInt(res_254282, 2);
 						}
 				} while(false);
 			} while(false);
@@ -1948,21 +1950,21 @@ function update_attributes_233677(new_node_233679, old_node_233680) {
 			var k_233691 = null;
 			var v_233692 = null;
 			L6: do {
-				var i_254286 = 0;
-				var colontmp__254287 = 0;
-				colontmp__254287 = subInt((new_node_233679.attrs != null ? new_node_233679.attrs.length : 0), 2);
-				var res_254288 = 0;
+				var i_254288 = 0;
+				var colontmp__254289 = 0;
+				colontmp__254289 = subInt((new_node_233679.attrs != null ? new_node_233679.attrs.length : 0), 2);
+				var res_254290 = 0;
 				L7: do {
 						L8: while (true) {
-						if (!(res_254288 <= colontmp__254287)) break L8;
-							i_254286 = res_254288;
-							k_233691 = new_node_233679.attrs[chckIndx(i_254286, 0, new_node_233679.attrs.length+0-1)-0];
-							v_233692 = new_node_233679.attrs[chckIndx(addInt(i_254286, 1), 0, new_node_233679.attrs.length+0-1)-0];
+						if (!(res_254290 <= colontmp__254289)) break L8;
+							i_254288 = res_254290;
+							k_233691 = new_node_233679.attrs[chckIndx(i_254288, 0, new_node_233679.attrs.length+0-1)-0];
+							v_233692 = new_node_233679.attrs[chckIndx(addInt(i_254288, 1), 0, new_node_233679.attrs.length+0-1)-0];
 							if (!((v_233692 == null))) {
 							old_node_233680.dom.setAttribute(k_233691, v_233692);
 							}
 							
-							res_254288 = addInt(res_254288, 2);
+							res_254290 = addInt(res_254290, 2);
 						}
 				} while(false);
 			} while(false);
@@ -1980,13 +1982,13 @@ function merge_events_233706(new_node_233708, old_node_233709, kxi_233710) {
 		var d_233711 = old_node_233709.dom;
 		L1: do {
 			var i_233724 = 0;
-			var colontmp__254293 = 0;
-			colontmp__254293 = (old_node_233709.events != null ? old_node_233709.events.length : 0);
-			var i_254294 = 0;
+			var colontmp__254295 = 0;
+			colontmp__254295 = (old_node_233709.events != null ? old_node_233709.events.length : 0);
+			var i_254296 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254294 < colontmp__254293)) break L3;
-						i_233724 = i_254294;
+					if (!(i_254296 < colontmp__254295)) break L3;
+						i_233724 = i_254296;
 						var k_233725 = old_node_233709.events[chckIndx(i_233724, 0, old_node_233709.events.length+0-1)-0]["Field0"];
 						switch (k_233725) {
 						case 30:
@@ -1999,7 +2001,7 @@ function merge_events_233706(new_node_233708, old_node_233709, kxi_233710) {
 						}
 						var name_233728 = Tmp4;
 						d_233711.removeEventListener(name_233728, old_node_233709.events[chckIndx(i_233724, 0, old_node_233709.events.length+0-1)-0]["Field2"]);
-						i_254294 = addInt(i_254294, 1);
+						i_254296 = addInt(i_254296, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2191,13 +2193,13 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 			var pos_235435 = addInt(nimMin(old_pos_235023, new_pos_235024), 1);
 			L11: do {
 				var i_235441 = 0;
-				var colontmp__254236 = 0;
-				colontmp__254236 = subInt(pos_235435, 1);
-				var res_254237 = common_prefix_234602;
+				var colontmp__254238 = 0;
+				colontmp__254238 = subInt(pos_235435, 1);
+				var res_254239 = common_prefix_234602;
 				L12: do {
 						L13: while (true) {
-						if (!(res_254237 <= colontmp__254236)) break L13;
-							i_235441 = res_254237;
+						if (!(res_254239 <= colontmp__254238)) break L13;
+							i_235441 = res_254239;
 							var r_235442 = diff_234045(HEX5BHEX5D_210750(new_node_234047, i_235441), HEX5BHEX5D_210750(old_node_234048, i_235441), current_234050, current_234050.childNodes[chckIndx(i_235441, 0, current_234050.childNodes.length+0-1)-0], kxi_234051);
 							if ((r_235442 == 4)) {
 							add_patch_v_233868(kxi_234051, old_node_234048, i_235441, HEX5BHEX5D_210750(new_node_234047, i_235441));
@@ -2207,21 +2209,21 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 							HEX5BHEX5DHEX3D_210768(new_node_234047, i_235441, HEX5BHEX5D_210750(old_node_234048, i_235441));
 							}
 							}
-							res_254237 = addInt(res_254237, 1);
+							res_254239 = addInt(res_254239, 1);
 						}
 				} while(false);
 			} while(false);
 			if ((addInt(old_pos_235023, 1) == old_length_234402)) {
 			L14: do {
 				var i_235458 = 0;
-				var res_254243 = pos_235435;
+				var res_254245 = pos_235435;
 				L15: do {
 						L16: while (true) {
-						if (!(res_254243 <= new_pos_235024)) break L16;
-							i_235458 = res_254243;
+						if (!(res_254245 <= new_pos_235024)) break L16;
+							i_235458 = res_254245;
 							add_patch_233814(kxi_234051, 2, current_234050, null, HEX5BHEX5D_210750(new_node_234047, i_235458));
 							result_234052 = 4;
-							res_254243 = addInt(res_254243, 1);
+							res_254245 = addInt(res_254245, 1);
 						}
 				} while(false);
 			} while(false);
@@ -2230,14 +2232,14 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 				var before_235459 = current_234050.childNodes[chckIndx(addInt(old_pos_235023, 1), 0, current_234050.childNodes.length+0-1)-0];
 				L17: do {
 					var i_235465 = 0;
-					var res_254249 = pos_235435;
+					var res_254251 = pos_235435;
 					L18: do {
 							L19: while (true) {
-							if (!(res_254249 <= new_pos_235024)) break L19;
-								i_235465 = res_254249;
+							if (!(res_254251 <= new_pos_235024)) break L19;
+								i_235465 = res_254251;
 								add_patch_233814(kxi_234051, 3, current_234050, before_235459, HEX5BHEX5D_210750(new_node_234047, i_235465));
 								result_234052 = 4;
-								res_254249 = addInt(res_254249, 1);
+								res_254251 = addInt(res_254251, 1);
 							}
 					} while(false);
 				} while(false);
@@ -2245,15 +2247,15 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 			
 			L20: do {
 				var i_235471 = 0;
-				var res_254255 = pos_235435;
+				var res_254257 = pos_235435;
 				L21: do {
 						L22: while (true) {
-						if (!(res_254255 <= old_pos_235023)) break L22;
-							i_235471 = res_254255;
+						if (!(res_254257 <= old_pos_235023)) break L22;
+							i_235471 = res_254257;
 							add_patch_233814(kxi_230324[0], 4, null, null, HEX5BHEX5D_210750(old_node_234048, i_235471));
 							add_patch_233814(kxi_234051, 1, current_234050, current_234050.childNodes[chckIndx(i_235471, 0, current_234050.childNodes.length+0-1)-0], null);
 							result_234052 = 4;
-							res_254255 = addInt(res_254255, 1);
+							res_254257 = addInt(res_254257, 1);
 						}
 				} while(false);
 			} while(false);
@@ -2331,13 +2333,13 @@ function apply_components_235814(kxi_235816) {
 function apply_patch_233906(kxi_233908) {
 		L1: do {
 			var i_233916 = 0;
-			var colontmp__254301 = 0;
-			colontmp__254301 = kxi_233908.patchLen;
-			var i_254302 = 0;
+			var colontmp__254303 = 0;
+			colontmp__254303 = kxi_233908.patchLen;
+			var i_254304 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254302 < colontmp__254301)) break L3;
-						i_233916 = i_254302;
+					if (!(i_254304 < colontmp__254303)) break L3;
+						i_233916 = i_254304;
 						var p_233917 = nimCopy(null, kxi_233908.patches[chckIndx(i_233916, 0, kxi_233908.patches.length+0-1)-0], NTI230209);
 						switch (p_233917.k) {
 						case 0:
@@ -2381,27 +2383,27 @@ function apply_patch_233906(kxi_233908) {
 							
 							break;
 						}
-						i_254302 = addInt(i_254302, 1);
+						i_254304 = addInt(i_254304, 1);
 					}
 			} while(false);
 		} while(false);
 		kxi_233908.patchLen = 0;
 		L4: do {
 			var i_233960 = 0;
-			var colontmp__254306 = 0;
-			colontmp__254306 = kxi_233908.patchLenV;
-			var i_254307 = 0;
+			var colontmp__254308 = 0;
+			colontmp__254308 = kxi_233908.patchLenV;
+			var i_254309 = 0;
 			L5: do {
 					L6: while (true) {
-					if (!(i_254307 < colontmp__254306)) break L6;
-						i_233960 = i_254307;
+					if (!(i_254309 < colontmp__254308)) break L6;
+						i_233960 = i_254309;
 						var p_233961 = nimCopy(null, kxi_233908.patchesV[chckIndx(i_233960, 0, kxi_233908.patchesV.length+0-1)-0], NTI230211);
 						HEX5BHEX5DHEX3D_210768(p_233961.parent, p_233961.pos, p_233961.newChild);
 						if (!(!((p_233961.newChild.dom == null)))) {
 						failed_assert_impl_56866(makeNimstrLit("karax.nim(377, 12) `p.newChild.dom != nil` "));
 						}
 						
-						i_254307 = addInt(i_254307, 1);
+						i_254309 = addInt(i_254309, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2471,9 +2473,9 @@ function redraw_239814(kxi_239816) {
 	
 }
 
-function view_selector_254131(view_254133, no_redraw_254134) {
-		rawEcho(makeNimstrLit("view"), reprEnum(view_254133, NTI254058));
-		switch (view_254133) {
+function view_selector_254133(view_254135, no_redraw_254136) {
+		rawEcho(makeNimstrLit("view"), reprEnum(view_254135, NTI254058));
+		switch (view_254135) {
 		case 0:
 			show_scan_seed_btn_254073[0] = true;
 			show_scanning_254074[0] = true;
@@ -2540,17 +2542,17 @@ function view_selector_254131(view_254133, no_redraw_254134) {
 		default: 
 			break;
 		}
-		if (!(no_redraw_254134)) {
+		if (!(no_redraw_254136)) {
 		redraw_239814(app_inst_254014[0]);
 		}
 		
 
 	
 }
-  jsViewSelector = view_selector_254131
+  jsViewSelector = view_selector_254133
   jsSupressRedraw = supress_redraw_254087[0]
 
-var seed_card_info_254408 = [{seed: null, gen: null, tag: null, orig: null}];
+var seed_card_info_254425 = [{seed: null, gen: null, tag: null, orig: null}];
 // https://github.com/gustf/js-levenshtein
 var levenshtein = (function()
 {
@@ -2777,13 +2779,13 @@ function tree_212046(kind_212048, kids_212050) {
 		result_212051 = new_vnode_212028(kind_212048);
 		L1: do {
 			var k_212082 = null;
-			var i_260683 = 0;
+			var i_261026 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_260683 < (kids_212050 != null ? kids_212050.length : 0))) break L3;
-						k_212082 = kids_212050[chckIndx(i_260683, 0, kids_212050.length+0-1)-0];
+					if (!(i_261026 < (kids_212050 != null ? kids_212050.length : 0))) break L3;
+						k_212082 = kids_212050[chckIndx(i_261026, 0, kids_212050.length+0-1)-0];
 						add_210786(result_212051, k_212082);
-						i_260683 = addInt(i_260683, 1);
+						i_261026 = addInt(i_261026, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2824,12 +2826,21 @@ function add_event_handler_240584(n_240586, k_240587, action_240590, kxi_240591)
 	
 }
 
-function import_selector_254310(import_type_254312) {
+function view_update_254312() {
+		if (!(supress_redraw_254087[0])) {
+		redraw_239814(app_inst_254014[0]);
+		}
+		
 
-		function HEX3Aanonymous_254316() {
+	
+}
+
+function import_selector_254327(import_type_254329) {
+
+		function HEX3Aanonymous_254333() {
 				      qrReader.hide(true);
     
-				current_import_type_254050[0] = import_type_254312;
+				current_import_type_254050[0] = import_type_254329;
 				if ((current_import_type_254050[0] == 0)) {
 				show_page2_254082[0] = show_scan_result_254076[0];
 				}
@@ -2849,15 +2860,16 @@ function import_selector_254310(import_type_254312) {
       
 				}
 				
+				view_update_254312();
 
 			
 		}
 
-	var result_254315 = null;
+	var result_254332 = null;
 
-		result_254315 = HEX3Aanonymous_254316;
+		result_254332 = HEX3Aanonymous_254333;
 
-	return result_254315;
+	return result_254332;
 
 }
 
@@ -2869,19 +2881,19 @@ function set_attr_210568(n_210570, key_210571, val_210572) {
 		else {
 			L1: do {
 				var i_210601 = 0;
-				var colontmp__260713 = 0;
-				colontmp__260713 = subInt((n_210570.attrs != null ? n_210570.attrs.length : 0), 2);
-				var res_260714 = 0;
+				var colontmp__261056 = 0;
+				colontmp__261056 = subInt((n_210570.attrs != null ? n_210570.attrs.length : 0), 2);
+				var res_261057 = 0;
 				L2: do {
 						L3: while (true) {
-						if (!(res_260714 <= colontmp__260713)) break L3;
-							i_210601 = res_260714;
+						if (!(res_261057 <= colontmp__261056)) break L3;
+							i_210601 = res_261057;
 							if ((n_210570.attrs[chckIndx(i_210601, 0, n_210570.attrs.length+0-1)-0] == key_210571)) {
 							n_210570.attrs[chckIndx(addInt(i_210601, 1), 0, n_210570.attrs.length+0-1)-0] = val_210572;
 							break BeforeRet;
 							}
 							
-							res_260714 = addInt(res_260714, 2);
+							res_261057 = addInt(res_261057, 2);
 						}
 				} while(false);
 			} while(false);
@@ -2957,13 +2969,13 @@ function HEX5BHEX5D_124281(s_124285, x_124287) {
 		result_124288 = nimCopy(null, mnewString(chckRange(l_124601, 0, 2147483647)), NTI43040);
 		L1: do {
 			var i_124609 = 0;
-			var i_260726 = 0;
+			var i_261069 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_260726 < l_124601)) break L3;
-						i_124609 = i_260726;
+					if (!(i_261069 < l_124601)) break L3;
+						i_124609 = i_261069;
 						result_124288[chckIndx(i_124609, 0, result_124288.length+0-1)-0] = s_124285[chckIndx(addInt(i_124609, a_124401), 0, s_124285.length+0-1)-0];
-						i_260726 = addInt(i_260726, 1);
+						i_261069 = addInt(i_261069, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2989,13 +3001,13 @@ function HEX5BHEX5D_151304(s_151308, x_151310) {
 		result_151311 = nimCopy(null, mnewString(chckRange(l_151601, 0, 2147483647)), NTI43040);
 		L1: do {
 			var i_151609 = 0;
-			var i_260734 = 0;
+			var i_261077 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_260734 < l_151601)) break L3;
-						i_151609 = i_260734;
+					if (!(i_261077 < l_151601)) break L3;
+						i_151609 = i_261077;
 						result_151311[chckIndx(i_151609, 0, result_151311.length+0-1)-0] = s_151308[chckIndx(addInt(i_151609, a_151401), 0, s_151308.length+0-1)-0];
-						i_260734 = addInt(i_260734, 1);
+						i_261077 = addInt(i_261077, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3131,31 +3143,31 @@ function nsuSplitChar(s_199455, sep_199456, maxsplit_199458) {
 		result_199460 = nimCopy(null, [], NTI199476);
 		L1: do {
 			var xHEX60gensym199461_199477 = null;
-			var lastHEX60gensym198812_260750 = 0;
-			var splitsHEX60gensym198813_260751 = maxsplit_199458;
+			var lastHEX60gensym198812_261093 = 0;
+			var splitsHEX60gensym198813_261094 = maxsplit_199458;
 			L2: do {
 					L3: while (true) {
-					if (!(lastHEX60gensym198812_260750 <= (s_199455 != null ? s_199455.length : 0))) break L3;
-						var firstHEX60gensym198814_260753 = lastHEX60gensym198812_260750;
+					if (!(lastHEX60gensym198812_261093 <= (s_199455 != null ? s_199455.length : 0))) break L3;
+						var firstHEX60gensym198814_261096 = lastHEX60gensym198812_261093;
 						L4: do {
 								L5: while (true) {
-								if (!((lastHEX60gensym198812_260750 < (s_199455 != null ? s_199455.length : 0)) && !((s_199455[chckIndx(lastHEX60gensym198812_260750, 0, s_199455.length+0-1)-0] == sep_199456)))) break L5;
-									lastHEX60gensym198812_260750 = addInt(lastHEX60gensym198812_260750, 1);
+								if (!((lastHEX60gensym198812_261093 < (s_199455 != null ? s_199455.length : 0)) && !((s_199455[chckIndx(lastHEX60gensym198812_261093, 0, s_199455.length+0-1)-0] == sep_199456)))) break L5;
+									lastHEX60gensym198812_261093 = addInt(lastHEX60gensym198812_261093, 1);
 								}
 						} while(false);
-						if ((splitsHEX60gensym198813_260751 == 0)) {
-						lastHEX60gensym198812_260750 = (s_199455 != null ? s_199455.length : 0);
+						if ((splitsHEX60gensym198813_261094 == 0)) {
+						lastHEX60gensym198812_261093 = (s_199455 != null ? s_199455.length : 0);
 						}
 						
-						xHEX60gensym199461_199477 = substr_71222(s_199455, firstHEX60gensym198814_260753, subInt(lastHEX60gensym198812_260750, 1));
+						xHEX60gensym199461_199477 = substr_71222(s_199455, firstHEX60gensym198814_261096, subInt(lastHEX60gensym198812_261093, 1));
 						var Tmp6 = nimCopy(null, xHEX60gensym199461_199477, NTI43040);
 						if (result_199460 != null) { result_199460.push(Tmp6); } else { result_199460 = [Tmp6]; };
-						if ((splitsHEX60gensym198813_260751 == 0)) {
+						if ((splitsHEX60gensym198813_261094 == 0)) {
 						break L2;
 						}
 						
-						splitsHEX60gensym198813_260751 = subInt(splitsHEX60gensym198813_260751, 1);
-						lastHEX60gensym198812_260750 = addInt(lastHEX60gensym198812_260750, 1);
+						splitsHEX60gensym198813_261094 = subInt(splitsHEX60gensym198813_261094, 1);
+						lastHEX60gensym198812_261093 = addInt(lastHEX60gensym198812_261093, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3337,12 +3349,12 @@ function add_quoted_255401(s_255404, s_255404_Idx, x_255405) {
 		if (s_255404[s_255404_Idx] != null) { s_255404[s_255404_Idx] = (s_255404[s_255404_Idx]).concat(makeNimstrLit("\"")); } else { s_255404[s_255404_Idx] = makeNimstrLit("\""); };
 		L1: do {
 			var c_255601 = 0;
-			var i_260757 = 0;
-			var l_260758 = (x_255405 != null ? x_255405.length : 0);
+			var i_261100 = 0;
+			var l_261101 = (x_255405 != null ? x_255405.length : 0);
 			L2: do {
 					L3: while (true) {
-					if (!(i_260757 < l_260758)) break L3;
-						c_255601 = x_255405.charCodeAt(chckIndx(i_260757, 0, x_255405.length+0-1)-0);
+					if (!(i_261100 < l_261101)) break L3;
+						c_255601 = x_255405.charCodeAt(chckIndx(i_261100, 0, x_255405.length+0-1)-0);
 						if ((c_255601 <= 127)) {
 						add_escaped_char_69814(s_255404, s_255404_Idx, c_255601);
 						}
@@ -3350,7 +3362,7 @@ function add_quoted_255401(s_255404, s_255404_Idx, x_255405) {
 						if (s_255404[s_255404_Idx] != null) { addChar(s_255404[s_255404_Idx], c_255601); } else { s_255404[s_255404_Idx] = [c_255601]; };
 						}
 						
-						i_260757 = addInt(i_260757, 1);
+						i_261100 = addInt(i_261100, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3426,46 +3438,46 @@ function HEX24_254723(x_254726) {
 
 }
 
-function cb_seed_qr_done_254437(data_254439) {
-		rawEcho(makeNimstrLit("cbQrDone:"), cstrToNimstr(data_254439));
-		var sdata_254443 = cstrToNimstr(data_254439);
-		var ds_254444 = nsuSplitChar(sdata_254443, 44, -1);
+function cb_seed_qr_done_254454(data_254456) {
+		rawEcho(makeNimstrLit("cbQrDone:"), cstrToNimstr(data_254456));
+		var sdata_254460 = cstrToNimstr(data_254456);
+		var ds_254461 = nsuSplitChar(sdata_254460, 44, -1);
 		L1: do {
 			var d_254614 = null;
-			var i_260744 = 0;
-			var l_260745 = (ds_254444 != null ? ds_254444.length : 0);
+			var i_261087 = 0;
+			var l_261088 = (ds_254461 != null ? ds_254461.length : 0);
 			L2: do {
 					L3: while (true) {
-					if (!(i_260744 < l_260745)) break L3;
-						d_254614 = ds_254444[chckIndx(i_260744, 0, ds_254444.length+0-1)-0];
+					if (!(i_261087 < l_261088)) break L3;
+						d_254614 = ds_254461[chckIndx(i_261087, 0, ds_254461.length+0-1)-0];
 						if (nsuStartsWith(d_254614, makeNimstrLit("seed:"))) {
-						seed_card_info_254408[0].seed = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(5, 1)));
-						rawEcho(cstrToNimstr(seed_card_info_254408[0].seed));
+						seed_card_info_254425[0].seed = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(5, 1)));
+						rawEcho(cstrToNimstr(seed_card_info_254425[0].seed));
 						}
 						else {
 						if (nsuStartsWith(d_254614, makeNimstrLit("tag:"))) {
-						seed_card_info_254408[0].tag = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
-						rawEcho(cstrToNimstr(seed_card_info_254408[0].tag));
+						seed_card_info_254425[0].tag = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
+						rawEcho(cstrToNimstr(seed_card_info_254425[0].tag));
 						}
 						else {
 						if (nsuStartsWith(d_254614, makeNimstrLit("gen:"))) {
-						seed_card_info_254408[0].gen = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
-						rawEcho(cstrToNimstr(seed_card_info_254408[0].gen));
+						seed_card_info_254425[0].gen = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
+						rawEcho(cstrToNimstr(seed_card_info_254425[0].gen));
 						}
 						}}
-						i_260744 = addInt(i_260744, 1);
-						if (!(((ds_254444 != null ? ds_254444.length : 0) == l_260745))) {
+						i_261087 = addInt(i_261087, 1);
+						if (!(((ds_254461 != null ? ds_254461.length : 0) == l_261088))) {
 						failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 						}
 						
 					}
 			} while(false);
 		} while(false);
-		seed_card_info_254408[0].orig = data_254439;
-		rawEcho(HEX24_254723(seed_card_info_254408[0]));
+		seed_card_info_254425[0].orig = data_254456;
+		rawEcho(HEX24_254723(seed_card_info_254425[0]));
 		    qrReader.hide();
   
-		view_selector_254131(2, false);
+		view_selector_254133(2, false);
 
 	
 }
@@ -3473,7 +3485,7 @@ function cb_seed_qr_done_254437(data_254439) {
 function show_qr_257829() {
 
 		function HEX3Aanonymous_257834() {
-				      qrReader.show(cb_seed_qr_done_254437);
+				      qrReader.show(cb_seed_qr_done_254454);
     
 
 			
@@ -3491,7 +3503,7 @@ function cam_change_257862() {
 
 		function HEX3Aanonymous_257867() {
 				      $('.camtools button').blur();
-      //qrReader.show(cb_seed_qr_done_254437);
+      //qrReader.show(cb_seed_qr_done_254454);
     
 
 			
@@ -3553,6 +3565,7 @@ function change_language_258756(ev_258758, n_258759) {
 		}
 		autocomplete_words_258012[0] = nimCopy(null, [], NTI258795);
 		chklist_258020[0] = nimCopy(null, [], NTI258810);
+		view_update_254312();
 
 	
 }
@@ -3571,7 +3584,7 @@ function check_mnemonic_258050(ev_258052, n_258053) {
 			if (!!((s_258054 == null))) Tmp1 = false; else {				Tmp1 = (0 < (s_258054 != null ? s_258054.length : 0));			}		if (Tmp1) {
 			if (!mnemonic_fulfill_254085[0]) Tmp2 = false; else {				Tmp2 = !((editing_words_257995[0] == s_258054));			}		if (Tmp2) {
 		mnemonic_fulfill_254085[0] = false;
-		view_selector_254131(3, false);
+		view_selector_254133(3, false);
 		}
 		
 		editing_words_257995[0] = s_258054;
@@ -3582,11 +3595,11 @@ function check_mnemonic_258050(ev_258052, n_258053) {
 		var tmplist_258113 = [];
 		L4: do {
 			var word_258114 = null;
-			var v_260803 = null;
+			var v_261146 = null;
 			for (var k in bip39_wordlist_257977[0]) {
 			  if (!bip39_wordlist_257977[0].hasOwnProperty(k)) continue;
-			  v_260803=bip39_wordlist_257977[0][k];
-			word_258114 = v_260803;
+			  v_261146=bip39_wordlist_257977[0][k];
+			word_258114 = v_261146;
 			var w_258115 = word_258114;
 			if (w_258115.startsWith(s_258054)) {
 			if (tmplist_258113 != null) { tmplist_258113.push(w_258115); } else { tmplist_258113 = [w_258115]; };
@@ -3605,6 +3618,7 @@ function check_mnemonic_258050(ev_258052, n_258053) {
 			autocomplete_words_258012[0] = nimCopy(null, [], NTI258152);
 		}
 		
+		view_update_254312();
 
 	
 }
@@ -3649,12 +3663,12 @@ function confirm_mnemonic_258399(input_id_258401) {
 				var allvalid_258429 = true;
 				L2: do {
 					var word_258614 = null;
-					var i_260807 = 0;
-					var l_260808 = (words_258412 != null ? words_258412.length : 0);
+					var i_261150 = 0;
+					var l_261151 = (words_258412 != null ? words_258412.length : 0);
 					L3: do {
 							L4: while (true) {
-							if (!(i_260807 < l_260808)) break L4;
-								word_258614 = words_258412[chckIndx(i_260807, 0, words_258412.length+0-1)-0];
+							if (!(i_261150 < l_261151)) break L4;
+								word_258614 = words_258412[chckIndx(i_261150, 0, words_258412.length+0-1)-0];
 								if (wl_select_258381[0].includes(word_258614)) {
 								if (chklist_258020[0] != null) { chklist_258020[0].push({Field0: idx_258428, Field1: word_258614, Field2: true, Field3: []}); } else { chklist_258020[0] = [{Field0: idx_258428, Field1: word_258614, Field2: true, Field3: []}]; };
 								}
@@ -3665,8 +3679,8 @@ function confirm_mnemonic_258399(input_id_258401) {
 								}
 								
 								idx_258428 = addInt(idx_258428, 1);
-								i_260807 = addInt(i_260807, 1);
-								if (!(((words_258412 != null ? words_258412.length : 0) == l_260808))) {
+								i_261150 = addInt(i_261150, 1);
+								if (!(((words_258412 != null ? words_258412.length : 0) == l_261151))) {
 								failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 								}
 								
@@ -3675,7 +3689,7 @@ function confirm_mnemonic_258399(input_id_258401) {
 				} while(false);
 					if (!allvalid_258429) Tmp6 = false; else {						Tmp6 = (12 <= idx_258428);					}					if (!Tmp6) Tmp5 = false; else {						Tmp5 = (modInt(idx_258428, 3) == 0);					}				if (Tmp5) {
 				mnemonic_fulfill_254085[0] = true;
-				view_selector_254131(4, false);
+				view_selector_254133(4, false);
 				}
 				
 				}
@@ -3684,6 +3698,7 @@ function confirm_mnemonic_258399(input_id_258401) {
 				}
 				
 				autocomplete_words_258012[0] = nimCopy(null, [], NTI258687);
+				view_update_254312();
 
 			
 		}
@@ -3747,6 +3762,7 @@ function select_word_258166(input_id_258168, word_258169, whole_replace_258170) 
 				}
 				
 				autocomplete_words_258012[0] = nimCopy(null, [], NTI258272);
+				view_update_254312();
 
 			
 		}
@@ -3878,19 +3894,19 @@ function mnemonic_editor_258824() {
 		tmp_258891.class = "medit-autocomp";
 		L1: do {
 			var word_258976 = null;
-			var i_260780 = 0;
-			var l_260781 = (autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0);
+			var i_261123 = 0;
+			var l_261124 = (autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0);
 			L2: do {
 					L3: while (true) {
-					if (!(i_260780 < l_260781)) break L3;
-						word_258976 = autocomplete_words_258012[0][chckIndx(i_260780, 0, autocomplete_words_258012[0].length+0-1)-0];
+					if (!(i_261123 < l_261124)) break L3;
+						word_258976 = autocomplete_words_258012[0][chckIndx(i_261123, 0, autocomplete_words_258012[0].length+0-1)-0];
 						var tmp_258892 = tree_212046(106, []);
 						tmp_258892.class = "ui mini teal label";
 						add_event_handler_240584(tmp_258892, 0, select_word_258166(input_id_258827, word_258976, true), kxi_230324[0]);
 						add_210786(tmp_258892, text_212201(word_258976));
 						add_210786(tmp_258891, tmp_258892);
-						i_260780 = addInt(i_260780, 1);
-						if (!(((autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0) == l_260781))) {
+						i_261123 = addInt(i_261123, 1);
+						if (!(((autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0) == l_261124))) {
 						failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 						}
 						
@@ -3899,13 +3915,13 @@ function mnemonic_editor_258824() {
 		} while(false);
 		L4: do {
 			var i_258999 = 0;
-			var colontmp__260794 = 0;
-			colontmp__260794 = (chklist_258020[0] != null ? (chklist_258020[0].length-1) : -1);
-			var res_260795 = 0;
+			var colontmp__261137 = 0;
+			colontmp__261137 = (chklist_258020[0] != null ? (chklist_258020[0].length-1) : -1);
+			var res_261138 = 0;
 			L5: do {
 					L6: while (true) {
-					if (!(res_260795 <= colontmp__260794)) break L6;
-						i_258999 = res_260795;
+					if (!(res_261138 <= colontmp__261137)) break L6;
+						i_258999 = res_261138;
 						if (chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field2) {
 						var tmp_258893 = tree_212046(106, []);
 						tmp_258893.class = "ui mini green label";
@@ -3924,21 +3940,21 @@ function mnemonic_editor_258824() {
 							add_210786(tmp_258895, tmp_258896);
 							L7: do {
 								var lev_259022 = null;
-								var colontmp__260790 = null;
-								colontmp__260790 = chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field3;
-								var i_260791 = 0;
-								var l_260792 = (colontmp__260790 != null ? colontmp__260790.length : 0);
+								var colontmp__261133 = null;
+								colontmp__261133 = chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field3;
+								var i_261134 = 0;
+								var l_261135 = (colontmp__261133 != null ? colontmp__261133.length : 0);
 								L8: do {
 										L9: while (true) {
-										if (!(i_260791 < l_260792)) break L9;
-											lev_259022 = colontmp__260790[chckIndx(i_260791, 0, colontmp__260790.length+0-1)-0];
+										if (!(i_261134 < l_261135)) break L9;
+											lev_259022 = colontmp__261133[chckIndx(i_261134, 0, colontmp__261133.length+0-1)-0];
 											var tmp_258897 = tree_212046(106, []);
 											tmp_258897.class = "ui mini blue basic label";
 											add_event_handler_240584(tmp_258897, 0, fix_word_258714(input_id_258827, chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field0, lev_259022), kxi_230324[0]);
 											add_210786(tmp_258897, text_212201(lev_259022));
 											add_210786(tmp_258895, tmp_258897);
-											i_260791 = addInt(i_260791, 1);
-											if (!(((colontmp__260790 != null ? colontmp__260790.length : 0) == l_260792))) {
+											i_261134 = addInt(i_261134, 1);
+											if (!(((colontmp__261133 != null ? colontmp__261133.length : 0) == l_261135))) {
 											failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 											}
 											
@@ -3948,7 +3964,7 @@ function mnemonic_editor_258824() {
 							add_210786(tmp_258891, tmp_258895);
 						}
 						
-						res_260795 = addInt(res_260795, 1);
+						res_261138 = addInt(res_261138, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3959,12 +3975,12 @@ function mnemonic_editor_258824() {
 
 }
 
-function protect_selector_254362(protect_type_254364) {
+function protect_selector_254379(protect_type_254381) {
 
-		function HEX3Aanonymous_254368() {
+		function HEX3Aanonymous_254385() {
 				      qrReader.hide(true);
     
-				current_protect_type_254056[0] = protect_type_254364;
+				current_protect_type_254056[0] = protect_type_254381;
 				show_page1_254081[0] = false;
 				show_page2_254082[0] = true;
 				if ((current_protect_type_254056[0] == 0)) {
@@ -3978,25 +3994,29 @@ function protect_selector_254362(protect_type_254364) {
       
 				}
 				
+				view_update_254312();
 
 			
 		}
 
-	var result_254367 = null;
+	var result_254384 = null;
 
-		result_254367 = HEX3Aanonymous_254368;
+		result_254384 = HEX3Aanonymous_254385;
 
-	return result_254367;
+	return result_254384;
 
 }
 
 function change_passphrase_259748(ev_259750, n_259751) {
+		view_update_254312();
+
 	
 }
 
 function confirm_passphrase_259765(ev_259767, n_259768) {
 		passphrase_fulfill_254086[0] = true;
 		show_page3_254083[0] = true;
+		view_update_254312();
 
 	
 }
@@ -4034,11 +4054,231 @@ function passphrase_editor_259782() {
 
 }
 
+function btn_receive_260080() {
+
+		function HEX3Aanonymous_260085() {
+				      showRecvAddress()
+    
+
+			
+		}
+
+	var result_260084 = null;
+
+		result_260084 = HEX3Aanonymous_260085;
+
+	return result_260084;
+
+}
+
+function recv_address_selector_259934() {
+	var result_259936 = null;
+
+		var tmp_259937 = tree_212046(43, []);
+		tmp_259937.id = "receive-address";
+		tmp_259937.class = "ui center aligined segment";
+		var tmp_259938 = tree_212046(43, []);
+		tmp_259938.class = "ui top attached label symbol";
+		add_210786(tmp_259938, text_212164(makeNimstrLit("Receive Address ")));
+		var tmp_259939 = tree_212046(70, []);
+		var tmp_259940 = tree_212046(61, []);
+		tmp_259940.class = "window maximize outline icon btn-maximize";
+		add_210786(tmp_259939, tmp_259940);
+		var tmp_259941 = tree_212046(61, []);
+		tmp_259941.class = "close icon btn-close";
+		add_210786(tmp_259939, tmp_259941);
+		add_210786(tmp_259938, tmp_259939);
+		add_210786(tmp_259937, tmp_259938);
+		var tmp_259942 = tree_212046(43, []);
+		tmp_259942.class = "ui mini basic icon buttons";
+		var tmp_259943 = tree_212046(106, []);
+		tmp_259943.id = "btn-recv-copy";
+		tmp_259943.class = "ui button";
+		set_attr_210568(tmp_259943, "title", "copy");
+		var tmp_259944 = tree_212046(61, []);
+		tmp_259944.class = "copy outline icon";
+		add_210786(tmp_259943, tmp_259944);
+		add_210786(tmp_259942, tmp_259943);
+		var tmp_259945 = tree_212046(106, []);
+		tmp_259945.id = "btn-recv-qrcode";
+		tmp_259945.class = "ui button";
+		set_attr_210568(tmp_259945, "title", "QR code");
+		var tmp_259946 = tree_212046(61, []);
+		tmp_259946.class = "qrcode icon";
+		add_210786(tmp_259945, tmp_259946);
+		add_210786(tmp_259942, tmp_259945);
+		add_210786(tmp_259937, tmp_259942);
+		var tmp_259947 = tree_212046(43, []);
+		tmp_259947.class = "address";
+		add_210786(tmp_259947, text_212164([]));
+		add_210786(tmp_259937, tmp_259947);
+		var tmp_259948 = tree_212046(43, []);
+		tmp_259948.class = "balls";
+		var tmp_259949 = tree_212046(43, []);
+		tmp_259949.class = "used";
+		var tmp_259950 = tree_212046(43, []);
+		tmp_259950.class = "circular ui icon mini button ball";
+		var tmp_259951 = tree_212046(75, []);
+		set_attr_210568(tmp_259951, "src", "");
+		add_210786(tmp_259950, tmp_259951);
+		add_210786(tmp_259949, tmp_259950);
+		add_210786(tmp_259948, tmp_259949);
+		var tmp_259952 = tree_212046(43, []);
+		tmp_259952.class = "new";
+		var tmp_259953 = tree_212046(43, []);
+		tmp_259953.class = "circular ui icon mini button ball";
+		var tmp_259954 = tree_212046(75, []);
+		set_attr_210568(tmp_259954, "src", "");
+		add_210786(tmp_259953, tmp_259954);
+		add_210786(tmp_259952, tmp_259953);
+		var tmp_259955 = tree_212046(43, []);
+		tmp_259955.class = "circular ui icon mini button ball";
+		var tmp_259956 = tree_212046(75, []);
+		set_attr_210568(tmp_259956, "src", "");
+		add_210786(tmp_259955, tmp_259956);
+		add_210786(tmp_259952, tmp_259955);
+		var tmp_259957 = tree_212046(43, []);
+		tmp_259957.class = "circular ui icon mini button ball";
+		var tmp_259958 = tree_212046(75, []);
+		set_attr_210568(tmp_259958, "src", "");
+		add_210786(tmp_259957, tmp_259958);
+		add_210786(tmp_259952, tmp_259957);
+		var tmp_259959 = tree_212046(43, []);
+		tmp_259959.class = "circular ui icon mini button ball";
+		var tmp_259960 = tree_212046(75, []);
+		set_attr_210568(tmp_259960, "src", "");
+		add_210786(tmp_259959, tmp_259960);
+		add_210786(tmp_259952, tmp_259959);
+		var tmp_259961 = tree_212046(43, []);
+		tmp_259961.class = "circular ui icon mini button ball";
+		var tmp_259962 = tree_212046(75, []);
+		set_attr_210568(tmp_259962, "src", "");
+		add_210786(tmp_259961, tmp_259962);
+		add_210786(tmp_259952, tmp_259961);
+		add_210786(tmp_259948, tmp_259952);
+		add_210786(tmp_259937, tmp_259948);
+		result_259936 = tmp_259937;
+
+	return result_259936;
+
+}
+
+function recv_address_modal_260113() {
+	var result_260115 = null;
+
+		var tmp_260116 = tree_212046(43, []);
+		tmp_260116.id = "recv-modal";
+		tmp_260116.class = "ui";
+		var tmp_260117 = tree_212046(61, []);
+		tmp_260117.class = "close icon btn-close-arc";
+		add_210786(tmp_260116, tmp_260117);
+		var tmp_260118 = tree_212046(43, []);
+		tmp_260118.class = "close-arc";
+		add_210786(tmp_260116, tmp_260118);
+		var tmp_260119 = tree_212046(43, []);
+		tmp_260119.id = "recv-qrcode";
+		tmp_260119.class = "qrcode";
+		set_attr_210568(tmp_260119, "title", "");
+		var tmp_260120 = tree_212046(84, []);
+		set_attr_210568(tmp_260120, "width", "0");
+		set_attr_210568(tmp_260120, "height", "0");
+		add_210786(tmp_260119, tmp_260120);
+		add_210786(tmp_260116, tmp_260119);
+		var tmp_260121 = tree_212046(43, []);
+		tmp_260121.id = "recvaddr-form";
+		tmp_260121.class = "ui container";
+		var tmp_260122 = tree_212046(43, []);
+		tmp_260122.class = "ui form";
+		var tmp_260123 = tree_212046(43, []);
+		tmp_260123.class = "two fields";
+		var tmp_260124 = tree_212046(43, []);
+		tmp_260124.class = "field";
+		var tmp_260125 = tree_212046(104, []);
+		add_210786(tmp_260125, text_212164(makeNimstrLit("Receive Address")));
+		add_210786(tmp_260124, tmp_260125);
+		var tmp_260126 = tree_212046(43, []);
+		tmp_260126.class = "ui selection dropdown addr-selection";
+		set_attr_210568(tmp_260126, "tabindex", "0");
+		var tmp_260127 = tree_212046(105, []);
+		set_attr_210568(tmp_260127, "type", "hidden");
+		set_attr_210568(tmp_260127, "name", "address");
+		valueHEX3D_209839(tmp_260127, "");
+		add_210786(tmp_260126, tmp_260127);
+		var tmp_260128 = tree_212046(61, []);
+		tmp_260128.class = "dropdown icon";
+		add_210786(tmp_260126, tmp_260128);
+		var tmp_260129 = tree_212046(43, []);
+		tmp_260129.class = "text";
+		var tmp_260130 = tree_212046(75, []);
+		set_attr_210568(tmp_260130, "clsss", "ui mini avatar image");
+		set_attr_210568(tmp_260130, "src", "");
+		add_210786(tmp_260129, tmp_260130);
+		add_210786(tmp_260129, text_212164([]));
+		add_210786(tmp_260126, tmp_260129);
+		var tmp_260131 = tree_212046(43, []);
+		tmp_260131.class = "menu";
+		set_attr_210568(tmp_260131, "tabindex", "-1");
+		add_210786(tmp_260126, tmp_260131);
+		add_210786(tmp_260124, tmp_260126);
+		add_210786(tmp_260123, tmp_260124);
+		var tmp_260132 = tree_212046(43, []);
+		tmp_260132.class = "field";
+		var tmp_260133 = tree_212046(104, []);
+		add_210786(tmp_260133, text_212164(makeNimstrLit("Amount")));
+		add_210786(tmp_260132, tmp_260133);
+		var tmp_260134 = tree_212046(43, []);
+		tmp_260134.class = "ui right labeled input";
+		var tmp_260135 = tree_212046(105, []);
+		tmp_260135.class = "right";
+		set_attr_210568(tmp_260135, "type", "text");
+		set_attr_210568(tmp_260135, "name", "amount");
+		set_attr_210568(tmp_260135, "placeholder", "Amount");
+		add_210786(tmp_260134, tmp_260135);
+		var tmp_260136 = tree_212046(43, []);
+		tmp_260136.class = "ui basic label";
+		add_210786(tmp_260136, text_212164(makeNimstrLit("ZNY")));
+		add_210786(tmp_260134, tmp_260136);
+		add_210786(tmp_260132, tmp_260134);
+		add_210786(tmp_260123, tmp_260132);
+		add_210786(tmp_260122, tmp_260123);
+		var tmp_260137 = tree_212046(43, []);
+		tmp_260137.class = "two fields";
+		var tmp_260138 = tree_212046(43, []);
+		tmp_260138.class = "field";
+		var tmp_260139 = tree_212046(104, []);
+		add_210786(tmp_260139, text_212164(makeNimstrLit("Label")));
+		add_210786(tmp_260138, tmp_260139);
+		var tmp_260140 = tree_212046(105, []);
+		set_attr_210568(tmp_260140, "type", "text");
+		set_attr_210568(tmp_260140, "name", "label");
+		set_attr_210568(tmp_260140, "placeholder", "Label");
+		add_210786(tmp_260138, tmp_260140);
+		add_210786(tmp_260137, tmp_260138);
+		var tmp_260141 = tree_212046(43, []);
+		tmp_260141.class = "field";
+		var tmp_260142 = tree_212046(104, []);
+		add_210786(tmp_260142, text_212164(makeNimstrLit("Message")));
+		add_210786(tmp_260141, tmp_260142);
+		var tmp_260143 = tree_212046(111, []);
+		set_attr_210568(tmp_260143, "rows", "2");
+		set_attr_210568(tmp_260143, "name", "message");
+		set_attr_210568(tmp_260143, "placeholder", "Message");
+		add_210786(tmp_260141, tmp_260143);
+		add_210786(tmp_260137, tmp_260141);
+		add_210786(tmp_260122, tmp_260137);
+		add_210786(tmp_260121, tmp_260122);
+		add_210786(tmp_260116, tmp_260121);
+		result_260115 = tmp_260116;
+
+	return result_260115;
+
+}
+
 function go_settings_259835() {
 
 		function HEX3Aanonymous_259840() {
 				if (!(show_page4_254084[0])) {
-				view_selector_254131(12, false);
+				view_selector_254133(12, false);
 				supress_redraw_254087[0] = true;
 				}
 				
@@ -4058,7 +4298,7 @@ function go_logs_259868() {
 
 		function HEX3Aanonymous_259873() {
 				if (!(show_page4_254084[0])) {
-				view_selector_254131(12, false);
+				view_selector_254133(12, false);
 				supress_redraw_254087[0] = true;
 				}
 				else {
@@ -4081,7 +4321,7 @@ function go_logs_259868() {
 function back_wallet_259901() {
 
 		function HEX3Aanonymous_259906() {
-				view_selector_254131(11, true);
+				view_selector_254133(11, true);
 				supress_redraw_254087[0] = false;
 				      goSection('#section3', page_scroll_done);
     
@@ -4097,442 +4337,454 @@ function back_wallet_259901() {
 
 }
 
-function app_main_259934(data_259936) {
-	var result_259937 = null;
+function app_main_260269(data_260271) {
+	var result_260272 = null;
 
-		var tmp_259938 = tree_212046(43, []);
+		var tmp_260273 = tree_212046(43, []);
 		if (show_page1_254081[0]) {
-		var tmp_259939 = tree_212046(17, []);
-		tmp_259939.id = "section1";
-		tmp_259939.class = "section";
-		var tmp_259940 = tree_212046(43, []);
-		tmp_259940.class = "intro";
-		var tmp_259941 = tree_212046(43, []);
-		tmp_259941.class = "intro-head";
-		var tmp_259942 = tree_212046(43, []);
-		tmp_259942.class = "caption";
-		add_210786(tmp_259942, text_212164(makeNimstrLit("Pastel Wallet")));
-		add_210786(tmp_259941, tmp_259942);
-		var tmp_259943 = tree_212046(43, []);
-		tmp_259943.class = "ui container method-selector";
-		var tmp_259944 = tree_212046(43, []);
-		tmp_259944.class = "title";
-		add_210786(tmp_259944, text_212164(makeNimstrLit("Import the master seed to start your wallet.")));
-		add_210786(tmp_259943, tmp_259944);
-		var tmp_259945 = tree_212046(43, []);
-		tmp_259945.class = "ui buttons";
-		var tmp_259946 = tree_212046(106, []);
-		tmp_259946.id = "seedselector";
-		tmp_259946.class = "ui olive button";
-		add_event_handler_240584(tmp_259946, 0, import_selector_254310(0), kxi_230324[0]);
-		var tmp_259947 = tree_212046(61, []);
-		tmp_259947.class = "qrcode icon";
-		add_210786(tmp_259946, tmp_259947);
-		add_210786(tmp_259946, text_212164(makeNimstrLit("Seed card")));
-		add_210786(tmp_259945, tmp_259946);
-		var tmp_259948 = tree_212046(43, []);
-		tmp_259948.class = "or";
-		add_210786(tmp_259945, tmp_259948);
-		var tmp_259949 = tree_212046(106, []);
-		tmp_259949.id = "mnemonicselector";
-		tmp_259949.class = "ui grey button";
-		add_event_handler_240584(tmp_259949, 0, import_selector_254310(1), kxi_230324[0]);
-		var tmp_259950 = tree_212046(61, []);
-		tmp_259950.class = "list alternate icon";
-		add_210786(tmp_259949, tmp_259950);
-		add_210786(tmp_259949, text_212164(makeNimstrLit("Mnemonic")));
-		add_210786(tmp_259945, tmp_259949);
-		add_210786(tmp_259943, tmp_259945);
-		add_210786(tmp_259941, tmp_259943);
-		add_210786(tmp_259940, tmp_259941);
-		var tmp_259951 = tree_212046(43, []);
-		tmp_259951.class = "intro-body";
+		var tmp_260274 = tree_212046(17, []);
+		tmp_260274.id = "section1";
+		tmp_260274.class = "section";
+		var tmp_260275 = tree_212046(43, []);
+		tmp_260275.class = "intro";
+		var tmp_260276 = tree_212046(43, []);
+		tmp_260276.class = "intro-head";
+		var tmp_260277 = tree_212046(43, []);
+		tmp_260277.class = "caption";
+		add_210786(tmp_260277, text_212164(makeNimstrLit("Pastel Wallet")));
+		add_210786(tmp_260276, tmp_260277);
+		var tmp_260278 = tree_212046(43, []);
+		tmp_260278.class = "ui container method-selector";
+		var tmp_260279 = tree_212046(43, []);
+		tmp_260279.class = "title";
+		add_210786(tmp_260279, text_212164(makeNimstrLit("Import the master seed to start your wallet.")));
+		add_210786(tmp_260278, tmp_260279);
+		var tmp_260280 = tree_212046(43, []);
+		tmp_260280.class = "ui buttons";
+		var tmp_260281 = tree_212046(106, []);
+		tmp_260281.id = "seedselector";
+		tmp_260281.class = "ui olive button";
+		add_event_handler_240584(tmp_260281, 0, import_selector_254327(0), kxi_230324[0]);
+		var tmp_260282 = tree_212046(61, []);
+		tmp_260282.class = "qrcode icon";
+		add_210786(tmp_260281, tmp_260282);
+		add_210786(tmp_260281, text_212164(makeNimstrLit("Seed card")));
+		add_210786(tmp_260280, tmp_260281);
+		var tmp_260283 = tree_212046(43, []);
+		tmp_260283.class = "or";
+		add_210786(tmp_260280, tmp_260283);
+		var tmp_260284 = tree_212046(106, []);
+		tmp_260284.id = "mnemonicselector";
+		tmp_260284.class = "ui grey button";
+		add_event_handler_240584(tmp_260284, 0, import_selector_254327(1), kxi_230324[0]);
+		var tmp_260285 = tree_212046(61, []);
+		tmp_260285.class = "list alternate icon";
+		add_210786(tmp_260284, tmp_260285);
+		add_210786(tmp_260284, text_212164(makeNimstrLit("Mnemonic")));
+		add_210786(tmp_260280, tmp_260284);
+		add_210786(tmp_260278, tmp_260280);
+		add_210786(tmp_260276, tmp_260278);
+		add_210786(tmp_260275, tmp_260276);
+		var tmp_260286 = tree_212046(43, []);
+		tmp_260286.class = "intro-body";
 		if ((current_import_type_254050[0] == 0)) {
-		var tmp_259952 = tree_212046(43, []);
-		tmp_259952.id = "seed-seg";
-		tmp_259952.class = "ui left aligned segment seed-seg";
+		var tmp_260287 = tree_212046(43, []);
+		tmp_260287.id = "seed-seg";
+		tmp_260287.class = "ui left aligned segment seed-seg";
 		if (show_scan_result_254076[0]) {
-		var tmp_259953 = tree_212046(43, []);
-		tmp_259953.class = "ui link cards seed-card-holder";
-		add_210786(tmp_259953, seed_card_259044(seed_card_info_254408[0]));
-		add_210786(tmp_259953, seed_card_259044(seed_card_info_254408[0]));
-		var tmp_259954 = tree_212046(43, []);
-		tmp_259954.class = "seed-add-container";
-		var tmp_259955 = tree_212046(106, []);
-		tmp_259955.class = "circular ui icon button bt-add-seed";
-		var tmp_259956 = tree_212046(61, []);
-		tmp_259956.class = "plus icon";
-		add_210786(tmp_259955, tmp_259956);
-		add_210786(tmp_259954, tmp_259955);
-		add_210786(tmp_259953, tmp_259954);
-		add_210786(tmp_259952, tmp_259953);
-		var tmp_259957 = tree_212046(44, []);
-		tmp_259957.class = "pagenext";
-		set_attr_210568(tmp_259957, "href", "#section2");
-		var tmp_259958 = tree_212046(70, []);
-		add_210786(tmp_259957, tmp_259958);
-		add_210786(tmp_259957, text_212164(makeNimstrLit("Next")));
-		add_210786(tmp_259952, tmp_259957);
+		var tmp_260288 = tree_212046(43, []);
+		tmp_260288.class = "ui link cards seed-card-holder";
+		add_210786(tmp_260288, seed_card_259044(seed_card_info_254425[0]));
+		add_210786(tmp_260288, seed_card_259044(seed_card_info_254425[0]));
+		var tmp_260289 = tree_212046(43, []);
+		tmp_260289.class = "seed-add-container";
+		var tmp_260290 = tree_212046(106, []);
+		tmp_260290.class = "circular ui icon button bt-add-seed";
+		var tmp_260291 = tree_212046(61, []);
+		tmp_260291.class = "plus icon";
+		add_210786(tmp_260290, tmp_260291);
+		add_210786(tmp_260289, tmp_260290);
+		add_210786(tmp_260288, tmp_260289);
+		add_210786(tmp_260287, tmp_260288);
+		var tmp_260292 = tree_212046(44, []);
+		tmp_260292.class = "pagenext";
+		set_attr_210568(tmp_260292, "href", "#section2");
+		var tmp_260293 = tree_212046(70, []);
+		add_210786(tmp_260292, tmp_260293);
+		add_210786(tmp_260292, text_212164(makeNimstrLit("Next")));
+		add_210786(tmp_260287, tmp_260292);
 		}
 		
 		if (show_scanning_254074[0]) {
-		var tmp_259959 = tree_212046(43, []);
-		tmp_259959.class = "qr-scanning";
-		var tmp_259960 = tree_212046(43, []);
-		add_210786(tmp_259959, tmp_259960);
-		var tmp_259961 = tree_212046(43, []);
-		add_210786(tmp_259959, tmp_259961);
-		add_210786(tmp_259952, tmp_259959);
+		var tmp_260294 = tree_212046(43, []);
+		tmp_260294.class = "qr-scanning";
+		var tmp_260295 = tree_212046(43, []);
+		add_210786(tmp_260294, tmp_260295);
+		var tmp_260296 = tree_212046(43, []);
+		add_210786(tmp_260294, tmp_260296);
+		add_210786(tmp_260287, tmp_260294);
 		}
 		
 		if (show_scan_seed_btn_254073[0]) {
-		var tmp_259962 = tree_212046(43, []);
-		tmp_259962.class = "ui teal labeled icon button bt-scan-seed";
-		add_event_handler_240584(tmp_259962, 0, show_qr_257829(), kxi_230324[0]);
-		add_210786(tmp_259962, text_212164(makeNimstrLit("Scan seed card with camera")));
-		var tmp_259963 = tree_212046(61, []);
-		tmp_259963.class = "camera icon";
-		add_210786(tmp_259962, tmp_259963);
-		add_210786(tmp_259952, tmp_259962);
+		var tmp_260297 = tree_212046(43, []);
+		tmp_260297.class = "ui teal labeled icon button bt-scan-seed";
+		add_event_handler_240584(tmp_260297, 0, show_qr_257829(), kxi_230324[0]);
+		add_210786(tmp_260297, text_212164(makeNimstrLit("Scan seed card with camera")));
+		var tmp_260298 = tree_212046(61, []);
+		tmp_260298.class = "camera icon";
+		add_210786(tmp_260297, tmp_260298);
+		add_210786(tmp_260287, tmp_260297);
 		}
 		
 		if (show_cam_tools_254075[0]) {
-		var tmp_259964 = tree_212046(43, []);
-		tmp_259964.class = "ui small basic icon buttons camtools";
-		var tmp_259965 = tree_212046(106, []);
-		tmp_259965.class = "ui button";
-		add_event_handler_240584(tmp_259965, 0, cam_change_257862(), kxi_230324[0]);
-		var tmp_259966 = tree_212046(61, []);
-		tmp_259966.class = "camera icon";
-		add_210786(tmp_259965, tmp_259966);
-		add_210786(tmp_259964, tmp_259965);
-		var tmp_259967 = tree_212046(106, []);
-		tmp_259967.class = "ui button";
-		add_event_handler_240584(tmp_259967, 0, cam_close_257895(), kxi_230324[0]);
-		var tmp_259968 = tree_212046(61, []);
-		tmp_259968.class = "window close icon";
-		add_210786(tmp_259967, tmp_259968);
-		add_210786(tmp_259964, tmp_259967);
-		add_210786(tmp_259952, tmp_259964);
+		var tmp_260299 = tree_212046(43, []);
+		tmp_260299.class = "ui small basic icon buttons camtools";
+		var tmp_260300 = tree_212046(106, []);
+		tmp_260300.class = "ui button";
+		add_event_handler_240584(tmp_260300, 0, cam_change_257862(), kxi_230324[0]);
+		var tmp_260301 = tree_212046(61, []);
+		tmp_260301.class = "camera icon";
+		add_210786(tmp_260300, tmp_260301);
+		add_210786(tmp_260299, tmp_260300);
+		var tmp_260302 = tree_212046(106, []);
+		tmp_260302.class = "ui button";
+		add_event_handler_240584(tmp_260302, 0, cam_close_257895(), kxi_230324[0]);
+		var tmp_260303 = tree_212046(61, []);
+		tmp_260303.class = "window close icon";
+		add_210786(tmp_260302, tmp_260303);
+		add_210786(tmp_260299, tmp_260302);
+		add_210786(tmp_260287, tmp_260299);
 		}
 		
-		var tmp_259969 = tree_212046(84, []);
-		tmp_259969.id = "qrcanvas";
-		add_210786(tmp_259952, tmp_259969);
-		add_210786(tmp_259951, tmp_259952);
+		var tmp_260304 = tree_212046(84, []);
+		tmp_260304.id = "qrcanvas";
+		add_210786(tmp_260287, tmp_260304);
+		add_210786(tmp_260286, tmp_260287);
 		}
 		else {
-			var tmp_259970 = tree_212046(43, []);
-			tmp_259970.class = "ui left aligned segment mnemonic-seg";
-			add_210786(tmp_259970, mnemonic_editor_258824());
+			var tmp_260305 = tree_212046(43, []);
+			tmp_260305.class = "ui left aligned segment mnemonic-seg";
+			add_210786(tmp_260305, mnemonic_editor_258824());
 			if (mnemonic_fulfill_254085[0]) {
-			var tmp_259971 = tree_212046(44, []);
-			tmp_259971.class = "pagenext";
-			set_attr_210568(tmp_259971, "href", "#section2");
-			var tmp_259972 = tree_212046(70, []);
-			add_210786(tmp_259971, tmp_259972);
-			add_210786(tmp_259971, text_212164(makeNimstrLit("Next")));
-			add_210786(tmp_259970, tmp_259971);
+			var tmp_260306 = tree_212046(44, []);
+			tmp_260306.class = "pagenext";
+			set_attr_210568(tmp_260306, "href", "#section2");
+			var tmp_260307 = tree_212046(70, []);
+			add_210786(tmp_260306, tmp_260307);
+			add_210786(tmp_260306, text_212164(makeNimstrLit("Next")));
+			add_210786(tmp_260305, tmp_260306);
 			}
 			
-			add_210786(tmp_259951, tmp_259970);
+			add_210786(tmp_260286, tmp_260305);
 		}
 		
-		add_210786(tmp_259940, tmp_259951);
-		add_210786(tmp_259939, tmp_259940);
-		add_210786(tmp_259938, tmp_259939);
+		add_210786(tmp_260275, tmp_260286);
+		add_210786(tmp_260274, tmp_260275);
+		add_210786(tmp_260273, tmp_260274);
 		}
 		
 		if (show_page2_254082[0]) {
-		var tmp_259973 = tree_212046(17, []);
-		tmp_259973.id = "section2";
-		tmp_259973.class = "section";
-		var tmp_259974 = tree_212046(43, []);
-		tmp_259974.class = "intro";
-		var tmp_259975 = tree_212046(43, []);
-		tmp_259975.class = "intro-head";
-		var tmp_259976 = tree_212046(43, []);
-		tmp_259976.class = "caption";
-		add_210786(tmp_259976, text_212164(makeNimstrLit("Pastel Wallet")));
-		add_210786(tmp_259975, tmp_259976);
-		var tmp_259977 = tree_212046(43, []);
-		tmp_259977.class = "ui container method-selector";
-		var tmp_259978 = tree_212046(43, []);
-		tmp_259978.class = "title";
-		add_210786(tmp_259978, text_212164(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
-		add_210786(tmp_259977, tmp_259978);
-		var tmp_259979 = tree_212046(43, []);
-		tmp_259979.class = "ui buttons";
-		var tmp_259980 = tree_212046(106, []);
-		tmp_259980.id = "keyselector";
-		tmp_259980.class = "ui olive button";
-		add_event_handler_240584(tmp_259980, 0, protect_selector_254362(0), kxi_230324[0]);
-		var tmp_259981 = tree_212046(61, []);
-		tmp_259981.class = "qrcode icon";
-		add_210786(tmp_259980, tmp_259981);
-		add_210786(tmp_259980, text_212164(makeNimstrLit("Key card")));
-		add_210786(tmp_259979, tmp_259980);
-		var tmp_259982 = tree_212046(43, []);
-		tmp_259982.class = "or";
-		add_210786(tmp_259979, tmp_259982);
-		var tmp_259983 = tree_212046(106, []);
-		tmp_259983.id = "passselector";
-		tmp_259983.class = "ui grey button";
-		add_event_handler_240584(tmp_259983, 0, protect_selector_254362(1), kxi_230324[0]);
-		var tmp_259984 = tree_212046(61, []);
-		tmp_259984.class = "list alternate icon";
-		add_210786(tmp_259983, tmp_259984);
-		add_210786(tmp_259983, text_212164(makeNimstrLit("Passphrase")));
-		add_210786(tmp_259979, tmp_259983);
-		add_210786(tmp_259977, tmp_259979);
-		add_210786(tmp_259975, tmp_259977);
-		add_210786(tmp_259974, tmp_259975);
-		var tmp_259985 = tree_212046(43, []);
-		tmp_259985.class = "intro-body";
+		var tmp_260308 = tree_212046(17, []);
+		tmp_260308.id = "section2";
+		tmp_260308.class = "section";
+		var tmp_260309 = tree_212046(43, []);
+		tmp_260309.class = "intro";
+		var tmp_260310 = tree_212046(43, []);
+		tmp_260310.class = "intro-head";
+		var tmp_260311 = tree_212046(43, []);
+		tmp_260311.class = "caption";
+		add_210786(tmp_260311, text_212164(makeNimstrLit("Pastel Wallet")));
+		add_210786(tmp_260310, tmp_260311);
+		var tmp_260312 = tree_212046(43, []);
+		tmp_260312.class = "ui container method-selector";
+		var tmp_260313 = tree_212046(43, []);
+		tmp_260313.class = "title";
+		add_210786(tmp_260313, text_212164(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
+		add_210786(tmp_260312, tmp_260313);
+		var tmp_260314 = tree_212046(43, []);
+		tmp_260314.class = "ui buttons";
+		var tmp_260315 = tree_212046(106, []);
+		tmp_260315.id = "keyselector";
+		tmp_260315.class = "ui olive button";
+		add_event_handler_240584(tmp_260315, 0, protect_selector_254379(0), kxi_230324[0]);
+		var tmp_260316 = tree_212046(61, []);
+		tmp_260316.class = "qrcode icon";
+		add_210786(tmp_260315, tmp_260316);
+		add_210786(tmp_260315, text_212164(makeNimstrLit("Key card")));
+		add_210786(tmp_260314, tmp_260315);
+		var tmp_260317 = tree_212046(43, []);
+		tmp_260317.class = "or";
+		add_210786(tmp_260314, tmp_260317);
+		var tmp_260318 = tree_212046(106, []);
+		tmp_260318.id = "passselector";
+		tmp_260318.class = "ui grey button";
+		add_event_handler_240584(tmp_260318, 0, protect_selector_254379(1), kxi_230324[0]);
+		var tmp_260319 = tree_212046(61, []);
+		tmp_260319.class = "list alternate icon";
+		add_210786(tmp_260318, tmp_260319);
+		add_210786(tmp_260318, text_212164(makeNimstrLit("Passphrase")));
+		add_210786(tmp_260314, tmp_260318);
+		add_210786(tmp_260312, tmp_260314);
+		add_210786(tmp_260310, tmp_260312);
+		add_210786(tmp_260309, tmp_260310);
+		var tmp_260320 = tree_212046(43, []);
+		tmp_260320.class = "intro-body";
 		if ((current_protect_type_254056[0] == 0)) {
-		var tmp_259986 = tree_212046(43, []);
-		tmp_259986.id = "seed-seg";
-		tmp_259986.class = "ui left aligned segment seed-seg";
+		var tmp_260321 = tree_212046(43, []);
+		tmp_260321.id = "seed-seg";
+		tmp_260321.class = "ui left aligned segment seed-seg";
 		if (show_scan_result2_254080[0]) {
-		var tmp_259987 = tree_212046(43, []);
-		tmp_259987.class = "ui link cards seed-card-holder";
-		add_210786(tmp_259987, seed_card_259044(seed_card_info_254408[0]));
-		add_210786(tmp_259987, seed_card_259044(seed_card_info_254408[0]));
-		var tmp_259988 = tree_212046(43, []);
-		tmp_259988.class = "seed-add-container";
-		var tmp_259989 = tree_212046(106, []);
-		tmp_259989.class = "circular ui icon button bt-add-seed";
-		var tmp_259990 = tree_212046(61, []);
-		tmp_259990.class = "plus icon";
-		add_210786(tmp_259989, tmp_259990);
-		add_210786(tmp_259988, tmp_259989);
-		add_210786(tmp_259987, tmp_259988);
-		add_210786(tmp_259986, tmp_259987);
-		var tmp_259991 = tree_212046(44, []);
-		tmp_259991.class = "pagenext";
-		set_attr_210568(tmp_259991, "href", "#section2");
-		var tmp_259992 = tree_212046(70, []);
-		add_210786(tmp_259991, tmp_259992);
-		add_210786(tmp_259991, text_212164(makeNimstrLit("Next")));
-		add_210786(tmp_259986, tmp_259991);
+		var tmp_260322 = tree_212046(43, []);
+		tmp_260322.class = "ui link cards seed-card-holder";
+		add_210786(tmp_260322, seed_card_259044(seed_card_info_254425[0]));
+		add_210786(tmp_260322, seed_card_259044(seed_card_info_254425[0]));
+		var tmp_260323 = tree_212046(43, []);
+		tmp_260323.class = "seed-add-container";
+		var tmp_260324 = tree_212046(106, []);
+		tmp_260324.class = "circular ui icon button bt-add-seed";
+		var tmp_260325 = tree_212046(61, []);
+		tmp_260325.class = "plus icon";
+		add_210786(tmp_260324, tmp_260325);
+		add_210786(tmp_260323, tmp_260324);
+		add_210786(tmp_260322, tmp_260323);
+		add_210786(tmp_260321, tmp_260322);
+		var tmp_260326 = tree_212046(44, []);
+		tmp_260326.class = "pagenext";
+		set_attr_210568(tmp_260326, "href", "#section2");
+		var tmp_260327 = tree_212046(70, []);
+		add_210786(tmp_260326, tmp_260327);
+		add_210786(tmp_260326, text_212164(makeNimstrLit("Next")));
+		add_210786(tmp_260321, tmp_260326);
 		}
 		
 		if (show_scanning2_254078[0]) {
-		var tmp_259993 = tree_212046(43, []);
-		tmp_259993.class = "qr-scanning";
-		var tmp_259994 = tree_212046(43, []);
-		add_210786(tmp_259993, tmp_259994);
-		var tmp_259995 = tree_212046(43, []);
-		add_210786(tmp_259993, tmp_259995);
-		add_210786(tmp_259986, tmp_259993);
+		var tmp_260328 = tree_212046(43, []);
+		tmp_260328.class = "qr-scanning";
+		var tmp_260329 = tree_212046(43, []);
+		add_210786(tmp_260328, tmp_260329);
+		var tmp_260330 = tree_212046(43, []);
+		add_210786(tmp_260328, tmp_260330);
+		add_210786(tmp_260321, tmp_260328);
 		}
 		
 		if (show_scan_seed_btn2_254077[0]) {
-		var tmp_259996 = tree_212046(43, []);
-		tmp_259996.class = "ui teal labeled icon button bt-scan-seed";
-		add_event_handler_240584(tmp_259996, 0, show_qr_257829(), kxi_230324[0]);
-		add_210786(tmp_259996, text_212164(makeNimstrLit("Scan key card with camera")));
-		var tmp_259997 = tree_212046(61, []);
-		tmp_259997.class = "camera icon";
-		add_210786(tmp_259996, tmp_259997);
-		add_210786(tmp_259986, tmp_259996);
+		var tmp_260331 = tree_212046(43, []);
+		tmp_260331.class = "ui teal labeled icon button bt-scan-seed";
+		add_event_handler_240584(tmp_260331, 0, show_qr_257829(), kxi_230324[0]);
+		add_210786(tmp_260331, text_212164(makeNimstrLit("Scan key card with camera")));
+		var tmp_260332 = tree_212046(61, []);
+		tmp_260332.class = "camera icon";
+		add_210786(tmp_260331, tmp_260332);
+		add_210786(tmp_260321, tmp_260331);
 		}
 		
 		if (show_cam_tools2_254079[0]) {
-		var tmp_259998 = tree_212046(43, []);
-		tmp_259998.class = "ui small basic icon buttons camtools";
-		var tmp_259999 = tree_212046(106, []);
-		tmp_259999.class = "ui button";
-		add_event_handler_240584(tmp_259999, 0, cam_change_257862(), kxi_230324[0]);
-		var tmp_260000 = tree_212046(61, []);
-		tmp_260000.class = "camera icon";
-		add_210786(tmp_259999, tmp_260000);
-		add_210786(tmp_259998, tmp_259999);
-		var tmp_260001 = tree_212046(106, []);
-		tmp_260001.class = "ui button";
-		add_event_handler_240584(tmp_260001, 0, cam_close_257895(), kxi_230324[0]);
-		var tmp_260002 = tree_212046(61, []);
-		tmp_260002.class = "window close icon";
-		add_210786(tmp_260001, tmp_260002);
-		add_210786(tmp_259998, tmp_260001);
-		add_210786(tmp_259986, tmp_259998);
+		var tmp_260333 = tree_212046(43, []);
+		tmp_260333.class = "ui small basic icon buttons camtools";
+		var tmp_260334 = tree_212046(106, []);
+		tmp_260334.class = "ui button";
+		add_event_handler_240584(tmp_260334, 0, cam_change_257862(), kxi_230324[0]);
+		var tmp_260335 = tree_212046(61, []);
+		tmp_260335.class = "camera icon";
+		add_210786(tmp_260334, tmp_260335);
+		add_210786(tmp_260333, tmp_260334);
+		var tmp_260336 = tree_212046(106, []);
+		tmp_260336.class = "ui button";
+		add_event_handler_240584(tmp_260336, 0, cam_close_257895(), kxi_230324[0]);
+		var tmp_260337 = tree_212046(61, []);
+		tmp_260337.class = "window close icon";
+		add_210786(tmp_260336, tmp_260337);
+		add_210786(tmp_260333, tmp_260336);
+		add_210786(tmp_260321, tmp_260333);
 		}
 		
-		var tmp_260003 = tree_212046(84, []);
-		tmp_260003.id = "qrcanvas";
-		add_210786(tmp_259986, tmp_260003);
-		add_210786(tmp_259985, tmp_259986);
+		var tmp_260338 = tree_212046(84, []);
+		tmp_260338.id = "qrcanvas";
+		add_210786(tmp_260321, tmp_260338);
+		add_210786(tmp_260320, tmp_260321);
 		}
 		else {
-			var tmp_260004 = tree_212046(43, []);
-			tmp_260004.class = "ui left aligned segment mnemonic-seg";
-			add_210786(tmp_260004, passphrase_editor_259782());
+			var tmp_260339 = tree_212046(43, []);
+			tmp_260339.class = "ui left aligned segment mnemonic-seg";
+			add_210786(tmp_260339, passphrase_editor_259782());
 			if (passphrase_fulfill_254086[0]) {
-			var tmp_260005 = tree_212046(44, []);
-			tmp_260005.class = "pagenext";
-			set_attr_210568(tmp_260005, "href", "#section3");
-			var tmp_260006 = tree_212046(70, []);
-			add_210786(tmp_260005, tmp_260006);
-			add_210786(tmp_260005, text_212164(makeNimstrLit("Next")));
-			add_210786(tmp_260004, tmp_260005);
+			var tmp_260340 = tree_212046(44, []);
+			tmp_260340.class = "pagenext";
+			set_attr_210568(tmp_260340, "href", "#section3");
+			var tmp_260341 = tree_212046(70, []);
+			add_210786(tmp_260340, tmp_260341);
+			add_210786(tmp_260340, text_212164(makeNimstrLit("Next")));
+			add_210786(tmp_260339, tmp_260340);
 			}
 			
-			add_210786(tmp_259985, tmp_260004);
+			add_210786(tmp_260320, tmp_260339);
 		}
 		
-		add_210786(tmp_259974, tmp_259985);
-		add_210786(tmp_259973, tmp_259974);
-		add_210786(tmp_259938, tmp_259973);
+		add_210786(tmp_260309, tmp_260320);
+		add_210786(tmp_260308, tmp_260309);
+		add_210786(tmp_260273, tmp_260308);
 		}
 		
 		if (show_page3_254083[0]) {
-		var tmp_260007 = tree_212046(17, []);
-		tmp_260007.id = "section3";
-		tmp_260007.class = "section";
-		var tmp_260008 = tree_212046(43, []);
-		tmp_260008.class = "intro";
-		var tmp_260009 = tree_212046(43, []);
-		tmp_260009.class = "intro-head  wallet-head";
-		var tmp_260010 = tree_212046(43, []);
-		tmp_260010.class = "caption";
-		add_210786(tmp_260010, text_212164(makeNimstrLit("Pastel Wallet")));
-		add_210786(tmp_260009, tmp_260010);
-		var tmp_260011 = tree_212046(43, []);
-		tmp_260011.class = "ui container wallet-btns";
-		var tmp_260012 = tree_212046(43, []);
-		tmp_260012.class = "two ui basic buttons sendrecv";
-		var tmp_260013 = tree_212046(106, []);
-		tmp_260013.id = "btn-send";
-		tmp_260013.class = "ui small button send";
-		var tmp_260014 = tree_212046(61, []);
-		tmp_260014.class = "counterclockwise rotated sign-out icon send";
-		add_210786(tmp_260013, tmp_260014);
-		add_210786(tmp_260013, text_212164(makeNimstrLit("Send")));
-		add_210786(tmp_260012, tmp_260013);
-		var tmp_260015 = tree_212046(106, []);
-		tmp_260015.id = "btn-receive";
-		tmp_260015.class = "ui small button receive";
-		var tmp_260016 = tree_212046(61, []);
-		tmp_260016.class = "clockwise rotated sign-in icon receive";
-		add_210786(tmp_260015, tmp_260016);
-		add_210786(tmp_260015, text_212164(makeNimstrLit("Receive")));
-		add_210786(tmp_260012, tmp_260015);
-		add_210786(tmp_260011, tmp_260012);
-		add_210786(tmp_260009, tmp_260011);
-		add_210786(tmp_260008, tmp_260009);
-		var tmp_260017 = tree_212046(43, []);
-		tmp_260017.class = "intro-body wallet-body";
-		var tmp_260018 = tree_212046(43, []);
-		tmp_260018.id = "wallet-balance";
-		tmp_260018.class = "ui center aligined segment";
-		var tmp_260019 = tree_212046(43, []);
-		tmp_260019.class = "ui top left attached tiny label send";
-		add_210786(tmp_260019, text_212164(makeNimstrLit("456.789 ")));
-		var tmp_260020 = tree_212046(61, []);
-		tmp_260020.class = "counterclockwise rotated sign-out icon";
-		add_210786(tmp_260019, tmp_260020);
-		add_210786(tmp_260018, tmp_260019);
-		var tmp_260021 = tree_212046(43, []);
-		tmp_260021.class = "ui top right attached tiny label receive";
-		var tmp_260022 = tree_212046(61, []);
-		tmp_260022.class = "clockwise rotated sign-in icon";
-		add_210786(tmp_260021, tmp_260022);
-		add_210786(tmp_260021, text_212164(makeNimstrLit("123.456")));
-		add_210786(tmp_260018, tmp_260021);
-		var tmp_260023 = tree_212046(43, []);
-		tmp_260023.class = "ui bottom right attached tiny label symbol";
-		add_210786(tmp_260023, text_212164(makeNimstrLit("ZNY")));
-		add_210786(tmp_260018, tmp_260023);
-		add_210786(tmp_260018, text_212164(makeNimstrLit("12345.6789")));
-		add_210786(tmp_260017, tmp_260018);
-		var tmp_260024 = tree_212046(43, []);
-		tmp_260024.id = "ball-info";
-		tmp_260024.class = "ui center aligined segment";
-		add_210786(tmp_260024, text_212164([]));
-		var tmp_260025 = tree_212046(71, []);
-		add_210786(tmp_260024, tmp_260025);
-		add_210786(tmp_260024, text_212164([]));
-		add_210786(tmp_260017, tmp_260024);
-		var tmp_260026 = tree_212046(43, []);
-		tmp_260026.id = "wallet-seg";
-		tmp_260026.class = "ui center aligned segment seed-seg";
-		var tmp_260027 = tree_212046(84, []);
-		set_attr_210568(tmp_260027, "width", "0");
-		set_attr_210568(tmp_260027, "height", "0");
-		add_210786(tmp_260026, tmp_260027);
-		add_210786(tmp_260017, tmp_260026);
-		add_210786(tmp_260008, tmp_260017);
-		var tmp_260028 = tree_212046(43, []);
-		tmp_260028.class = "ui two bottom attached buttons settings";
-		var tmp_260029 = tree_212046(43, []);
-		tmp_260029.class = "ui button";
-		add_event_handler_240584(tmp_260029, 0, go_settings_259835(), kxi_230324[0]);
-		var tmp_260030 = tree_212046(61, []);
-		tmp_260030.class = "cog icon";
-		add_210786(tmp_260029, tmp_260030);
-		add_210786(tmp_260029, text_212164(makeNimstrLit("Settings")));
-		var tmp_260031 = tree_212046(70, []);
-		var tmp_260032 = tree_212046(61, []);
-		tmp_260032.class = "chevron down icon";
-		add_210786(tmp_260031, tmp_260032);
-		add_210786(tmp_260029, tmp_260031);
-		add_210786(tmp_260028, tmp_260029);
-		var tmp_260033 = tree_212046(43, []);
-		tmp_260033.class = "ui button";
-		add_event_handler_240584(tmp_260033, 0, go_logs_259868(), kxi_230324[0]);
-		var tmp_260034 = tree_212046(61, []);
-		tmp_260034.class = "list alternate outline icon";
-		add_210786(tmp_260033, tmp_260034);
-		add_210786(tmp_260033, text_212164(makeNimstrLit("Logs")));
-		var tmp_260035 = tree_212046(70, []);
-		var tmp_260036 = tree_212046(61, []);
-		tmp_260036.class = "chevron down icon";
-		add_210786(tmp_260035, tmp_260036);
-		add_210786(tmp_260033, tmp_260035);
-		add_210786(tmp_260028, tmp_260033);
-		add_210786(tmp_260008, tmp_260028);
-		add_210786(tmp_260007, tmp_260008);
-		add_210786(tmp_259938, tmp_260007);
+		var tmp_260342 = tree_212046(17, []);
+		tmp_260342.id = "section3";
+		tmp_260342.class = "section";
+		var tmp_260343 = tree_212046(43, []);
+		tmp_260343.class = "intro";
+		var tmp_260344 = tree_212046(43, []);
+		tmp_260344.class = "intro-head  wallet-head";
+		var tmp_260345 = tree_212046(43, []);
+		tmp_260345.class = "caption";
+		add_210786(tmp_260345, text_212164(makeNimstrLit("Pastel Wallet")));
+		add_210786(tmp_260344, tmp_260345);
+		var tmp_260346 = tree_212046(43, []);
+		tmp_260346.class = "ui container wallet-btns";
+		var tmp_260347 = tree_212046(43, []);
+		tmp_260347.class = "two ui basic buttons sendrecv";
+		var tmp_260348 = tree_212046(106, []);
+		tmp_260348.id = "btn-send";
+		tmp_260348.class = "ui small button send";
+		var tmp_260349 = tree_212046(61, []);
+		tmp_260349.class = "counterclockwise rotated sign-out icon send";
+		add_210786(tmp_260348, tmp_260349);
+		add_210786(tmp_260348, text_212164(makeNimstrLit(" Send")));
+		add_210786(tmp_260347, tmp_260348);
+		var tmp_260350 = tree_212046(106, []);
+		tmp_260350.id = "btn-receive";
+		tmp_260350.class = "ui small button receive";
+		add_event_handler_240584(tmp_260350, 0, btn_receive_260080(), kxi_230324[0]);
+		var tmp_260351 = tree_212046(61, []);
+		tmp_260351.class = "clockwise rotated sign-in icon receive";
+		add_210786(tmp_260350, tmp_260351);
+		add_210786(tmp_260350, text_212164(makeNimstrLit(" Receive")));
+		add_210786(tmp_260347, tmp_260350);
+		add_210786(tmp_260346, tmp_260347);
+		add_210786(tmp_260344, tmp_260346);
+		add_210786(tmp_260343, tmp_260344);
+		var tmp_260352 = tree_212046(43, []);
+		tmp_260352.class = "intro-body wallet-body";
+		var tmp_260353 = tree_212046(43, []);
+		tmp_260353.id = "wallet-balance";
+		tmp_260353.class = "ui center aligined segment";
+		var tmp_260354 = tree_212046(43, []);
+		tmp_260354.class = "ui top left attached tiny label send";
+		add_210786(tmp_260354, text_212164(makeNimstrLit("456.789 ")));
+		var tmp_260355 = tree_212046(61, []);
+		tmp_260355.class = "counterclockwise rotated sign-out icon";
+		add_210786(tmp_260354, tmp_260355);
+		add_210786(tmp_260353, tmp_260354);
+		var tmp_260356 = tree_212046(43, []);
+		tmp_260356.class = "ui top right attached tiny label receive";
+		var tmp_260357 = tree_212046(61, []);
+		tmp_260357.class = "clockwise rotated sign-in icon";
+		add_210786(tmp_260356, tmp_260357);
+		add_210786(tmp_260356, text_212164(makeNimstrLit("123.456")));
+		add_210786(tmp_260353, tmp_260356);
+		var tmp_260358 = tree_212046(43, []);
+		tmp_260358.class = "ui bottom right attached tiny label symbol";
+		add_210786(tmp_260358, text_212164(makeNimstrLit("ZNY")));
+		add_210786(tmp_260353, tmp_260358);
+		add_210786(tmp_260353, text_212164(makeNimstrLit("12345.6789")));
+		add_210786(tmp_260352, tmp_260353);
+		if (show_recv_address_selector_254088[0]) {
+		add_210786(tmp_260352, recv_address_selector_259934());
+		}
+		
+		if (show_recv_address_modal_254089[0]) {
+		add_210786(tmp_260352, recv_address_modal_260113());
+		}
+		
+		var tmp_260359 = tree_212046(43, []);
+		tmp_260359.id = "ball-info";
+		tmp_260359.class = "ui center aligined segment";
+		add_210786(tmp_260359, text_212164([]));
+		var tmp_260360 = tree_212046(71, []);
+		add_210786(tmp_260359, tmp_260360);
+		add_210786(tmp_260359, text_212164([]));
+		add_210786(tmp_260352, tmp_260359);
+		var tmp_260361 = tree_212046(43, []);
+		tmp_260361.id = "wallet-seg";
+		tmp_260361.class = "ui center aligned segment seed-seg";
+		var tmp_260362 = tree_212046(84, []);
+		set_attr_210568(tmp_260362, "width", "0");
+		set_attr_210568(tmp_260362, "height", "0");
+		add_210786(tmp_260361, tmp_260362);
+		add_210786(tmp_260352, tmp_260361);
+		add_210786(tmp_260343, tmp_260352);
+		var tmp_260363 = tree_212046(43, []);
+		tmp_260363.class = "ui two bottom attached buttons settings";
+		var tmp_260364 = tree_212046(43, []);
+		tmp_260364.class = "ui button";
+		add_event_handler_240584(tmp_260364, 0, go_settings_259835(), kxi_230324[0]);
+		var tmp_260365 = tree_212046(61, []);
+		tmp_260365.class = "cog icon";
+		add_210786(tmp_260364, tmp_260365);
+		add_210786(tmp_260364, text_212164(makeNimstrLit("Settings")));
+		var tmp_260366 = tree_212046(70, []);
+		var tmp_260367 = tree_212046(61, []);
+		tmp_260367.class = "chevron down icon";
+		add_210786(tmp_260366, tmp_260367);
+		add_210786(tmp_260364, tmp_260366);
+		add_210786(tmp_260363, tmp_260364);
+		var tmp_260368 = tree_212046(43, []);
+		tmp_260368.class = "ui button";
+		add_event_handler_240584(tmp_260368, 0, go_logs_259868(), kxi_230324[0]);
+		var tmp_260369 = tree_212046(61, []);
+		tmp_260369.class = "list alternate outline icon";
+		add_210786(tmp_260368, tmp_260369);
+		add_210786(tmp_260368, text_212164(makeNimstrLit("Logs")));
+		var tmp_260370 = tree_212046(70, []);
+		var tmp_260371 = tree_212046(61, []);
+		tmp_260371.class = "chevron down icon";
+		add_210786(tmp_260370, tmp_260371);
+		add_210786(tmp_260368, tmp_260370);
+		add_210786(tmp_260363, tmp_260368);
+		var tmp_260372 = tree_212046(43, []);
+		tmp_260372.id = "bottom-blink";
+		add_210786(tmp_260363, tmp_260372);
+		add_210786(tmp_260343, tmp_260363);
+		add_210786(tmp_260342, tmp_260343);
+		add_210786(tmp_260273, tmp_260342);
 		}
 		
 		if (show_page4_254084[0]) {
-		var tmp_260037 = tree_212046(17, []);
-		tmp_260037.id = "section4";
-		tmp_260037.class = "tradelogs-section";
-		var tmp_260038 = tree_212046(43, []);
-		tmp_260038.class = "ui buttons settings backpage";
-		var tmp_260039 = tree_212046(43, []);
-		tmp_260039.id = "backwallet";
-		tmp_260039.class = "ui button";
-		add_event_handler_240584(tmp_260039, 0, back_wallet_259901(), kxi_230324[0]);
-		var tmp_260040 = tree_212046(61, []);
-		tmp_260040.class = "dot circle icon";
-		add_210786(tmp_260039, tmp_260040);
-		add_210786(tmp_260039, text_212164(makeNimstrLit("Back")));
-		var tmp_260041 = tree_212046(70, []);
-		var tmp_260042 = tree_212046(61, []);
-		tmp_260042.class = "chevron up icon";
-		add_210786(tmp_260041, tmp_260042);
-		add_210786(tmp_260039, tmp_260041);
-		add_210786(tmp_260038, tmp_260039);
-		add_210786(tmp_260037, tmp_260038);
-		var tmp_260043 = tree_212046(43, []);
-		tmp_260043.class = "ui container";
-		var tmp_260044 = tree_212046(43, []);
-		tmp_260044.id = "tradelogs";
-		tmp_260044.class = "ui cards tradelogs";
-		add_210786(tmp_260043, tmp_260044);
-		add_210786(tmp_260037, tmp_260043);
-		add_210786(tmp_259938, tmp_260037);
+		var tmp_260373 = tree_212046(17, []);
+		tmp_260373.id = "section4";
+		tmp_260373.class = "tradelogs-section";
+		var tmp_260374 = tree_212046(43, []);
+		tmp_260374.class = "ui buttons settings backpage";
+		var tmp_260375 = tree_212046(43, []);
+		tmp_260375.id = "backwallet";
+		tmp_260375.class = "ui button";
+		add_event_handler_240584(tmp_260375, 0, back_wallet_259901(), kxi_230324[0]);
+		var tmp_260376 = tree_212046(61, []);
+		tmp_260376.class = "dot circle icon";
+		add_210786(tmp_260375, tmp_260376);
+		add_210786(tmp_260375, text_212164(makeNimstrLit("Back")));
+		var tmp_260377 = tree_212046(70, []);
+		var tmp_260378 = tree_212046(61, []);
+		tmp_260378.class = "chevron up icon";
+		add_210786(tmp_260377, tmp_260378);
+		add_210786(tmp_260375, tmp_260377);
+		add_210786(tmp_260374, tmp_260375);
+		add_210786(tmp_260373, tmp_260374);
+		var tmp_260379 = tree_212046(43, []);
+		tmp_260379.class = "ui container";
+		var tmp_260380 = tree_212046(43, []);
+		tmp_260380.id = "tradelogs";
+		tmp_260380.class = "ui cards tradelogs";
+		add_210786(tmp_260379, tmp_260380);
+		add_210786(tmp_260373, tmp_260379);
+		add_210786(tmp_260273, tmp_260373);
 		}
 		
-		result_259937 = tmp_259938;
+		result_260272 = tmp_260273;
 
-	return result_259937;
+	return result_260272;
 
 }
 
-function after_script_260528(data_260530) {
+function after_script_260870(data_260872) {
 		$("#section0").remove();
 		$(".ui.dropdown").dropdown();
 		if (show_scan_result_254076[0]) {
@@ -4636,6 +4888,7 @@ function after_script_260528(data_260530) {
           jsSupressRedraw = false;
           jsViewSelector(11);
           page_scroll_done = function() {};
+          $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
     
@@ -4644,5 +4897,5 @@ function after_script_260528(data_260530) {
 
 	
 }
-view_selector_254131(11, true);
-app_inst_254014[0] = set_initializer_240462(app_main_259934, "main", after_script_260528);
+view_selector_254133(11, true);
+app_inst_254014[0] = set_initializer_240462(app_main_260269, "main", after_script_260870);

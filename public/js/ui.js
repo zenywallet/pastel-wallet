@@ -141,31 +141,159 @@ function showQrReader() {
   }
 }
 
+var bip21_uri;
+var draw_qrcode_animate = false;
+var draw_qrcode_prev_size = 0;
+function draw_qrcode(check_resize) {
+  var w = $(window).width() - 120;
+  var h = $(window).height() - 440;
+  var s = (w < h) ? w : h;
+  s = s > 200 ? s : 200;
+  if(check_resize && draw_qrcode_prev_size == s) {
+    if(bip21_uri) {
+      $('#recv-qrcode').attr('title', bip21_uri);
+    }
+    return;
+  }
+  draw_qrcode_prev_size = s;
+
+  if(bip21_uri) {
+    function draw() {
+      $('#recv-qrcode').empty();
+      $('#recv-qrcode').attr('title', '');
+      $('#recv-qrcode').qrcode({
+        render: 'canvas',
+        ecLevel: 'Q',
+        radius: 0.39,
+        text: bip21_uri,
+        size: s,
+        mode: 0,
+        label: '',
+        fontname: 'sans',
+        fontcolor: '#393939'
+      });
+      if($('#recv-qrcode canvas').length) {
+        $('#recv-qrcode').attr('title', bip21_uri);
+        if(draw_qrcode_animate) {
+          $('#recv-qrcode').stop(true, false).animate({opacity: 1}, 200);
+        }
+      } else {
+        console.log('qrcode error');
+        $('#recv-qrcode').append('<div style="text-align:center;display:inline-block;">unable to display qrcode</div>');
+      }
+    }
+    if(draw_qrcode_animate && $('#recv-qrcode canvas').length) {
+      $('#recv-qrcode').stop(true, false).animate({opacity: 0}, 200, function() {
+        draw();
+      });
+    } else {
+      draw();
+    }
+  }
+}
+
+function recvform_change() {
+  var uri = 'bitzeny:' + $('#recvaddr-form input[name="address"]').val();
+  var amount_elm = $('#recvaddr-form input[name="amount"]');
+  var amount = amount_elm.val();
+  var label = $('#recvaddr-form input[name="label"]').val();
+  var message = $('#recvaddr-form textarea[name="message"]').val();
+  var firstflag = true;
+  if(amount) {
+    if(amount.indexOf('.') == amount.length - 1 && amount[amount.length - 1] == '.') {
+      amount = amount.slice(0, -1);
+    }
+    var desep_amount = amount.replace(/[',]/g, '');
+    if(amount_pasted) {
+      amount = desep_amount;
+      amount_elm.val(amount);
+    }
+    amount_pasted = false;
+    if(/^\d+\.?\d{0,8}$/.test(amount)) {
+      amount_elm.closest('.field').removeClass('error');
+    } else {
+      amount_elm.closest('.field').addClass('error');
+    }
+    amount = desep_amount;
+    if(amount) {
+      uri += (firstflag ? '?' : '&') + 'amount=' + Encoding.convert(amount, 'SJIS', 'UNICODE');
+      firstflag = false;
+    }
+  }
+  if(label) {
+    uri += (firstflag ? '?' : '&') + 'label=' + Encoding.convert(label, 'SJIS', 'UNICODE');
+    firstflag = false;
+  }
+  if(message) {
+    uri += (firstflag ? '?' : '&') + 'message=' + Encoding.convert(message, 'SJIS', 'UNICODE');
+    firstflag = false;
+  }
+  bip21_uri = encodeURI(uri);
+  draw_qrcode();
+}
+
+var amount_pasted = false;
+var recv_moval_init_flag = false;
+function initRecvModal() {
+  $('#recvaddr-form form input[name="amount"]').on('paste', function() {
+    amount_pasted = true;
+  });
+
+  $('#recvaddr-form input[name="address"]').change(function() {
+    console.log('change');
+    recvform_change();
+  });
+  $('#recvaddr-form input[name="amount"],#recvaddr-form input[name="label"],#recvaddr-form textarea[name="message"]').keyup(function() {
+    console.log('keyup');
+    recvform_change();
+  });
+
+  $('#recv-modal .close-arc').click(function() {
+    hideRecvModal();
+  });
+}
+
+function showRecvModal() {
+  $('html').css('background-color', '#fff');
+  $('#recv-modal').fadeIn(600);
+  window.addEventListener("resize", draw_qrcode);
+  draw_qrcode(true);
+}
+
+function hideRecvModal() {
+  $('#recv-qrcode').attr('title', '');
+  window.removeEventListener("resize", draw_qrcode);
+  $('#recv-modal').fadeOut(600);
+  $('#recvaddr-form .menu').empty();
+  $('html').css('background-color', '#444');
+}
+
+var modal_recv_addrs = [];
 function showRecvAddress() {
   if(!pastel.wallet || !pastel.utxoballs) {
     return;
   }
   var wallet = pastel.wallet;
-  var addrs = wallet.getUnusedAddressList(5);
+  modal_recv_addrs = wallet.getUnusedAddressList(5);
   $('#receive-address .new').hide();
   $('#receive-address .new').empty();
-  for(var i in addrs) {
-    var addr = addrs[i];
+  for(var i in modal_recv_addrs) {
+    var addr = modal_recv_addrs[i];
     $('#receive-address .new').append('<div class="circular ui icon mini button ball" data-idx="' + i + '"><img src="' + Ball.get(addr, 28) + '"></div>');
   }
 
   function ball_selector_event(sel) {
     $(sel).off('click').click(function() {
       var idx = $(this).data('idx');
-      if(addrs[idx].length > 0) {
+      if(modal_recv_addrs[idx].length > 0) {
         $('#receive-address .ball').each(function() {
           $(this).removeClass('active');
         });
         $(this).addClass('active');
         $('#receive-address .address').stop(true, true).fadeOut(200, function() {
-          $(this).text(addrs[idx]).fadeIn(400);
-          if(idx != 5 && addrs[5].length > 0) {
-            addrs[5] = "";
+          $(this).text(modal_recv_addrs[idx]).fadeIn(400);
+          if(idx != 5 && modal_recv_addrs[5].length > 0) {
+            modal_recv_addrs[5] = "";
             $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0}, 100);
           }
         });
@@ -175,8 +303,8 @@ function showRecvAddress() {
 
   var utxoballs_click = function(addr) {
     console.log('address=' + addr);
-    if(addrs[5].length > 0) {
-      addrs[5] = addr;
+    if(modal_recv_addrs[5].length > 0) {
+      modal_recv_addrs[5] = addr;
       $('#receive-address .used .ball').animate({opacity: 0}, 200, function() {
         $('#receive-address .used').animate({width: 0}, 100, function() {
           $('#receive-address .used .ball img').replaceWith('<img src="' + Ball.get(addr, 28) + '">');
@@ -184,8 +312,8 @@ function showRecvAddress() {
             $('#receive-address .ball').animate({opacity: 1}, 400);
             if($('#receive-address .used .ball').hasClass('active')) {
               $('#receive-address .address').stop(true, true).fadeOut(200, function() {
-                if(addrs[5].length > 0) {
-                  $(this).text(addrs[5]).fadeIn(400);
+                if(modal_recv_addrs[5].length > 0) {
+                  $(this).text(modal_recv_addrs[5]).fadeIn(400);
                 }
               });
             }
@@ -193,7 +321,7 @@ function showRecvAddress() {
         });
       });
     } else {
-      addrs[5] = addr;
+      modal_recv_addrs[5] = addr;
       $('#receive-address .used').stop().css("opacity", 0).animate({width: 42}, 100, function() {
         $('#receive-address .used .ball').replaceWith('<div class="circular ui icon mini button ball" data-idx="5"><img src="' + Ball.get(addr, 28) + '"></div>');
         $('#receive-address .used').stop().css("visibility", "visible").animate({opacity: 1}, 400);
@@ -210,11 +338,44 @@ function showRecvAddress() {
   $('#receive-address .new').fadeIn(800, function() {
     $('#receive-address .new .ball:first').addClass('active');
     setTimeout(function() {
-      $('#receive-address .address').hide().text(addrs[0]).fadeIn(400);
-      addrs.push("");
+      $('#receive-address .address').hide().text(modal_recv_addrs[0]).fadeIn(400);
+      modal_recv_addrs.push("");
       pastel.utxoballs.click(utxoballs_click);
     }, 400);
   });
+
+  if(!recv_moval_init_flag) {
+    initRecvModal();
+    recv_moval_init_flag = true;
+    var btn_qrcode = document.getElementById('btn-recv-qrcode');
+    btn_qrcode.addEventListener('click', function() {
+      $('#recvaddr-form .menu').empty();
+      var item_addrs = [];
+      if(modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
+        item_addrs.push(modal_recv_addrs[5]);
+      }
+      for(var i = 0; i < 5; i++) {
+        item_addrs.push(modal_recv_addrs[i]);
+      }
+      for(var i in item_addrs) {
+        var addr = item_addrs[i];
+        $('#recvaddr-form .menu').append('<div class="item" data-value="' + addr + '"><img class="ui mini avatar image" src="' + Ball.get(addr, 28) + '">' + addr + '</div>');
+      }
+
+      var idx = $('#receive-address .ball.active').data('idx');
+      var sel_addr;
+      if(idx == null) {
+        sel_addr = modal_recv_addrs[0];
+      } else {
+        sel_addr = modal_recv_addrs[idx];
+      }
+      $('#recv-modal .text').html('<img class="ui mini avatar image" src="' + Ball.get(sel_addr, 28) + '">' + sel_addr + '</div>');
+       $('#recvaddr-form input[name="address"]').val(sel_addr);
+      $('#recvaddr-form .ui.dropdown').dropdown('set selected', sel_addr);
+      recvform_change();
+      showRecvModal();
+    });
+  }
 }
 
 var registerEventList = [];

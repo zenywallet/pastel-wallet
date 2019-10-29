@@ -280,6 +280,7 @@ var mnemonicFulfill = false
 var passphraseFulfill = false
 var supressRedraw = false
 var showRecvAddressSelector = true
+var showRecvAddressModal = true
 
 proc viewSelector(view: ViewType, no_redraw: bool = false) =
   echo "view", view
@@ -799,6 +800,37 @@ proc btnReceive: proc() =
       showRecvAddress()
     """
 
+proc recvAddressModal(): VNode =
+  result = buildHtml(tdiv(id="recv-modal", class="ui")):
+    italic(class="close icon btn-close-arc")
+    tdiv(class="close-arc")
+    tdiv(id="recv-qrcode", class="qrcode", title=""):
+      canvas(width="0", height="0")
+    tdiv(id="recvaddr-form", class="ui container"):
+      tdiv(class="ui form"):
+        tdiv(class="two fields"):
+          tdiv(class="field"):
+            label: text "Receive Address"
+            tdiv(class="ui selection dropdown addr-selection", tabindex="0"):
+              input(type="hidden", name="address", value="")
+              italic(class="dropdown icon")
+              tdiv(class="text"):
+                img(clsss="ui mini avatar image", src="")
+                text ""
+              tdiv(class="menu", tabindex="-1")
+          tdiv(class="field"):
+            label: text "Amount"
+            tdiv(class="ui right labeled input"):
+              input(class="right", type="text", name="amount", placeholder="Amount")
+              tdiv(class="ui basic label"): text "ZNY"
+        tdiv(class="two fields"):
+          tdiv(class="field"):
+            label: text "Label"
+            input(type="text", name="label", placeholder="Label")
+          tdiv(class="field"):
+            label: text "Message"
+            textarea(rows="2", name="message", placeholder="Message")
+
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
     if showPage1:
@@ -930,6 +962,8 @@ proc appMain(data: RouterData): VNode =
               text "12345.6789"
             if showRecvAddressSelector:
               recvAddressSelector()
+            if showRecvAddressModal:
+              recvAddressModal()
             tdiv(id="ball-info", class="ui center aligined segment"):
               text ""
               br()

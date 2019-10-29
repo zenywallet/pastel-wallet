@@ -13,6 +13,7 @@ proc layout_base*(debug: bool): string =
 <script type="text/javascript" src="/js/matter.js"></script>
 <script type="text/javascript" src="/js/dotmatrix.js"></script>
 <script type="text/javascript" src="/js/balls.js"></script>
+<script type="text/javascript" src="/js/encoding.js"></script>
 <script type="text/javascript" src="/js/tradelogs.js"></script>
 <script type="text/javascript" src="/js/wallet.js"></script>
 <script type="text/javascript" src="/js/ui.js"></script>

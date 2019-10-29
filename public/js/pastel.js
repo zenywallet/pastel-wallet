@@ -514,8 +514,9 @@ pastel.ready = function() {
         utxoballs.stop();
         clearTimeout(resize_tval);
         resize_tval = setTimeout(function() {
-          utxoballs.canvas.remove();
+          var click_cb = utxoballs.click_cb();
           utxoballs = UtxoBalls.simple();
+          utxoballs.click(click_cb);
         }, 1400);
       });
     } else if(type == 'ready') {
