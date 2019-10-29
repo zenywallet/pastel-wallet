@@ -729,7 +729,7 @@ i.receive {
 #recvaddr-form .ui.dropdown > .text, #recvaddr-form .ui.dropdown .menu > .item {
   font-size: 12px;
 }
-#recvaddr-form .ui.dropdown, #recvaddr-form .ui.input {
+#recvaddr-form .ui.dropdown, #recvaddr-form .ui.input, #recvaddr-form .ui.textarea  {
   min-width: 324px;
 }
 #recvaddr-form .ui.dropdown > .text > .image, #recvaddr-form .ui.dropdown > .text > img {

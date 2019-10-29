@@ -826,10 +826,10 @@ proc recvAddressModal(): VNode =
         tdiv(class="two fields"):
           tdiv(class="field"):
             label: text "Label"
-            input(type="text", name="label", placeholder="Label")
+            input(class="ui input", type="text", name="label", placeholder="Label")
           tdiv(class="field"):
             label: text "Message"
-            textarea(rows="2", name="message", placeholder="Message")
+            textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
 
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
