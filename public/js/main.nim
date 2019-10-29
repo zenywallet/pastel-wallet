@@ -884,10 +884,10 @@ proc appMain(data: RouterData): VNode =
               tdiv(class="two ui basic buttons sendrecv"):
                 button(id="btn-send", class="ui small button send"):
                   italic(class="counterclockwise rotated sign-out icon send")
-                  text "Send"
+                  text " Send"
                 button(id="btn-receive", class="ui small button receive"):
                   italic(class="clockwise rotated sign-in icon receive")
-                  text "Receive"
+                  text " Receive"
           tdiv(class="intro-body wallet-body"):
             tdiv(id="wallet-balance", class="ui center aligined segment"):
               tdiv(class="ui top left attached tiny label send"):
