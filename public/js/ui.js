@@ -205,7 +205,7 @@ function resize_qrcode() {
   }
   var s = calc_qrcode_size();
   canvas.css({width: s, height: s});
-  if(!resize_qrcode_tval && s > draw_qrcode_prev_size) {
+  if(!resize_qrcode_tval) {
     resize_qrcode_tval = setTimeout(function() {
       draw_qrcode(s);
       resize_qrcode_tval = null;
