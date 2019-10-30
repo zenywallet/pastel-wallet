@@ -141,14 +141,19 @@ function showQrReader() {
   }
 }
 
-var bip21_uri;
-var draw_qrcode_animate = false;
-var draw_qrcode_prev_size = 0;
-function draw_qrcode(check_resize) {
+function calc_qrcode_size() {
   var w = $(window).width() - 120;
   var h = $(window).height() - 440;
   var s = (w < h) ? w : h;
   s = s > 200 ? s : 200;
+  return s;
+}
+
+var bip21_uri;
+var draw_qrcode_animate = false;
+var draw_qrcode_prev_size = 0;
+function draw_qrcode(check_resize) {
+  var s = calc_qrcode_size();
   if(check_resize && draw_qrcode_prev_size == s) {
     if(bip21_uri) {
       $('#recv-qrcode').attr('title', bip21_uri);
@@ -189,6 +194,22 @@ function draw_qrcode(check_resize) {
     } else {
       draw();
     }
+  }
+}
+
+var resize_qrcode_tval = null;
+function resize_qrcode() {
+  var canvas = $('#recv-qrcode canvas');
+  if(!canvas.length) {
+    return;
+  }
+  var s = calc_qrcode_size();
+  canvas.css({width: s, height: s});
+  if(!resize_qrcode_tval && s > draw_qrcode_prev_size) {
+    resize_qrcode_tval = setTimeout(function() {
+      draw_qrcode(s);
+      resize_qrcode_tval = null;
+    }, 200);
   }
 }
 
@@ -256,13 +277,13 @@ function initRecvModal() {
 function showRecvModal() {
   $('html').css('background-color', '#fff');
   $('#recv-modal').fadeIn(600);
-  window.addEventListener("resize", draw_qrcode);
+  window.addEventListener("resize", resize_qrcode);
   draw_qrcode(true);
 }
 
 function hideRecvModal() {
   $('#recv-qrcode').attr('title', '');
-  window.removeEventListener("resize", draw_qrcode);
+  window.removeEventListener("resize", resize_qrcode);
   $('#recv-modal').fadeOut(600);
   $('#recvaddr-form .menu').empty();
   $('html').css('background-color', '#444');
