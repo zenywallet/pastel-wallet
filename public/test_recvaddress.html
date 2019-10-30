@@ -18,7 +18,7 @@
   <script type="text/javascript" src="/js/balls.js"></script>
   <script type="text/javascript" src="/js/murmurhash.js"></script>
   <script type="text/javascript" src="/js/matter.js"></script>
-  <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
+  <script type="text/javascript" src="/js/jquery-qrcode.js"></script>
   <script type="text/javascript" src="/js/dotmatrix.js"></script>
   <script type="text/javascript" src="/js/coinlibs.js"></script>
   <script type="text/javascript" src="/js/encoding.js"></script>
@@ -155,6 +155,7 @@ function str2sjis(str) {
   return sjis;
 }
 
+var bip21_uri = "";
 var amount_pasted = false;
 $('#recvaddr-form form input[name="amount"]').on('paste', function() {
   amount_pasted = true;
@@ -212,12 +213,12 @@ $('#recvaddr-form input[name="amount"],#recvaddr-form input[name="label"],#recva
 function show_recv_modal() {
   $('html').css('background-color', '#fff');
   $('#recv-modal').fadeIn(600);
-  window.addEventListener("resize", draw_qrcode);
   draw_qrcode(true);
+  window.addEventListener("resize", resize_qrcode);
 }
 function hide_recv_modal() {
   $('#recv-qrcode').attr('title', '');
-  window.removeEventListener("resize", draw_qrcode);
+  window.removeEventListener("resize", resize_qrcode);
   $('#recv-modal').fadeOut(600);
   $('html').css('background-color', '#444');
 }
@@ -230,13 +231,34 @@ $('#recv-modal .close-arc').click(function() {
   hide_recv_modal();
 });
 
-var draw_qrcode_animate = false;
-var draw_qrcode_prev_size = 0;
-function draw_qrcode(check_resize) {
+function calc_qrcode_size() {
   var w = $(window).width() - 120;
   var h = $(window).height() - 440;
   var s = (w < h) ? w : h;
   s = s > 200 ? s : 200;
+  return s;
+}
+
+var resize_qrcode_tval = null;
+function resize_qrcode() {
+  var canvas = $('#recv-qrcode canvas');
+  if(!canvas.length) {
+    return;
+  }
+  var s = calc_qrcode_size();
+  canvas.css({width: s, height: s});
+  if(!resize_qrcode_tval && s > draw_qrcode_prev_size) {
+    resize_qrcode_tval = setTimeout(function() {
+      draw_qrcode(s);
+      resize_qrcode_tval = null;
+    }, 200);
+  }
+}
+
+var draw_qrcode_animate = false;
+var draw_qrcode_prev_size = 0;
+function draw_qrcode(check_resize) {
+  var s = calc_qrcode_size();
   if(check_resize && draw_qrcode_prev_size == s) {
     if(bip21_uri) {
       $('#recv-qrcode').attr('title', bip21_uri);
@@ -260,6 +282,8 @@ function draw_qrcode(check_resize) {
         fontname: 'sans',
         fontcolor: '#393939'
       });
+      //window.removeEventListener("resize", resize_qrcode);
+      //window.addEventListener("resize", resize_qrcode);
       if($('#recv-qrcode canvas').length) {
         $('#recv-qrcode').attr('title', bip21_uri);
         if(draw_qrcode_animate) {
@@ -430,7 +454,7 @@ murmurhash.run(function() {
 
   var utxoballs_click = function(addr) {
     console.log('address=' + addr);
-    if(addrs[5].length > 0) {
+    if(addrs[5] && addrs[5].length > 0) {
       addrs[5] = addr;
       $('#receive-address .used .ball').animate({opacity: 0}, 200, function() {
         $('#receive-address .used').animate({width: 0}, 100, function() {
@@ -439,7 +463,7 @@ murmurhash.run(function() {
             $('#receive-address .ball').animate({opacity: 1}, 400);
             if($('#receive-address .used .ball').hasClass('active')) {
               $('#receive-address .address').stop(true, true).fadeOut(200, function() {
-                if(addrs[5].length > 0) {
+                if(addrs[5] && addrs[5].length > 0) {
                   $(this).text(addrs[5]).fadeIn(400);
                 }
               });
@@ -469,10 +493,9 @@ murmurhash.run(function() {
   });
 
   $('#btn-recv-qrcode').click(function() {
-    var bip21_uri = 'bitzeny:' + addrs[0];
     $('#recvaddr-form .menu').empty();
     var item_addrs = [];
-    if(addrs[5].length > 0) {
+    if(addrs[5] && addrs[5].length > 0) {
       item_addrs.push(addrs[5]);
     }
     for(var i = 0; i < 5; i++) {
