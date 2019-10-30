@@ -310,13 +310,19 @@
         return $canvas;
     }
 
+    var prevResizeFunc;
+
     // Returns a `canvas` element representing the QR code for the given settings.
     function createCanvas(settings) {
         var $canvas = jq('<canvas/>');
-        $(window).resize(function() {
+        if(prevResizeFunc) {
+          window.removeEventListener("resize", prevResizeFunc);
+        }
+        prevResizeFunc = function() {
             pixel_ratio = getPixelRatio();
             drawOnCanvas($canvas, settings);
-        });
+        };
+        window.addEventListener("resize", prevResizeFunc);
         return drawOnCanvas($canvas, settings);
     }
 
