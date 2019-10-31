@@ -806,7 +806,7 @@ proc recvAddressSelector(): VNode =
         italic(class="window maximize outline icon btn-maximize")
         italic(class="close icon btn-close")
     tdiv(class="ui mini basic icon buttons"):
-      button(id="btn-recv-copy", class="ui button", title="copy"):
+      button(id="btn-recv-copy", class="ui button", title="Copy"):
         italic(class="copy outline icon")
       button(id="btn-recv-qrcode", class="ui button", title="QR code"):
         italic(class="qrcode icon")
