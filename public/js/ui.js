@@ -417,7 +417,7 @@ function showRecvAddress() {
         }
       }
       $('#recv-modal .text').html('<img class="ui mini avatar image" src="' + Ball.get(sel_addr, 28) + '">' + sel_addr + '</div>');
-       $('#recvaddr-form input[name="address"]').val(sel_addr);
+      $('#recvaddr-form input[name="address"]').val(sel_addr);
       $('#recvaddr-form .ui.dropdown').dropdown('set selected', sel_addr);
       $('#recvaddr-form .ui.dropdown').dropdown({
         onChange: function(val) {
