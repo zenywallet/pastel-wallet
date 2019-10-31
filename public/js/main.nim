@@ -984,7 +984,7 @@ proc appMain(data: RouterData): VNode =
     if showPage4:
       section(id="section4", class="tradelogs-section"):
         tdiv(class="ui buttons settings backpage"):
-          tdiv(id="backwallet", class="ui button", onclick=backWallet()):
+          tdiv(class="ui button backwallet", onclick=backWallet()):
             italic(class="dot circle icon")
             text "Back"
             span: italic(class="chevron up icon")
