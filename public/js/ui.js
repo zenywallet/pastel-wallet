@@ -392,14 +392,15 @@ function showRecvAddress() {
       $('#recvaddr-form .menu').empty();
       var item_addrs = [];
       if(modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
-        item_addrs.push(modal_recv_addrs[5]);
+        item_addrs.push({addr: modal_recv_addrs[5], idx: 5});
       }
       for(var i = 0; i < 5; i++) {
-        item_addrs.push(modal_recv_addrs[i]);
+        item_addrs.push({addr: modal_recv_addrs[i], idx: i});
       }
       for(var i in item_addrs) {
-        var addr = item_addrs[i];
-        $('#recvaddr-form .menu').append('<div class="item" data-value="' + addr + '"><img class="ui mini avatar image" src="' + Ball.get(addr, 28) + '">' + addr + '</div>');
+        var item_addr = item_addrs[i];
+        $('#recvaddr-form .menu').append('<div class="item" data-value="' + item_addr.addr + '" data-idx="' + item_addr.idx
+          + '"><img class="ui mini avatar image" src="' + Ball.get(item_addr.addr, 28) + '">' + item_addr.addr + '</div>');
       }
 
       var idx = $('#receive-address .ball.active').data('idx');
@@ -408,20 +409,39 @@ function showRecvAddress() {
         idx = 0;
       }
       sel_addr = modal_recv_addrs[idx];
-      var sel_item = 0;
-      if(item_addrs.length <= 5) {
-        sel_item = idx;
-      } else {
-        if(idx == 5) {
-          sel_item = 0;
-        } else {
-          sel_item = idx + 1;
+      var sel_item = -1;
+      for(var i in item_addrs) {
+        if(item_addrs[i].addr == sel_addr) {
+          sel_item = i;
+          break;
         }
       }
       $('#recv-modal .text').html('<img class="ui mini avatar image" src="' + Ball.get(sel_addr, 28) + '">' + sel_addr + '</div>');
        $('#recvaddr-form input[name="address"]').val(sel_addr);
       $('#recvaddr-form .ui.dropdown').dropdown('set selected', sel_addr);
-      if(item_addrs[sel_item] == sel_addr) {
+      $('#recvaddr-form .ui.dropdown').dropdown({
+        onChange: function(val) {
+          var idx = null;
+          $('#recvaddr-form .item').each(function() {
+            if(val == $(this).data('value')) {
+              idx = $(this).data('idx');
+              return false;
+            }
+          });
+          if(idx != null) {
+            $('#receive-address .ball').each(function() {
+              var bidx = $(this).data('idx');
+              if(bidx == idx) {
+                $(this).addClass('active');
+              } else {
+                $(this).removeClass('active');
+              }
+            });
+          }
+          $('#receive-address .address').text(val);
+        }
+      });
+      if(sel_item >= 0) {
         $('#recvaddr-form .menu .item:eq(' + sel_item + ')').addClass('active selected');
       }
       recvform_change();
