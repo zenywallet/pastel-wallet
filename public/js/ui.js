@@ -274,7 +274,9 @@ function initRecvModal() {
   });
 }
 
+var recvModalViewState = false;
 function showRecvModal() {
+  recvModalViewState = true;
   $('html').css('background-color', '#fff');
   $('#recv-modal').fadeIn(600);
   window.addEventListener("resize", resize_qrcode);
@@ -282,11 +284,28 @@ function showRecvModal() {
 }
 
 function hideRecvModal() {
+  recvModalViewState = false;
   $('#recv-qrcode').attr('title', '');
   window.removeEventListener("resize", resize_qrcode);
   $('#recv-modal').fadeOut(600);
   $('#recvaddr-form .menu').empty();
   $('html').css('background-color', '#444');
+  $('#btn-recv-qrcode').blur();
+}
+
+var save_view_state = {recv_modal_menu: null};
+function reloadViewSafeStart() {
+  if(recvModalViewState) {
+    save_view_state.recv_modal_menu = $('#recvaddr-form .menu').html();
+    $('#recvaddr-form .menu').empty();
+  }
+}
+
+function reloadViewSafeEnd() {
+  if(recvModalViewState && save_view_state.recv_modal_menu) {
+    $('#recvaddr-form .menu').html(save_view_state.recv_modal_menu);
+    save_view_state.recv_modal_menu = null;
+  }
 }
 
 var modal_recv_addrs = [];
@@ -398,6 +417,64 @@ function showRecvAddress() {
     });
   }
 }
+
+
+var Settings = (function() {
+  var Module = {};
+  var confirm_popup_tval;
+
+  function reset_click() {
+    var self = $(this);
+    var check = $('#settings .ui.checkbox').checkbox('is checked');
+    if(check) {
+      $('#btn-reset').blur();
+      $('.ui.basic.modal').modal("setting", {
+        closable: false,
+        onApprove: function() {
+          location.reload();
+        },
+        onDeny: function() {}
+      }).modal('show');
+    } else {
+      self.blur();
+      var confirm = $('#settings input[name="confirm"]');
+      clearTimeout(confirm_popup_tval);
+      confirm.popup({
+        title: 'Confirmation',
+        content: 'Please read and check here before resetting your wallet.',
+        on: 'manual',
+        variation: 'inverted',
+        position: 'bottom left',
+        distanceAway: 6,
+        exclusive: true
+      }).popup('show');
+      confirm_popup_tval = setTimeout(function() {
+        confirm.popup('hide');
+      }, 5000);
+    }
+  }
+
+  Module.init = function() {
+    $('#settings .ui.checkbox').checkbox('set unchecked');
+
+    $('#settings .ui.checkbox').checkbox({
+      onChange: function() {
+        var check = $('#settings .ui.checkbox').checkbox('is checked');
+        if(check) {
+          var confirm = $('#settings input[name="confirm"]');
+          clearTimeout(confirm_popup_tval);
+          confirm.popup('hide');
+        }
+      }
+    });
+
+    var btn_reset = document.getElementById('btn-reset');
+    btn_reset.removeEventListener('click', reset_click);
+    btn_reset.addEventListener('click', reset_click);
+  }
+
+  return Module;
+})();
 
 var registerEventList = [];
 ready(function() {

@@ -281,6 +281,8 @@ var passphraseFulfill = false
 var supressRedraw = false
 var showRecvAddressSelector = true
 var showRecvAddressModal = true
+var showTradeLogs = false
+var showSettings = false
 
 proc viewSelector(view: ViewType, no_redraw: bool = false) =
   echo "view", view
@@ -334,11 +336,15 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
     showPage2 = false
     showPage3 = true
     showPage4 = true
+    showSettings = false
+    showTradeLogs = true
   of WalletSettings:
     showPage1 = false
     showPage2 = false
     showPage3 = true
     showPage4 = true
+    showTradeLogs = false
+    showSettings = true
   else:
     discard
 
@@ -347,8 +353,13 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
 
 var jsViewSelector {.importc, nodecl.}: JsObject
 asm """
-  jsViewSelector = `viewSelector`
-  jsSupressRedraw = `supressRedraw`
+  jsViewSelector = `viewSelector`;
+  function setSupressRedraw(flag) {
+    `supressRedraw` = flag;
+  }
+  function getSupressRedraw() {
+    return `supressRedraw`;
+  }
 """
 
 proc viewUpdate() =
@@ -749,9 +760,20 @@ proc passphraseEditor(): VNode =
 
 proc goSettings(): proc() =
   result = proc() =
+    echo showPage4
     if not showPage4:
-      viewSelector(WalletLogs, false)
+      viewSelector(WalletSettings, false)
       supressRedraw = true
+    else:
+      asm """
+        TradeLogs.stop();
+        $('.backpage').visibility();
+        $('#tradelogs').empty();
+      """
+      viewSelector(WalletSettings, false)
+      asm """
+        goSection('#section4');
+      """
 
 proc goLogs(): proc() =
   result = proc() =
@@ -760,13 +782,18 @@ proc goLogs(): proc() =
       supressRedraw = true
     else:
       asm """
+        TradeLogs.stop();
+        $('.backpage').visibility();
+        $('#tradelogs').empty();
+      """
+      viewSelector(WalletLogs, false)
+      asm """
         goSection('#section4');
       """
 
 proc backWallet(): proc() =
   result = proc() =
     viewSelector(Wallet, true)
-    supressRedraw = false
     asm """
       goSection('#section3', page_scroll_done);
     """
@@ -830,6 +857,35 @@ proc recvAddressModal(): VNode =
           tdiv(class="field"):
             label: text "Message"
             textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
+
+proc settingsModal(): VNode =
+  result = buildHtml(tdiv(id="settings-modal", class="ui basic modal")):
+    tdiv(class="ui icon header"):
+      italic(class="trash icon")
+      text "Reset Wallet"
+    tdiv(class="content"):
+      p: text "Are you sure to reset your wallet?"
+    tdiv(class="actions"):
+      tdiv(class="ui basic cancel inverted button"):
+        italic(class="remove icon")
+        text "Cancel"
+      tdiv(class="ui red ok inverted button"):
+        italic(class="checkmark icon")
+        text "Reset"
+
+proc settingsPage(): VNode =
+  result = buildHtml(tdiv(id="settings", class="ui container")):
+    h3(class="ui dividing header"): text "Settings"
+    button(id="btn-reset", class="ui inverted red button"): text "Reset Wallet"
+    tdiv(class="ui pink inverted segment"):
+      text """
+        Delete all your wallet data in your web browser, including your encrypted secret keys and mnemonics.
+         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards
+         or mnemonics before deleting it. Otherwise you will lost your coins forever.
+      """
+    tdiv(class="ui checkbox"):
+      input(type="checkbox", name="confirm")
+      label: text "I confirmed that I have the seed cards or mnemonics or no coins in my wallet."
 
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
@@ -988,8 +1044,12 @@ proc appMain(data: RouterData): VNode =
             italic(class="dot circle icon")
             text "Back"
             span: italic(class="chevron up icon")
-        tdiv(class="ui container"):
-          tdiv(id="tradelogs", class="ui cards tradelogs")
+        if showTradeLogs:
+          tdiv(class="ui container"):
+            tdiv(id="tradelogs", class="ui cards tradelogs")
+        if showSettings:
+          settingsPage()
+          settingsModal()
 
 proc afterScript(data: RouterData) =
   jq("#section0").remove()
@@ -1082,7 +1142,16 @@ proc afterScript(data: RouterData) =
         type: 'fixed',
         offset: 0
       });
-      TradeLogs.start();
+    """
+    if showTradeLogs:
+      asm """
+        TradeLogs.start();
+      """
+    if showSettings:
+      asm """
+        Settings.init();
+      """
+    asm """
       goSection('#section4', function() {
         target_page_scroll = '#section3';
         page_scroll_done = function() {
@@ -1091,12 +1160,17 @@ proc afterScript(data: RouterData) =
           $('#tradelogs').empty();
           $('#section4').hide();
           window.scrollTo(0, 0);
-          jsSupressRedraw = false;
+          setSupressRedraw(false);
+          reloadViewSafeStart();
           jsViewSelector(11);
           page_scroll_done = function() {};
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
+    """
+  if showPage3 or showPage4:
+    asm """
+      reloadViewSafeEnd();
     """
 
 viewSelector(Wallet, true)
