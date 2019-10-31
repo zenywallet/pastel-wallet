@@ -405,13 +405,25 @@ function showRecvAddress() {
       var idx = $('#receive-address .ball.active').data('idx');
       var sel_addr;
       if(idx == null) {
-        sel_addr = modal_recv_addrs[0];
+        idx = 0;
+      }
+      sel_addr = modal_recv_addrs[idx];
+      var sel_item = 0;
+      if(item_addrs.length <= 5) {
+        sel_item = idx;
       } else {
-        sel_addr = modal_recv_addrs[idx];
+        if(idx == 5) {
+          sel_item = 0;
+        } else {
+          sel_item = idx + 1;
+        }
       }
       $('#recv-modal .text').html('<img class="ui mini avatar image" src="' + Ball.get(sel_addr, 28) + '">' + sel_addr + '</div>');
        $('#recvaddr-form input[name="address"]').val(sel_addr);
       $('#recvaddr-form .ui.dropdown').dropdown('set selected', sel_addr);
+      if(item_addrs[sel_item] == sel_addr) {
+        $('#recvaddr-form .menu .item:eq(' + sel_item + ')').addClass('active selected');
+      }
       recvform_change();
       showRecvModal();
     });
