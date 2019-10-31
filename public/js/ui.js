@@ -403,12 +403,8 @@ function showRecvAddress() {
           + '"><img class="ui mini avatar image" src="' + Ball.get(item_addr.addr, 28) + '">' + item_addr.addr + '</div>');
       }
 
-      var idx = $('#receive-address .ball.active').data('idx');
-      var sel_addr;
-      if(idx == null) {
-        idx = 0;
-      }
-      sel_addr = modal_recv_addrs[idx];
+      var idx = $('#receive-address .ball.active').data('idx') || 0;
+      var sel_addr = modal_recv_addrs[idx];
       var sel_item = -1;
       for(var i in item_addrs) {
         if(item_addrs[i].addr == sel_addr) {
