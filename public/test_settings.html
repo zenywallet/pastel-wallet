@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/semantic/semantic.min.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <script type="text/javascript" src="/js/jquery-3.4.1.js"></script>
+  <script type="text/javascript" src="/semantic/semantic.js"></script>
+  <title>test settings</title>
+<style>
+body {
+  background-color: #444;
+}
+#settings .ui.header {
+  color: #f0f0f0;
+  margin-top: 14px;
+}
+#settings .ui.dividing.header {
+  border-bottom: 1px solid rgba(221,219,217,.55);
+}
+#settings .ui.checkbox label {
+  color: #f0f0f0;
+}
+#settings-modal .content {
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="ui buttons settings backpage">
+  <div class="ui button"><i class="dot circle icon"></i>Back<span><i class="chevron up icon"></i></span></div>
+</div>
+<div id="settings" class="ui container">
+  <h3 class="ui dividing header">Settings</h3>
+  <button id="btn-reset" class="ui inverted red button">Reset Wallet</button>
+  <div class="ui pink inverted segment">Delete all your wallet data in your web browser, including your encrypted secret keys and mnemonics. If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards or mnemonics before deleting it. Otherwise you will lost your coins forever.</div>
+  <div class="ui checkbox">
+    <input type="checkbox" name="confirm">
+    <label>I confirmed that I have the seed cards or mnemonics or no coins in my wallet.</label>
+  </div>
+  <div style="height: 2000px;"></div>
+  <h3 class="ui header">end</h3>
+</div>
+<div id="settings-modal" class="ui basic modal">
+  <div class="ui icon header">
+    <i class="trash icon"></i>
+    Reset Wallet
+  </div>
+  <div class="content">
+    <p>Are you sure to reset your wallet?</p>
+  </div>
+  <div class="actions">
+    <div class="ui basic cancel inverted button">
+      <i class="remove icon"></i>
+      Cancel
+    </div>
+    <div class="ui red ok inverted button">
+      <i class="checkmark icon"></i>
+      Reset
+    </div>
+  </div>
+</div>
+<script>
+$(document).ready(function() {
+  $('.backpage').visibility({
+    type: 'fixed',
+    offset: 0
+  });
+
+  $('#settings .ui.checkbox').checkbox('set unchecked');
+
+  var confirm_popup_tval;
+  $('#settings .ui.checkbox').checkbox({
+    onChange: function() {
+      var check = $('#settings .ui.checkbox').checkbox('is checked');
+      if(check) {
+        var confirm = $('#settings input[name="confirm"]');
+        clearTimeout(confirm_popup_tval);
+        confirm.popup('hide');
+      }
+    }
+  });
+
+  $('#btn-reset').click(function() {
+    var self = $(this);
+    var check = $('#settings .ui.checkbox').checkbox('is checked');
+    if(check) {
+      $('#btn-reset').blur();
+      $('.ui.basic.modal').modal("setting", {
+        closable: false,
+        onApprove: function() {
+          location.reload();
+        },
+        onDeny: function() {}
+      }).modal('show');
+    } else {
+      self.blur();
+      var confirm = $('#settings input[name="confirm"]');
+      clearTimeout(confirm_popup_tval);
+      confirm.popup({
+        title: 'Confirmation',
+        content: 'Please read and check here before resetting your wallet.',
+        on: 'manual',
+        variation: 'inverted',
+        position: 'bottom left',
+        distanceAway: 6,
+        exclusive: true
+      }).popup('show');
+      confirm_popup_tval = setTimeout(function() {
+        confirm.popup('hide');
+      }, 5000);
+    }
+  });
+});
+</script>
+</body>
+</html>
