@@ -799,7 +799,7 @@ proc backWallet(): proc() =
     """
 
 proc recvAddressSelector(): VNode =
-  result = buildHtml(tdiv(id="receive-address", class="ui center aligined segment")):
+  result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment")):
     tdiv(class="ui top attached label symbol"):
       text "Receive Address "
       span:
@@ -1007,7 +1007,7 @@ proc appMain(data: RouterData): VNode =
                   italic(class="clockwise rotated sign-in icon receive")
                   text " Receive"
           tdiv(class="intro-body wallet-body"):
-            tdiv(id="wallet-balance", class="ui center aligined segment"):
+            tdiv(id="wallet-balance", class="ui center aligned segment"):
               tdiv(class="ui top left attached tiny label send"):
                 text "456.789" & " "
                 italic(class="counterclockwise rotated sign-out icon")
@@ -1020,7 +1020,7 @@ proc appMain(data: RouterData): VNode =
               recvAddressSelector()
             if showRecvAddressModal:
               recvAddressModal()
-            tdiv(id="ball-info", class="ui center aligined segment"):
+            tdiv(id="ball-info", class="ui center aligned segment"):
               text ""
               br()
               text ""
