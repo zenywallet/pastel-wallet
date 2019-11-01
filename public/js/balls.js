@@ -65,7 +65,7 @@ UtxoBalls.simple = function() {
   var bodies = [];
   var image_count = 0;
   for(var i = 0; i < 120; i++) {
-    var s = Math.round(Math.random() * 56 + 8);
+    var s = Math.round(Math.random() * 28 + 8);
     var x = Math.round(Math.random() * (w - s) + s / 2);
     var y = Math.round(Math.random() * (200 - s) + s / 2);
     image_count++;
@@ -94,13 +94,13 @@ UtxoBalls.simple = function() {
   }
 
   setTimeout(function() {
-    var s2 = 160;
+    var s2 = 80;
     var x = Math.round(Math.random() * (w - s2) + s2 / 2);
 
     var keyPair = coin.ECPair.makeRandom();
     var p2pkh = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
 
-    var ball = Bodies.circle(x, 80, s2 / 2, {
+    var ball = Bodies.circle(x, 40, s2 / 2, {
       label: 'ball',
       address: sanitize(p2pkh.address),
       value: sanitize("123'456.789"),
