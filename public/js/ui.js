@@ -334,7 +334,9 @@ function showRecvAddress() {
           $(this).text(modal_recv_addrs[idx]).fadeIn(400);
           if(idx != 5 && modal_recv_addrs[5].length > 0) {
             modal_recv_addrs[5] = "";
-            $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0, 'margin-right': 0}, 100);
+            $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0, 'margin-right': 0}, 100, function() {
+              $(this).css("visibility", "hidden");
+            });
           }
         });
       }
