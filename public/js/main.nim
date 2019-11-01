@@ -800,7 +800,7 @@ proc backWallet(): proc() =
 
 proc recvAddressSelector(): VNode =
   result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment")):
-    tdiv(class="ui top attached label symbol"):
+    tdiv(class="ui top attached label recvaddress"):
       text "Receive Address "
       span:
         italic(class="window maximize outline icon btn-maximize")
