@@ -334,7 +334,7 @@ function showRecvAddress() {
           $(this).text(modal_recv_addrs[idx]).fadeIn(400);
           if(idx != 5 && modal_recv_addrs[5].length > 0) {
             modal_recv_addrs[5] = "";
-            $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0}, 100);
+            $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0, 'margin-right': 0}, 100);
           }
         });
       }
@@ -346,9 +346,9 @@ function showRecvAddress() {
     if(modal_recv_addrs[5].length > 0) {
       modal_recv_addrs[5] = addr;
       $('#receive-address .used .ball').animate({opacity: 0}, 200, function() {
-        $('#receive-address .used').animate({width: 0}, 100, function() {
+        $('#receive-address .used').animate({width: 0, 'margin-right': 0}, 100, function() {
           $('#receive-address .used .ball img').replaceWith('<img src="' + Ball.get(addr, 28) + '">');
-          $('#receive-address .used').animate({width: 42}, 100, function() {
+          $('#receive-address .used').animate({width: 42, 'margin-right': 7}, 100, function() {
             $('#receive-address .ball').animate({opacity: 1}, 400);
             if($('#receive-address .used .ball').hasClass('active')) {
               $('#receive-address .address').stop(true, true).fadeOut(200, function() {
@@ -362,7 +362,7 @@ function showRecvAddress() {
       });
     } else {
       modal_recv_addrs[5] = addr;
-      $('#receive-address .used').stop().css("opacity", 0).animate({width: 42}, 100, function() {
+      $('#receive-address .used').stop().css("opacity", 0).animate({width: 42, 'margin-right': 7}, 100, function() {
         $('#receive-address .used .ball').replaceWith('<div class="circular ui icon mini button ball" data-idx="5"><img src="' + Ball.get(addr, 28) + '"></div>');
         $('#receive-address .used').stop().css("visibility", "visible").animate({opacity: 1}, 400);
         ball_selector_event('#receive-address .used .ball');
