@@ -332,7 +332,7 @@ function showRecvAddress() {
         $(this).addClass('active');
         $('#receive-address .address').stop(true, true).fadeOut(200, function() {
           $(this).text(modal_recv_addrs[idx]).fadeIn(400);
-          if(idx != 5 && modal_recv_addrs[5].length > 0) {
+          if(idx != 5 && modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
             modal_recv_addrs[5] = "";
             $('#receive-address .used').stop().animate({opacity: 0}, 400).animate({width: 0, 'margin-right': 0}, 100, function() {
               $(this).css("visibility", "hidden");
@@ -345,7 +345,7 @@ function showRecvAddress() {
 
   var utxoballs_click = function(addr) {
     console.log('address=' + addr);
-    if(modal_recv_addrs[5].length > 0) {
+    if(modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
       modal_recv_addrs[5] = addr;
       $('#receive-address .used .ball').animate({opacity: 0}, 200, function() {
         $('#receive-address .used').animate({width: 0, 'margin-right': 0}, 100, function() {
@@ -381,10 +381,9 @@ function showRecvAddress() {
     $('#receive-address .new .ball:first').addClass('active');
     setTimeout(function() {
       $('#receive-address .address').hide().text(modal_recv_addrs[0]).fadeIn(400);
-      modal_recv_addrs.push("");
-      pastel.utxoballs.click(utxoballs_click);
     }, 400);
   });
+  pastel.utxoballs.click(utxoballs_click);
 
   if(!recv_moval_init_flag) {
     initRecvModal();
