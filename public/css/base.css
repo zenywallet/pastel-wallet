@@ -442,15 +442,16 @@ i.receive {
 .wallet-head {
   position: relative;
   width: 100%;
-  height: 167px;
+  height: 144px;
   top: 16px;
 }
 .wallet-body {
     width: 100%;
-    height: calc(100% - 202px);
+    height: calc(100% - 179px);
 }
 .wallet-body .seed-seg {
   min-height: 482px;
+  bottom: 7px;
 }
 .ui.buttons.settings > .button {
   font-weight: 400;
@@ -652,7 +653,6 @@ i.receive {
   margin: 8px 4px 0;
   width: 42px;
   height: 52px;
-
 }
 #receive-address img {
 }
