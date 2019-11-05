@@ -767,7 +767,7 @@ proc goSettings(): proc() =
     else:
       asm """
         TradeLogs.stop();
-        $('.backpage').visibility();
+        $('.backpage').visibility({silent: true});
         $('#tradelogs').empty();
       """
       viewSelector(WalletSettings, false)
@@ -783,7 +783,7 @@ proc goLogs(): proc() =
     else:
       asm """
         TradeLogs.stop();
-        $('.backpage').visibility();
+        $('.backpage').visibility({silent: true});
         $('#tradelogs').empty();
       """
       viewSelector(WalletLogs, false)
@@ -1138,6 +1138,7 @@ proc afterScript(data: RouterData) =
 
   if showPage4:
     asm """
+      //$.fn.visibility.settings.silent = true;
       $('.backpage').visibility({
         type: 'fixed',
         offset: 0
@@ -1156,7 +1157,7 @@ proc afterScript(data: RouterData) =
         target_page_scroll = '#section3';
         page_scroll_done = function() {
           TradeLogs.stop();
-          $('.backpage').visibility();
+          $('.backpage').visibility({silent: true});
           $('#tradelogs').empty();
           $('#section4').hide();
           window.scrollTo(0, 0);
