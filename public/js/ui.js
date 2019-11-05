@@ -166,6 +166,11 @@ function draw_qrcode(check_resize) {
     function draw() {
       $('#recv-qrcode').empty();
       $('#recv-qrcode').attr('title', '');
+      $('#recv-qrcode').popup({
+        hoverable: true,
+        position: 'bottom center',
+        variation: 'mini inverted'
+      });
       $('#recv-qrcode').qrcode({
         render: 'canvas',
         ecLevel: 'Q',
