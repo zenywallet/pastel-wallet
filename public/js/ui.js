@@ -678,6 +678,269 @@ var qrReader = (function() {
   }
 })();
 
+var qrReaderModal = (function() {
+  var video, canvasElement, canvas, qrseg;
+  var abort = false;
+  var showing = false;
+
+  function drawLine(begin, end, color) {
+    canvas.beginPath();
+    canvas.moveTo(begin.x, begin.y);
+    canvas.lineTo(end.x, end.y);
+    canvas.lineWidth = 4;
+    canvas.strokeStyle = color;
+    canvas.stroke();
+  }
+
+  function checkRange(rect, x1, y1, x2, y2) {
+    return (rect.x > x1 && rect.x < x2
+      && rect.y > y1 && rect.y < y2);
+  }
+
+  var cb_done = function() {}
+
+  function qr_stop() {
+    camera_scanning(false);
+    video.pause();
+    if(video.srcObject) {
+      video.srcObject.getTracks().forEach(function(track) {
+        track.stop();
+      });
+    }
+    video.removeAttribute('src');
+    video.load();
+  }
+
+  var skip_first_tick = false;
+  function tick() {
+    if(video.readyState === video.HAVE_ENOUGH_DATA) {
+      camera_scanning(true);
+      canvasElement.height = video.videoHeight;
+      canvasElement.width = video.videoWidth;
+      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      var code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+      if(code) {
+        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#ff3b58");
+        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#ff3b58");
+        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#ff3b58");
+        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#ff3b58");
+
+        var sw = qrseg.offsetWidth - 28;
+        var sh = qrseg.offsetHeight - 28;
+        if(canvasElement.width > 0 && sw > 0) {
+          var mergin = 14;
+          var c = canvasElement.height / canvasElement.width;
+          var s = sh / sw;
+          var x1, y1, x2, y2;
+          if(c < s) {
+            var w = canvasElement.height / s;
+            x1 = (canvasElement.width - w) / 2;
+            y1 = 0;
+            x2 = x1 + w;
+            y2 = canvasElement.height;
+            x1 += mergin;
+            x2 -= mergin;
+            y1 += mergin;
+            y2 -= mergin;
+          } else {
+            var h = canvasElement.width * s;
+            x1 = 0;
+            y1 = (canvasElement.height - h) / 2;
+            x2 = canvasElement.width;
+            y2 = y1 + h;
+            x1 += mergin;
+            x2 -= mergin;
+            y1 += mergin;
+            y2 -= mergin;
+          }
+          if(skip_first_tick
+            && checkRange(code.location.topLeftCorner, x1, y1, x2, y2)
+            && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
+            && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
+            && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
+            scan_done = true;
+            qr_stop();
+            showing = false;
+            if(!abort && cb_done) {
+              var active = true;
+              var count = 0;
+              function shutter() {
+                setTimeout(function() {
+                  if(active) {
+                    $('#qrcamera-shutter').addClass('active');
+                    active = false;
+                  } else {
+                    $('#qrcamera-shutter').removeClass('active');
+                    active = true;
+                    count++;
+                  }
+                  if(count < 3) {
+                    shutter();
+                  }
+                }, 50);
+              }
+              shutter();
+              cb_done(code.data);
+            }
+            return;
+          }
+          skip_first_tick = true;
+        }
+      }
+    }
+    if(abort) {
+      return;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  var mode_show = true;
+  var video = null;
+  var qr_instance = null;
+  var scan_done = false;
+
+  var prev_camera_scanning_flag = false;
+  function camera_scanning(flag) {
+    if(prev_camera_scanning_flag != flag) {
+      if(flag) {
+        $('#qrcamera-loader').removeClass('active');
+        $('.qr-scanning').show();
+      } else {
+        $('.qr-scanning').hide();
+        if(!scan_done) {
+          $('#qrcamera-loader').addClass('active');
+        }
+      }
+      prev_camera_scanning_flag = flag;
+    }
+  }
+
+  function video_status_change() {
+    if(mode_show) {
+      canvasElement.hidden = false;
+      $('.camtools').css('visibility', 'visible');
+      $('#qrcode-modal .camtools .btn-camera').off('click').click(function() {
+        hide(true);
+        next();
+        $(this).blur();
+      });
+      $('#qrcode-modal .camtools .btn-close, #qrcode-modal .def-close').off('click').click(function() {
+        hide();
+        $('#qrcode-modal').modal('hide');
+      });
+
+    } else {
+      camera_scanning(false);
+      $('.camtools').css('visibility', 'hidden');
+      if(canvasElement) {
+        canvasElement.hidden = true;
+      }
+    }
+  }
+
+  var current_deviceId = null;
+
+  function qrShow(cb) {
+    mode_show = true;
+    showing = false;
+    abort = false;
+    scan_done = false;
+    $('#qrcamera-loader').addClass('active');
+    skip_first_tick = false;
+    video = video || document.createElement("video");
+    canvasElement = document.getElementById("qrcanvas-modal");
+    canvas = canvasElement.getContext("2d");
+    qrseg = document.getElementById("qrreader-seg");
+    cb_done = cb;
+
+    var constraints;
+    if(!current_deviceId) {
+      constraints = {video: {facingMode: "environment"}};
+    } else {
+      constraints = {video: {deviceId: current_deviceId}};
+    }
+    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+      if(!current_deviceId) {
+        var envcam;
+        stream.getTracks().forEach(function(track) {
+          envcam = track.getSettings().deviceId;
+          return true;
+        });
+        if(envcam) {
+          camDevice.set_current(envcam);
+        }
+      }
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true);
+      video.play();
+      video_status_change();
+      showing = true;
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function show(cb) {
+    $('#qrcode-modal').modal("setting", {
+      closable: false,
+      autofocus: false,
+      onShow: function() {
+        qrShow(function(data) {
+          setTimeout(function() {
+            if(data) {
+              hide();
+              cb(data);
+              $('#qrcode-modal').modal('hide');
+            }
+          }, 1000);
+        });
+      },
+      onApprove: function() {
+        hide();
+      },
+      onDeny: function() {
+        hide();
+      }
+    }).modal('show');
+  }
+
+  function next() {
+    current_deviceId = camDevice.next();
+    qrShow(cb_done);
+  }
+
+  function hide(rescan) {
+    if(mode_show) {
+      abort = true;
+      if(showing) {
+        qr_stop();
+        showing = false;
+      }
+      if(canvas && canvasElement) {
+        canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+      if(rescan) {
+        mode_show = false;
+        video_status_change();
+      } else {
+        if(canvasElement) {
+          canvasElement.hidden = true;
+        }
+      }
+      mode_show = false;
+    }
+  }
+
+  var Module = {
+    show: show,
+    next: next,
+    hide: hide
+  }
+  return Module;
+})();
+
 var Settings = (function() {
   var Module = {};
   var confirm_popup_tval;
