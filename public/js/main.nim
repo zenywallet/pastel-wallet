@@ -25,6 +25,16 @@ var camDevice = (function() {
     });
   });
   return {
+    set_current: function(deviceId) {
+      var new_cam_index = 0;
+      for(var i in cam_ids) {
+        if(deviceId == cam_ids[i]) {
+          new_cam_index = i;
+          break;
+        }
+      }
+      sel_cam_index = new_cam_index;
+    },
     next: function() {
       if(cam_ids.length > 0) {
         if(sel_cam == null) {
