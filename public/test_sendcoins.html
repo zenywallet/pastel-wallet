@@ -160,7 +160,7 @@ function crlftab_to_html(s) {
   return s.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 }
 
-function loadBip21uri(uri) {
+function load_bip21uri(uri) {
   $('#send-coins .uri-options').empty();
   var data = bip21reader(uri);
   $('#send-coins input[name="address"]').val(data.address || '');
@@ -490,7 +490,7 @@ $(function() {
   });
   $('#btn-send-qrcode').off('click').click(function() {
     qrReaderModal.show(function(data) {
-      loadBip21uri(data);
+      load_bip21uri(data);
     });
     $(this).blur();
   });
