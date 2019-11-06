@@ -8,12 +8,6 @@ import unicode
 import sequtils
 
 var appInst: KaraxInstance
-
-
-{.emit: """
-var jsViewSelector = function() {}
-""".}
-
 var document {.importc, nodecl.}: JsObject
 #var console {.importc, nodecl.}: JsObject
 proc jq(selector: cstring): JsObject {.importcpp: "$$(#)".}
@@ -136,6 +130,10 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
   if not no_redraw:
     appInst.redraw()
 
+
+{.emit: """
+var jsViewSelector = function() {}
+""".}
 var jsViewSelector {.importc, nodecl.}: JsObject
 asm """
   jsViewSelector = `viewSelector`;
