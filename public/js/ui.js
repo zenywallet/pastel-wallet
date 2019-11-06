@@ -156,7 +156,7 @@ function draw_qrcode(check_resize) {
   var s = calc_qrcode_size();
   if(check_resize && draw_qrcode_prev_size == s) {
     if(bip21_uri) {
-      $('#recv-qrcode').attr('title', bip21_uri);
+      $('#recv-qrcode').attr('data-content', bip21_uri);
     }
     return;
   }
@@ -166,6 +166,7 @@ function draw_qrcode(check_resize) {
     function draw() {
       $('#recv-qrcode').empty();
       $('#recv-qrcode').attr('title', '');
+      $('#recv-qrcode').attr('data-content', '');
       $('#recv-qrcode').popup({
         hoverable: true,
         position: 'bottom center',
@@ -183,7 +184,7 @@ function draw_qrcode(check_resize) {
         fontcolor: '#393939'
       });
       if($('#recv-qrcode canvas').length) {
-        $('#recv-qrcode').attr('title', bip21_uri);
+        $('#recv-qrcode').attr('data-content', bip21_uri);
         if(draw_qrcode_animate) {
           $('#recv-qrcode').stop(true, false).animate({opacity: 1}, 200);
         }
@@ -290,7 +291,7 @@ function showRecvModal() {
 
 function hideRecvModal() {
   recvModalViewState = false;
-  $('#recv-qrcode').attr('title', '');
+  $('#recv-qrcode').attr('data-content', '');
   window.removeEventListener("resize", resize_qrcode);
   $('#recv-modal').fadeOut(600);
   $('#recvaddr-form .menu').empty();
