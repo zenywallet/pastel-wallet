@@ -218,7 +218,7 @@ var camDevice = (function() {
   };
 })();
 
-var qrReader = (function() {
+var qrReaderModal = (function() {
   var video, canvasElement, canvas, qrseg;
   var abort = false;
   var showing = false;
@@ -363,12 +363,12 @@ var qrReader = (function() {
       canvasElement.hidden = false;
       $('.camtools').css('visibility', 'visible');
       $('#qrcode-modal .camtools .btn-camera').off('click').click(function() {
-        qrReader.hide(true);
-        qrReader.next();
+        hide(true);
+        next();
         $(this).blur();
       });
       $('#qrcode-modal .camtools .btn-close, #qrcode-modal .def-close').off('click').click(function() {
-        qrReader.hide();
+        hide();
         $('#qrcode-modal').modal('hide');
       });
 
@@ -422,56 +422,63 @@ var qrReader = (function() {
     });
   }
 
-  return {
-    show: function(cb) {
-      $('#qrcode-modal').modal("setting", {
-        closable: false,
-        autofocus: false,
-        onShow: function() {
-          qrShow(function(data) {
-            setTimeout(function() {
-              if(data) {
-                qrReader.hide();
-                cb(data);
-                $('#qrcode-modal').modal('hide');
-              }
-            }, 1000);
-          });
-        },
-        onApprove: function() {
-          qrReader.hide();
-        },
-        onDeny: function() {
-          qrReader.hide();
-        }
-      }).modal('show');
-    },
-    next: function() {
-      current_deviceId = camDevice.next();
-      qrShow(cb_done);
-    },
-    hide: function(rescan) {
-      if(mode_show) {
-        abort = true;
-        if(showing) {
-          qr_stop();
-          showing = false;
-        }
-        if(canvas && canvasElement) {
-          canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        }
-        if(rescan) {
-          mode_show = false;
-          video_status_change();
-        } else {
-          if(canvasElement) {
-            canvasElement.hidden = true;
-          }
-        }
-        mode_show = false;
+  function show(cb) {
+    $('#qrcode-modal').modal("setting", {
+      closable: false,
+      autofocus: false,
+      onShow: function() {
+        qrShow(function(data) {
+          setTimeout(function() {
+            if(data) {
+              hide();
+              cb(data);
+              $('#qrcode-modal').modal('hide');
+            }
+          }, 1000);
+        });
+      },
+      onApprove: function() {
+        hide();
+      },
+      onDeny: function() {
+        hide();
       }
+    }).modal('show');
+  }
+
+  function next() {
+    current_deviceId = camDevice.next();
+    qrShow(cb_done);
+  }
+
+  function hide(rescan) {
+    if(mode_show) {
+      abort = true;
+      if(showing) {
+        qr_stop();
+        showing = false;
+      }
+      if(canvas && canvasElement) {
+        canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+      if(rescan) {
+        mode_show = false;
+        video_status_change();
+      } else {
+        if(canvasElement) {
+          canvasElement.hidden = true;
+        }
+      }
+      mode_show = false;
     }
   }
+
+  var Module = {
+    show: show,
+    next: next,
+    hide: hide
+  }
+  return Module;
 })();
 
 $(function() {
@@ -482,7 +489,7 @@ $(function() {
     $(this).blur();
   });
   $('#btn-send-qrcode').off('click').click(function() {
-    qrReader.show(function(data) {
+    qrReaderModal.show(function(data) {
       loadBip21uri(data);
     });
     $(this).blur();
