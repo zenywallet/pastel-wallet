@@ -453,6 +453,230 @@ function showRecvAddress() {
   }
 }
 
+var camDevice = (function() {
+  var cam_ids = [];
+  var sel_cam = null;
+  var sel_cam_index = 0;
+  navigator.mediaDevices.enumerateDevices().then(function(devices) {
+    devices.forEach(function(device) {
+      if(device.kind == 'videoinput') {
+        cam_ids.push(device);
+      }
+    });
+  });
+  return {
+    set_current: function(deviceId) {
+      var new_cam_index = 0;
+      for(var i in cam_ids) {
+        if(deviceId == cam_ids[i]) {
+          new_cam_index = i;
+          break;
+        }
+      }
+      sel_cam_index = new_cam_index;
+    },
+    next: function() {
+      if(cam_ids.length > 0) {
+        if(sel_cam == null) {
+          sel_cam_index = cam_ids.length - 1;
+          sel_cam = cam_ids[sel_cam_index].deviceId;
+        } else {
+          sel_cam_index++;
+          if(sel_cam_index >= cam_ids.length) {
+            sel_cam_index = 0;
+          }
+          sel_cam = cam_ids[sel_cam_index].deviceId;
+        }
+      }
+      return sel_cam;
+    },
+    count: function() {
+      return cam_ids.length;
+    }
+  };
+})();
+
+var qrReader = (function() {
+  var video, canvasElement, canvas, seedseg;
+  var abort = false;
+  var showing = false;
+  //var scandata = null;
+  //var loadingMessage = document.getElementById("loadingMessage");
+  //var outputContainer = document.getElementById("output");
+  //var outputMessage = document.getElementById("outputMessage");
+  //var outputData = document.getElementById("outputData");
+
+  function drawLine(begin, end, color) {
+    canvas.beginPath();
+    canvas.moveTo(begin.x, begin.y);
+    canvas.lineTo(end.x, end.y);
+    canvas.lineWidth = 4;
+    canvas.strokeStyle = color;
+    canvas.stroke();
+  }
+
+  function checkRange(rect, x1, y1, x2, y2) {
+    return (rect.x > x1 && rect.x < x2
+      && rect.y > y1 && rect.y < y2);
+  }
+
+  var cb_done = function() {}
+
+  function qr_stop() {
+    camera_scanning(false);
+    video.pause();
+    if(video.srcObject) {
+      video.srcObject.getTracks().forEach(function(track) {
+        track.stop();
+      });
+    }
+    video.removeAttribute('src');
+    video.load();
+  }
+
+  var skip_first_tick = false;
+  function tick() {
+    if(video.readyState === video.HAVE_ENOUGH_DATA) {
+      camera_scanning(true);
+      canvasElement.height = video.videoHeight;
+      canvasElement.width = video.videoWidth;
+      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      var code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+      if(code) {
+        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#ff3b58");
+        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#ff3b58");
+        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#ff3b58");
+        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#ff3b58");
+
+        var sw = seedseg.offsetWidth - 28;
+        var sh = seedseg.offsetHeight - 28;
+        if(canvasElement.width > 0 && sw > 0) {
+          var mergin = 14;
+          var c = canvasElement.height / canvasElement.width;
+          var s = sh / sw;
+          var x1, y1, x2, y2;
+          if(c < s) {
+            var w = canvasElement.height / s;
+            x1 = (canvasElement.width - w) / 2;
+            y1 = 0;
+            x2 = x1 + w;
+            y2 = canvasElement.height;
+            x1 += mergin;
+            x2 -= mergin;
+            y1 += mergin;
+            y2 -= mergin;
+          } else {
+            var h = canvasElement.width * s;
+            x1 = 0;
+            y1 = (canvasElement.height - h) / 2;
+            x2 = canvasElement.width;
+            y2 = y1 + h;
+            x1 += mergin;
+            x2 -= mergin;
+            y1 += mergin;
+            y2 -= mergin;
+          }
+          if(skip_first_tick
+            && checkRange(code.location.topLeftCorner, x1, y1, x2, y2)
+            && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
+            && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
+            && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
+            console.log(code.data);
+            qr_stop();
+            if(!abort && cb_done) {
+              cb_done(code.data);
+            }
+            return;
+          }
+          skip_first_tick = true;
+        }
+      }
+    }
+    if(abort) {
+      return;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  var mode_show = true;
+  var video = null;
+  var qr_instance = null;
+
+  var prev_camera_scanning_flag = false;
+  function camera_scanning(flag) {
+    if(prev_camera_scanning_flag != flag) {
+      if(flag) {
+        $('.qr-scanning').show();
+      } else {
+        $('.qr-scanning').hide();
+      }
+      prev_camera_scanning_flag = flag;
+    }
+  }
+
+  function video_status_change() {
+    if(mode_show) {
+      canvasElement.hidden = false;
+      $('.bt-scan-seed').css('visibility', 'hidden');
+      $('.camtools').css('visibility', 'visible');
+    } else {
+      camera_scanning(false);
+      $('.camtools').css('visibility', 'hidden');
+      $('.bt-scan-seed').css('visibility', 'visible');
+      if(canvasElement) {
+        canvasElement.hidden = true;
+      }
+    }
+  }
+
+  return {
+    show: function(cb) {
+      mode_show = true;
+      showing = false;
+      abort = false;
+      skip_first_tick = false;
+      video = video || document.createElement("video");
+      canvasElement = document.getElementById("qrcanvas");
+      canvas = canvasElement.getContext("2d");
+      seedseg = document.getElementById("seed-seg");
+      cb_done = cb;
+
+      // Use facingMode: environment to attemt to get the front camera on phones
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+        video.play();
+        video_status_change();
+        showing = true;
+        requestAnimationFrame(tick);
+      });
+    },
+    hide: function(rescan) {
+      if(mode_show) {
+        abort = true;
+        if(showing) {
+          qr_stop();
+          showing = false;
+        }
+        if(canvas && canvasElement) {
+          canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        }
+        if(rescan) {
+          mode_show = false;
+          video_status_change();
+        } else {
+          if(canvasElement) {
+            canvasElement.hidden = true;
+          }
+        }
+        mode_show = false;
+      }
+    }
+  }
+})();
 
 var Settings = (function() {
   var Module = {};
