@@ -448,7 +448,7 @@ var qrReader = (function() {
     },
     next: function() {
       current_deviceId = camDevice.next();
-      this.show();
+      qrShow(cb_done);
     },
     hide: function(rescan) {
       if(mode_show) {
