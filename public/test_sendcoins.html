@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description" content="Pastel WALLET">
+  <meta name="author" content="zenywallet">
+  <meta name="keywords" content="wallet">
+  <meta name="format-detection" content="telephone=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="msapplication-TileColor" content="#00aba9">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="/semantic/semantic.min.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <script type="text/javascript" src="/js/jsQR.js"></script>
+  <script type="text/javascript" src="/js/jquery-3.4.1.js"></script>
+  <script type="text/javascript" src="/semantic/semantic.js"></script>
+  <script type="text/javascript" src="/js/dotmatrix.js"></script>
+  <script type="text/javascript" src="/js/balls.js"></script>
+  <script type="text/javascript" src="/js/murmurhash.js"></script>
+  <script type="text/javascript" src="/js/matter.js"></script>
+  <script type="text/javascript" src="/js/jquery-qrcode.js"></script>
+  <script type="text/javascript" src="/js/dotmatrix.js"></script>
+  <script type="text/javascript" src="/js/coinlibs.js"></script>
+  <script type="text/javascript" src="/js/encoding.js"></script>
+  <title>test sendcoins</title>
+</head>
+<body>
+<div id="canvas-container"></div>
+<section id="section3" class="section">
+  <div class="intro">
+    <div class="intro-head wallet-head">
+      <div class="caption">Pastel Wallet</div>
+      <div class="ui container wallet-btns">
+        <div class="two ui basic buttons sendrecv">
+          <button id="btn-send" class="ui small button send"><i class="counterclockwise rotated icon sign-out send"></i> Send</button>
+          <button id ="btn-receive" class="ui small button receive"><i class="clockwise rotated icon sign-in receive"></i> Receive</button>
+        </div>
+      </div>
+    </div>
+    <div class="intro-body wallet-body">
+      <div id="wallet-balance" class="ui center aligned segment">
+        <div class="ui top left attached tiny label send">456.789 / 0.000012 <i class="counterclockwise rotated icon sign-out"></i></div>
+        <div class="ui top right attached tiny label receive"><i class="clockwise rotated icon sign-in"></i>123.456</div>
+        <div class="ui bottom right attached tiny label symbol">ZNY</div>
+        12345.6789
+      </div>
+<style>
+#send-coins {
+  position: absolute;
+  top: 216px;
+  left: 28px;
+  z-index: 3;
+  background: rgba(128,128,128,0.3);
+  width: calc(100% - 56px);
+  min-width: 296px;
+  min-height: 266px;
+  color: #fafafa;
+  font: normal 400 13px/1 'arial', sans-serif;
+  padding: 7px 14px 14px;
+  height: auto;
+  max-height: calc(100vh - 288px);
+}
+#send-coins .ui.label.sendcoins {
+  text-align: center;
+  background-color: rgba(213, 113, 113, 0.5);
+  color: #eee;
+  padding: 5px 6px 5px 6px;
+}
+#send-coins .ui.form label {
+  text-align: left;
+  color: rgba(238, 238, 238, .8);
+}
+#send-coins .ui.form input[type="text"] {
+  background: rgba(128, 128, 128, 0.6);
+  color: #f0f0f0;
+}
+#send-coins .btn-send {
+  background: rgba(113, 120, 54, 0.5);
+}
+#send-coins .btn-send:hover, #send-coins .btn-send:focus {
+ background: rgba(217, 231, 120, 0.8);
+}
+#send-coins .btn-close {
+  position: absolute;
+  right: 0em;
+  top: 0.4em;
+  color: rgba(0,0,0,.3);
+}
+#send-coins .btn-maximize {
+  position: absolute;
+  right: 1.5em;
+  top: 0.4em;
+  color: rgba(0,0,0,.3);
+}
+#send-coins .ui.input > input.center {
+  text-align: center;
+}
+#send-coins .ui.input > input.right {
+  text-align: right;
+}
+#send-coins .ui.buttons.utxoctrl {
+  display: block;
+  position: absolute;
+  top: -17.6px;
+  right: 0;
+}
+#send-coins .ui.form input[name="amount"] {
+  border-top-right-radius: 0;
+}
+
+#send-coins .utxoctrl .ui.button {
+  padding: 3px 2px 3px 2px;
+  color: #f0f0f0;
+}
+#send-coins .ui.basic.buttons .ui.button {
+  color: rgba(238, 238, 238, .8) !important;
+}
+#send-coins .ui.basic.buttons.utxoctrl {
+  border-top-left-radius: .28571429rem;
+  border-top-right-radius: .28571429rem;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: 0;
+}
+#send-coins .ui.buttons.utxoctrl .button:first-child {
+  border-bottom-left-radius: 0;
+}
+#send-coins .ui.buttons.utxoctrl .button:last-child {
+ border-bottom-right-radius: 0;
+}
+#send-coins .ui.buttons.utxoctrl .ui.button.sendutxos {
+  pointer-events: none;
+}
+#qrcanvas-modal {
+  margin: 0 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  object-fit: cover;
+  pointer-events: none;
+}
+#qrreader-seg {
+  height: calc(100vh - 300px);
+  margin: 16px 0;
+  bottom: 30px;
+  min-width: 352px;
+  min-height: 352px;
+  object-fit: cover;
+  background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
+}
+#qrcode-modal.ui.modal {
+  min-height: 550px;
+  min-width: 352px;
+}
+#qrcode-modal.ui.modal .scrolling.content {
+  width: 100%;
+  max-height: calc(100vh - 240px);
+  min-height: 400px;
+  overflow: hidden;
+}
+#qrcode-modal.ui.modal .ui.header, #qrcode-modal.ui.modal .content, #qrcode-modal.ui.modal .actions {
+  min-width: 352px;
+}
+@media only screen and (max-width:767px) {
+.ui.modal>.header {
+  padding:.75rem 1rem!important;
+  /*padding-right:0rem!important;*/
+}
+}
+#send-coins .ui.list {
+  text-align: left;
+}
+#send-coins .content .header, #send-coins .ui.list > .item .description {
+  color: rgba(238, 238, 238, .8);
+  margin-bottom: 2px;
+}
+#send-coins .ui.list.uri-options {
+  height: auto;
+  min-height: 0;
+  max-height: calc(100vh - 550px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-color: rgba(77, 77, 77, 0.5) rgba(100, 100, 100, 0.3);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+</style>
+      <div id="send-coins" class="ui center aligned segment">
+        <div class="ui top attached label sendcoins">Send Coins <span><i class="window maximize outline icon btn-maximize"></i><i class="close icon btn-close"></i></span></div>
+        <div class="ui mini basic icon buttons">
+          <button id="btn-send-clear" class="ui button" title="Clear"><i class="eraser icon"></i></button>
+          <button id="btn-send-qrcode" class="ui button" title="Scan QR code"><i class="camera icon"></i></button>
+        </div>
+        <div class="ui form">
+          <div class="field">
+            <label>Send Address</label>
+            <div class="ui small input">
+              <input class="center" type="text" name="address" placeholder="Address">
+            </div>
+          </div>
+          <div class="field">
+            <label>Amount</label>
+            <div class="ui small input">
+              <input class="center" type="text" name="amount" placeholder="Amount">
+              <div class="ui  mini basic icon buttons utxoctrl">
+                <button id="btn-utxo-plus" class="ui button" title="-1 UTXO"><i class="minus circle icon"></i></button>
+                <button id="btn-utxo-count" class="ui button sendutxos">&#8804;24</button>
+                <button id="btn-utxo-minus" class="ui button" title="+1 UTXO"><i class="plus circle icon"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="ui list uri-options"></div>
+          <div class="fluid ui buttons">
+            <button id="btn-send" class="ui inverted olive button center btn-send">Send</button>
+          </div>
+        </div>
+      </div>
+      <div id="wallet-seg" class="ui center aligned segment seed-seg"></div>
+      <div id="qrcode-modal" class="ui basic modal">
+        <i class="close icon def-close"></i>
+        <div class="ui icon header">
+          Scan QR Code
+        </div>
+        <div class="scrolling content">
+          <div id="qrreader-seg" class="ui center aligned segment">
+            <div class="qr-scanning"><div></div><div></div></div>
+            <div class="ui small basic icon buttons camtools">
+              <button class="ui button btn-camera"><i class="camera icon"></i></button>
+              <button class="ui button btn-close"><i class="window close icon"></i></button>
+            </div>
+            <canvas id="qrcanvas-modal"></canvas>
+            <div id="qrcamera-loader" class="ui active dimmer">
+              <div class="ui indeterminate text loader">Preparing Camera</div>
+            </div>
+            <div id="qrcamera-shutter" class="ui dimmer">
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="ui basic cancel inverted button">
+            <i class="remove icon"></i>
+            Cancel
+          </div>
+        </div>
+        <!--div class="actions">
+          <div class="ui basic cancel inverted button">
+            <i class="remove icon"></i>
+            Cancel
+          </div>
+          <div class="ui inverted blue button">
+            <i class="redo alternate icon"></i>
+            Rescan
+          </div>
+          <div class="ui ok inverted red button">
+            <i class="checkmark icon"></i>
+            OK
+          </div>
+        </div-->
+      </div>
+    </div>
+    <div class="ui two bottom attached buttons settings">
+      <div class="ui button"><i class="icon cog"></i> Settings</div>
+      <div class="ui button"><i class="icon list alternate outline"></i> Logs</div>
+    </div>
+  </div>
+</section>
+
+<script>
+function escape_html(s) {
+  return s.replace(/[&'`"<>]/g, function(match) {
+    return {
+      '&': '&amp;',
+      "'": '&#39;',
+      "`": '&#96;',
+      '"': '&quot;',
+      '<': '&lt;',
+      '>': '&gt;',
+    }[match]
+  });
+}
+
+function bip21reader(uri) {
+  var d_uri = decodeURI(uri);
+  var s = d_uri.split(/[?&]/);
+  if(s.length <= 0) {
+    return null;
+  }
+  var a = s[0].split(':');
+  var result = {address: a[a.length - 1]};
+  for(var i = 1; i < s.length; i++) {
+    var p = s[i].split('=');
+    if(p.length == 2) {
+      result[escape_html(p[0])] = escape_html(Encoding.convert(p[1], 'UNICODE', 'SJIS'));
+    }
+  }
+  return result;
+}
+
+function crlftab_to_html(s) {
+  return s.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+}
+
+function loadBip21uri(uri) {
+  $('#send-coins .uri-options').empty();
+  var data = bip21reader(uri);
+  $('#send-coins input[name="address"]').val(data.address || '');
+  $('#send-coins input[name="amount"]').val(data.amount || '');
+  for(var k in data) {
+    var p = data[k];
+    if(k == 'address' || k == 'amount') {
+      continue;
+    }
+    $('#send-coins .uri-options').append('<div class="item"><div class="content"><div class="header">'
+      + crlftab_to_html(k) + '</div><div class="description">' + crlftab_to_html(p) + '</div></div></div>');
+  }
+}
+
+var camDevice = (function() {
+  var cam_ids = [];
+  var sel_cam = null;
+  var sel_cam_index = 0;
+  navigator.mediaDevices.enumerateDevices().then(function(devices) {
+    devices.forEach(function(device) {
+      if(device.kind == 'videoinput') {
+        cam_ids.push(device);
+      }
+    });
+  });
+  return {
+    set_current: function(deviceId) {
+      var new_cam_index = 0;
+      for(var i in cam_ids) {
+        if(deviceId == cam_ids[i]) {
+          new_cam_index = i;
+          break;
+        }
+      }
+      sel_cam_index = new_cam_index;
+    },
+    next: function() {
+      if(cam_ids.length > 0) {
+        if(sel_cam == null) {
+          sel_cam_index = cam_ids.length - 1;
+          sel_cam = cam_ids[sel_cam_index].deviceId;
+        } else {
+          sel_cam_index++;
+          if(sel_cam_index >= cam_ids.length) {
+            sel_cam_index = 0;
+          }
+          sel_cam = cam_ids[sel_cam_index].deviceId;
+        }
+      }
+      return sel_cam;
+    },
+    count: function() {
+      return cam_ids.length;
+    }
+  };
+})();
+
+var qrReader = (function() {
+  var video, canvasElement, canvas, qrseg;
+  var abort = false;
+  var showing = false;
+
+  function drawLine(begin, end, color) {
+    canvas.beginPath();
+    canvas.moveTo(begin.x, begin.y);
+    canvas.lineTo(end.x, end.y);
+    canvas.lineWidth = 4;
+    canvas.strokeStyle = color;
+    canvas.stroke();
+  }
+
+  function checkRange(rect, x1, y1, x2, y2) {
+    return (rect.x > x1 && rect.x < x2
+      && rect.y > y1 && rect.y < y2);
+  }
+
+  var cb_done = function() {}
+
+  function qr_stop() {
+    camera_scanning(false);
+    video.pause();
+    if(video.srcObject) {
+      video.srcObject.getTracks().forEach(function(track) {
+        track.stop();
+      });
+    }
+    video.removeAttribute('src');
+    video.load();
+  }
+
+  var skip_first_tick = false;
+  function tick() {
+    if(video.readyState === video.HAVE_ENOUGH_DATA) {
+      camera_scanning(true);
+      canvasElement.height = video.videoHeight;
+      canvasElement.width = video.videoWidth;
+      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      var code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+      if(code) {
+        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#ff3b58");
+        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#ff3b58");
+        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#ff3b58");
+        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#ff3b58");
+
+        var sw = qrseg.offsetWidth - 28;
+        var sh = qrseg.offsetHeight - 28;
+        if(canvasElement.width > 0 && sw > 0) {
+          var mergin = 14;
+          var c = canvasElement.height / canvasElement.width;
+          var s = sh / sw;
+          var x1, y1, x2, y2;
+          if(c < s) {
+            var w = canvasElement.height / s;
+            x1 = (canvasElement.width - w) / 2;
+            y1 = 0;
+            x2 = x1 + w;
+            y2 = canvasElement.height;
+            x1 += mergin;
+            x2 -= mergin;
+            y1 += mergin;
+            y2 -= mergin;
+          } else {
+            var h = canvasElement.width * s;
+            x1 = 0;
+            y1 = (canvasElement.height - h) / 2;
+            x2 = canvasElement.width;
+            y2 = y1 + h;
+            x1 += mergin;
+            x2 -= mergin;
+            y1 += mergin;
+            y2 -= mergin;
+          }
+          if(skip_first_tick
+            && checkRange(code.location.topLeftCorner, x1, y1, x2, y2)
+            && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
+            && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
+            && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
+            scan_done = true;
+            qr_stop();
+            showing = false;
+            if(!abort && cb_done) {
+              var active = true;
+              var count = 0;
+              function shutter() {
+                setTimeout(function() {
+                  if(active) {
+                    $('#qrcamera-shutter').addClass('active');
+                    active = false;
+                  } else {
+                    $('#qrcamera-shutter').removeClass('active');
+                    active = true;
+                    count++;
+                  }
+                  if(count < 3) {
+                    shutter();
+                  }
+                }, 50);
+              }
+              shutter();
+              cb_done(code.data);
+            }
+            return;
+          }
+          skip_first_tick = true;
+        }
+      }
+    }
+    if(abort) {
+      return;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  var mode_show = true;
+  var video = null;
+  var qr_instance = null;
+  var scan_done = false;
+
+  var prev_camera_scanning_flag = false;
+  function camera_scanning(flag) {
+    if(prev_camera_scanning_flag != flag) {
+      if(flag) {
+        $('#qrcamera-loader').removeClass('active');
+        $('.qr-scanning').show();
+      } else {
+        $('.qr-scanning').hide();
+        if(!scan_done) {
+          $('#qrcamera-loader').addClass('active');
+        }
+      }
+      prev_camera_scanning_flag = flag;
+    }
+  }
+
+  function video_status_change() {
+    if(mode_show) {
+      canvasElement.hidden = false;
+      $('.camtools').css('visibility', 'visible');
+      $('#qrcode-modal .camtools .btn-camera').off('click').click(function() {
+        qrReader.hide(true);
+        qrReader.next();
+        $(this).blur();
+      });
+      $('#qrcode-modal .camtools .btn-close, #qrcode-modal .def-close').off('click').click(function() {
+        qrReader.hide();
+        $('#qrcode-modal').modal('hide');
+      });
+
+    } else {
+      camera_scanning(false);
+      $('.camtools').css('visibility', 'hidden');
+      if(canvasElement) {
+        canvasElement.hidden = true;
+      }
+    }
+  }
+
+  var current_deviceId = null;
+
+  function qrShow(cb) {
+    mode_show = true;
+    showing = false;
+    abort = false;
+    scan_done = false;
+    $('#qrcamera-loader').addClass('active');
+    skip_first_tick = false;
+    video = video || document.createElement("video");
+    canvasElement = document.getElementById("qrcanvas-modal");
+    canvas = canvasElement.getContext("2d");
+    qrseg = document.getElementById("qrreader-seg");
+    cb_done = cb;
+
+    var constraints;
+    if(!current_deviceId) {
+      constraints = {video: {facingMode: "environment"}};
+    } else {
+      constraints = {video: {deviceId: current_deviceId}};
+    }
+    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+      if(!current_deviceId) {
+        var envcam;
+        stream.getTracks().forEach(function(track) {
+          envcam = track.getSettings().deviceId;
+          return true;
+        });
+        if(envcam) {
+          camDevice.set_current(envcam);
+        }
+      }
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true);
+      video.play();
+      video_status_change();
+      showing = true;
+      requestAnimationFrame(tick);
+    });
+  }
+
+  return {
+    show: function(cb) {
+      $('#qrcode-modal').modal("setting", {
+        closable: false,
+        autofocus: false,
+        onShow: function() {
+          qrShow(function(data) {
+            setTimeout(function() {
+              if(data) {
+                qrReader.hide();
+                cb(data);
+                $('#qrcode-modal').modal('hide');
+              }
+            }, 1000);
+          });
+        },
+        onApprove: function() {
+          qrReader.hide();
+        },
+        onDeny: function() {
+          qrReader.hide();
+        }
+      }).modal('show');
+    },
+    next: function() {
+      current_deviceId = camDevice.next();
+      this.show();
+    },
+    hide: function(rescan) {
+      if(mode_show) {
+        abort = true;
+        if(showing) {
+          qr_stop();
+          showing = false;
+        }
+        if(canvas && canvasElement) {
+          canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        }
+        if(rescan) {
+          mode_show = false;
+          video_status_change();
+        } else {
+          if(canvasElement) {
+            canvasElement.hidden = true;
+          }
+        }
+        mode_show = false;
+      }
+    }
+  }
+})();
+
+$(function() {
+  $('#btn-send-clear').off('click').click(function() {
+    $('#send-coins input[name="address"]').val('');
+    $('#send-coins input[name="amount"]').val('');
+    $('#send-coins .uri-options').empty();
+    $(this).blur();
+  });
+  $('#btn-send-qrcode').off('click').click(function() {
+    qrReader.show(function(data) {
+      loadBip21uri(data);
+    });
+    $(this).blur();
+  });
+  $('#btn-utxo-plus').off('click').click(function() {
+
+  });
+  $('#btn-utxo-minus').off('click').click(function() {
+
+  });
+  $('#btn-utxo-count').off('click').click(function() {
+
+  });
+});
+</script>
+
+<svg width="80" height="80" viewBox="0 0 250 250" style="fill:rgba(56,56,56,.2); color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-labelledby="githublink"><title id="githublink">View source on GitHub</title><a href="https://github.com/zenywallet/pastel-wallet" xlink:href="https://github.com/zenywallet/pastel-wallet" class="github-corner"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></a></svg><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}a.github-corner{color:#eee}</style>
+
+<script>
+var buf2hex = function(buffer) {
+  return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+}
+
+var murmurhash = {};
+
+murmurhash.load = function(cb) {
+  var Module = Murmurhash({
+    onRuntimeInitialized: function() {
+      var Module = this;
+      for(var o in Module) {
+        console.log(o);
+      }
+      murmurhash.mod_hash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+
+      murmurhash.alloclist = murmurhash.alloclist || [];
+
+      murmurhash.free = function() {
+        var p = murmurhash.alloclist.shift();
+        while(p) {
+          Module._free(p);
+          p = murmurhash.alloclist.shift();
+        }
+      }
+
+      if(murmurhash.alloclist.length > 0) {
+        murmurhash.free();
+      }
+
+      murmurhash.alloc = function(size) {
+        var p = new Number(Module._malloc(size));
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+        p.free = function() {
+          Module._free(p);
+          murmurhash.alloclist.splice(murmurhash.alloclist.indexOf(p), 1);
+        }
+        murmurhash.alloclist.push(p);
+        return p;
+      }
+
+      murmurhash.hash = function(data) {
+        var input = murmurhash.alloc(data.length);
+        var output = murmurhash.alloc(16);
+        input.set(data);
+        murmurhash.mod_hash(input, data.length, output);
+        var ret = output.get();
+        output.free();
+        input.free();
+        return ret;
+      }
+
+      cb();
+      murmurhash.ready_flag = true;
+    }
+  });
+  return Module;
+}
+
+murmurhash.run = function(cb) {
+  if(this.ready_flag) {
+    if(this.pending) {
+      clearTimeout(this.worker_tval);
+      var p = this.pending.shift();
+      while(p) {
+        p();
+        p = this.pending.shift();
+      }
+    }
+    cb();
+  } else {
+    if(!this.load_flag) {
+      this.load_flag = true;
+      this.load(cb);
+    } else {
+      if(this.pending) {
+        this.pending.push(cb);
+      } else {
+        this.pending = [cb];
+        var self = this;
+        function worker() {
+          if(self.ready_flag) {
+            var p = self.pending.shift();
+            while(p) {
+              p();
+              p = self.pending.shift();
+            }
+          } else {
+            self.worker_tval = setTimeout(worker, 100);
+          }
+        }
+        worker();
+      }
+    }
+  }
+}
+
+var pastel = {};
+
+murmurhash.run(function() {
+  pastel.cipher = {};
+  pastel.cipher.buf2hex = buf2hex;
+  pastel.cipher.murmurhash = murmurhash.hash;
+
+  var utxoballs = UtxoBalls.simple();
+  var resize_tval;
+  window.addEventListener("resize", function() {
+    utxoballs.stop();
+    clearTimeout(resize_tval);
+    resize_tval = setTimeout(function() {
+      utxoballs.canvas.remove();
+      var click_cb = utxoballs.click_cb();
+      utxoballs = UtxoBalls.simple();
+      utxoballs.click(click_cb);
+    }, 1400);
+  });
+});
+</script>
+</body>
+</html>
