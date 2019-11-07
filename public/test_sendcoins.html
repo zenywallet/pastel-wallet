@@ -482,6 +482,7 @@ var qrReaderModal = (function() {
 })();
 
 $(function() {
+  $('#send-coins').show();
   $('#btn-send-clear').off('click').click(function() {
     $('#send-coins input[name="address"]').val('');
     $('#send-coins input[name="amount"]').val('');
