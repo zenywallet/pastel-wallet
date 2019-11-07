@@ -773,6 +773,7 @@ i.receive {
   padding: 7px 14px 14px;
   height: auto;
   max-height: calc(100vh - 288px);
+  display: none;
 }
 #send-coins .ui.label.sendcoins {
   text-align: center;
