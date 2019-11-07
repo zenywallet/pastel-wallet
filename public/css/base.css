@@ -641,6 +641,9 @@ i.receive {
   vertical-align: top;
   height: 52px;
 }
+#receive-address .ui.basic.buttons .ui.button {
+  color: rgba(238, 238, 238, .8) !important;
+}
 #receive-address .ui.icon.button {
   padding: 3px 3px 3px 3px;
   width: 34px;
