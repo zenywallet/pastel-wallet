@@ -582,7 +582,7 @@ proc backWallet(): proc() =
     """
 
 proc recvAddressSelector(): VNode =
-  result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment")):
+  result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment hidden")):
     tdiv(class="ui top attached label recvaddress"):
       text "Receive Address "
       span:
@@ -607,11 +607,13 @@ proc recvAddressSelector(): VNode =
 proc btnReceive: proc() =
   result = proc() =
     asm """
-      if($('#receive-address').is(":hidden")) {
-        $('#send-coins').hide();
+      if($('#receive-address').hasClass('hidden')) {
+        if($('#send-coins').hasClass('visible')) {
+          $('#send-coins').transition('fade down');
+        }
         showRecvAddress();
       } else {
-        $('#receive-address').hide();
+        $('#receive-address').transition('fade down');
       }
     """
 
@@ -651,7 +653,7 @@ asm """
 """
 var uriOptions {.importc, nodecl.}: JsObject
 proc sendForm(): VNode =
-  result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment")):
+  result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment hidden")):
     tdiv(class="ui top attached label sendcoins"):
       text "Send Coins "
       span:
@@ -691,9 +693,11 @@ proc sendForm(): VNode =
 proc btnSend: proc() =
   result = proc() =
     asm """
-      if($('#send-coins').is(":hidden")) {
-        $('#receive-address').hide();
-        $('#send-coins').show();
+      if($('#send-coins').hasClass('hidden')) {
+        if(!$('#receive-address').hasClass('hidden')) {
+          $('#receive-address').transition('fade down');
+        }
+        $('#send-coins').transition('fade down');
         $('#btn-send-clear').off('click').click(function() {
           $('#send-coins input[name="address"]').val('');
           $('#send-coins input[name="amount"]').val('');
@@ -719,7 +723,7 @@ proc btnSend: proc() =
           $(this).blur();
         });
       } else {
-        $('#send-coins').hide();
+        $('#send-coins').transition('fade down');
       }
     """
 

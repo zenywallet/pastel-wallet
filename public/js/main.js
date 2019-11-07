@@ -92,22 +92,22 @@ var NTI46428 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI46442 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI46446 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI43040 = {size: 0,kind: 28,base: null,node: null,finalizer: null};
-var NTI254058 = {size: 0, kind: 14, base: null, node: null, finalizer: null};
-var NNI254058 = {kind: 2, offset: 0, typ: null, name: null, len: 14, sons: {"0": {kind: 1, offset: 0, typ: NTI254058, name: "SeedNone", len: 0, sons: null}, 
-"1": {kind: 1, offset: 1, typ: NTI254058, name: "SeedScanning", len: 0, sons: null}, 
-"2": {kind: 1, offset: 2, typ: NTI254058, name: "SeedAfterScan", len: 0, sons: null}, 
-"3": {kind: 1, offset: 3, typ: NTI254058, name: "MnemonicEdit", len: 0, sons: null}, 
-"4": {kind: 1, offset: 4, typ: NTI254058, name: "MnemonicFulfill", len: 0, sons: null}, 
-"5": {kind: 1, offset: 5, typ: NTI254058, name: "SetPassphrase", len: 0, sons: null}, 
-"6": {kind: 1, offset: 6, typ: NTI254058, name: "KeyNone", len: 0, sons: null}, 
-"7": {kind: 1, offset: 7, typ: NTI254058, name: "KeyScanning", len: 0, sons: null}, 
-"8": {kind: 1, offset: 8, typ: NTI254058, name: "KeyAfterScan", len: 0, sons: null}, 
-"9": {kind: 1, offset: 9, typ: NTI254058, name: "PassphraseEdit", len: 0, sons: null}, 
-"10": {kind: 1, offset: 10, typ: NTI254058, name: "PassphraseDone", len: 0, sons: null}, 
-"11": {kind: 1, offset: 11, typ: NTI254058, name: "Wallet", len: 0, sons: null}, 
-"12": {kind: 1, offset: 12, typ: NTI254058, name: "WalletLogs", len: 0, sons: null}, 
-"13": {kind: 1, offset: 13, typ: NTI254058, name: "WalletSettings", len: 0, sons: null}}};
-NTI254058.node = NNI254058;
+var NTI254045 = {size: 0, kind: 14, base: null, node: null, finalizer: null};
+var NNI254045 = {kind: 2, offset: 0, typ: null, name: null, len: 14, sons: {"0": {kind: 1, offset: 0, typ: NTI254045, name: "SeedNone", len: 0, sons: null}, 
+"1": {kind: 1, offset: 1, typ: NTI254045, name: "SeedScanning", len: 0, sons: null}, 
+"2": {kind: 1, offset: 2, typ: NTI254045, name: "SeedAfterScan", len: 0, sons: null}, 
+"3": {kind: 1, offset: 3, typ: NTI254045, name: "MnemonicEdit", len: 0, sons: null}, 
+"4": {kind: 1, offset: 4, typ: NTI254045, name: "MnemonicFulfill", len: 0, sons: null}, 
+"5": {kind: 1, offset: 5, typ: NTI254045, name: "SetPassphrase", len: 0, sons: null}, 
+"6": {kind: 1, offset: 6, typ: NTI254045, name: "KeyNone", len: 0, sons: null}, 
+"7": {kind: 1, offset: 7, typ: NTI254045, name: "KeyScanning", len: 0, sons: null}, 
+"8": {kind: 1, offset: 8, typ: NTI254045, name: "KeyAfterScan", len: 0, sons: null}, 
+"9": {kind: 1, offset: 9, typ: NTI254045, name: "PassphraseEdit", len: 0, sons: null}, 
+"10": {kind: 1, offset: 10, typ: NTI254045, name: "PassphraseDone", len: 0, sons: null}, 
+"11": {kind: 1, offset: 11, typ: NTI254045, name: "Wallet", len: 0, sons: null}, 
+"12": {kind: 1, offset: 12, typ: NTI254045, name: "WalletLogs", len: 0, sons: null}, 
+"13": {kind: 1, offset: 13, typ: NTI254045, name: "WalletSettings", len: 0, sons: null}}};
+NTI254045.node = NNI254045;
 var NNI46446 = {kind: 2, len: 0, offset: 0, typ: null, name: null, sons: []};
 NTI46446.node = NNI46446;
 var NNI46442 = {kind: 2, len: 0, offset: 0, typ: null, name: null, sons: []};
@@ -886,6 +886,21 @@ function modInt(a_64875, b_64876) {
 
 	
 }
+
+function nimBoolToStr(x_62045) {
+	var result_62046 = null;
+
+		if (x_62045) {
+		result_62046 = nimCopy(null, makeNimstrLit("true"), NTI43040);
+		}
+		else {
+			result_62046 = nimCopy(null, makeNimstrLit("false"), NTI43040);
+		}
+		
+
+	return result_62046;
+
+}
 var nim_program_result = 0;
 var global_raise_hook_59618 = [null];
 var local_raise_hook_59623 = [null];
@@ -903,242 +918,29 @@ var object_id_214437 = [0];
 var vcomponents_223026 = [{}];
 var kxi_230324 = [null];
 var app_inst_254014 = [null];
+var current_import_type_254037 = [0];
+var current_protect_type_254043 = [0];
+var show_scan_seed_btn_254060 = [true];
+var show_scanning_254061 = [true];
+var show_cam_tools_254062 = [true];
+var show_scan_result_254063 = [false];
+var show_scan_seed_btn2_254064 = [true];
+var show_scanning2_254065 = [true];
+var show_cam_tools2_254066 = [true];
+var show_scan_result2_254067 = [false];
+var show_page1_254068 = [true];
+var show_page2_254069 = [false];
+var show_page3_254070 = [false];
+var show_page4_254071 = [false];
+var mnemonic_fulfill_254072 = [false];
+var passphrase_fulfill_254073 = [false];
+var supress_redraw_254074 = [false];
+var show_recv_address_selector_254075 = [true];
+var show_recv_address_modal_254076 = [true];
+var show_trade_logs_254077 = [false];
+var show_settings_254078 = [false];
 var jsViewSelector = function() {}
 
-var camDevice = (function() {
-  var cam_ids = [];
-  var sel_cam = null;
-  var sel_cam_index = 0;
-  navigator.mediaDevices.enumerateDevices().then(function(devices) {
-    devices.forEach(function(device) {
-      if(device.kind == 'videoinput') {
-        cam_ids.push(device);
-      }
-    });
-  });
-  return {
-    next: function() {
-      if(cam_ids.length > 0) {
-        if(sel_cam == null) {
-          sel_cam_index = cam_ids.length - 1;
-          sel_cam = cam_ids[sel_cam_index].deviceId;
-        } else {
-          sel_cam_index++;
-          if(sel_cam_index >= cam_ids.length) {
-            sel_cam_index = 0;
-          }
-          sel_cam = cam_ids[sel_cam_index].deviceId;
-        }
-      }
-      return sel_cam;
-    },
-    count: function() {
-      return cam_ids.length;
-    }
-  };
-})();
-
-var qrReader = (function() {
-  var video, canvasElement, canvas, seedseg;
-  var abort = false;
-  var showing = false;
-  //var scandata = null;
-  //var loadingMessage = document.getElementById("loadingMessage");
-  //var outputContainer = document.getElementById("output");
-  //var outputMessage = document.getElementById("outputMessage");
-  //var outputData = document.getElementById("outputData");
-
-  function drawLine(begin, end, color) {
-    canvas.beginPath();
-    canvas.moveTo(begin.x, begin.y);
-    canvas.lineTo(end.x, end.y);
-    canvas.lineWidth = 4;
-    canvas.strokeStyle = color;
-    canvas.stroke();
-  }
-
-  function checkRange(rect, x1, y1, x2, y2) {
-    return (rect.x > x1 && rect.x < x2
-      && rect.y > y1 && rect.y < y2);
-  }
-
-  var cb_done = function() {}
-
-  function qr_stop() {
-    camera_scanning(false);
-    video.pause();
-    if(video.srcObject) {
-      video.srcObject.getTracks().forEach(function(track) {
-        track.stop();
-      });
-    }
-    video.removeAttribute('src');
-    video.load();
-  }
-
-  var skip_first_tick = false;
-  function tick() {
-    if(video.readyState === video.HAVE_ENOUGH_DATA) {
-      camera_scanning(true);
-      canvasElement.height = video.videoHeight;
-      canvasElement.width = video.videoWidth;
-      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-      var code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "dontInvert",
-      });
-      if(code) {
-        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#ff3b58");
-        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#ff3b58");
-        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#ff3b58");
-        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#ff3b58");
-
-        var sw = seedseg.offsetWidth - 28;
-        var sh = seedseg.offsetHeight - 28;
-        if(canvasElement.width > 0 && sw > 0) {
-          var mergin = 14;
-          var c = canvasElement.height / canvasElement.width;
-          var s = sh / sw;
-          var x1, y1, x2, y2;
-          if(c < s) {
-            var w = canvasElement.height / s;
-            x1 = (canvasElement.width - w) / 2;
-            y1 = 0;
-            x2 = x1 + w;
-            y2 = canvasElement.height;
-            x1 += mergin;
-            x2 -= mergin;
-            y1 += mergin;
-            y2 -= mergin;
-          } else {
-            var h = canvasElement.width * s;
-            x1 = 0;
-            y1 = (canvasElement.height - h) / 2;
-            x2 = canvasElement.width;
-            y2 = y1 + h;
-            x1 += mergin;
-            x2 -= mergin;
-            y1 += mergin;
-            y2 -= mergin;
-          }
-          if(skip_first_tick
-            && checkRange(code.location.topLeftCorner, x1, y1, x2, y2)
-            && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
-            && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
-            && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
-            console.log(code.data);
-            qr_stop();
-            if(!abort && cb_done) {
-              cb_done(code.data);
-            }
-            return;
-          }
-          skip_first_tick = true;
-        }
-      }
-    }
-    if(abort) {
-      return;
-    }
-    requestAnimationFrame(tick);
-  }
-
-  var mode_show = true;
-  var video = null;
-  var qr_instance = null;
-
-  var prev_camera_scanning_flag = false;
-  function camera_scanning(flag) {
-    if(prev_camera_scanning_flag != flag) {
-      if(flag) {
-        $('.qr-scanning').show();
-      } else {
-        $('.qr-scanning').hide();
-      }
-      prev_camera_scanning_flag = flag;
-    }
-  }
-
-  function video_status_change() {
-    if(mode_show) {
-      canvasElement.hidden = false;
-      $('.bt-scan-seed').css('visibility', 'hidden');
-      $('.camtools').css('visibility', 'visible');
-    } else {
-      camera_scanning(false);
-      $('.camtools').css('visibility', 'hidden');
-      $('.bt-scan-seed').css('visibility', 'visible');
-      if(canvasElement) {
-        canvasElement.hidden = true;
-      }
-    }
-  }
-
-  return {
-    show: function(cb) {
-      mode_show = true;
-      showing = false;
-      abort = false;
-      skip_first_tick = false;
-      video = video || document.createElement("video");
-      canvasElement = document.getElementById("qrcanvas");
-      canvas = canvasElement.getContext("2d");
-      seedseg = document.getElementById("seed-seg");
-      cb_done = cb;
-
-      // Use facingMode: environment to attemt to get the front camera on phones
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
-        video.srcObject = stream;
-        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-        video.play();
-        video_status_change();
-        showing = true;
-        requestAnimationFrame(tick);
-      });
-    },
-    hide: function(rescan) {
-      if(mode_show) {
-        abort = true;
-        if(showing) {
-          qr_stop();
-          showing = false;
-        }
-        if(canvas && canvasElement) {
-          canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        }
-        if(rescan) {
-          mode_show = false;
-          video_status_change();
-        } else {
-          if(canvasElement) {
-            canvasElement.hidden = true;
-          }
-        }
-        mode_show = false;
-      }
-    }
-  }
-})();
-
-var current_import_type_254050 = [0];
-var current_protect_type_254056 = [0];
-var show_scan_seed_btn_254073 = [true];
-var show_scanning_254074 = [true];
-var show_cam_tools_254075 = [true];
-var show_scan_result_254076 = [false];
-var show_scan_seed_btn2_254077 = [true];
-var show_scanning2_254078 = [true];
-var show_cam_tools2_254079 = [true];
-var show_scan_result2_254080 = [false];
-var show_page1_254081 = [true];
-var show_page2_254082 = [false];
-var show_page3_254083 = [false];
-var show_page4_254084 = [false];
-var mnemonic_fulfill_254085 = [false];
-var passphrase_fulfill_254086 = [false];
-var supress_redraw_254087 = [false];
-var show_recv_address_selector_254088 = [true];
-var show_recv_address_modal_254089 = [true];
 
 function new_seq_64336(len_64339) {
 	var result_64341 = null;
@@ -1433,15 +1235,15 @@ function apply_events_231086(n_231088) {
 		var dest_231089 = n_231088.dom;
 		L1: do {
 			var i_231102 = 0;
-			var colontmp__254211 = 0;
-			colontmp__254211 = (n_231088.events != null ? n_231088.events.length : 0);
-			var i_254212 = 0;
+			var colontmp__254200 = 0;
+			colontmp__254200 = (n_231088.events != null ? n_231088.events.length : 0);
+			var i_254201 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254212 < colontmp__254211)) break L3;
-						i_231102 = i_254212;
+					if (!(i_254201 < colontmp__254200)) break L3;
+						i_231102 = i_254201;
 						n_231088.events[chckIndx(i_231102, 0, n_231088.events.length+0-1)-0]["Field2"] = wrap_event_230390(dest_231089, n_231088, n_231088.events[chckIndx(i_231102, 0, n_231088.events.length+0-1)-0]["Field0"], n_231088.events[chckIndx(i_231102, 0, n_231088.events.length+0-1)-0]["Field1"]);
-						i_254212 = addInt(i_254212, 1);
+						i_254201 = addInt(i_254201, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1453,15 +1255,15 @@ function apply_style_99025(n_99027, s_99028) {
 		n_99027.style = {};
 		L1: do {
 			var i_99221 = 0;
-			var colontmp__254223 = 0;
-			colontmp__254223 = subInt(s_99028.length, 1);
-			var res_254224 = 0;
+			var colontmp__254212 = 0;
+			colontmp__254212 = subInt(s_99028.length, 1);
+			var res_254213 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(res_254224 <= colontmp__254223)) break L3;
-						i_99221 = res_254224;
+					if (!(res_254213 <= colontmp__254212)) break L3;
+						i_99221 = res_254213;
 						n_99027.style[s_99028[i_99221]] = s_99028[addInt(i_99221, 1)];
-						res_254224 = addInt(res_254224, 2);
+						res_254213 = addInt(res_254213, 2);
 					}
 			} while(false);
 		} while(false);
@@ -1557,17 +1359,17 @@ function vnode_to_dom_231167(n_231169, kxi_231170) {
 			L1: do {
 				var k_231831 = null;
 				L2: do {
-					var i_254181 = 0;
-					var colontmp__254182 = 0;
-					colontmp__254182 = (n_231169.kids != null ? n_231169.kids.length : 0);
-					var i_254183 = 0;
+					var i_254170 = 0;
+					var colontmp__254171 = 0;
+					colontmp__254171 = (n_231169.kids != null ? n_231169.kids.length : 0);
+					var i_254172 = 0;
 					L3: do {
 							L4: while (true) {
-							if (!(i_254183 < colontmp__254182)) break L4;
-								i_254181 = i_254183;
-								k_231831 = n_231169.kids[chckIndx(i_254181, 0, n_231169.kids.length+0-1)-0];
+							if (!(i_254172 < colontmp__254171)) break L4;
+								i_254170 = i_254172;
+								k_231831 = n_231169.kids[chckIndx(i_254170, 0, n_231169.kids.length+0-1)-0];
 								result_231171.appendChild(vnode_to_dom_231167(k_231831, kxi_231170));
-								i_254183 = addInt(i_254183, 1);
+								i_254172 = addInt(i_254172, 1);
 							}
 					} while(false);
 				} while(false);
@@ -1590,21 +1392,21 @@ function vnode_to_dom_231167(n_231169, kxi_231170) {
 			var k_231832 = null;
 			var v_231833 = null;
 			L6: do {
-				var i_254194 = 0;
-				var colontmp__254195 = 0;
-				colontmp__254195 = subInt((n_231169.attrs != null ? n_231169.attrs.length : 0), 2);
-				var res_254196 = 0;
+				var i_254183 = 0;
+				var colontmp__254184 = 0;
+				colontmp__254184 = subInt((n_231169.attrs != null ? n_231169.attrs.length : 0), 2);
+				var res_254185 = 0;
 				L7: do {
 						L8: while (true) {
-						if (!(res_254196 <= colontmp__254195)) break L8;
-							i_254194 = res_254196;
-							k_231832 = n_231169.attrs[chckIndx(i_254194, 0, n_231169.attrs.length+0-1)-0];
-							v_231833 = n_231169.attrs[chckIndx(addInt(i_254194, 1), 0, n_231169.attrs.length+0-1)-0];
+						if (!(res_254185 <= colontmp__254184)) break L8;
+							i_254183 = res_254185;
+							k_231832 = n_231169.attrs[chckIndx(i_254183, 0, n_231169.attrs.length+0-1)-0];
+							v_231833 = n_231169.attrs[chckIndx(addInt(i_254183, 1), 0, n_231169.attrs.length+0-1)-0];
 							if (!((v_231833 == null))) {
 							result_231171.setAttribute(k_231832, v_231833);
 							}
 							
-							res_254196 = addInt(res_254196, 2);
+							res_254185 = addInt(res_254185, 2);
 						}
 				} while(false);
 			} while(false);
@@ -1685,19 +1487,19 @@ function same_231920(n_231922, e_231923, nesting_231924) {
 		
 		L3: do {
 			var i_231994 = 0;
-			var colontmp__254230 = 0;
-			colontmp__254230 = len_210728(n_231922);
-			var i_254231 = 0;
+			var colontmp__254219 = 0;
+			colontmp__254219 = len_210728(n_231922);
+			var i_254220 = 0;
 			L4: do {
 					L5: while (true) {
-					if (!(i_254231 < colontmp__254230)) break L5;
-						i_231994 = i_254231;
+					if (!(i_254220 < colontmp__254219)) break L5;
+						i_231994 = i_254220;
 						if (!(same_231920(HEX5BHEX5D_210750(n_231922, i_231994), e_231923.childNodes[i_231994], addInt(nesting_231924, 1)))) {
 						result_231926 = false;
 						break BeforeRet;
 						}
 						
-						i_254231 = addInt(i_254231, 1);
+						i_254220 = addInt(i_254220, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1742,19 +1544,19 @@ function eq_97814(a_97816, b_97817) {
 		
 		L1: do {
 			var i_97916 = 0;
-			var colontmp__254268 = 0;
-			colontmp__254268 = a_97816.length;
-			var i_254269 = 0;
+			var colontmp__254257 = 0;
+			colontmp__254257 = a_97816.length;
+			var i_254258 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254269 < colontmp__254268)) break L3;
-						i_97916 = i_254269;
+					if (!(i_254258 < colontmp__254257)) break L3;
+						i_97916 = i_254258;
 						if (!((a_97816[i_97916] == b_97817[i_97916]))) {
 						result_97818 = false;
 						break BeforeRet;
 						}
 						
-						i_254269 = addInt(i_254269, 1);
+						i_254258 = addInt(i_254258, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1774,19 +1576,19 @@ function same_attrs_212480(a_212482, b_212483) {
 		result_212484 = true;
 		L1: do {
 			var i_212507 = 0;
-			var colontmp__254273 = 0;
-			colontmp__254273 = (a_212482.attrs != null ? a_212482.attrs.length : 0);
-			var i_254274 = 0;
+			var colontmp__254262 = 0;
+			colontmp__254262 = (a_212482.attrs != null ? a_212482.attrs.length : 0);
+			var i_254263 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254274 < colontmp__254273)) break L3;
-						i_212507 = i_254274;
+					if (!(i_254263 < colontmp__254262)) break L3;
+						i_212507 = i_254263;
 						if (!((a_212482.attrs[chckIndx(i_212507, 0, a_212482.attrs.length+0-1)-0] == b_212483.attrs[chckIndx(i_212507, 0, b_212483.attrs.length+0-1)-0]))) {
 						result_212484 = false;
 						break BeforeRet;
 						}
 						
-						i_254274 = addInt(i_254274, 1);
+						i_254263 = addInt(i_254263, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1842,19 +1644,19 @@ function eq_232214(a_232216, b_232217) {
 		
 		L1: do {
 			var i_233014 = 0;
-			var colontmp__254263 = 0;
-			colontmp__254263 = len_210728(a_232216);
-			var i_254264 = 0;
+			var colontmp__254252 = 0;
+			colontmp__254252 = len_210728(a_232216);
+			var i_254253 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254264 < colontmp__254263)) break L3;
-						i_233014 = i_254264;
+					if (!(i_254253 < colontmp__254252)) break L3;
+						i_233014 = i_254253;
 						if ((eq_232214(HEX5BHEX5D_210750(a_232216, i_233014), HEX5BHEX5D_210750(b_232217, i_233014)) == 1)) {
 						result_232218 = 1;
 						break BeforeRet;
 						}
 						
-						i_254264 = addInt(i_254264, 1);
+						i_254253 = addInt(i_254253, 1);
 					}
 			} while(false);
 		} while(false);
@@ -1930,18 +1732,18 @@ function update_attributes_233677(new_node_233679, old_node_233680) {
 			var k_233689 = null;
 			var __233690 = null;
 			L2: do {
-				var i_254280 = 0;
-				var colontmp__254281 = 0;
-				colontmp__254281 = subInt((old_node_233680.attrs != null ? old_node_233680.attrs.length : 0), 2);
-				var res_254282 = 0;
+				var i_254269 = 0;
+				var colontmp__254270 = 0;
+				colontmp__254270 = subInt((old_node_233680.attrs != null ? old_node_233680.attrs.length : 0), 2);
+				var res_254271 = 0;
 				L3: do {
 						L4: while (true) {
-						if (!(res_254282 <= colontmp__254281)) break L4;
-							i_254280 = res_254282;
-							k_233689 = old_node_233680.attrs[chckIndx(i_254280, 0, old_node_233680.attrs.length+0-1)-0];
-							__233690 = old_node_233680.attrs[chckIndx(addInt(i_254280, 1), 0, old_node_233680.attrs.length+0-1)-0];
+						if (!(res_254271 <= colontmp__254270)) break L4;
+							i_254269 = res_254271;
+							k_233689 = old_node_233680.attrs[chckIndx(i_254269, 0, old_node_233680.attrs.length+0-1)-0];
+							__233690 = old_node_233680.attrs[chckIndx(addInt(i_254269, 1), 0, old_node_233680.attrs.length+0-1)-0];
 							old_node_233680.dom.removeAttribute(k_233689);
-							res_254282 = addInt(res_254282, 2);
+							res_254271 = addInt(res_254271, 2);
 						}
 				} while(false);
 			} while(false);
@@ -1950,21 +1752,21 @@ function update_attributes_233677(new_node_233679, old_node_233680) {
 			var k_233691 = null;
 			var v_233692 = null;
 			L6: do {
-				var i_254288 = 0;
-				var colontmp__254289 = 0;
-				colontmp__254289 = subInt((new_node_233679.attrs != null ? new_node_233679.attrs.length : 0), 2);
-				var res_254290 = 0;
+				var i_254277 = 0;
+				var colontmp__254278 = 0;
+				colontmp__254278 = subInt((new_node_233679.attrs != null ? new_node_233679.attrs.length : 0), 2);
+				var res_254279 = 0;
 				L7: do {
 						L8: while (true) {
-						if (!(res_254290 <= colontmp__254289)) break L8;
-							i_254288 = res_254290;
-							k_233691 = new_node_233679.attrs[chckIndx(i_254288, 0, new_node_233679.attrs.length+0-1)-0];
-							v_233692 = new_node_233679.attrs[chckIndx(addInt(i_254288, 1), 0, new_node_233679.attrs.length+0-1)-0];
+						if (!(res_254279 <= colontmp__254278)) break L8;
+							i_254277 = res_254279;
+							k_233691 = new_node_233679.attrs[chckIndx(i_254277, 0, new_node_233679.attrs.length+0-1)-0];
+							v_233692 = new_node_233679.attrs[chckIndx(addInt(i_254277, 1), 0, new_node_233679.attrs.length+0-1)-0];
 							if (!((v_233692 == null))) {
 							old_node_233680.dom.setAttribute(k_233691, v_233692);
 							}
 							
-							res_254290 = addInt(res_254290, 2);
+							res_254279 = addInt(res_254279, 2);
 						}
 				} while(false);
 			} while(false);
@@ -1982,13 +1784,13 @@ function merge_events_233706(new_node_233708, old_node_233709, kxi_233710) {
 		var d_233711 = old_node_233709.dom;
 		L1: do {
 			var i_233724 = 0;
-			var colontmp__254295 = 0;
-			colontmp__254295 = (old_node_233709.events != null ? old_node_233709.events.length : 0);
-			var i_254296 = 0;
+			var colontmp__254284 = 0;
+			colontmp__254284 = (old_node_233709.events != null ? old_node_233709.events.length : 0);
+			var i_254285 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254296 < colontmp__254295)) break L3;
-						i_233724 = i_254296;
+					if (!(i_254285 < colontmp__254284)) break L3;
+						i_233724 = i_254285;
 						var k_233725 = old_node_233709.events[chckIndx(i_233724, 0, old_node_233709.events.length+0-1)-0]["Field0"];
 						switch (k_233725) {
 						case 30:
@@ -2001,7 +1803,7 @@ function merge_events_233706(new_node_233708, old_node_233709, kxi_233710) {
 						}
 						var name_233728 = Tmp4;
 						d_233711.removeEventListener(name_233728, old_node_233709.events[chckIndx(i_233724, 0, old_node_233709.events.length+0-1)-0]["Field2"]);
-						i_254296 = addInt(i_254296, 1);
+						i_254285 = addInt(i_254285, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2193,13 +1995,13 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 			var pos_235435 = addInt(nimMin(old_pos_235023, new_pos_235024), 1);
 			L11: do {
 				var i_235441 = 0;
-				var colontmp__254238 = 0;
-				colontmp__254238 = subInt(pos_235435, 1);
-				var res_254239 = common_prefix_234602;
+				var colontmp__254227 = 0;
+				colontmp__254227 = subInt(pos_235435, 1);
+				var res_254228 = common_prefix_234602;
 				L12: do {
 						L13: while (true) {
-						if (!(res_254239 <= colontmp__254238)) break L13;
-							i_235441 = res_254239;
+						if (!(res_254228 <= colontmp__254227)) break L13;
+							i_235441 = res_254228;
 							var r_235442 = diff_234045(HEX5BHEX5D_210750(new_node_234047, i_235441), HEX5BHEX5D_210750(old_node_234048, i_235441), current_234050, current_234050.childNodes[chckIndx(i_235441, 0, current_234050.childNodes.length+0-1)-0], kxi_234051);
 							if ((r_235442 == 4)) {
 							add_patch_v_233868(kxi_234051, old_node_234048, i_235441, HEX5BHEX5D_210750(new_node_234047, i_235441));
@@ -2209,21 +2011,21 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 							HEX5BHEX5DHEX3D_210768(new_node_234047, i_235441, HEX5BHEX5D_210750(old_node_234048, i_235441));
 							}
 							}
-							res_254239 = addInt(res_254239, 1);
+							res_254228 = addInt(res_254228, 1);
 						}
 				} while(false);
 			} while(false);
 			if ((addInt(old_pos_235023, 1) == old_length_234402)) {
 			L14: do {
 				var i_235458 = 0;
-				var res_254245 = pos_235435;
+				var res_254234 = pos_235435;
 				L15: do {
 						L16: while (true) {
-						if (!(res_254245 <= new_pos_235024)) break L16;
-							i_235458 = res_254245;
+						if (!(res_254234 <= new_pos_235024)) break L16;
+							i_235458 = res_254234;
 							add_patch_233814(kxi_234051, 2, current_234050, null, HEX5BHEX5D_210750(new_node_234047, i_235458));
 							result_234052 = 4;
-							res_254245 = addInt(res_254245, 1);
+							res_254234 = addInt(res_254234, 1);
 						}
 				} while(false);
 			} while(false);
@@ -2232,14 +2034,14 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 				var before_235459 = current_234050.childNodes[chckIndx(addInt(old_pos_235023, 1), 0, current_234050.childNodes.length+0-1)-0];
 				L17: do {
 					var i_235465 = 0;
-					var res_254251 = pos_235435;
+					var res_254240 = pos_235435;
 					L18: do {
 							L19: while (true) {
-							if (!(res_254251 <= new_pos_235024)) break L19;
-								i_235465 = res_254251;
+							if (!(res_254240 <= new_pos_235024)) break L19;
+								i_235465 = res_254240;
 								add_patch_233814(kxi_234051, 3, current_234050, before_235459, HEX5BHEX5D_210750(new_node_234047, i_235465));
 								result_234052 = 4;
-								res_254251 = addInt(res_254251, 1);
+								res_254240 = addInt(res_254240, 1);
 							}
 					} while(false);
 				} while(false);
@@ -2247,15 +2049,15 @@ function diff_234045(new_node_234047, old_node_234048, parent_234049, current_23
 			
 			L20: do {
 				var i_235471 = 0;
-				var res_254257 = pos_235435;
+				var res_254246 = pos_235435;
 				L21: do {
 						L22: while (true) {
-						if (!(res_254257 <= old_pos_235023)) break L22;
-							i_235471 = res_254257;
+						if (!(res_254246 <= old_pos_235023)) break L22;
+							i_235471 = res_254246;
 							add_patch_233814(kxi_230324[0], 4, null, null, HEX5BHEX5D_210750(old_node_234048, i_235471));
 							add_patch_233814(kxi_234051, 1, current_234050, current_234050.childNodes[chckIndx(i_235471, 0, current_234050.childNodes.length+0-1)-0], null);
 							result_234052 = 4;
-							res_254257 = addInt(res_254257, 1);
+							res_254246 = addInt(res_254246, 1);
 						}
 				} while(false);
 			} while(false);
@@ -2333,13 +2135,13 @@ function apply_components_235814(kxi_235816) {
 function apply_patch_233906(kxi_233908) {
 		L1: do {
 			var i_233916 = 0;
-			var colontmp__254303 = 0;
-			colontmp__254303 = kxi_233908.patchLen;
-			var i_254304 = 0;
+			var colontmp__254292 = 0;
+			colontmp__254292 = kxi_233908.patchLen;
+			var i_254293 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_254304 < colontmp__254303)) break L3;
-						i_233916 = i_254304;
+					if (!(i_254293 < colontmp__254292)) break L3;
+						i_233916 = i_254293;
 						var p_233917 = nimCopy(null, kxi_233908.patches[chckIndx(i_233916, 0, kxi_233908.patches.length+0-1)-0], NTI230209);
 						switch (p_233917.k) {
 						case 0:
@@ -2383,27 +2185,27 @@ function apply_patch_233906(kxi_233908) {
 							
 							break;
 						}
-						i_254304 = addInt(i_254304, 1);
+						i_254293 = addInt(i_254293, 1);
 					}
 			} while(false);
 		} while(false);
 		kxi_233908.patchLen = 0;
 		L4: do {
 			var i_233960 = 0;
-			var colontmp__254308 = 0;
-			colontmp__254308 = kxi_233908.patchLenV;
-			var i_254309 = 0;
+			var colontmp__254297 = 0;
+			colontmp__254297 = kxi_233908.patchLenV;
+			var i_254298 = 0;
 			L5: do {
 					L6: while (true) {
-					if (!(i_254309 < colontmp__254308)) break L6;
-						i_233960 = i_254309;
+					if (!(i_254298 < colontmp__254297)) break L6;
+						i_233960 = i_254298;
 						var p_233961 = nimCopy(null, kxi_233908.patchesV[chckIndx(i_233960, 0, kxi_233908.patchesV.length+0-1)-0], NTI230211);
 						HEX5BHEX5DHEX3D_210768(p_233961.parent, p_233961.pos, p_233961.newChild);
 						if (!(!((p_233961.newChild.dom == null)))) {
 						failed_assert_impl_56866(makeNimstrLit("karax.nim(377, 12) `p.newChild.dom != nil` "));
 						}
 						
-						i_254309 = addInt(i_254309, 1);
+						i_254298 = addInt(i_254298, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2473,86 +2275,95 @@ function redraw_239814(kxi_239816) {
 	
 }
 
-function view_selector_254133(view_254135, no_redraw_254136) {
-		rawEcho(makeNimstrLit("view"), reprEnum(view_254135, NTI254058));
-		switch (view_254135) {
+function view_selector_254122(view_254124, no_redraw_254125) {
+		rawEcho(makeNimstrLit("view"), reprEnum(view_254124, NTI254045));
+		switch (view_254124) {
 		case 0:
-			show_scan_seed_btn_254073[0] = true;
-			show_scanning_254074[0] = true;
-			show_cam_tools_254075[0] = true;
-			show_scan_result_254076[0] = false;
-			show_page2_254082[0] = false;
+			show_scan_seed_btn_254060[0] = true;
+			show_scanning_254061[0] = true;
+			show_cam_tools_254062[0] = true;
+			show_scan_result_254063[0] = false;
+			show_page2_254069[0] = false;
 			break;
 		case 1:
-			show_scan_seed_btn_254073[0] = true;
-			show_scanning_254074[0] = true;
-			show_cam_tools_254075[0] = true;
-			show_scan_result_254076[0] = false;
-			show_page2_254082[0] = false;
+			show_scan_seed_btn_254060[0] = true;
+			show_scanning_254061[0] = true;
+			show_cam_tools_254062[0] = true;
+			show_scan_result_254063[0] = false;
+			show_page2_254069[0] = false;
 			break;
 		case 2:
-			show_scan_seed_btn_254073[0] = false;
-			show_scanning_254074[0] = false;
-			show_cam_tools_254075[0] = false;
-			show_scan_result_254076[0] = true;
-			show_page2_254082[0] = true;
+			show_scan_seed_btn_254060[0] = false;
+			show_scanning_254061[0] = false;
+			show_cam_tools_254062[0] = false;
+			show_scan_result_254063[0] = true;
+			show_page2_254069[0] = true;
 			break;
 		case 3:
-			show_page2_254082[0] = false;
+			show_page2_254069[0] = false;
 			break;
 		case 4:
-			show_page2_254082[0] = true;
+			show_page2_254069[0] = true;
 			break;
 		case 5:
-			show_scan_seed_btn_254073[0] = true;
-			show_scanning_254074[0] = true;
-			show_cam_tools_254075[0] = true;
-			show_scan_result_254076[0] = false;
-			show_scan_seed_btn2_254077[0] = true;
-			show_scanning2_254078[0] = true;
-			show_cam_tools2_254079[0] = true;
-			show_scan_result2_254080[0] = false;
-			show_page1_254081[0] = false;
-			show_page2_254082[0] = true;
+			show_scan_seed_btn_254060[0] = true;
+			show_scanning_254061[0] = true;
+			show_cam_tools_254062[0] = true;
+			show_scan_result_254063[0] = false;
+			show_scan_seed_btn2_254064[0] = true;
+			show_scanning2_254065[0] = true;
+			show_cam_tools2_254066[0] = true;
+			show_scan_result2_254067[0] = false;
+			show_page1_254068[0] = false;
+			show_page2_254069[0] = true;
 			break;
 		case 8:
-			show_page3_254083[0] = true;
+			show_page3_254070[0] = true;
 			break;
 		case 10:
-			show_page3_254083[0] = true;
+			show_page3_254070[0] = true;
 			break;
 		case 11:
-			show_page1_254081[0] = false;
-			show_page2_254082[0] = false;
-			show_page3_254083[0] = true;
-			show_page4_254084[0] = false;
+			show_page1_254068[0] = false;
+			show_page2_254069[0] = false;
+			show_page3_254070[0] = true;
+			show_page4_254071[0] = false;
 			break;
 		case 12:
-			show_page1_254081[0] = false;
-			show_page2_254082[0] = false;
-			show_page3_254083[0] = true;
-			show_page4_254084[0] = true;
+			show_page1_254068[0] = false;
+			show_page2_254069[0] = false;
+			show_page3_254070[0] = true;
+			show_page4_254071[0] = true;
+			show_settings_254078[0] = false;
+			show_trade_logs_254077[0] = true;
 			break;
 		case 13:
-			show_page1_254081[0] = false;
-			show_page2_254082[0] = false;
-			show_page3_254083[0] = true;
-			show_page4_254084[0] = true;
+			show_page1_254068[0] = false;
+			show_page2_254069[0] = false;
+			show_page3_254070[0] = true;
+			show_page4_254071[0] = true;
+			show_trade_logs_254077[0] = false;
+			show_settings_254078[0] = true;
 			break;
 		default: 
 			break;
 		}
-		if (!(no_redraw_254136)) {
+		if (!(no_redraw_254125)) {
 		redraw_239814(app_inst_254014[0]);
 		}
 		
 
 	
 }
-  jsViewSelector = view_selector_254133
-  jsSupressRedraw = supress_redraw_254087[0]
+  jsViewSelector = view_selector_254122;
+  function setSupressRedraw(flag) {
+    supress_redraw_254074[0] = flag;
+  }
+  function getSupressRedraw() {
+    return supress_redraw_254074[0];
+  }
 
-var seed_card_info_254425 = [{seed: null, gen: null, tag: null, orig: null}];
+var seed_card_info_254414 = [{seed: null, gen: null, tag: null, orig: null}];
 // https://github.com/gustf/js-levenshtein
 var levenshtein = (function()
 {
@@ -2717,6 +2528,8 @@ function HEX3Aanonymous_258351(x_258353) {
 var wl_japanese_258339 = [nimCopy(null, bip39_257966[0].wordlists.japanese.map((HEX3Aanonymous_258310)), NTI258299)];
 var wl_english_258380 = [nimCopy(null, bip39_257966[0].wordlists.english.map((HEX3Aanonymous_258351)), NTI258340)];
 var wl_select_258381 = [nimCopy(null, wl_japanese_258339[0], NTI258299)];
+  var uriOptions = [];
+
 
 function new_seq_240213(len_240216) {
 	var result_240218 = null;
@@ -2779,13 +2592,13 @@ function tree_212046(kind_212048, kids_212050) {
 		result_212051 = new_vnode_212028(kind_212048);
 		L1: do {
 			var k_212082 = null;
-			var i_261026 = 0;
+			var i_261381 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_261026 < (kids_212050 != null ? kids_212050.length : 0))) break L3;
-						k_212082 = kids_212050[chckIndx(i_261026, 0, kids_212050.length+0-1)-0];
+					if (!(i_261381 < (kids_212050 != null ? kids_212050.length : 0))) break L3;
+						k_212082 = kids_212050[chckIndx(i_261381, 0, kids_212050.length+0-1)-0];
 						add_210786(result_212051, k_212082);
-						i_261026 = addInt(i_261026, 1);
+						i_261381 = addInt(i_261381, 1);
 					}
 			} while(false);
 		} while(false);
@@ -2826,8 +2639,8 @@ function add_event_handler_240584(n_240586, k_240587, action_240590, kxi_240591)
 	
 }
 
-function view_update_254312() {
-		if (!(supress_redraw_254087[0])) {
+function view_update_254301() {
+		if (!(supress_redraw_254074[0])) {
 		redraw_239814(app_inst_254014[0]);
 		}
 		
@@ -2835,21 +2648,21 @@ function view_update_254312() {
 	
 }
 
-function import_selector_254327(import_type_254329) {
+function import_selector_254316(import_type_254318) {
 
-		function HEX3Aanonymous_254333() {
+		function HEX3Aanonymous_254322() {
 				      qrReader.hide(true);
     
-				current_import_type_254050[0] = import_type_254329;
-				if ((current_import_type_254050[0] == 0)) {
-				show_page2_254082[0] = show_scan_result_254076[0];
+				current_import_type_254037[0] = import_type_254318;
+				if ((current_import_type_254037[0] == 0)) {
+				show_page2_254069[0] = show_scan_result_254063[0];
 				}
 				else {
-				if ((current_import_type_254050[0] == 1)) {
-				show_page2_254082[0] = mnemonic_fulfill_254085[0];
+				if ((current_import_type_254037[0] == 1)) {
+				show_page2_254069[0] = mnemonic_fulfill_254072[0];
 				}
 				}
-				if ((current_import_type_254050[0] == 0)) {
+				if ((current_import_type_254037[0] == 0)) {
 				        $('#seedselector').removeClass('grey').addClass('olive');
         $('#mnemonicselector').removeClass('olive').addClass('grey');
       
@@ -2860,16 +2673,16 @@ function import_selector_254327(import_type_254329) {
       
 				}
 				
-				view_update_254312();
+				view_update_254301();
 
 			
 		}
 
-	var result_254332 = null;
+	var result_254321 = null;
 
-		result_254332 = HEX3Aanonymous_254333;
+		result_254321 = HEX3Aanonymous_254322;
 
-	return result_254332;
+	return result_254321;
 
 }
 
@@ -2881,19 +2694,19 @@ function set_attr_210568(n_210570, key_210571, val_210572) {
 		else {
 			L1: do {
 				var i_210601 = 0;
-				var colontmp__261056 = 0;
-				colontmp__261056 = subInt((n_210570.attrs != null ? n_210570.attrs.length : 0), 2);
-				var res_261057 = 0;
+				var colontmp__261411 = 0;
+				colontmp__261411 = subInt((n_210570.attrs != null ? n_210570.attrs.length : 0), 2);
+				var res_261412 = 0;
 				L2: do {
 						L3: while (true) {
-						if (!(res_261057 <= colontmp__261056)) break L3;
-							i_210601 = res_261057;
+						if (!(res_261412 <= colontmp__261411)) break L3;
+							i_210601 = res_261412;
 							if ((n_210570.attrs[chckIndx(i_210601, 0, n_210570.attrs.length+0-1)-0] == key_210571)) {
 							n_210570.attrs[chckIndx(addInt(i_210601, 1), 0, n_210570.attrs.length+0-1)-0] = val_210572;
 							break BeforeRet;
 							}
 							
-							res_261057 = addInt(res_261057, 2);
+							res_261412 = addInt(res_261412, 2);
 						}
 				} while(false);
 			} while(false);
@@ -2969,13 +2782,13 @@ function HEX5BHEX5D_124281(s_124285, x_124287) {
 		result_124288 = nimCopy(null, mnewString(chckRange(l_124601, 0, 2147483647)), NTI43040);
 		L1: do {
 			var i_124609 = 0;
-			var i_261069 = 0;
+			var i_261424 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_261069 < l_124601)) break L3;
-						i_124609 = i_261069;
+					if (!(i_261424 < l_124601)) break L3;
+						i_124609 = i_261424;
 						result_124288[chckIndx(i_124609, 0, result_124288.length+0-1)-0] = s_124285[chckIndx(addInt(i_124609, a_124401), 0, s_124285.length+0-1)-0];
-						i_261069 = addInt(i_261069, 1);
+						i_261424 = addInt(i_261424, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3001,13 +2814,13 @@ function HEX5BHEX5D_151304(s_151308, x_151310) {
 		result_151311 = nimCopy(null, mnewString(chckRange(l_151601, 0, 2147483647)), NTI43040);
 		L1: do {
 			var i_151609 = 0;
-			var i_261077 = 0;
+			var i_261432 = 0;
 			L2: do {
 					L3: while (true) {
-					if (!(i_261077 < l_151601)) break L3;
-						i_151609 = i_261077;
+					if (!(i_261432 < l_151601)) break L3;
+						i_151609 = i_261432;
 						result_151311[chckIndx(i_151609, 0, result_151311.length+0-1)-0] = s_151308[chckIndx(addInt(i_151609, a_151401), 0, s_151308.length+0-1)-0];
-						i_261077 = addInt(i_261077, 1);
+						i_261432 = addInt(i_261432, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3143,31 +2956,31 @@ function nsuSplitChar(s_199455, sep_199456, maxsplit_199458) {
 		result_199460 = nimCopy(null, [], NTI199476);
 		L1: do {
 			var xHEX60gensym199461_199477 = null;
-			var lastHEX60gensym198812_261093 = 0;
-			var splitsHEX60gensym198813_261094 = maxsplit_199458;
+			var lastHEX60gensym198812_261448 = 0;
+			var splitsHEX60gensym198813_261449 = maxsplit_199458;
 			L2: do {
 					L3: while (true) {
-					if (!(lastHEX60gensym198812_261093 <= (s_199455 != null ? s_199455.length : 0))) break L3;
-						var firstHEX60gensym198814_261096 = lastHEX60gensym198812_261093;
+					if (!(lastHEX60gensym198812_261448 <= (s_199455 != null ? s_199455.length : 0))) break L3;
+						var firstHEX60gensym198814_261451 = lastHEX60gensym198812_261448;
 						L4: do {
 								L5: while (true) {
-								if (!((lastHEX60gensym198812_261093 < (s_199455 != null ? s_199455.length : 0)) && !((s_199455[chckIndx(lastHEX60gensym198812_261093, 0, s_199455.length+0-1)-0] == sep_199456)))) break L5;
-									lastHEX60gensym198812_261093 = addInt(lastHEX60gensym198812_261093, 1);
+								if (!((lastHEX60gensym198812_261448 < (s_199455 != null ? s_199455.length : 0)) && !((s_199455[chckIndx(lastHEX60gensym198812_261448, 0, s_199455.length+0-1)-0] == sep_199456)))) break L5;
+									lastHEX60gensym198812_261448 = addInt(lastHEX60gensym198812_261448, 1);
 								}
 						} while(false);
-						if ((splitsHEX60gensym198813_261094 == 0)) {
-						lastHEX60gensym198812_261093 = (s_199455 != null ? s_199455.length : 0);
+						if ((splitsHEX60gensym198813_261449 == 0)) {
+						lastHEX60gensym198812_261448 = (s_199455 != null ? s_199455.length : 0);
 						}
 						
-						xHEX60gensym199461_199477 = substr_71222(s_199455, firstHEX60gensym198814_261096, subInt(lastHEX60gensym198812_261093, 1));
+						xHEX60gensym199461_199477 = substr_71222(s_199455, firstHEX60gensym198814_261451, subInt(lastHEX60gensym198812_261448, 1));
 						var Tmp6 = nimCopy(null, xHEX60gensym199461_199477, NTI43040);
 						if (result_199460 != null) { result_199460.push(Tmp6); } else { result_199460 = [Tmp6]; };
-						if ((splitsHEX60gensym198813_261094 == 0)) {
+						if ((splitsHEX60gensym198813_261449 == 0)) {
 						break L2;
 						}
 						
-						splitsHEX60gensym198813_261094 = subInt(splitsHEX60gensym198813_261094, 1);
-						lastHEX60gensym198812_261093 = addInt(lastHEX60gensym198812_261093, 1);
+						splitsHEX60gensym198813_261449 = subInt(splitsHEX60gensym198813_261449, 1);
+						lastHEX60gensym198812_261448 = addInt(lastHEX60gensym198812_261448, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3349,12 +3162,12 @@ function add_quoted_255401(s_255404, s_255404_Idx, x_255405) {
 		if (s_255404[s_255404_Idx] != null) { s_255404[s_255404_Idx] = (s_255404[s_255404_Idx]).concat(makeNimstrLit("\"")); } else { s_255404[s_255404_Idx] = makeNimstrLit("\""); };
 		L1: do {
 			var c_255601 = 0;
-			var i_261100 = 0;
-			var l_261101 = (x_255405 != null ? x_255405.length : 0);
+			var i_261455 = 0;
+			var l_261456 = (x_255405 != null ? x_255405.length : 0);
 			L2: do {
 					L3: while (true) {
-					if (!(i_261100 < l_261101)) break L3;
-						c_255601 = x_255405.charCodeAt(chckIndx(i_261100, 0, x_255405.length+0-1)-0);
+					if (!(i_261455 < l_261456)) break L3;
+						c_255601 = x_255405.charCodeAt(chckIndx(i_261455, 0, x_255405.length+0-1)-0);
 						if ((c_255601 <= 127)) {
 						add_escaped_char_69814(s_255404, s_255404_Idx, c_255601);
 						}
@@ -3362,7 +3175,7 @@ function add_quoted_255401(s_255404, s_255404_Idx, x_255405) {
 						if (s_255404[s_255404_Idx] != null) { addChar(s_255404[s_255404_Idx], c_255601); } else { s_255404[s_255404_Idx] = [c_255601]; };
 						}
 						
-						i_261100 = addInt(i_261100, 1);
+						i_261455 = addInt(i_261455, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3438,46 +3251,46 @@ function HEX24_254723(x_254726) {
 
 }
 
-function cb_seed_qr_done_254454(data_254456) {
-		rawEcho(makeNimstrLit("cbQrDone:"), cstrToNimstr(data_254456));
-		var sdata_254460 = cstrToNimstr(data_254456);
-		var ds_254461 = nsuSplitChar(sdata_254460, 44, -1);
+function cb_seed_qr_done_254443(data_254445) {
+		rawEcho(makeNimstrLit("cbQrDone:"), cstrToNimstr(data_254445));
+		var sdata_254449 = cstrToNimstr(data_254445);
+		var ds_254450 = nsuSplitChar(sdata_254449, 44, -1);
 		L1: do {
 			var d_254614 = null;
-			var i_261087 = 0;
-			var l_261088 = (ds_254461 != null ? ds_254461.length : 0);
+			var i_261442 = 0;
+			var l_261443 = (ds_254450 != null ? ds_254450.length : 0);
 			L2: do {
 					L3: while (true) {
-					if (!(i_261087 < l_261088)) break L3;
-						d_254614 = ds_254461[chckIndx(i_261087, 0, ds_254461.length+0-1)-0];
+					if (!(i_261442 < l_261443)) break L3;
+						d_254614 = ds_254450[chckIndx(i_261442, 0, ds_254450.length+0-1)-0];
 						if (nsuStartsWith(d_254614, makeNimstrLit("seed:"))) {
-						seed_card_info_254425[0].seed = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(5, 1)));
-						rawEcho(cstrToNimstr(seed_card_info_254425[0].seed));
+						seed_card_info_254414[0].seed = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(5, 1)));
+						rawEcho(cstrToNimstr(seed_card_info_254414[0].seed));
 						}
 						else {
 						if (nsuStartsWith(d_254614, makeNimstrLit("tag:"))) {
-						seed_card_info_254425[0].tag = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
-						rawEcho(cstrToNimstr(seed_card_info_254425[0].tag));
+						seed_card_info_254414[0].tag = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
+						rawEcho(cstrToNimstr(seed_card_info_254414[0].tag));
 						}
 						else {
 						if (nsuStartsWith(d_254614, makeNimstrLit("gen:"))) {
-						seed_card_info_254425[0].gen = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
-						rawEcho(cstrToNimstr(seed_card_info_254425[0].gen));
+						seed_card_info_254414[0].gen = toJSStr(HEX5BHEX5D_151304(d_254614, HEX2EHEX2E_151239(4, 1)));
+						rawEcho(cstrToNimstr(seed_card_info_254414[0].gen));
 						}
 						}}
-						i_261087 = addInt(i_261087, 1);
-						if (!(((ds_254461 != null ? ds_254461.length : 0) == l_261088))) {
+						i_261442 = addInt(i_261442, 1);
+						if (!(((ds_254450 != null ? ds_254450.length : 0) == l_261443))) {
 						failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 						}
 						
 					}
 			} while(false);
 		} while(false);
-		seed_card_info_254425[0].orig = data_254456;
-		rawEcho(HEX24_254723(seed_card_info_254425[0]));
+		seed_card_info_254414[0].orig = data_254445;
+		rawEcho(HEX24_254723(seed_card_info_254414[0]));
 		    qrReader.hide();
   
-		view_selector_254133(2, false);
+		view_selector_254122(2, false);
 
 	
 }
@@ -3485,7 +3298,7 @@ function cb_seed_qr_done_254454(data_254456) {
 function show_qr_257829() {
 
 		function HEX3Aanonymous_257834() {
-				      qrReader.show(cb_seed_qr_done_254454);
+				      qrReader.show(cb_seed_qr_done_254443);
     
 
 			
@@ -3503,7 +3316,7 @@ function cam_change_257862() {
 
 		function HEX3Aanonymous_257867() {
 				      $('.camtools button').blur();
-      //qrReader.show(cb_seed_qr_done_254454);
+      //qrReader.show(cb_seed_qr_done_254443);
     
 
 			
@@ -3565,7 +3378,7 @@ function change_language_258756(ev_258758, n_258759) {
 		}
 		autocomplete_words_258012[0] = nimCopy(null, [], NTI258795);
 		chklist_258020[0] = nimCopy(null, [], NTI258810);
-		view_update_254312();
+		view_update_254301();
 
 	
 }
@@ -3582,9 +3395,9 @@ function check_mnemonic_258050(ev_258052, n_258053) {
 		
 		prev_check_word_258021[0] = s_258054;
 			if (!!((s_258054 == null))) Tmp1 = false; else {				Tmp1 = (0 < (s_258054 != null ? s_258054.length : 0));			}		if (Tmp1) {
-			if (!mnemonic_fulfill_254085[0]) Tmp2 = false; else {				Tmp2 = !((editing_words_257995[0] == s_258054));			}		if (Tmp2) {
-		mnemonic_fulfill_254085[0] = false;
-		view_selector_254133(3, false);
+			if (!mnemonic_fulfill_254072[0]) Tmp2 = false; else {				Tmp2 = !((editing_words_257995[0] == s_258054));			}		if (Tmp2) {
+		mnemonic_fulfill_254072[0] = false;
+		view_selector_254122(3, false);
 		}
 		
 		editing_words_257995[0] = s_258054;
@@ -3595,11 +3408,11 @@ function check_mnemonic_258050(ev_258052, n_258053) {
 		var tmplist_258113 = [];
 		L4: do {
 			var word_258114 = null;
-			var v_261146 = null;
+			var v_261501 = null;
 			for (var k in bip39_wordlist_257977[0]) {
 			  if (!bip39_wordlist_257977[0].hasOwnProperty(k)) continue;
-			  v_261146=bip39_wordlist_257977[0][k];
-			word_258114 = v_261146;
+			  v_261501=bip39_wordlist_257977[0][k];
+			word_258114 = v_261501;
 			var w_258115 = word_258114;
 			if (w_258115.startsWith(s_258054)) {
 			if (tmplist_258113 != null) { tmplist_258113.push(w_258115); } else { tmplist_258113 = [w_258115]; };
@@ -3618,7 +3431,7 @@ function check_mnemonic_258050(ev_258052, n_258053) {
 			autocomplete_words_258012[0] = nimCopy(null, [], NTI258152);
 		}
 		
-		view_update_254312();
+		view_update_254301();
 
 	
 }
@@ -3663,12 +3476,12 @@ function confirm_mnemonic_258399(input_id_258401) {
 				var allvalid_258429 = true;
 				L2: do {
 					var word_258614 = null;
-					var i_261150 = 0;
-					var l_261151 = (words_258412 != null ? words_258412.length : 0);
+					var i_261505 = 0;
+					var l_261506 = (words_258412 != null ? words_258412.length : 0);
 					L3: do {
 							L4: while (true) {
-							if (!(i_261150 < l_261151)) break L4;
-								word_258614 = words_258412[chckIndx(i_261150, 0, words_258412.length+0-1)-0];
+							if (!(i_261505 < l_261506)) break L4;
+								word_258614 = words_258412[chckIndx(i_261505, 0, words_258412.length+0-1)-0];
 								if (wl_select_258381[0].includes(word_258614)) {
 								if (chklist_258020[0] != null) { chklist_258020[0].push({Field0: idx_258428, Field1: word_258614, Field2: true, Field3: []}); } else { chklist_258020[0] = [{Field0: idx_258428, Field1: word_258614, Field2: true, Field3: []}]; };
 								}
@@ -3679,8 +3492,8 @@ function confirm_mnemonic_258399(input_id_258401) {
 								}
 								
 								idx_258428 = addInt(idx_258428, 1);
-								i_261150 = addInt(i_261150, 1);
-								if (!(((words_258412 != null ? words_258412.length : 0) == l_261151))) {
+								i_261505 = addInt(i_261505, 1);
+								if (!(((words_258412 != null ? words_258412.length : 0) == l_261506))) {
 								failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 								}
 								
@@ -3688,8 +3501,8 @@ function confirm_mnemonic_258399(input_id_258401) {
 					} while(false);
 				} while(false);
 					if (!allvalid_258429) Tmp6 = false; else {						Tmp6 = (12 <= idx_258428);					}					if (!Tmp6) Tmp5 = false; else {						Tmp5 = (modInt(idx_258428, 3) == 0);					}				if (Tmp5) {
-				mnemonic_fulfill_254085[0] = true;
-				view_selector_254133(4, false);
+				mnemonic_fulfill_254072[0] = true;
+				view_selector_254122(4, false);
 				}
 				
 				}
@@ -3698,7 +3511,7 @@ function confirm_mnemonic_258399(input_id_258401) {
 				}
 				
 				autocomplete_words_258012[0] = nimCopy(null, [], NTI258687);
-				view_update_254312();
+				view_update_254301();
 
 			
 		}
@@ -3762,7 +3575,7 @@ function select_word_258166(input_id_258168, word_258169, whole_replace_258170) 
 				}
 				
 				autocomplete_words_258012[0] = nimCopy(null, [], NTI258272);
-				view_update_254312();
+				view_update_254301();
 
 			
 		}
@@ -3894,19 +3707,19 @@ function mnemonic_editor_258824() {
 		tmp_258891.class = "medit-autocomp";
 		L1: do {
 			var word_258976 = null;
-			var i_261123 = 0;
-			var l_261124 = (autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0);
+			var i_261478 = 0;
+			var l_261479 = (autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0);
 			L2: do {
 					L3: while (true) {
-					if (!(i_261123 < l_261124)) break L3;
-						word_258976 = autocomplete_words_258012[0][chckIndx(i_261123, 0, autocomplete_words_258012[0].length+0-1)-0];
+					if (!(i_261478 < l_261479)) break L3;
+						word_258976 = autocomplete_words_258012[0][chckIndx(i_261478, 0, autocomplete_words_258012[0].length+0-1)-0];
 						var tmp_258892 = tree_212046(106, []);
 						tmp_258892.class = "ui mini teal label";
 						add_event_handler_240584(tmp_258892, 0, select_word_258166(input_id_258827, word_258976, true), kxi_230324[0]);
 						add_210786(tmp_258892, text_212201(word_258976));
 						add_210786(tmp_258891, tmp_258892);
-						i_261123 = addInt(i_261123, 1);
-						if (!(((autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0) == l_261124))) {
+						i_261478 = addInt(i_261478, 1);
+						if (!(((autocomplete_words_258012[0] != null ? autocomplete_words_258012[0].length : 0) == l_261479))) {
 						failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 						}
 						
@@ -3915,13 +3728,13 @@ function mnemonic_editor_258824() {
 		} while(false);
 		L4: do {
 			var i_258999 = 0;
-			var colontmp__261137 = 0;
-			colontmp__261137 = (chklist_258020[0] != null ? (chklist_258020[0].length-1) : -1);
-			var res_261138 = 0;
+			var colontmp__261492 = 0;
+			colontmp__261492 = (chklist_258020[0] != null ? (chklist_258020[0].length-1) : -1);
+			var res_261493 = 0;
 			L5: do {
 					L6: while (true) {
-					if (!(res_261138 <= colontmp__261137)) break L6;
-						i_258999 = res_261138;
+					if (!(res_261493 <= colontmp__261492)) break L6;
+						i_258999 = res_261493;
 						if (chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field2) {
 						var tmp_258893 = tree_212046(106, []);
 						tmp_258893.class = "ui mini green label";
@@ -3940,21 +3753,21 @@ function mnemonic_editor_258824() {
 							add_210786(tmp_258895, tmp_258896);
 							L7: do {
 								var lev_259022 = null;
-								var colontmp__261133 = null;
-								colontmp__261133 = chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field3;
-								var i_261134 = 0;
-								var l_261135 = (colontmp__261133 != null ? colontmp__261133.length : 0);
+								var colontmp__261488 = null;
+								colontmp__261488 = chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field3;
+								var i_261489 = 0;
+								var l_261490 = (colontmp__261488 != null ? colontmp__261488.length : 0);
 								L8: do {
 										L9: while (true) {
-										if (!(i_261134 < l_261135)) break L9;
-											lev_259022 = colontmp__261133[chckIndx(i_261134, 0, colontmp__261133.length+0-1)-0];
+										if (!(i_261489 < l_261490)) break L9;
+											lev_259022 = colontmp__261488[chckIndx(i_261489, 0, colontmp__261488.length+0-1)-0];
 											var tmp_258897 = tree_212046(106, []);
 											tmp_258897.class = "ui mini blue basic label";
 											add_event_handler_240584(tmp_258897, 0, fix_word_258714(input_id_258827, chklist_258020[0][chckIndx(i_258999, 0, chklist_258020[0].length+0-1)-0].Field0, lev_259022), kxi_230324[0]);
 											add_210786(tmp_258897, text_212201(lev_259022));
 											add_210786(tmp_258895, tmp_258897);
-											i_261134 = addInt(i_261134, 1);
-											if (!(((colontmp__261133 != null ? colontmp__261133.length : 0) == l_261135))) {
+											i_261489 = addInt(i_261489, 1);
+											if (!(((colontmp__261488 != null ? colontmp__261488.length : 0) == l_261490))) {
 											failed_assert_impl_56866(makeNimstrLit("iterators.nim(189, 11) `len(a) == L` the length of the seq changed while iterating over it"));
 											}
 											
@@ -3964,7 +3777,7 @@ function mnemonic_editor_258824() {
 							add_210786(tmp_258891, tmp_258895);
 						}
 						
-						res_261138 = addInt(res_261138, 1);
+						res_261493 = addInt(res_261493, 1);
 					}
 			} while(false);
 		} while(false);
@@ -3975,15 +3788,15 @@ function mnemonic_editor_258824() {
 
 }
 
-function protect_selector_254379(protect_type_254381) {
+function protect_selector_254368(protect_type_254370) {
 
-		function HEX3Aanonymous_254385() {
+		function HEX3Aanonymous_254374() {
 				      qrReader.hide(true);
     
-				current_protect_type_254056[0] = protect_type_254381;
-				show_page1_254081[0] = false;
-				show_page2_254082[0] = true;
-				if ((current_protect_type_254056[0] == 0)) {
+				current_protect_type_254043[0] = protect_type_254370;
+				show_page1_254068[0] = false;
+				show_page2_254069[0] = true;
+				if ((current_protect_type_254043[0] == 0)) {
 				        $('#keyselector').removeClass('grey').addClass('olive');
         $('#passselector').removeClass('olive').addClass('grey');
       
@@ -3994,29 +3807,29 @@ function protect_selector_254379(protect_type_254381) {
       
 				}
 				
-				view_update_254312();
+				view_update_254301();
 
 			
 		}
 
-	var result_254384 = null;
+	var result_254373 = null;
 
-		result_254384 = HEX3Aanonymous_254385;
+		result_254373 = HEX3Aanonymous_254374;
 
-	return result_254384;
+	return result_254373;
 
 }
 
 function change_passphrase_259748(ev_259750, n_259751) {
-		view_update_254312();
+		view_update_254301();
 
 	
 }
 
 function confirm_passphrase_259765(ev_259767, n_259768) {
-		passphrase_fulfill_254086[0] = true;
-		show_page3_254083[0] = true;
-		view_update_254312();
+		passphrase_fulfill_254073[0] = true;
+		show_page3_254070[0] = true;
+		view_update_254301();
 
 	
 }
@@ -4054,232 +3867,433 @@ function passphrase_editor_259782() {
 
 }
 
-function btn_receive_260080() {
+function btn_send_260472() {
 
-		function HEX3Aanonymous_260085() {
-				      showRecvAddress()
+		function HEX3Aanonymous_260477() {
+				      if($('#send-coins').hasClass('hidden')) {
+        if(!$('#receive-address').hasClass('hidden')) {
+          $('#receive-address').transition('fade down');
+        }
+        $('#send-coins').transition('fade down');
+        $('#btn-send-clear').off('click').click(function() {
+          $('#send-coins input[name="address"]').val('');
+          $('#send-coins input[name="amount"]').val('');
+          uriOptions = [];
+          jsViewSelector(11);
+          $(this).blur();
+        });
+        $('#btn-send-qrcode').off('click').click(function() {
+          qrReaderModal.show(function(uri) {
+            var data = bip21reader(uri);
+            $('#send-coins input[name="address"]').val(data.address || '');
+            $('#send-coins input[name="amount"]').val(data.amount || '');
+            uriOptions = [];
+            for(var k in data) {
+              var p = data[k];
+              if(k == 'address' || k == 'amount') {
+                continue;
+              }
+              uriOptions.push({key: crlftab_to_html(k), value: crlftab_to_html(p)});
+            }
+            jsViewSelector(11);
+          });
+          $(this).blur();
+        });
+      } else {
+        $('#send-coins').transition('fade down');
+      }
     
 
 			
 		}
 
-	var result_260084 = null;
+	var result_260476 = null;
 
-		result_260084 = HEX3Aanonymous_260085;
+		result_260476 = HEX3Aanonymous_260477;
 
-	return result_260084;
+	return result_260476;
 
 }
 
-function recv_address_selector_259934() {
-	var result_259936 = null;
+function btn_receive_260082() {
 
-		var tmp_259937 = tree_212046(43, []);
-		tmp_259937.id = "receive-address";
-		tmp_259937.class = "ui center aligined segment";
-		var tmp_259938 = tree_212046(43, []);
-		tmp_259938.class = "ui top attached label symbol";
-		add_210786(tmp_259938, text_212164(makeNimstrLit("Receive Address ")));
-		var tmp_259939 = tree_212046(70, []);
-		var tmp_259940 = tree_212046(61, []);
-		tmp_259940.class = "window maximize outline icon btn-maximize";
+		function HEX3Aanonymous_260087() {
+				      if($('#receive-address').hasClass('hidden')) {
+        if($('#send-coins').hasClass('visible')) {
+          $('#send-coins').transition('fade down');
+        }
+        showRecvAddress();
+      } else {
+        $('#receive-address').transition('fade down');
+      }
+    
+
+			
+		}
+
+	var result_260086 = null;
+
+		result_260086 = HEX3Aanonymous_260087;
+
+	return result_260086;
+
+}
+
+function recv_address_selector_259936() {
+	var result_259938 = null;
+
+		var tmp_259939 = tree_212046(43, []);
+		tmp_259939.id = "receive-address";
+		tmp_259939.class = "ui center aligned segment hidden";
+		var tmp_259940 = tree_212046(43, []);
+		tmp_259940.class = "ui top attached label recvaddress";
+		add_210786(tmp_259940, text_212164(makeNimstrLit("Receive Address ")));
+		var tmp_259941 = tree_212046(70, []);
+		var tmp_259942 = tree_212046(61, []);
+		tmp_259942.class = "window maximize outline icon btn-maximize";
+		add_210786(tmp_259941, tmp_259942);
+		var tmp_259943 = tree_212046(61, []);
+		tmp_259943.class = "close icon btn-close";
+		add_210786(tmp_259941, tmp_259943);
+		add_210786(tmp_259940, tmp_259941);
 		add_210786(tmp_259939, tmp_259940);
-		var tmp_259941 = tree_212046(61, []);
-		tmp_259941.class = "close icon btn-close";
-		add_210786(tmp_259939, tmp_259941);
-		add_210786(tmp_259938, tmp_259939);
-		add_210786(tmp_259937, tmp_259938);
-		var tmp_259942 = tree_212046(43, []);
-		tmp_259942.class = "ui mini basic icon buttons";
-		var tmp_259943 = tree_212046(106, []);
-		tmp_259943.id = "btn-recv-copy";
-		tmp_259943.class = "ui button";
-		set_attr_210568(tmp_259943, "title", "copy");
-		var tmp_259944 = tree_212046(61, []);
-		tmp_259944.class = "copy outline icon";
-		add_210786(tmp_259943, tmp_259944);
-		add_210786(tmp_259942, tmp_259943);
+		var tmp_259944 = tree_212046(43, []);
+		tmp_259944.class = "ui mini basic icon buttons";
 		var tmp_259945 = tree_212046(106, []);
-		tmp_259945.id = "btn-recv-qrcode";
+		tmp_259945.id = "btn-recv-copy";
 		tmp_259945.class = "ui button";
-		set_attr_210568(tmp_259945, "title", "QR code");
+		set_attr_210568(tmp_259945, "title", "Copy");
 		var tmp_259946 = tree_212046(61, []);
-		tmp_259946.class = "qrcode icon";
+		tmp_259946.class = "copy outline icon";
 		add_210786(tmp_259945, tmp_259946);
-		add_210786(tmp_259942, tmp_259945);
-		add_210786(tmp_259937, tmp_259942);
-		var tmp_259947 = tree_212046(43, []);
-		tmp_259947.class = "address";
-		add_210786(tmp_259947, text_212164([]));
-		add_210786(tmp_259937, tmp_259947);
-		var tmp_259948 = tree_212046(43, []);
-		tmp_259948.class = "balls";
+		add_210786(tmp_259944, tmp_259945);
+		var tmp_259947 = tree_212046(106, []);
+		tmp_259947.id = "btn-recv-qrcode";
+		tmp_259947.class = "ui button";
+		set_attr_210568(tmp_259947, "title", "QR code");
+		var tmp_259948 = tree_212046(61, []);
+		tmp_259948.class = "qrcode icon";
+		add_210786(tmp_259947, tmp_259948);
+		add_210786(tmp_259944, tmp_259947);
+		add_210786(tmp_259939, tmp_259944);
 		var tmp_259949 = tree_212046(43, []);
-		tmp_259949.class = "used";
+		tmp_259949.class = "address";
+		add_210786(tmp_259949, text_212164([]));
+		add_210786(tmp_259939, tmp_259949);
 		var tmp_259950 = tree_212046(43, []);
-		tmp_259950.class = "circular ui icon mini button ball";
-		var tmp_259951 = tree_212046(75, []);
-		set_attr_210568(tmp_259951, "src", "");
-		add_210786(tmp_259950, tmp_259951);
-		add_210786(tmp_259949, tmp_259950);
-		add_210786(tmp_259948, tmp_259949);
+		tmp_259950.class = "balls";
+		var tmp_259951 = tree_212046(43, []);
+		tmp_259951.class = "used";
 		var tmp_259952 = tree_212046(43, []);
-		tmp_259952.class = "new";
-		var tmp_259953 = tree_212046(43, []);
-		tmp_259953.class = "circular ui icon mini button ball";
-		var tmp_259954 = tree_212046(75, []);
-		set_attr_210568(tmp_259954, "src", "");
-		add_210786(tmp_259953, tmp_259954);
+		tmp_259952.class = "circular ui icon mini button ball";
+		var tmp_259953 = tree_212046(75, []);
+		set_attr_210568(tmp_259953, "src", "");
 		add_210786(tmp_259952, tmp_259953);
+		add_210786(tmp_259951, tmp_259952);
+		add_210786(tmp_259950, tmp_259951);
+		var tmp_259954 = tree_212046(43, []);
+		tmp_259954.class = "new";
 		var tmp_259955 = tree_212046(43, []);
 		tmp_259955.class = "circular ui icon mini button ball";
 		var tmp_259956 = tree_212046(75, []);
 		set_attr_210568(tmp_259956, "src", "");
 		add_210786(tmp_259955, tmp_259956);
-		add_210786(tmp_259952, tmp_259955);
+		add_210786(tmp_259954, tmp_259955);
 		var tmp_259957 = tree_212046(43, []);
 		tmp_259957.class = "circular ui icon mini button ball";
 		var tmp_259958 = tree_212046(75, []);
 		set_attr_210568(tmp_259958, "src", "");
 		add_210786(tmp_259957, tmp_259958);
-		add_210786(tmp_259952, tmp_259957);
+		add_210786(tmp_259954, tmp_259957);
 		var tmp_259959 = tree_212046(43, []);
 		tmp_259959.class = "circular ui icon mini button ball";
 		var tmp_259960 = tree_212046(75, []);
 		set_attr_210568(tmp_259960, "src", "");
 		add_210786(tmp_259959, tmp_259960);
-		add_210786(tmp_259952, tmp_259959);
+		add_210786(tmp_259954, tmp_259959);
 		var tmp_259961 = tree_212046(43, []);
 		tmp_259961.class = "circular ui icon mini button ball";
 		var tmp_259962 = tree_212046(75, []);
 		set_attr_210568(tmp_259962, "src", "");
 		add_210786(tmp_259961, tmp_259962);
-		add_210786(tmp_259952, tmp_259961);
-		add_210786(tmp_259948, tmp_259952);
-		add_210786(tmp_259937, tmp_259948);
-		result_259936 = tmp_259937;
+		add_210786(tmp_259954, tmp_259961);
+		var tmp_259963 = tree_212046(43, []);
+		tmp_259963.class = "circular ui icon mini button ball";
+		var tmp_259964 = tree_212046(75, []);
+		set_attr_210568(tmp_259964, "src", "");
+		add_210786(tmp_259963, tmp_259964);
+		add_210786(tmp_259954, tmp_259963);
+		add_210786(tmp_259950, tmp_259954);
+		add_210786(tmp_259939, tmp_259950);
+		result_259938 = tmp_259939;
 
-	return result_259936;
+	return result_259938;
 
 }
 
-function recv_address_modal_260113() {
-	var result_260115 = null;
+function recv_address_modal_260115() {
+	var result_260117 = null;
 
-		var tmp_260116 = tree_212046(43, []);
-		tmp_260116.id = "recv-modal";
-		tmp_260116.class = "ui";
-		var tmp_260117 = tree_212046(61, []);
-		tmp_260117.class = "close icon btn-close-arc";
-		add_210786(tmp_260116, tmp_260117);
 		var tmp_260118 = tree_212046(43, []);
-		tmp_260118.class = "close-arc";
-		add_210786(tmp_260116, tmp_260118);
-		var tmp_260119 = tree_212046(43, []);
-		tmp_260119.id = "recv-qrcode";
-		tmp_260119.class = "qrcode";
-		set_attr_210568(tmp_260119, "title", "");
-		var tmp_260120 = tree_212046(84, []);
-		set_attr_210568(tmp_260120, "width", "0");
-		set_attr_210568(tmp_260120, "height", "0");
-		add_210786(tmp_260119, tmp_260120);
-		add_210786(tmp_260116, tmp_260119);
+		tmp_260118.id = "recv-modal";
+		tmp_260118.class = "ui";
+		var tmp_260119 = tree_212046(61, []);
+		tmp_260119.class = "close icon btn-close-arc";
+		add_210786(tmp_260118, tmp_260119);
+		var tmp_260120 = tree_212046(43, []);
+		tmp_260120.class = "close-arc";
+		add_210786(tmp_260118, tmp_260120);
 		var tmp_260121 = tree_212046(43, []);
-		tmp_260121.id = "recvaddr-form";
-		tmp_260121.class = "ui container";
-		var tmp_260122 = tree_212046(43, []);
-		tmp_260122.class = "ui form";
+		tmp_260121.id = "recv-qrcode";
+		tmp_260121.class = "qrcode";
+		set_attr_210568(tmp_260121, "title", "");
+		var tmp_260122 = tree_212046(84, []);
+		set_attr_210568(tmp_260122, "width", "0");
+		set_attr_210568(tmp_260122, "height", "0");
+		add_210786(tmp_260121, tmp_260122);
+		add_210786(tmp_260118, tmp_260121);
 		var tmp_260123 = tree_212046(43, []);
-		tmp_260123.class = "two fields";
+		tmp_260123.id = "recvaddr-form";
+		tmp_260123.class = "ui container";
 		var tmp_260124 = tree_212046(43, []);
-		tmp_260124.class = "field";
-		var tmp_260125 = tree_212046(104, []);
-		add_210786(tmp_260125, text_212164(makeNimstrLit("Receive Address")));
-		add_210786(tmp_260124, tmp_260125);
+		tmp_260124.class = "ui form";
+		var tmp_260125 = tree_212046(43, []);
+		tmp_260125.class = "two fields";
 		var tmp_260126 = tree_212046(43, []);
-		tmp_260126.class = "ui selection dropdown addr-selection";
-		set_attr_210568(tmp_260126, "tabindex", "0");
-		var tmp_260127 = tree_212046(105, []);
-		set_attr_210568(tmp_260127, "type", "hidden");
-		set_attr_210568(tmp_260127, "name", "address");
-		valueHEX3D_209839(tmp_260127, "");
+		tmp_260126.class = "field";
+		var tmp_260127 = tree_212046(104, []);
+		add_210786(tmp_260127, text_212164(makeNimstrLit("Receive Address")));
 		add_210786(tmp_260126, tmp_260127);
-		var tmp_260128 = tree_212046(61, []);
-		tmp_260128.class = "dropdown icon";
-		add_210786(tmp_260126, tmp_260128);
-		var tmp_260129 = tree_212046(43, []);
-		tmp_260129.class = "text";
-		var tmp_260130 = tree_212046(75, []);
-		set_attr_210568(tmp_260130, "clsss", "ui mini avatar image");
-		set_attr_210568(tmp_260130, "src", "");
-		add_210786(tmp_260129, tmp_260130);
-		add_210786(tmp_260129, text_212164([]));
-		add_210786(tmp_260126, tmp_260129);
+		var tmp_260128 = tree_212046(43, []);
+		tmp_260128.class = "ui selection dropdown addr-selection";
+		set_attr_210568(tmp_260128, "tabindex", "0");
+		var tmp_260129 = tree_212046(105, []);
+		set_attr_210568(tmp_260129, "type", "hidden");
+		set_attr_210568(tmp_260129, "name", "address");
+		valueHEX3D_209839(tmp_260129, "");
+		add_210786(tmp_260128, tmp_260129);
+		var tmp_260130 = tree_212046(61, []);
+		tmp_260130.class = "dropdown icon";
+		add_210786(tmp_260128, tmp_260130);
 		var tmp_260131 = tree_212046(43, []);
-		tmp_260131.class = "menu";
-		set_attr_210568(tmp_260131, "tabindex", "-1");
-		add_210786(tmp_260126, tmp_260131);
-		add_210786(tmp_260124, tmp_260126);
-		add_210786(tmp_260123, tmp_260124);
-		var tmp_260132 = tree_212046(43, []);
-		tmp_260132.class = "field";
-		var tmp_260133 = tree_212046(104, []);
-		add_210786(tmp_260133, text_212164(makeNimstrLit("Amount")));
-		add_210786(tmp_260132, tmp_260133);
+		tmp_260131.class = "text";
+		var tmp_260132 = tree_212046(75, []);
+		set_attr_210568(tmp_260132, "clsss", "ui mini avatar image");
+		set_attr_210568(tmp_260132, "src", "");
+		add_210786(tmp_260131, tmp_260132);
+		add_210786(tmp_260131, text_212164([]));
+		add_210786(tmp_260128, tmp_260131);
+		var tmp_260133 = tree_212046(43, []);
+		tmp_260133.class = "menu";
+		set_attr_210568(tmp_260133, "tabindex", "-1");
+		add_210786(tmp_260128, tmp_260133);
+		add_210786(tmp_260126, tmp_260128);
+		add_210786(tmp_260125, tmp_260126);
 		var tmp_260134 = tree_212046(43, []);
-		tmp_260134.class = "ui right labeled input";
-		var tmp_260135 = tree_212046(105, []);
-		tmp_260135.class = "right";
-		set_attr_210568(tmp_260135, "type", "text");
-		set_attr_210568(tmp_260135, "name", "amount");
-		set_attr_210568(tmp_260135, "placeholder", "Amount");
+		tmp_260134.class = "field";
+		var tmp_260135 = tree_212046(104, []);
+		add_210786(tmp_260135, text_212164(makeNimstrLit("Amount")));
 		add_210786(tmp_260134, tmp_260135);
 		var tmp_260136 = tree_212046(43, []);
-		tmp_260136.class = "ui basic label";
-		add_210786(tmp_260136, text_212164(makeNimstrLit("ZNY")));
-		add_210786(tmp_260134, tmp_260136);
-		add_210786(tmp_260132, tmp_260134);
-		add_210786(tmp_260123, tmp_260132);
-		add_210786(tmp_260122, tmp_260123);
-		var tmp_260137 = tree_212046(43, []);
-		tmp_260137.class = "two fields";
+		tmp_260136.class = "ui right labeled input";
+		var tmp_260137 = tree_212046(105, []);
+		tmp_260137.class = "right";
+		set_attr_210568(tmp_260137, "type", "text");
+		set_attr_210568(tmp_260137, "name", "amount");
+		set_attr_210568(tmp_260137, "placeholder", "Amount");
+		add_210786(tmp_260136, tmp_260137);
 		var tmp_260138 = tree_212046(43, []);
-		tmp_260138.class = "field";
-		var tmp_260139 = tree_212046(104, []);
-		add_210786(tmp_260139, text_212164(makeNimstrLit("Label")));
-		add_210786(tmp_260138, tmp_260139);
-		var tmp_260140 = tree_212046(105, []);
-		set_attr_210568(tmp_260140, "type", "text");
-		set_attr_210568(tmp_260140, "name", "label");
-		set_attr_210568(tmp_260140, "placeholder", "Label");
-		add_210786(tmp_260138, tmp_260140);
-		add_210786(tmp_260137, tmp_260138);
-		var tmp_260141 = tree_212046(43, []);
-		tmp_260141.class = "field";
-		var tmp_260142 = tree_212046(104, []);
-		add_210786(tmp_260142, text_212164(makeNimstrLit("Message")));
-		add_210786(tmp_260141, tmp_260142);
-		var tmp_260143 = tree_212046(111, []);
-		set_attr_210568(tmp_260143, "rows", "2");
-		set_attr_210568(tmp_260143, "name", "message");
-		set_attr_210568(tmp_260143, "placeholder", "Message");
-		add_210786(tmp_260141, tmp_260143);
-		add_210786(tmp_260137, tmp_260141);
-		add_210786(tmp_260122, tmp_260137);
-		add_210786(tmp_260121, tmp_260122);
-		add_210786(tmp_260116, tmp_260121);
-		result_260115 = tmp_260116;
+		tmp_260138.class = "ui basic label";
+		add_210786(tmp_260138, text_212164(makeNimstrLit("ZNY")));
+		add_210786(tmp_260136, tmp_260138);
+		add_210786(tmp_260134, tmp_260136);
+		add_210786(tmp_260125, tmp_260134);
+		add_210786(tmp_260124, tmp_260125);
+		var tmp_260139 = tree_212046(43, []);
+		tmp_260139.class = "two fields";
+		var tmp_260140 = tree_212046(43, []);
+		tmp_260140.class = "field";
+		var tmp_260141 = tree_212046(104, []);
+		add_210786(tmp_260141, text_212164(makeNimstrLit("Label")));
+		add_210786(tmp_260140, tmp_260141);
+		var tmp_260142 = tree_212046(105, []);
+		tmp_260142.class = "ui input";
+		set_attr_210568(tmp_260142, "type", "text");
+		set_attr_210568(tmp_260142, "name", "label");
+		set_attr_210568(tmp_260142, "placeholder", "Label");
+		add_210786(tmp_260140, tmp_260142);
+		add_210786(tmp_260139, tmp_260140);
+		var tmp_260143 = tree_212046(43, []);
+		tmp_260143.class = "field";
+		var tmp_260144 = tree_212046(104, []);
+		add_210786(tmp_260144, text_212164(makeNimstrLit("Message")));
+		add_210786(tmp_260143, tmp_260144);
+		var tmp_260145 = tree_212046(111, []);
+		tmp_260145.class = "ui textarea";
+		set_attr_210568(tmp_260145, "rows", "2");
+		set_attr_210568(tmp_260145, "name", "message");
+		set_attr_210568(tmp_260145, "placeholder", "Message");
+		add_210786(tmp_260143, tmp_260145);
+		add_210786(tmp_260139, tmp_260143);
+		add_210786(tmp_260124, tmp_260139);
+		add_210786(tmp_260123, tmp_260124);
+		add_210786(tmp_260118, tmp_260123);
+		result_260117 = tmp_260118;
 
-	return result_260115;
+	return result_260117;
+
+}
+
+function send_form_260285() {
+	var result_260287 = null;
+
+		var tmp_260288 = tree_212046(43, []);
+		tmp_260288.id = "send-coins";
+		tmp_260288.class = "ui center aligned segment hidden";
+		var tmp_260289 = tree_212046(43, []);
+		tmp_260289.class = "ui top attached label sendcoins";
+		add_210786(tmp_260289, text_212164(makeNimstrLit("Send Coins ")));
+		var tmp_260290 = tree_212046(70, []);
+		var tmp_260291 = tree_212046(61, []);
+		tmp_260291.class = "window maximize outline icon btn-maximize";
+		add_210786(tmp_260290, tmp_260291);
+		var tmp_260292 = tree_212046(61, []);
+		tmp_260292.class = "close icon btn-close";
+		add_210786(tmp_260290, tmp_260292);
+		add_210786(tmp_260289, tmp_260290);
+		add_210786(tmp_260288, tmp_260289);
+		var tmp_260293 = tree_212046(43, []);
+		tmp_260293.class = "ui mini basic icon buttons";
+		var tmp_260294 = tree_212046(106, []);
+		tmp_260294.id = "btn-send-clear";
+		tmp_260294.class = "ui button";
+		set_attr_210568(tmp_260294, "title", "Clear");
+		var tmp_260295 = tree_212046(61, []);
+		tmp_260295.class = "eraser icon";
+		add_210786(tmp_260294, tmp_260295);
+		add_210786(tmp_260293, tmp_260294);
+		var tmp_260296 = tree_212046(106, []);
+		tmp_260296.id = "btn-send-qrcode";
+		tmp_260296.class = "ui button";
+		set_attr_210568(tmp_260296, "title", "Scan QR code");
+		var tmp_260297 = tree_212046(61, []);
+		tmp_260297.class = "camera icon";
+		add_210786(tmp_260296, tmp_260297);
+		add_210786(tmp_260293, tmp_260296);
+		add_210786(tmp_260288, tmp_260293);
+		var tmp_260298 = tree_212046(43, []);
+		tmp_260298.class = "ui form";
+		var tmp_260299 = tree_212046(43, []);
+		tmp_260299.class = "field";
+		var tmp_260300 = tree_212046(104, []);
+		add_210786(tmp_260300, text_212164(makeNimstrLit("Send Address")));
+		add_210786(tmp_260299, tmp_260300);
+		var tmp_260301 = tree_212046(43, []);
+		tmp_260301.class = "ui small input";
+		var tmp_260302 = tree_212046(105, []);
+		tmp_260302.class = "center";
+		set_attr_210568(tmp_260302, "type", "text");
+		set_attr_210568(tmp_260302, "name", "address");
+		set_attr_210568(tmp_260302, "placeholder", "Address");
+		add_210786(tmp_260301, tmp_260302);
+		add_210786(tmp_260299, tmp_260301);
+		add_210786(tmp_260298, tmp_260299);
+		var tmp_260303 = tree_212046(43, []);
+		tmp_260303.class = "field";
+		var tmp_260304 = tree_212046(104, []);
+		add_210786(tmp_260304, text_212164(makeNimstrLit("Amount")));
+		add_210786(tmp_260303, tmp_260304);
+		var tmp_260305 = tree_212046(43, []);
+		tmp_260305.class = "ui small input";
+		var tmp_260306 = tree_212046(105, []);
+		tmp_260306.class = "center";
+		set_attr_210568(tmp_260306, "type", "text");
+		set_attr_210568(tmp_260306, "name", "amount");
+		set_attr_210568(tmp_260306, "placeholder", "Amount");
+		add_210786(tmp_260305, tmp_260306);
+		var tmp_260307 = tree_212046(43, []);
+		tmp_260307.class = "ui mini basic icon buttons utxoctrl";
+		var tmp_260308 = tree_212046(106, []);
+		tmp_260308.id = "btn-utxo-plus";
+		tmp_260308.class = "ui button";
+		set_attr_210568(tmp_260308, "title", "-1 UTXO");
+		var tmp_260309 = tree_212046(61, []);
+		tmp_260309.class = "minus circle icon";
+		add_210786(tmp_260308, tmp_260309);
+		add_210786(tmp_260307, tmp_260308);
+		var tmp_260310 = tree_212046(106, []);
+		tmp_260310.id = "btn-utxo-count";
+		tmp_260310.class = "ui button sendutxos";
+		add_210786(tmp_260310, text_212164(makeNimstrLit("\xE2\x89\xA424")));
+		add_210786(tmp_260307, tmp_260310);
+		var tmp_260311 = tree_212046(106, []);
+		tmp_260311.id = "btn-utxo-minus";
+		tmp_260311.class = "ui button";
+		set_attr_210568(tmp_260311, "title", "+1 UTXO");
+		var tmp_260312 = tree_212046(61, []);
+		tmp_260312.class = "plus circle icon";
+		add_210786(tmp_260311, tmp_260312);
+		add_210786(tmp_260307, tmp_260311);
+		add_210786(tmp_260305, tmp_260307);
+		add_210786(tmp_260303, tmp_260305);
+		add_210786(tmp_260298, tmp_260303);
+		var tmp_260313 = tree_212046(43, []);
+		tmp_260313.class = "ui list uri-options";
+		L1: do {
+			var d_260424 = null;
+			var v_261602 = null;
+			for (var k in uriOptions) {
+			  if (!uriOptions.hasOwnProperty(k)) continue;
+			  v_261602=uriOptions[k];
+			d_260424 = v_261602;
+			var tmp_260314 = tree_212046(43, []);
+			tmp_260314.class = "item";
+			var tmp_260315 = tree_212046(43, []);
+			tmp_260315.class = "content";
+			var tmp_260316 = tree_212046(43, []);
+			tmp_260316.class = "header";
+			add_210786(tmp_260316, text_212201(d_260424.key));
+			add_210786(tmp_260315, tmp_260316);
+			var tmp_260317 = tree_212046(43, []);
+			tmp_260317.class = "description";
+			add_210786(tmp_260317, text_212201(d_260424.value));
+			add_210786(tmp_260315, tmp_260317);
+			add_210786(tmp_260314, tmp_260315);
+			add_210786(tmp_260313, tmp_260314);
+			}
+		} while(false);
+		add_210786(tmp_260298, tmp_260313);
+		var tmp_260318 = tree_212046(43, []);
+		tmp_260318.class = "fluid ui buttons";
+		var tmp_260319 = tree_212046(106, []);
+		tmp_260319.id = "btn-send";
+		tmp_260319.class = "ui inverted olive button center btn-send";
+		add_210786(tmp_260319, text_212164(makeNimstrLit("Send")));
+		add_210786(tmp_260318, tmp_260319);
+		add_210786(tmp_260298, tmp_260318);
+		add_210786(tmp_260288, tmp_260298);
+		result_260287 = tmp_260288;
+
+	return result_260287;
 
 }
 
 function go_settings_259835() {
 
 		function HEX3Aanonymous_259840() {
-				if (!(show_page4_254084[0])) {
-				view_selector_254133(12, false);
-				supress_redraw_254087[0] = true;
+				rawEcho(nimBoolToStr(show_page4_254071[0]));
+				if (!(show_page4_254071[0])) {
+				view_selector_254122(13, false);
+				supress_redraw_254074[0] = true;
+				}
+				else {
+					        TradeLogs.stop();
+        $('.backpage').visibility({silent: true});
+        $('#tradelogs').empty();
+      
+					view_selector_254122(13, false);
+					        goSection('#section4');
+      
 				}
 				
 
@@ -4294,14 +4308,19 @@ function go_settings_259835() {
 
 }
 
-function go_logs_259868() {
+function go_logs_259870() {
 
-		function HEX3Aanonymous_259873() {
-				if (!(show_page4_254084[0])) {
-				view_selector_254133(12, false);
-				supress_redraw_254087[0] = true;
+		function HEX3Aanonymous_259875() {
+				if (!(show_page4_254071[0])) {
+				view_selector_254122(12, false);
+				supress_redraw_254074[0] = true;
 				}
 				else {
+					        TradeLogs.stop();
+        $('.backpage').visibility({silent: true});
+        $('#tradelogs').empty();
+      
+					view_selector_254122(12, false);
 					        goSection('#section4');
       
 				}
@@ -4310,484 +4329,569 @@ function go_logs_259868() {
 			
 		}
 
-	var result_259872 = null;
+	var result_259874 = null;
 
-		result_259872 = HEX3Aanonymous_259873;
+		result_259874 = HEX3Aanonymous_259875;
 
-	return result_259872;
+	return result_259874;
 
 }
 
-function back_wallet_259901() {
+function back_wallet_259903() {
 
-		function HEX3Aanonymous_259906() {
-				view_selector_254133(11, true);
-				supress_redraw_254087[0] = false;
+		function HEX3Aanonymous_259908() {
+				view_selector_254122(11, true);
 				      goSection('#section3', page_scroll_done);
     
 
 			
 		}
 
-	var result_259905 = null;
+	var result_259907 = null;
 
-		result_259905 = HEX3Aanonymous_259906;
+		result_259907 = HEX3Aanonymous_259908;
 
-	return result_259905;
-
-}
-
-function app_main_260269(data_260271) {
-	var result_260272 = null;
-
-		var tmp_260273 = tree_212046(43, []);
-		if (show_page1_254081[0]) {
-		var tmp_260274 = tree_212046(17, []);
-		tmp_260274.id = "section1";
-		tmp_260274.class = "section";
-		var tmp_260275 = tree_212046(43, []);
-		tmp_260275.class = "intro";
-		var tmp_260276 = tree_212046(43, []);
-		tmp_260276.class = "intro-head";
-		var tmp_260277 = tree_212046(43, []);
-		tmp_260277.class = "caption";
-		add_210786(tmp_260277, text_212164(makeNimstrLit("Pastel Wallet")));
-		add_210786(tmp_260276, tmp_260277);
-		var tmp_260278 = tree_212046(43, []);
-		tmp_260278.class = "ui container method-selector";
-		var tmp_260279 = tree_212046(43, []);
-		tmp_260279.class = "title";
-		add_210786(tmp_260279, text_212164(makeNimstrLit("Import the master seed to start your wallet.")));
-		add_210786(tmp_260278, tmp_260279);
-		var tmp_260280 = tree_212046(43, []);
-		tmp_260280.class = "ui buttons";
-		var tmp_260281 = tree_212046(106, []);
-		tmp_260281.id = "seedselector";
-		tmp_260281.class = "ui olive button";
-		add_event_handler_240584(tmp_260281, 0, import_selector_254327(0), kxi_230324[0]);
-		var tmp_260282 = tree_212046(61, []);
-		tmp_260282.class = "qrcode icon";
-		add_210786(tmp_260281, tmp_260282);
-		add_210786(tmp_260281, text_212164(makeNimstrLit("Seed card")));
-		add_210786(tmp_260280, tmp_260281);
-		var tmp_260283 = tree_212046(43, []);
-		tmp_260283.class = "or";
-		add_210786(tmp_260280, tmp_260283);
-		var tmp_260284 = tree_212046(106, []);
-		tmp_260284.id = "mnemonicselector";
-		tmp_260284.class = "ui grey button";
-		add_event_handler_240584(tmp_260284, 0, import_selector_254327(1), kxi_230324[0]);
-		var tmp_260285 = tree_212046(61, []);
-		tmp_260285.class = "list alternate icon";
-		add_210786(tmp_260284, tmp_260285);
-		add_210786(tmp_260284, text_212164(makeNimstrLit("Mnemonic")));
-		add_210786(tmp_260280, tmp_260284);
-		add_210786(tmp_260278, tmp_260280);
-		add_210786(tmp_260276, tmp_260278);
-		add_210786(tmp_260275, tmp_260276);
-		var tmp_260286 = tree_212046(43, []);
-		tmp_260286.class = "intro-body";
-		if ((current_import_type_254050[0] == 0)) {
-		var tmp_260287 = tree_212046(43, []);
-		tmp_260287.id = "seed-seg";
-		tmp_260287.class = "ui left aligned segment seed-seg";
-		if (show_scan_result_254076[0]) {
-		var tmp_260288 = tree_212046(43, []);
-		tmp_260288.class = "ui link cards seed-card-holder";
-		add_210786(tmp_260288, seed_card_259044(seed_card_info_254425[0]));
-		add_210786(tmp_260288, seed_card_259044(seed_card_info_254425[0]));
-		var tmp_260289 = tree_212046(43, []);
-		tmp_260289.class = "seed-add-container";
-		var tmp_260290 = tree_212046(106, []);
-		tmp_260290.class = "circular ui icon button bt-add-seed";
-		var tmp_260291 = tree_212046(61, []);
-		tmp_260291.class = "plus icon";
-		add_210786(tmp_260290, tmp_260291);
-		add_210786(tmp_260289, tmp_260290);
-		add_210786(tmp_260288, tmp_260289);
-		add_210786(tmp_260287, tmp_260288);
-		var tmp_260292 = tree_212046(44, []);
-		tmp_260292.class = "pagenext";
-		set_attr_210568(tmp_260292, "href", "#section2");
-		var tmp_260293 = tree_212046(70, []);
-		add_210786(tmp_260292, tmp_260293);
-		add_210786(tmp_260292, text_212164(makeNimstrLit("Next")));
-		add_210786(tmp_260287, tmp_260292);
-		}
-		
-		if (show_scanning_254074[0]) {
-		var tmp_260294 = tree_212046(43, []);
-		tmp_260294.class = "qr-scanning";
-		var tmp_260295 = tree_212046(43, []);
-		add_210786(tmp_260294, tmp_260295);
-		var tmp_260296 = tree_212046(43, []);
-		add_210786(tmp_260294, tmp_260296);
-		add_210786(tmp_260287, tmp_260294);
-		}
-		
-		if (show_scan_seed_btn_254073[0]) {
-		var tmp_260297 = tree_212046(43, []);
-		tmp_260297.class = "ui teal labeled icon button bt-scan-seed";
-		add_event_handler_240584(tmp_260297, 0, show_qr_257829(), kxi_230324[0]);
-		add_210786(tmp_260297, text_212164(makeNimstrLit("Scan seed card with camera")));
-		var tmp_260298 = tree_212046(61, []);
-		tmp_260298.class = "camera icon";
-		add_210786(tmp_260297, tmp_260298);
-		add_210786(tmp_260287, tmp_260297);
-		}
-		
-		if (show_cam_tools_254075[0]) {
-		var tmp_260299 = tree_212046(43, []);
-		tmp_260299.class = "ui small basic icon buttons camtools";
-		var tmp_260300 = tree_212046(106, []);
-		tmp_260300.class = "ui button";
-		add_event_handler_240584(tmp_260300, 0, cam_change_257862(), kxi_230324[0]);
-		var tmp_260301 = tree_212046(61, []);
-		tmp_260301.class = "camera icon";
-		add_210786(tmp_260300, tmp_260301);
-		add_210786(tmp_260299, tmp_260300);
-		var tmp_260302 = tree_212046(106, []);
-		tmp_260302.class = "ui button";
-		add_event_handler_240584(tmp_260302, 0, cam_close_257895(), kxi_230324[0]);
-		var tmp_260303 = tree_212046(61, []);
-		tmp_260303.class = "window close icon";
-		add_210786(tmp_260302, tmp_260303);
-		add_210786(tmp_260299, tmp_260302);
-		add_210786(tmp_260287, tmp_260299);
-		}
-		
-		var tmp_260304 = tree_212046(84, []);
-		tmp_260304.id = "qrcanvas";
-		add_210786(tmp_260287, tmp_260304);
-		add_210786(tmp_260286, tmp_260287);
-		}
-		else {
-			var tmp_260305 = tree_212046(43, []);
-			tmp_260305.class = "ui left aligned segment mnemonic-seg";
-			add_210786(tmp_260305, mnemonic_editor_258824());
-			if (mnemonic_fulfill_254085[0]) {
-			var tmp_260306 = tree_212046(44, []);
-			tmp_260306.class = "pagenext";
-			set_attr_210568(tmp_260306, "href", "#section2");
-			var tmp_260307 = tree_212046(70, []);
-			add_210786(tmp_260306, tmp_260307);
-			add_210786(tmp_260306, text_212164(makeNimstrLit("Next")));
-			add_210786(tmp_260305, tmp_260306);
-			}
-			
-			add_210786(tmp_260286, tmp_260305);
-		}
-		
-		add_210786(tmp_260275, tmp_260286);
-		add_210786(tmp_260274, tmp_260275);
-		add_210786(tmp_260273, tmp_260274);
-		}
-		
-		if (show_page2_254082[0]) {
-		var tmp_260308 = tree_212046(17, []);
-		tmp_260308.id = "section2";
-		tmp_260308.class = "section";
-		var tmp_260309 = tree_212046(43, []);
-		tmp_260309.class = "intro";
-		var tmp_260310 = tree_212046(43, []);
-		tmp_260310.class = "intro-head";
-		var tmp_260311 = tree_212046(43, []);
-		tmp_260311.class = "caption";
-		add_210786(tmp_260311, text_212164(makeNimstrLit("Pastel Wallet")));
-		add_210786(tmp_260310, tmp_260311);
-		var tmp_260312 = tree_212046(43, []);
-		tmp_260312.class = "ui container method-selector";
-		var tmp_260313 = tree_212046(43, []);
-		tmp_260313.class = "title";
-		add_210786(tmp_260313, text_212164(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
-		add_210786(tmp_260312, tmp_260313);
-		var tmp_260314 = tree_212046(43, []);
-		tmp_260314.class = "ui buttons";
-		var tmp_260315 = tree_212046(106, []);
-		tmp_260315.id = "keyselector";
-		tmp_260315.class = "ui olive button";
-		add_event_handler_240584(tmp_260315, 0, protect_selector_254379(0), kxi_230324[0]);
-		var tmp_260316 = tree_212046(61, []);
-		tmp_260316.class = "qrcode icon";
-		add_210786(tmp_260315, tmp_260316);
-		add_210786(tmp_260315, text_212164(makeNimstrLit("Key card")));
-		add_210786(tmp_260314, tmp_260315);
-		var tmp_260317 = tree_212046(43, []);
-		tmp_260317.class = "or";
-		add_210786(tmp_260314, tmp_260317);
-		var tmp_260318 = tree_212046(106, []);
-		tmp_260318.id = "passselector";
-		tmp_260318.class = "ui grey button";
-		add_event_handler_240584(tmp_260318, 0, protect_selector_254379(1), kxi_230324[0]);
-		var tmp_260319 = tree_212046(61, []);
-		tmp_260319.class = "list alternate icon";
-		add_210786(tmp_260318, tmp_260319);
-		add_210786(tmp_260318, text_212164(makeNimstrLit("Passphrase")));
-		add_210786(tmp_260314, tmp_260318);
-		add_210786(tmp_260312, tmp_260314);
-		add_210786(tmp_260310, tmp_260312);
-		add_210786(tmp_260309, tmp_260310);
-		var tmp_260320 = tree_212046(43, []);
-		tmp_260320.class = "intro-body";
-		if ((current_protect_type_254056[0] == 0)) {
-		var tmp_260321 = tree_212046(43, []);
-		tmp_260321.id = "seed-seg";
-		tmp_260321.class = "ui left aligned segment seed-seg";
-		if (show_scan_result2_254080[0]) {
-		var tmp_260322 = tree_212046(43, []);
-		tmp_260322.class = "ui link cards seed-card-holder";
-		add_210786(tmp_260322, seed_card_259044(seed_card_info_254425[0]));
-		add_210786(tmp_260322, seed_card_259044(seed_card_info_254425[0]));
-		var tmp_260323 = tree_212046(43, []);
-		tmp_260323.class = "seed-add-container";
-		var tmp_260324 = tree_212046(106, []);
-		tmp_260324.class = "circular ui icon button bt-add-seed";
-		var tmp_260325 = tree_212046(61, []);
-		tmp_260325.class = "plus icon";
-		add_210786(tmp_260324, tmp_260325);
-		add_210786(tmp_260323, tmp_260324);
-		add_210786(tmp_260322, tmp_260323);
-		add_210786(tmp_260321, tmp_260322);
-		var tmp_260326 = tree_212046(44, []);
-		tmp_260326.class = "pagenext";
-		set_attr_210568(tmp_260326, "href", "#section2");
-		var tmp_260327 = tree_212046(70, []);
-		add_210786(tmp_260326, tmp_260327);
-		add_210786(tmp_260326, text_212164(makeNimstrLit("Next")));
-		add_210786(tmp_260321, tmp_260326);
-		}
-		
-		if (show_scanning2_254078[0]) {
-		var tmp_260328 = tree_212046(43, []);
-		tmp_260328.class = "qr-scanning";
-		var tmp_260329 = tree_212046(43, []);
-		add_210786(tmp_260328, tmp_260329);
-		var tmp_260330 = tree_212046(43, []);
-		add_210786(tmp_260328, tmp_260330);
-		add_210786(tmp_260321, tmp_260328);
-		}
-		
-		if (show_scan_seed_btn2_254077[0]) {
-		var tmp_260331 = tree_212046(43, []);
-		tmp_260331.class = "ui teal labeled icon button bt-scan-seed";
-		add_event_handler_240584(tmp_260331, 0, show_qr_257829(), kxi_230324[0]);
-		add_210786(tmp_260331, text_212164(makeNimstrLit("Scan key card with camera")));
-		var tmp_260332 = tree_212046(61, []);
-		tmp_260332.class = "camera icon";
-		add_210786(tmp_260331, tmp_260332);
-		add_210786(tmp_260321, tmp_260331);
-		}
-		
-		if (show_cam_tools2_254079[0]) {
-		var tmp_260333 = tree_212046(43, []);
-		tmp_260333.class = "ui small basic icon buttons camtools";
-		var tmp_260334 = tree_212046(106, []);
-		tmp_260334.class = "ui button";
-		add_event_handler_240584(tmp_260334, 0, cam_change_257862(), kxi_230324[0]);
-		var tmp_260335 = tree_212046(61, []);
-		tmp_260335.class = "camera icon";
-		add_210786(tmp_260334, tmp_260335);
-		add_210786(tmp_260333, tmp_260334);
-		var tmp_260336 = tree_212046(106, []);
-		tmp_260336.class = "ui button";
-		add_event_handler_240584(tmp_260336, 0, cam_close_257895(), kxi_230324[0]);
-		var tmp_260337 = tree_212046(61, []);
-		tmp_260337.class = "window close icon";
-		add_210786(tmp_260336, tmp_260337);
-		add_210786(tmp_260333, tmp_260336);
-		add_210786(tmp_260321, tmp_260333);
-		}
-		
-		var tmp_260338 = tree_212046(84, []);
-		tmp_260338.id = "qrcanvas";
-		add_210786(tmp_260321, tmp_260338);
-		add_210786(tmp_260320, tmp_260321);
-		}
-		else {
-			var tmp_260339 = tree_212046(43, []);
-			tmp_260339.class = "ui left aligned segment mnemonic-seg";
-			add_210786(tmp_260339, passphrase_editor_259782());
-			if (passphrase_fulfill_254086[0]) {
-			var tmp_260340 = tree_212046(44, []);
-			tmp_260340.class = "pagenext";
-			set_attr_210568(tmp_260340, "href", "#section3");
-			var tmp_260341 = tree_212046(70, []);
-			add_210786(tmp_260340, tmp_260341);
-			add_210786(tmp_260340, text_212164(makeNimstrLit("Next")));
-			add_210786(tmp_260339, tmp_260340);
-			}
-			
-			add_210786(tmp_260320, tmp_260339);
-		}
-		
-		add_210786(tmp_260309, tmp_260320);
-		add_210786(tmp_260308, tmp_260309);
-		add_210786(tmp_260273, tmp_260308);
-		}
-		
-		if (show_page3_254083[0]) {
-		var tmp_260342 = tree_212046(17, []);
-		tmp_260342.id = "section3";
-		tmp_260342.class = "section";
-		var tmp_260343 = tree_212046(43, []);
-		tmp_260343.class = "intro";
-		var tmp_260344 = tree_212046(43, []);
-		tmp_260344.class = "intro-head  wallet-head";
-		var tmp_260345 = tree_212046(43, []);
-		tmp_260345.class = "caption";
-		add_210786(tmp_260345, text_212164(makeNimstrLit("Pastel Wallet")));
-		add_210786(tmp_260344, tmp_260345);
-		var tmp_260346 = tree_212046(43, []);
-		tmp_260346.class = "ui container wallet-btns";
-		var tmp_260347 = tree_212046(43, []);
-		tmp_260347.class = "two ui basic buttons sendrecv";
-		var tmp_260348 = tree_212046(106, []);
-		tmp_260348.id = "btn-send";
-		tmp_260348.class = "ui small button send";
-		var tmp_260349 = tree_212046(61, []);
-		tmp_260349.class = "counterclockwise rotated sign-out icon send";
-		add_210786(tmp_260348, tmp_260349);
-		add_210786(tmp_260348, text_212164(makeNimstrLit(" Send")));
-		add_210786(tmp_260347, tmp_260348);
-		var tmp_260350 = tree_212046(106, []);
-		tmp_260350.id = "btn-receive";
-		tmp_260350.class = "ui small button receive";
-		add_event_handler_240584(tmp_260350, 0, btn_receive_260080(), kxi_230324[0]);
-		var tmp_260351 = tree_212046(61, []);
-		tmp_260351.class = "clockwise rotated sign-in icon receive";
-		add_210786(tmp_260350, tmp_260351);
-		add_210786(tmp_260350, text_212164(makeNimstrLit(" Receive")));
-		add_210786(tmp_260347, tmp_260350);
-		add_210786(tmp_260346, tmp_260347);
-		add_210786(tmp_260344, tmp_260346);
-		add_210786(tmp_260343, tmp_260344);
-		var tmp_260352 = tree_212046(43, []);
-		tmp_260352.class = "intro-body wallet-body";
-		var tmp_260353 = tree_212046(43, []);
-		tmp_260353.id = "wallet-balance";
-		tmp_260353.class = "ui center aligined segment";
-		var tmp_260354 = tree_212046(43, []);
-		tmp_260354.class = "ui top left attached tiny label send";
-		add_210786(tmp_260354, text_212164(makeNimstrLit("456.789 ")));
-		var tmp_260355 = tree_212046(61, []);
-		tmp_260355.class = "counterclockwise rotated sign-out icon";
-		add_210786(tmp_260354, tmp_260355);
-		add_210786(tmp_260353, tmp_260354);
-		var tmp_260356 = tree_212046(43, []);
-		tmp_260356.class = "ui top right attached tiny label receive";
-		var tmp_260357 = tree_212046(61, []);
-		tmp_260357.class = "clockwise rotated sign-in icon";
-		add_210786(tmp_260356, tmp_260357);
-		add_210786(tmp_260356, text_212164(makeNimstrLit("123.456")));
-		add_210786(tmp_260353, tmp_260356);
-		var tmp_260358 = tree_212046(43, []);
-		tmp_260358.class = "ui bottom right attached tiny label symbol";
-		add_210786(tmp_260358, text_212164(makeNimstrLit("ZNY")));
-		add_210786(tmp_260353, tmp_260358);
-		add_210786(tmp_260353, text_212164(makeNimstrLit("12345.6789")));
-		add_210786(tmp_260352, tmp_260353);
-		if (show_recv_address_selector_254088[0]) {
-		add_210786(tmp_260352, recv_address_selector_259934());
-		}
-		
-		if (show_recv_address_modal_254089[0]) {
-		add_210786(tmp_260352, recv_address_modal_260113());
-		}
-		
-		var tmp_260359 = tree_212046(43, []);
-		tmp_260359.id = "ball-info";
-		tmp_260359.class = "ui center aligined segment";
-		add_210786(tmp_260359, text_212164([]));
-		var tmp_260360 = tree_212046(71, []);
-		add_210786(tmp_260359, tmp_260360);
-		add_210786(tmp_260359, text_212164([]));
-		add_210786(tmp_260352, tmp_260359);
-		var tmp_260361 = tree_212046(43, []);
-		tmp_260361.id = "wallet-seg";
-		tmp_260361.class = "ui center aligned segment seed-seg";
-		var tmp_260362 = tree_212046(84, []);
-		set_attr_210568(tmp_260362, "width", "0");
-		set_attr_210568(tmp_260362, "height", "0");
-		add_210786(tmp_260361, tmp_260362);
-		add_210786(tmp_260352, tmp_260361);
-		add_210786(tmp_260343, tmp_260352);
-		var tmp_260363 = tree_212046(43, []);
-		tmp_260363.class = "ui two bottom attached buttons settings";
-		var tmp_260364 = tree_212046(43, []);
-		tmp_260364.class = "ui button";
-		add_event_handler_240584(tmp_260364, 0, go_settings_259835(), kxi_230324[0]);
-		var tmp_260365 = tree_212046(61, []);
-		tmp_260365.class = "cog icon";
-		add_210786(tmp_260364, tmp_260365);
-		add_210786(tmp_260364, text_212164(makeNimstrLit("Settings")));
-		var tmp_260366 = tree_212046(70, []);
-		var tmp_260367 = tree_212046(61, []);
-		tmp_260367.class = "chevron down icon";
-		add_210786(tmp_260366, tmp_260367);
-		add_210786(tmp_260364, tmp_260366);
-		add_210786(tmp_260363, tmp_260364);
-		var tmp_260368 = tree_212046(43, []);
-		tmp_260368.class = "ui button";
-		add_event_handler_240584(tmp_260368, 0, go_logs_259868(), kxi_230324[0]);
-		var tmp_260369 = tree_212046(61, []);
-		tmp_260369.class = "list alternate outline icon";
-		add_210786(tmp_260368, tmp_260369);
-		add_210786(tmp_260368, text_212164(makeNimstrLit("Logs")));
-		var tmp_260370 = tree_212046(70, []);
-		var tmp_260371 = tree_212046(61, []);
-		tmp_260371.class = "chevron down icon";
-		add_210786(tmp_260370, tmp_260371);
-		add_210786(tmp_260368, tmp_260370);
-		add_210786(tmp_260363, tmp_260368);
-		var tmp_260372 = tree_212046(43, []);
-		tmp_260372.id = "bottom-blink";
-		add_210786(tmp_260363, tmp_260372);
-		add_210786(tmp_260343, tmp_260363);
-		add_210786(tmp_260342, tmp_260343);
-		add_210786(tmp_260273, tmp_260342);
-		}
-		
-		if (show_page4_254084[0]) {
-		var tmp_260373 = tree_212046(17, []);
-		tmp_260373.id = "section4";
-		tmp_260373.class = "tradelogs-section";
-		var tmp_260374 = tree_212046(43, []);
-		tmp_260374.class = "ui buttons settings backpage";
-		var tmp_260375 = tree_212046(43, []);
-		tmp_260375.id = "backwallet";
-		tmp_260375.class = "ui button";
-		add_event_handler_240584(tmp_260375, 0, back_wallet_259901(), kxi_230324[0]);
-		var tmp_260376 = tree_212046(61, []);
-		tmp_260376.class = "dot circle icon";
-		add_210786(tmp_260375, tmp_260376);
-		add_210786(tmp_260375, text_212164(makeNimstrLit("Back")));
-		var tmp_260377 = tree_212046(70, []);
-		var tmp_260378 = tree_212046(61, []);
-		tmp_260378.class = "chevron up icon";
-		add_210786(tmp_260377, tmp_260378);
-		add_210786(tmp_260375, tmp_260377);
-		add_210786(tmp_260374, tmp_260375);
-		add_210786(tmp_260373, tmp_260374);
-		var tmp_260379 = tree_212046(43, []);
-		tmp_260379.class = "ui container";
-		var tmp_260380 = tree_212046(43, []);
-		tmp_260380.id = "tradelogs";
-		tmp_260380.class = "ui cards tradelogs";
-		add_210786(tmp_260379, tmp_260380);
-		add_210786(tmp_260373, tmp_260379);
-		add_210786(tmp_260273, tmp_260373);
-		}
-		
-		result_260272 = tmp_260273;
-
-	return result_260272;
+	return result_259907;
 
 }
 
-function after_script_260870(data_260872) {
+function settings_page_260571() {
+	var result_260573 = null;
+
+		var tmp_260574 = tree_212046(43, []);
+		tmp_260574.id = "settings";
+		tmp_260574.class = "ui container";
+		var tmp_260575 = tree_212046(23, []);
+		tmp_260575.class = "ui dividing header";
+		add_210786(tmp_260575, text_212164(makeNimstrLit("Settings")));
+		add_210786(tmp_260574, tmp_260575);
+		var tmp_260576 = tree_212046(106, []);
+		tmp_260576.id = "btn-reset";
+		tmp_260576.class = "ui inverted red button";
+		add_210786(tmp_260576, text_212164(makeNimstrLit("Reset Wallet")));
+		add_210786(tmp_260574, tmp_260576);
+		var tmp_260577 = tree_212046(43, []);
+		tmp_260577.class = "ui pink inverted segment";
+		add_210786(tmp_260577, text_212164(makeNimstrLit("        Delete all your wallet data in your web browser, including your encrypted secret keys and mnemonics.\x0A         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards\x0A         or mnemonics before deleting it. Otherwise you will lost your coins forever.\x0A      ")));
+		add_210786(tmp_260574, tmp_260577);
+		var tmp_260578 = tree_212046(43, []);
+		tmp_260578.class = "ui checkbox";
+		var tmp_260579 = tree_212046(105, []);
+		set_attr_210568(tmp_260579, "type", "checkbox");
+		set_attr_210568(tmp_260579, "name", "confirm");
+		add_210786(tmp_260578, tmp_260579);
+		var tmp_260580 = tree_212046(104, []);
+		add_210786(tmp_260580, text_212164(makeNimstrLit("I confirmed that I have the seed cards or mnemonics or no coins in my wallet.")));
+		add_210786(tmp_260578, tmp_260580);
+		add_210786(tmp_260574, tmp_260578);
+		result_260573 = tmp_260574;
+
+	return result_260573;
+
+}
+
+function settings_modal_260505() {
+	var result_260507 = null;
+
+		var tmp_260508 = tree_212046(43, []);
+		tmp_260508.id = "settings-modal";
+		tmp_260508.class = "ui basic modal";
+		var tmp_260509 = tree_212046(43, []);
+		tmp_260509.class = "ui icon header";
+		var tmp_260510 = tree_212046(61, []);
+		tmp_260510.class = "trash icon";
+		add_210786(tmp_260509, tmp_260510);
+		add_210786(tmp_260509, text_212164(makeNimstrLit("Reset Wallet")));
+		add_210786(tmp_260508, tmp_260509);
+		var tmp_260511 = tree_212046(43, []);
+		tmp_260511.class = "content";
+		var tmp_260512 = tree_212046(31, []);
+		add_210786(tmp_260512, text_212164(makeNimstrLit("Are you sure to reset your wallet?")));
+		add_210786(tmp_260511, tmp_260512);
+		add_210786(tmp_260508, tmp_260511);
+		var tmp_260513 = tree_212046(43, []);
+		tmp_260513.class = "actions";
+		var tmp_260514 = tree_212046(43, []);
+		tmp_260514.class = "ui basic cancel inverted button";
+		var tmp_260515 = tree_212046(61, []);
+		tmp_260515.class = "remove icon";
+		add_210786(tmp_260514, tmp_260515);
+		add_210786(tmp_260514, text_212164(makeNimstrLit("Cancel")));
+		add_210786(tmp_260513, tmp_260514);
+		var tmp_260516 = tree_212046(43, []);
+		tmp_260516.class = "ui red ok inverted button";
+		var tmp_260517 = tree_212046(61, []);
+		tmp_260517.class = "checkmark icon";
+		add_210786(tmp_260516, tmp_260517);
+		add_210786(tmp_260516, text_212164(makeNimstrLit("Reset")));
+		add_210786(tmp_260513, tmp_260516);
+		add_210786(tmp_260508, tmp_260513);
+		result_260507 = tmp_260508;
+
+	return result_260507;
+
+}
+
+function app_main_260622(data_260624) {
+	var result_260625 = null;
+
+		var tmp_260626 = tree_212046(43, []);
+		if (show_page1_254068[0]) {
+		var tmp_260627 = tree_212046(17, []);
+		tmp_260627.id = "section1";
+		tmp_260627.class = "section";
+		var tmp_260628 = tree_212046(43, []);
+		tmp_260628.class = "intro";
+		var tmp_260629 = tree_212046(43, []);
+		tmp_260629.class = "intro-head";
+		var tmp_260630 = tree_212046(43, []);
+		tmp_260630.class = "caption";
+		add_210786(tmp_260630, text_212164(makeNimstrLit("Pastel Wallet")));
+		add_210786(tmp_260629, tmp_260630);
+		var tmp_260631 = tree_212046(43, []);
+		tmp_260631.class = "ui container method-selector";
+		var tmp_260632 = tree_212046(43, []);
+		tmp_260632.class = "title";
+		add_210786(tmp_260632, text_212164(makeNimstrLit("Import the master seed to start your wallet.")));
+		add_210786(tmp_260631, tmp_260632);
+		var tmp_260633 = tree_212046(43, []);
+		tmp_260633.class = "ui buttons";
+		var tmp_260634 = tree_212046(106, []);
+		tmp_260634.id = "seedselector";
+		tmp_260634.class = "ui olive button";
+		add_event_handler_240584(tmp_260634, 0, import_selector_254316(0), kxi_230324[0]);
+		var tmp_260635 = tree_212046(61, []);
+		tmp_260635.class = "qrcode icon";
+		add_210786(tmp_260634, tmp_260635);
+		add_210786(tmp_260634, text_212164(makeNimstrLit("Seed card")));
+		add_210786(tmp_260633, tmp_260634);
+		var tmp_260636 = tree_212046(43, []);
+		tmp_260636.class = "or";
+		add_210786(tmp_260633, tmp_260636);
+		var tmp_260637 = tree_212046(106, []);
+		tmp_260637.id = "mnemonicselector";
+		tmp_260637.class = "ui grey button";
+		add_event_handler_240584(tmp_260637, 0, import_selector_254316(1), kxi_230324[0]);
+		var tmp_260638 = tree_212046(61, []);
+		tmp_260638.class = "list alternate icon";
+		add_210786(tmp_260637, tmp_260638);
+		add_210786(tmp_260637, text_212164(makeNimstrLit("Mnemonic")));
+		add_210786(tmp_260633, tmp_260637);
+		add_210786(tmp_260631, tmp_260633);
+		add_210786(tmp_260629, tmp_260631);
+		add_210786(tmp_260628, tmp_260629);
+		var tmp_260639 = tree_212046(43, []);
+		tmp_260639.class = "intro-body";
+		if ((current_import_type_254037[0] == 0)) {
+		var tmp_260640 = tree_212046(43, []);
+		tmp_260640.id = "seed-seg";
+		tmp_260640.class = "ui left aligned segment seed-seg";
+		if (show_scan_result_254063[0]) {
+		var tmp_260641 = tree_212046(43, []);
+		tmp_260641.class = "ui link cards seed-card-holder";
+		add_210786(tmp_260641, seed_card_259044(seed_card_info_254414[0]));
+		add_210786(tmp_260641, seed_card_259044(seed_card_info_254414[0]));
+		var tmp_260642 = tree_212046(43, []);
+		tmp_260642.class = "seed-add-container";
+		var tmp_260643 = tree_212046(106, []);
+		tmp_260643.class = "circular ui icon button bt-add-seed";
+		var tmp_260644 = tree_212046(61, []);
+		tmp_260644.class = "plus icon";
+		add_210786(tmp_260643, tmp_260644);
+		add_210786(tmp_260642, tmp_260643);
+		add_210786(tmp_260641, tmp_260642);
+		add_210786(tmp_260640, tmp_260641);
+		var tmp_260645 = tree_212046(44, []);
+		tmp_260645.class = "pagenext";
+		set_attr_210568(tmp_260645, "href", "#section2");
+		var tmp_260646 = tree_212046(70, []);
+		add_210786(tmp_260645, tmp_260646);
+		add_210786(tmp_260645, text_212164(makeNimstrLit("Next")));
+		add_210786(tmp_260640, tmp_260645);
+		}
+		
+		if (show_scanning_254061[0]) {
+		var tmp_260647 = tree_212046(43, []);
+		tmp_260647.class = "qr-scanning";
+		var tmp_260648 = tree_212046(43, []);
+		add_210786(tmp_260647, tmp_260648);
+		var tmp_260649 = tree_212046(43, []);
+		add_210786(tmp_260647, tmp_260649);
+		add_210786(tmp_260640, tmp_260647);
+		}
+		
+		if (show_scan_seed_btn_254060[0]) {
+		var tmp_260650 = tree_212046(43, []);
+		tmp_260650.class = "ui teal labeled icon button bt-scan-seed";
+		add_event_handler_240584(tmp_260650, 0, show_qr_257829(), kxi_230324[0]);
+		add_210786(tmp_260650, text_212164(makeNimstrLit("Scan seed card with camera")));
+		var tmp_260651 = tree_212046(61, []);
+		tmp_260651.class = "camera icon";
+		add_210786(tmp_260650, tmp_260651);
+		add_210786(tmp_260640, tmp_260650);
+		}
+		
+		if (show_cam_tools_254062[0]) {
+		var tmp_260652 = tree_212046(43, []);
+		tmp_260652.class = "ui small basic icon buttons camtools";
+		var tmp_260653 = tree_212046(106, []);
+		tmp_260653.class = "ui button";
+		add_event_handler_240584(tmp_260653, 0, cam_change_257862(), kxi_230324[0]);
+		var tmp_260654 = tree_212046(61, []);
+		tmp_260654.class = "camera icon";
+		add_210786(tmp_260653, tmp_260654);
+		add_210786(tmp_260652, tmp_260653);
+		var tmp_260655 = tree_212046(106, []);
+		tmp_260655.class = "ui button";
+		add_event_handler_240584(tmp_260655, 0, cam_close_257895(), kxi_230324[0]);
+		var tmp_260656 = tree_212046(61, []);
+		tmp_260656.class = "window close icon";
+		add_210786(tmp_260655, tmp_260656);
+		add_210786(tmp_260652, tmp_260655);
+		add_210786(tmp_260640, tmp_260652);
+		}
+		
+		var tmp_260657 = tree_212046(84, []);
+		tmp_260657.id = "qrcanvas";
+		add_210786(tmp_260640, tmp_260657);
+		add_210786(tmp_260639, tmp_260640);
+		}
+		else {
+			var tmp_260658 = tree_212046(43, []);
+			tmp_260658.class = "ui left aligned segment mnemonic-seg";
+			add_210786(tmp_260658, mnemonic_editor_258824());
+			if (mnemonic_fulfill_254072[0]) {
+			var tmp_260659 = tree_212046(44, []);
+			tmp_260659.class = "pagenext";
+			set_attr_210568(tmp_260659, "href", "#section2");
+			var tmp_260660 = tree_212046(70, []);
+			add_210786(tmp_260659, tmp_260660);
+			add_210786(tmp_260659, text_212164(makeNimstrLit("Next")));
+			add_210786(tmp_260658, tmp_260659);
+			}
+			
+			add_210786(tmp_260639, tmp_260658);
+		}
+		
+		add_210786(tmp_260628, tmp_260639);
+		add_210786(tmp_260627, tmp_260628);
+		add_210786(tmp_260626, tmp_260627);
+		}
+		
+		if (show_page2_254069[0]) {
+		var tmp_260661 = tree_212046(17, []);
+		tmp_260661.id = "section2";
+		tmp_260661.class = "section";
+		var tmp_260662 = tree_212046(43, []);
+		tmp_260662.class = "intro";
+		var tmp_260663 = tree_212046(43, []);
+		tmp_260663.class = "intro-head";
+		var tmp_260664 = tree_212046(43, []);
+		tmp_260664.class = "caption";
+		add_210786(tmp_260664, text_212164(makeNimstrLit("Pastel Wallet")));
+		add_210786(tmp_260663, tmp_260664);
+		var tmp_260665 = tree_212046(43, []);
+		tmp_260665.class = "ui container method-selector";
+		var tmp_260666 = tree_212046(43, []);
+		tmp_260666.class = "title";
+		add_210786(tmp_260666, text_212164(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
+		add_210786(tmp_260665, tmp_260666);
+		var tmp_260667 = tree_212046(43, []);
+		tmp_260667.class = "ui buttons";
+		var tmp_260668 = tree_212046(106, []);
+		tmp_260668.id = "keyselector";
+		tmp_260668.class = "ui olive button";
+		add_event_handler_240584(tmp_260668, 0, protect_selector_254368(0), kxi_230324[0]);
+		var tmp_260669 = tree_212046(61, []);
+		tmp_260669.class = "qrcode icon";
+		add_210786(tmp_260668, tmp_260669);
+		add_210786(tmp_260668, text_212164(makeNimstrLit("Key card")));
+		add_210786(tmp_260667, tmp_260668);
+		var tmp_260670 = tree_212046(43, []);
+		tmp_260670.class = "or";
+		add_210786(tmp_260667, tmp_260670);
+		var tmp_260671 = tree_212046(106, []);
+		tmp_260671.id = "passselector";
+		tmp_260671.class = "ui grey button";
+		add_event_handler_240584(tmp_260671, 0, protect_selector_254368(1), kxi_230324[0]);
+		var tmp_260672 = tree_212046(61, []);
+		tmp_260672.class = "list alternate icon";
+		add_210786(tmp_260671, tmp_260672);
+		add_210786(tmp_260671, text_212164(makeNimstrLit("Passphrase")));
+		add_210786(tmp_260667, tmp_260671);
+		add_210786(tmp_260665, tmp_260667);
+		add_210786(tmp_260663, tmp_260665);
+		add_210786(tmp_260662, tmp_260663);
+		var tmp_260673 = tree_212046(43, []);
+		tmp_260673.class = "intro-body";
+		if ((current_protect_type_254043[0] == 0)) {
+		var tmp_260674 = tree_212046(43, []);
+		tmp_260674.id = "seed-seg";
+		tmp_260674.class = "ui left aligned segment seed-seg";
+		if (show_scan_result2_254067[0]) {
+		var tmp_260675 = tree_212046(43, []);
+		tmp_260675.class = "ui link cards seed-card-holder";
+		add_210786(tmp_260675, seed_card_259044(seed_card_info_254414[0]));
+		add_210786(tmp_260675, seed_card_259044(seed_card_info_254414[0]));
+		var tmp_260676 = tree_212046(43, []);
+		tmp_260676.class = "seed-add-container";
+		var tmp_260677 = tree_212046(106, []);
+		tmp_260677.class = "circular ui icon button bt-add-seed";
+		var tmp_260678 = tree_212046(61, []);
+		tmp_260678.class = "plus icon";
+		add_210786(tmp_260677, tmp_260678);
+		add_210786(tmp_260676, tmp_260677);
+		add_210786(tmp_260675, tmp_260676);
+		add_210786(tmp_260674, tmp_260675);
+		var tmp_260679 = tree_212046(44, []);
+		tmp_260679.class = "pagenext";
+		set_attr_210568(tmp_260679, "href", "#section2");
+		var tmp_260680 = tree_212046(70, []);
+		add_210786(tmp_260679, tmp_260680);
+		add_210786(tmp_260679, text_212164(makeNimstrLit("Next")));
+		add_210786(tmp_260674, tmp_260679);
+		}
+		
+		if (show_scanning2_254065[0]) {
+		var tmp_260681 = tree_212046(43, []);
+		tmp_260681.class = "qr-scanning";
+		var tmp_260682 = tree_212046(43, []);
+		add_210786(tmp_260681, tmp_260682);
+		var tmp_260683 = tree_212046(43, []);
+		add_210786(tmp_260681, tmp_260683);
+		add_210786(tmp_260674, tmp_260681);
+		}
+		
+		if (show_scan_seed_btn2_254064[0]) {
+		var tmp_260684 = tree_212046(43, []);
+		tmp_260684.class = "ui teal labeled icon button bt-scan-seed";
+		add_event_handler_240584(tmp_260684, 0, show_qr_257829(), kxi_230324[0]);
+		add_210786(tmp_260684, text_212164(makeNimstrLit("Scan key card with camera")));
+		var tmp_260685 = tree_212046(61, []);
+		tmp_260685.class = "camera icon";
+		add_210786(tmp_260684, tmp_260685);
+		add_210786(tmp_260674, tmp_260684);
+		}
+		
+		if (show_cam_tools2_254066[0]) {
+		var tmp_260686 = tree_212046(43, []);
+		tmp_260686.class = "ui small basic icon buttons camtools";
+		var tmp_260687 = tree_212046(106, []);
+		tmp_260687.class = "ui button";
+		add_event_handler_240584(tmp_260687, 0, cam_change_257862(), kxi_230324[0]);
+		var tmp_260688 = tree_212046(61, []);
+		tmp_260688.class = "camera icon";
+		add_210786(tmp_260687, tmp_260688);
+		add_210786(tmp_260686, tmp_260687);
+		var tmp_260689 = tree_212046(106, []);
+		tmp_260689.class = "ui button";
+		add_event_handler_240584(tmp_260689, 0, cam_close_257895(), kxi_230324[0]);
+		var tmp_260690 = tree_212046(61, []);
+		tmp_260690.class = "window close icon";
+		add_210786(tmp_260689, tmp_260690);
+		add_210786(tmp_260686, tmp_260689);
+		add_210786(tmp_260674, tmp_260686);
+		}
+		
+		var tmp_260691 = tree_212046(84, []);
+		tmp_260691.id = "qrcanvas";
+		add_210786(tmp_260674, tmp_260691);
+		add_210786(tmp_260673, tmp_260674);
+		}
+		else {
+			var tmp_260692 = tree_212046(43, []);
+			tmp_260692.class = "ui left aligned segment mnemonic-seg";
+			add_210786(tmp_260692, passphrase_editor_259782());
+			if (passphrase_fulfill_254073[0]) {
+			var tmp_260693 = tree_212046(44, []);
+			tmp_260693.class = "pagenext";
+			set_attr_210568(tmp_260693, "href", "#section3");
+			var tmp_260694 = tree_212046(70, []);
+			add_210786(tmp_260693, tmp_260694);
+			add_210786(tmp_260693, text_212164(makeNimstrLit("Next")));
+			add_210786(tmp_260692, tmp_260693);
+			}
+			
+			add_210786(tmp_260673, tmp_260692);
+		}
+		
+		add_210786(tmp_260662, tmp_260673);
+		add_210786(tmp_260661, tmp_260662);
+		add_210786(tmp_260626, tmp_260661);
+		}
+		
+		if (show_page3_254070[0]) {
+		var tmp_260695 = tree_212046(17, []);
+		tmp_260695.id = "section3";
+		tmp_260695.class = "section";
+		var tmp_260696 = tree_212046(43, []);
+		tmp_260696.class = "intro";
+		var tmp_260697 = tree_212046(43, []);
+		tmp_260697.class = "intro-head  wallet-head";
+		var tmp_260698 = tree_212046(43, []);
+		tmp_260698.class = "caption";
+		add_210786(tmp_260698, text_212164(makeNimstrLit("Pastel Wallet")));
+		add_210786(tmp_260697, tmp_260698);
+		var tmp_260699 = tree_212046(43, []);
+		tmp_260699.class = "ui container wallet-btns";
+		var tmp_260700 = tree_212046(43, []);
+		tmp_260700.class = "two ui basic buttons sendrecv";
+		var tmp_260701 = tree_212046(106, []);
+		tmp_260701.id = "btn-send";
+		tmp_260701.class = "ui small button send";
+		add_event_handler_240584(tmp_260701, 0, btn_send_260472(), kxi_230324[0]);
+		var tmp_260702 = tree_212046(61, []);
+		tmp_260702.class = "counterclockwise rotated sign-out icon send";
+		add_210786(tmp_260701, tmp_260702);
+		add_210786(tmp_260701, text_212164(makeNimstrLit(" Send")));
+		add_210786(tmp_260700, tmp_260701);
+		var tmp_260703 = tree_212046(106, []);
+		tmp_260703.id = "btn-receive";
+		tmp_260703.class = "ui small button receive";
+		add_event_handler_240584(tmp_260703, 0, btn_receive_260082(), kxi_230324[0]);
+		var tmp_260704 = tree_212046(61, []);
+		tmp_260704.class = "clockwise rotated sign-in icon receive";
+		add_210786(tmp_260703, tmp_260704);
+		add_210786(tmp_260703, text_212164(makeNimstrLit(" Receive")));
+		add_210786(tmp_260700, tmp_260703);
+		add_210786(tmp_260699, tmp_260700);
+		add_210786(tmp_260697, tmp_260699);
+		add_210786(tmp_260696, tmp_260697);
+		var tmp_260705 = tree_212046(43, []);
+		tmp_260705.class = "intro-body wallet-body";
+		var tmp_260706 = tree_212046(43, []);
+		tmp_260706.id = "wallet-balance";
+		tmp_260706.class = "ui center aligned segment";
+		var tmp_260707 = tree_212046(43, []);
+		tmp_260707.class = "ui top left attached tiny label send";
+		add_210786(tmp_260707, text_212164(makeNimstrLit("456.789 ")));
+		var tmp_260708 = tree_212046(61, []);
+		tmp_260708.class = "counterclockwise rotated sign-out icon";
+		add_210786(tmp_260707, tmp_260708);
+		add_210786(tmp_260706, tmp_260707);
+		var tmp_260709 = tree_212046(43, []);
+		tmp_260709.class = "ui top right attached tiny label receive";
+		var tmp_260710 = tree_212046(61, []);
+		tmp_260710.class = "clockwise rotated sign-in icon";
+		add_210786(tmp_260709, tmp_260710);
+		add_210786(tmp_260709, text_212164(makeNimstrLit("123.456")));
+		add_210786(tmp_260706, tmp_260709);
+		var tmp_260711 = tree_212046(43, []);
+		tmp_260711.class = "ui bottom right attached tiny label symbol";
+		add_210786(tmp_260711, text_212164(makeNimstrLit("ZNY")));
+		add_210786(tmp_260706, tmp_260711);
+		add_210786(tmp_260706, text_212164(makeNimstrLit("12345.6789")));
+		add_210786(tmp_260705, tmp_260706);
+		if (show_recv_address_selector_254075[0]) {
+		add_210786(tmp_260705, recv_address_selector_259936());
+		}
+		
+		if (show_recv_address_modal_254076[0]) {
+		add_210786(tmp_260705, recv_address_modal_260115());
+		}
+		
+		add_210786(tmp_260705, send_form_260285());
+		var tmp_260712 = tree_212046(43, []);
+		tmp_260712.id = "ball-info";
+		tmp_260712.class = "ui center aligned segment";
+		add_210786(tmp_260712, text_212164([]));
+		var tmp_260713 = tree_212046(71, []);
+		add_210786(tmp_260712, tmp_260713);
+		add_210786(tmp_260712, text_212164([]));
+		add_210786(tmp_260705, tmp_260712);
+		var tmp_260714 = tree_212046(43, []);
+		tmp_260714.id = "wallet-seg";
+		tmp_260714.class = "ui center aligned segment seed-seg";
+		var tmp_260715 = tree_212046(84, []);
+		set_attr_210568(tmp_260715, "width", "0");
+		set_attr_210568(tmp_260715, "height", "0");
+		add_210786(tmp_260714, tmp_260715);
+		add_210786(tmp_260705, tmp_260714);
+		add_210786(tmp_260696, tmp_260705);
+		var tmp_260716 = tree_212046(43, []);
+		tmp_260716.class = "ui two bottom attached buttons settings";
+		var tmp_260717 = tree_212046(43, []);
+		tmp_260717.class = "ui button";
+		add_event_handler_240584(tmp_260717, 0, go_settings_259835(), kxi_230324[0]);
+		var tmp_260718 = tree_212046(61, []);
+		tmp_260718.class = "cog icon";
+		add_210786(tmp_260717, tmp_260718);
+		add_210786(tmp_260717, text_212164(makeNimstrLit("Settings")));
+		var tmp_260719 = tree_212046(70, []);
+		var tmp_260720 = tree_212046(61, []);
+		tmp_260720.class = "chevron down icon";
+		add_210786(tmp_260719, tmp_260720);
+		add_210786(tmp_260717, tmp_260719);
+		add_210786(tmp_260716, tmp_260717);
+		var tmp_260721 = tree_212046(43, []);
+		tmp_260721.class = "ui button";
+		add_event_handler_240584(tmp_260721, 0, go_logs_259870(), kxi_230324[0]);
+		var tmp_260722 = tree_212046(61, []);
+		tmp_260722.class = "list alternate outline icon";
+		add_210786(tmp_260721, tmp_260722);
+		add_210786(tmp_260721, text_212164(makeNimstrLit("Logs")));
+		var tmp_260723 = tree_212046(70, []);
+		var tmp_260724 = tree_212046(61, []);
+		tmp_260724.class = "chevron down icon";
+		add_210786(tmp_260723, tmp_260724);
+		add_210786(tmp_260721, tmp_260723);
+		add_210786(tmp_260716, tmp_260721);
+		var tmp_260725 = tree_212046(43, []);
+		tmp_260725.id = "bottom-blink";
+		add_210786(tmp_260716, tmp_260725);
+		add_210786(tmp_260696, tmp_260716);
+		add_210786(tmp_260695, tmp_260696);
+		add_210786(tmp_260626, tmp_260695);
+		}
+		
+		if (show_page4_254071[0]) {
+		var tmp_260726 = tree_212046(17, []);
+		tmp_260726.id = "section4";
+		tmp_260726.class = "tradelogs-section";
+		var tmp_260727 = tree_212046(43, []);
+		tmp_260727.class = "ui buttons settings backpage";
+		var tmp_260728 = tree_212046(43, []);
+		tmp_260728.class = "ui button backwallet";
+		add_event_handler_240584(tmp_260728, 0, back_wallet_259903(), kxi_230324[0]);
+		var tmp_260729 = tree_212046(61, []);
+		tmp_260729.class = "dot circle icon";
+		add_210786(tmp_260728, tmp_260729);
+		add_210786(tmp_260728, text_212164(makeNimstrLit("Back")));
+		var tmp_260730 = tree_212046(70, []);
+		var tmp_260731 = tree_212046(61, []);
+		tmp_260731.class = "chevron up icon";
+		add_210786(tmp_260730, tmp_260731);
+		add_210786(tmp_260728, tmp_260730);
+		add_210786(tmp_260727, tmp_260728);
+		add_210786(tmp_260726, tmp_260727);
+		if (show_trade_logs_254077[0]) {
+		var tmp_260732 = tree_212046(43, []);
+		tmp_260732.class = "ui container";
+		var tmp_260733 = tree_212046(43, []);
+		tmp_260733.id = "tradelogs";
+		tmp_260733.class = "ui cards tradelogs";
+		add_210786(tmp_260732, tmp_260733);
+		add_210786(tmp_260726, tmp_260732);
+		}
+		
+		if (show_settings_254078[0]) {
+		add_210786(tmp_260726, settings_page_260571());
+		add_210786(tmp_260726, settings_modal_260505());
+		}
+		
+		add_210786(tmp_260626, tmp_260726);
+		}
+		
+		result_260625 = tmp_260626;
+
+	return result_260625;
+
+}
+
+function after_script_261225(data_261227) {
 		$("#section0").remove();
 		$(".ui.dropdown").dropdown();
-		if (show_scan_result_254076[0]) {
+		if (show_scan_result_254063[0]) {
 		      function seedCardQrUpdate() {
         $('.seed-qrcode').each(function() {
           $(this).find('canvas').remove();
@@ -4826,7 +4930,7 @@ function after_script_260870(data_260872) {
     
 		}
 		
-		if ((show_scan_result_254076[0] || mnemonic_fulfill_254085[0])) {
+		if ((show_scan_result_254063[0] || mnemonic_fulfill_254072[0])) {
 		      target_page_scroll = '#section2';
       page_scroll_done = function() {
         $('a.pagenext').css('visibility', 'hidden');
@@ -4838,7 +4942,7 @@ function after_script_260870(data_260872) {
     
 		}
 		
-		if ((show_scan_result2_254080[0] || passphrase_fulfill_254086[0])) {
+		if ((show_scan_result2_254067[0] || passphrase_fulfill_254073[0])) {
 		      target_page_scroll = '#section3';
       page_scroll_done = function() {
         $('a.pagenext').css('visibility', 'hidden');
@@ -4850,7 +4954,7 @@ function after_script_260870(data_260872) {
     
 		}
 		
-		if ((((show_scan_result_254076[0] || mnemonic_fulfill_254085[0]) || show_scan_result2_254080[0]) || passphrase_fulfill_254086[0])) {
+		if ((((show_scan_result_254063[0] || mnemonic_fulfill_254072[0]) || show_scan_result2_254067[0]) || passphrase_fulfill_254073[0])) {
 		      var elms = document.querySelectorAll('a.pagenext');
       Array.prototype.forEach.call(elms, function(elm) {
         var href = elm.getAttribute("href");
@@ -4871,21 +4975,33 @@ function after_script_260870(data_260872) {
     
 		}
 		
-		if (show_page4_254084[0]) {
-		      $('.backpage').visibility({
+		if (show_page4_254071[0]) {
+		      //$.fn.visibility.settings.silent = true;
+      $('.backpage').visibility({
         type: 'fixed',
         offset: 0
       });
-      TradeLogs.start();
-      goSection('#section4', function() {
+    
+		if (show_trade_logs_254077[0]) {
+		        TradeLogs.start();
+      
+		}
+		
+		if (show_settings_254078[0]) {
+		        Settings.init();
+      
+		}
+		
+		      goSection('#section4', function() {
         target_page_scroll = '#section3';
         page_scroll_done = function() {
           TradeLogs.stop();
-          $('.backpage').visibility();
+          $('.backpage').visibility({silent: true});
           $('#tradelogs').empty();
           $('#section4').hide();
           window.scrollTo(0, 0);
-          jsSupressRedraw = false;
+          setSupressRedraw(false);
+          reloadViewSafeStart();
           jsViewSelector(11);
           page_scroll_done = function() {};
           $('#bottom-blink').fadeIn(100).fadeOut(400);
@@ -4894,8 +5010,13 @@ function after_script_260870(data_260872) {
     
 		}
 		
+		if ((show_page3_254070[0] || show_page4_254071[0])) {
+		      reloadViewSafeEnd();
+    
+		}
+		
 
 	
 }
-view_selector_254133(11, true);
-app_inst_254014[0] = set_initializer_240462(app_main_260269, "main", after_script_260870);
+view_selector_254122(11, true);
+app_inst_254014[0] = set_initializer_240462(app_main_260622, "main", after_script_261225);

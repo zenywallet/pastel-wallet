@@ -383,6 +383,9 @@ function showRecvAddress() {
   $('#receive-address .used').css("width", 0);
   $('#receive-address .used .ball').removeClass('active');
   $('#receive-address .address').text('');
+  if(!$('#receive-address').hasClass('visible')) {
+    $('#receive-address').transition('fade down');
+  }
   $('#receive-address').show();
   $('#receive-address .new').fadeIn(800, function() {
     $('#receive-address .new .ball:first').addClass('active');
