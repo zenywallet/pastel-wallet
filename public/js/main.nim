@@ -604,19 +604,6 @@ proc recvAddressSelector(): VNode =
         tdiv(class="circular ui icon mini button ball"): img(src="")
         tdiv(class="circular ui icon mini button ball"): img(src="")
 
-proc btnReceive: proc() =
-  result = proc() =
-    asm """
-      if($('#receive-address').hasClass('hidden')) {
-        if($('#send-coins').hasClass('visible')) {
-          $('#send-coins').transition('fade down');
-        }
-        showRecvAddress();
-      } else {
-        $('#receive-address').transition('fade down');
-      }
-    """
-
 proc recvAddressModal(): VNode =
   result = buildHtml(tdiv(id="recv-modal", class="ui")):
     italic(class="close icon btn-close-arc")
@@ -690,41 +677,155 @@ proc sendForm(): VNode =
         button(id="btn-send", class="ui inverted olive button center btn-send"):
           text "Send"
 
+asm """
+  function initSendForm() {
+    $('#btn-send-clear').off('click').click(function() {
+      $('#send-coins input[name="address"]').val('');
+      $('#send-coins input[name="amount"]').val('');
+      uriOptions = [];
+      jsViewSelector(11);
+      $(this).blur();
+    });
+    $('#btn-send-qrcode').off('click').click(function() {
+      qrReaderModal.show(function(uri) {
+        var data = bip21reader(uri);
+        $('#send-coins input[name="address"]').val(data.address || '');
+        $('#send-coins input[name="amount"]').val(data.amount || '');
+        uriOptions = [];
+        for(var k in data) {
+          var p = data[k];
+          if(k == 'address' || k == 'amount') {
+            continue;
+          }
+          uriOptions.push({key: crlftab_to_html(k), value: crlftab_to_html(p)});
+        }
+        jsViewSelector(11);
+      });
+      $(this).blur();
+    });
+  }
+  var sendrecv_switch = 0;
+  var sendrecv_switch_busy = false;
+  var sendrecv_switch_tval;
+  var sendrecv_last = null;
+  var sendrecv_wait = 0;
+  function send_switch() {
+    sendrecv_switch_busy = true;
+    if(sendrecv_last == 2) {
+      $('#receive-address').transition({
+        animation: 'fade down',
+        onComplete : function() {
+          $('#send-coins').transition({
+            animation: 'fade down',
+            onComplete : function() {
+              sendrecv_last = 1;
+              sendrecv_switch_busy = false;
+            }
+          });
+          initSendForm();
+        }
+      });
+    } else {
+      $('#send-coins').transition({
+        animation: 'fade down',
+        onComplete : function() {
+          sendrecv_last = 1;
+          sendrecv_switch_busy = false;
+        }
+      });
+      initSendForm();
+    }
+  }
+  function recv_switch() {
+    sendrecv_switch_busy = true;
+    if(sendrecv_last == 1) {
+      $('#send-coins').transition({
+        animation: 'fade down',
+        onComplete : function() {
+          showRecvAddress();
+          $('#receive-address').transition({
+            animation: 'fade down',
+            onComplete : function() {
+              sendrecv_last = 2;
+              sendrecv_switch_busy = false;
+            }
+          });
+        }
+      });
+    } else {
+      showRecvAddress();
+      $('#receive-address').transition({
+        animation: 'fade down',
+        onComplete : function() {
+          sendrecv_last = 2;
+          sendrecv_switch_busy = false;
+        }
+      });
+    }
+  }
+  function reset_switch() {
+    if(!$('#send-coins').hasClass('hidden')) {
+      sendrecv_switch_busy = true;
+      $('#send-coins').transition({
+        animation: 'fade down',
+        onComplete : function() {
+          sendrecv_last = 0;
+          sendrecv_switch_busy = false;
+        }
+      });
+    }
+    if(!$('#receive-address').hasClass('hidden')) {
+      sendrecv_switch_busy = true;
+      $('#receive-address').transition({
+        animation: 'fade down',
+        onComplete : function() {
+          sendrecv_last = 0;
+          sendrecv_switch_busy = false;
+        }
+      });
+    }
+  }
+  function sendrecv_switch_worker() {
+    if(sendrecv_switch_busy) {
+      sendrecv_switch_tval = setTimeout(function() {
+        sendrecv_wait++;
+        if(sendrecv_wait < 300) {
+          sendrecv_switch_worker();
+        } else {
+          sendrecv_switch_busy = false;
+        }
+      }, 50);
+      return;
+    }
+    sendrecv_wait = 0;
+    if(sendrecv_last == sendrecv_switch) {
+      return;
+    }
+    if(sendrecv_switch == 1) {
+      send_switch();
+    } else if(sendrecv_switch == 2) {
+      recv_switch();
+    } else {
+      reset_switch();
+    }
+  }
+  function sendrecv_select(val) {
+    clearTimeout(sendrecv_switch_tval);
+    sendrecv_switch = val;
+    sendrecv_switch_worker();
+  }
+"""
+
 proc btnSend: proc() =
   result = proc() =
     asm """
-      if($('#send-coins').hasClass('hidden')) {
-        if(!$('#receive-address').hasClass('hidden')) {
-          $('#receive-address').transition('fade down');
-        }
-        $('#send-coins').transition('fade down');
-        $('#btn-send-clear').off('click').click(function() {
-          $('#send-coins input[name="address"]').val('');
-          $('#send-coins input[name="amount"]').val('');
-          uriOptions = [];
-          jsViewSelector(11);
-          $(this).blur();
-        });
-        $('#btn-send-qrcode').off('click').click(function() {
-          qrReaderModal.show(function(uri) {
-            var data = bip21reader(uri);
-            $('#send-coins input[name="address"]').val(data.address || '');
-            $('#send-coins input[name="amount"]').val(data.amount || '');
-            uriOptions = [];
-            for(var k in data) {
-              var p = data[k];
-              if(k == 'address' || k == 'amount') {
-                continue;
-              }
-              uriOptions.push({key: crlftab_to_html(k), value: crlftab_to_html(p)});
-            }
-            jsViewSelector(11);
-          });
-          $(this).blur();
-        });
-      } else {
-        $('#send-coins').transition('fade down');
-      }
+      sendrecv_select((sendrecv_switch == 1) ? 0 : 1);
+    """
+
+proc btnReceive: proc() =
+  result = proc() =
+    asm """
+      sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
     """
 
 #[
