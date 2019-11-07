@@ -607,7 +607,12 @@ proc recvAddressSelector(): VNode =
 proc btnReceive: proc() =
   result = proc() =
     asm """
-      showRecvAddress()
+      if($('#receive-address').is(":hidden")) {
+        $('#send-coins').hide();
+        showRecvAddress();
+      } else {
+        $('#receive-address').hide();
+      }
     """
 
 proc recvAddressModal(): VNode =
@@ -640,6 +645,108 @@ proc recvAddressModal(): VNode =
           tdiv(class="field"):
             label: text "Message"
             textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
+
+asm """
+  var uriOptions = [];
+"""
+var uriOptions {.importc, nodecl.}: JsObject
+proc sendForm(): VNode =
+  result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment")):
+    tdiv(class="ui top attached label sendcoins"):
+      text "Send Coins "
+      span:
+        italic(class="window maximize outline icon btn-maximize")
+        italic(class="close icon btn-close")
+    tdiv(class="ui mini basic icon buttons"):
+      button(id="btn-send-clear", class="ui button", title="Clear"):
+        italic(class="eraser icon")
+      button(id="btn-send-qrcode", class="ui button", title="Scan QR code"):
+        italic(class="camera icon")
+    tdiv(class="ui form"):
+      tdiv(class="field"):
+        label: text "Send Address"
+        tdiv(class="ui small input"):
+          input(class="center", type="text", name="address", placeholder="Address")
+      tdiv(class="field"):
+        label: text "Amount"
+        tdiv(class="ui small input"):
+          input(class="center", type="text", name="amount", placeholder="Amount")
+          tdiv(class="ui mini basic icon buttons utxoctrl"):
+            button(id="btn-utxo-plus", class="ui button", title="-1 UTXO"):
+              italic(class="minus circle icon")
+            button(id="btn-utxo-count", class="ui button sendutxos"):
+              text "≤24"
+            button(id="btn-utxo-minus", class="ui button", title="+1 UTXO"):
+              italic(class="plus circle icon")
+      tdiv(class="ui list uri-options"):
+        for d in uriOptions:
+          tdiv(class="item"):
+            tdiv(class="content"):
+              tdiv(class="header"): text cast[cstring](d.key)
+              tdiv(class="description"): text cast[cstring](d.value)
+      tdiv(class="fluid ui buttons"):
+        button(id="btn-send", class="ui inverted olive button center btn-send"):
+          text "Send"
+
+proc btnSend: proc() =
+  result = proc() =
+    asm """
+      if($('#send-coins').is(":hidden")) {
+        $('#receive-address').hide();
+        $('#send-coins').show();
+        $('#btn-send-clear').off('click').click(function() {
+          $('#send-coins input[name="address"]').val('');
+          $('#send-coins input[name="amount"]').val('');
+          uriOptions = [];
+          jsViewSelector(11);
+          $(this).blur();
+        });
+        $('#btn-send-qrcode').off('click').click(function() {
+          qrReaderModal.show(function(uri) {
+            var data = bip21reader(uri);
+            $('#send-coins input[name="address"]').val(data.address || '');
+            $('#send-coins input[name="amount"]').val(data.amount || '');
+            uriOptions = [];
+            for(var k in data) {
+              var p = data[k];
+              if(k == 'address' || k == 'amount') {
+                continue;
+              }
+              uriOptions.push({key: crlftab_to_html(k), value: crlftab_to_html(p)});
+            }
+            jsViewSelector(11);
+          });
+          $(this).blur();
+        });
+      } else {
+        $('#send-coins').hide();
+      }
+    """
+
+#[
+proc qrCodeModal(): Vnode =
+  result = buildHtml(tdiv(id="qrcode-modal", class="ui basic modal")):
+    italic(class="close icon def-close")
+    tdiv(class="ui icon header"): text "Scan QR Code"
+    tdiv(class="scrolling content"):
+      tdiv(id="qrreader-seg", class="ui center aligned segment"):
+        tdiv(class="qr-scanning"):
+          tdiv()
+          tdiv()
+        tdiv(class="ui small basic icon buttons camtools"):
+          button(class="ui button btn-camera"):
+            italic(class="camera icon")
+          button(class="ui button btn-close"):
+            italic(class="window close icon")
+        canvas(id="qrcanvas-modal", width="0", height="0")
+        tdiv(id="qrcamera-loader", class="ui dimmer active"):
+          tdiv(class="ui indeterminate text loader"): text "Preparing Camera"
+        tdiv(id="qrcamera-shutter", class="ui dimmer")
+    tdiv(class="actions"):
+      tdiv(class="ui basic cancel inverted button"):
+        italic(class="remove icon")
+        text "Cancel"
+]#
 
 proc settingsModal(): VNode =
   result = buildHtml(tdiv(id="settings-modal", class="ui basic modal")):
@@ -783,7 +890,7 @@ proc appMain(data: RouterData): VNode =
             tdiv(class="caption"): text "Pastel Wallet"
             tdiv(class="ui container wallet-btns"):
               tdiv(class="two ui basic buttons sendrecv"):
-                button(id="btn-send", class="ui small button send"):
+                button(id="btn-send", class="ui small button send", onclick=btnSend()):
                   italic(class="counterclockwise rotated sign-out icon send")
                   text " Send"
                 button(id="btn-receive", class="ui small button receive", onclick=btnReceive()):
@@ -803,6 +910,8 @@ proc appMain(data: RouterData): VNode =
               recvAddressSelector()
             if showRecvAddressModal:
               recvAddressModal()
+            sendForm()
+            #qrCodeModal()
             tdiv(id="ball-info", class="ui center aligned segment"):
               text ""
               br()

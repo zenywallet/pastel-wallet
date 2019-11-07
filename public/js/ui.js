@@ -381,7 +381,8 @@ function showRecvAddress() {
   ball_selector_event('#receive-address .new .ball');
   $('#receive-address .used').css("visibility", "hidden");
   $('#receive-address .used').css("width", 0);
-  $('#receive-address .used .ball').removeClass('active')
+  $('#receive-address .used .ball').removeClass('active');
+  $('#receive-address .address').text('');
   $('#receive-address').show();
   $('#receive-address .new').fadeIn(800, function() {
     $('#receive-address .new .ball:first').addClass('active');
@@ -451,6 +452,40 @@ function showRecvAddress() {
       showRecvModal();
     });
   }
+}
+
+function escape_html(s) {
+  return s.replace(/[&'`"<>]/g, function(match) {
+    return {
+      '&': '&amp;',
+      "'": '&#39;',
+      "`": '&#96;',
+      '"': '&quot;',
+      '<': '&lt;',
+      '>': '&gt;',
+    }[match]
+  });
+}
+
+function bip21reader(uri) {
+  var d_uri = decodeURI(uri);
+  var s = d_uri.split(/[?&]/);
+  if(s.length <= 0) {
+    return null;
+  }
+  var a = s[0].split(':');
+  var result = {address: a[a.length - 1]};
+  for(var i = 1; i < s.length; i++) {
+    var p = s[i].split('=');
+    if(p.length == 2) {
+      result[escape_html(p[0])] = escape_html(Encoding.convert(p[1], 'UNICODE', 'SJIS'));
+    }
+  }
+  return result;
+}
+
+function crlftab_to_html(s) {
+  return s.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 }
 
 var camDevice = (function() {
@@ -883,6 +918,10 @@ var qrReaderModal = (function() {
   }
 
   function show(cb) {
+    $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
+    $('body').removeClass('dimmable dimmed');
+    $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">Scan QR Code</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button><button class="ui button btn-close"><i class="window close icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div id="qrcamera-loader" class="ui active dimmer"><div class="ui indeterminate text loader">Preparing Camera</div></div><div id="qrcamera-shutter" class="ui dimmer"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
+
     $('#qrcode-modal').modal("setting", {
       closable: false,
       autofocus: false,
@@ -931,6 +970,8 @@ var qrReaderModal = (function() {
       }
       mode_show = false;
     }
+    $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
+    $('body').removeClass('dimmable dimmed');
   }
 
   var Module = {
