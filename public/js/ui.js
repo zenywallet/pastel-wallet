@@ -439,6 +439,51 @@ function showRecvAddress() {
       recvform_change();
       showRecvModal();
     });
+
+    var btn_copy = document.getElementById('btn-recv-copy');
+    var copied_popup_tval;
+    btn_copy.addEventListener('click', function() {
+      var address_elm = document.getElementById('address-text');
+      if(address_elm) {
+        var ret = false;
+        var copydata = '';
+        var textarea = document.getElementById('clipboard');
+        if(textarea) {
+          copydata = address_elm.textContent;
+          textarea.textContent = copydata;
+          textarea.select();
+          ret = document.execCommand('copy');
+          textarea.textContent = '';
+        }
+        if(!ret && window.getSelection) {
+          var getsel = window.getSelection();
+          var range = document.createRange();
+          range.selectNode(address_elm);
+          getsel.removeAllRanges();
+          getsel.addRange(range);
+          copydata = getsel.toString();
+          ret = document.execCommand('copy');
+          getsel.removeAllRanges();
+        }
+        if(ret) {
+          var copied = $('#address-text');
+          clearTimeout(copied_popup_tval);
+          copied.popup({
+            title: 'Copy to Clipboard',
+            content: copydata,
+            on: 'manual',
+            variation: 'inverted',
+            position: 'bottom center',
+            distanceAway: 0,
+            exclusive: true
+          }).popup('show');
+          copied_popup_tval = setTimeout(function() {
+            copied.popup('hide');
+          }, 2000);
+        }
+      }
+      btn_copy.blur();
+    });
   }
 }
 

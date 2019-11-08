@@ -593,7 +593,7 @@ proc recvAddressSelector(): VNode =
         italic(class="copy outline icon")
       button(id="btn-recv-qrcode", class="ui button", title="QR code"):
         italic(class="qrcode icon")
-    tdiv(class="address"): text ""
+    tdiv(id="address-text", class="address"): text ""
     tdiv(class="balls"):
       tdiv(class="used"):
         tdiv(class="circular ui icon mini button ball"): img(src="")
@@ -1038,6 +1038,7 @@ proc appMain(data: RouterData): VNode =
               text "Logs"
               span: italic(class="chevron down icon")
             tdiv(id="bottom-blink")
+        textarea(id="clipboard", rows="1")
 
     if showPage4:
       section(id="section4", class="tradelogs-section"):
