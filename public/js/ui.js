@@ -874,6 +874,7 @@ var qrReaderModal = (function() {
   var current_deviceId = null;
 
   function qrShow(cb) {
+    $.fn.transition.settings.silent = true;
     mode_show = true;
     showing = false;
     abort = false;
