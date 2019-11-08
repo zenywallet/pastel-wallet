@@ -507,16 +507,15 @@ pastel.ready = function() {
       console.log('unspents: ' + JSON.stringify(utxos));
       wallet.setUtxos(utxos);
 
-      var utxoballs = UtxoBalls.simple();
-      pastel.utxoballs = utxoballs;
+      pastel.utxoballs = UtxoBalls.simple();
       var resize_tval;
       window.addEventListener("resize", function() {
-        utxoballs.stop();
+        pastel.utxoballs.stop();
         clearTimeout(resize_tval);
         resize_tval = setTimeout(function() {
-          var click_cb = utxoballs.click_cb();
-          utxoballs = UtxoBalls.simple();
-          utxoballs.click(click_cb);
+          var click_cb = pastel.utxoballs.click_cb();
+          pastel.utxoballs = UtxoBalls.simple();
+          pastel.utxoballs.click(click_cb);
         }, 1400);
       });
     } else if(type == 'ready') {
