@@ -825,6 +825,9 @@ proc btnSend: proc() =
 proc btnReceive: proc() =
   result = proc() =
     asm """
+      if(!pastel.wallet || !pastel.utxoballs) {
+        return;
+      }
       sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
     """
 

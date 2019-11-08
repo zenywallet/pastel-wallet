@@ -316,9 +316,6 @@ function reloadViewSafeEnd() {
 
 var modal_recv_addrs = [];
 function showRecvAddress() {
-  if(!pastel.wallet || !pastel.utxoballs) {
-    return;
-  }
   var wallet = pastel.wallet;
   modal_recv_addrs = wallet.getUnusedAddressList(5);
   $('#receive-address .new').hide();
