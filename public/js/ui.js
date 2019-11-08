@@ -375,7 +375,7 @@ function showRecvAddress() {
 
   ball_selector_event('#receive-address .new .ball');
   $('#receive-address .used').css("visibility", "hidden");
-  $('#receive-address .used').css("width", 0);
+  $('#receive-address .used').css({width: 0, 'margin-right': 0});
   $('#receive-address .used .ball').removeClass('active');
   $('#receive-address .address').css("visibility", "hidden").css("opacity", 0).text(modal_recv_addrs[0]);
   pastel.utxoballs.click(utxoballs_click);
