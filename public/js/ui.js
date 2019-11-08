@@ -319,10 +319,9 @@ function showRecvAddress() {
   var wallet = pastel.wallet;
   modal_recv_addrs = wallet.getUnusedAddressList(5);
   $('#receive-address .new').hide();
-  $('#receive-address .new').empty();
   for(var i in modal_recv_addrs) {
     var addr = modal_recv_addrs[i];
-    $('#receive-address .new').append('<div class="circular ui icon mini button ball" data-idx="' + i + '"><img src="' + Ball.get(addr, 28) + '"></div>');
+    $('#receive-address .new .ball').eq(i).replaceWith('<div class="circular ui icon mini button ball" data-idx="' + i + '"><img src="' + Ball.get(addr, 28) + '"></div>');
   }
 
   function ball_selector_event(sel) {
