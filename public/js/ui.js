@@ -962,11 +962,11 @@ var qrReaderModal = (function() {
         if(canvasElement) {
           canvasElement.hidden = true;
         }
+        $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
+        $('body').removeClass('dimmable dimmed');
       }
       mode_show = false;
     }
-    $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
-    $('body').removeClass('dimmable dimmed');
   }
 
   var Module = {
