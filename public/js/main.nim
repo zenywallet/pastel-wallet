@@ -746,6 +746,7 @@ asm """
           $('#receive-address').transition({
             animation: 'fade down',
             onComplete : function() {
+              showRecvAddressAfterEffect();
               sendrecv_last = 2;
               sendrecv_switch_busy = false;
             }
@@ -757,6 +758,7 @@ asm """
       $('#receive-address').transition({
         animation: 'fade down',
         onComplete : function() {
+          showRecvAddressAfterEffect();
           sendrecv_last = 2;
           sendrecv_switch_busy = false;
         }

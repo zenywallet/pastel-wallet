@@ -377,17 +377,7 @@ function showRecvAddress() {
   $('#receive-address .used').css("visibility", "hidden");
   $('#receive-address .used').css("width", 0);
   $('#receive-address .used .ball').removeClass('active');
-  $('#receive-address .address').hide().text(modal_recv_addrs[0]);
-  //if(!$('#receive-address').hasClass('visible')) {
-  //  $('#receive-address').transition('fade down');
-  //}
-  //$('#receive-address').show();
-  $('#receive-address .new').fadeIn(800, function() {
-    $('#receive-address .new .ball:first').addClass('active');
-    setTimeout(function() {
-      $('#receive-address .address').fadeIn(400);
-    }, 400);
-  });
+  $('#receive-address .address').css("visibility", "hidden").css("opacity", 0).text(modal_recv_addrs[0]);
   pastel.utxoballs.click(utxoballs_click);
 
   if(!recv_moval_init_flag) {
@@ -450,6 +440,13 @@ function showRecvAddress() {
       showRecvModal();
     });
   }
+}
+
+function showRecvAddressAfterEffect() {
+  $('#receive-address .new').fadeIn(400, function() {
+    $('#receive-address .new .ball:first').addClass('active');
+    $('#receive-address .address').css("visibility", "visible").animate({opacity: 1}, 400);
+  });
 }
 
 function escape_html(s) {
