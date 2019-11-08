@@ -323,7 +323,6 @@ function showRecvAddress() {
     var addr = modal_recv_addrs[i];
     $('#receive-address .new .ball').eq(i).replaceWith('<div class="circular ui icon mini button ball" data-idx="' + i + '"><img src="' + Ball.get(addr, 28) + '"></div>');
   }
-
   function ball_selector_event(sel) {
     $(sel).off('click').click(function() {
       var idx = $(this).data('idx');
@@ -378,7 +377,7 @@ function showRecvAddress() {
   $('#receive-address .used').css("visibility", "hidden");
   $('#receive-address .used').css("width", 0);
   $('#receive-address .used .ball').removeClass('active');
-  $('#receive-address .address').text('');
+  $('#receive-address .address').hide().text(modal_recv_addrs[0]);
   //if(!$('#receive-address').hasClass('visible')) {
   //  $('#receive-address').transition('fade down');
   //}
@@ -386,7 +385,7 @@ function showRecvAddress() {
   $('#receive-address .new').fadeIn(800, function() {
     $('#receive-address .new .ball:first').addClass('active');
     setTimeout(function() {
-      $('#receive-address .address').hide().text(modal_recv_addrs[0]).fadeIn(400);
+      $('#receive-address .address').fadeIn(400);
     }, 400);
   });
   pastel.utxoballs.click(utxoballs_click);
