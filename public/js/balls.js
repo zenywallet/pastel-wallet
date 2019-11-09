@@ -107,7 +107,7 @@ UtxoBalls.simple = function() {
       restitution: 0.3,
       render: {
         sprite: {
-          texture: Ball.get(String(200), 160, 'Too Much UTXOs'),
+          texture: Ball.get(String(200), 160, 'Too Much Balls'),
           xScale: s2 / 160,
           yScale: s2 / 160,
         }

@@ -661,11 +661,11 @@ proc sendForm(): VNode =
         tdiv(class="ui small input"):
           input(class="center", type="text", name="amount", placeholder="Amount")
           tdiv(class="ui mini basic icon buttons utxoctrl"):
-            button(id="btn-utxo-plus", class="ui button", title="-1 UTXO"):
+            button(id="btn-utxo-plus", class="ui button", title="-1 Ball"):
               italic(class="minus circle icon")
             button(id="btn-utxo-count", class="ui button sendutxos"):
               text "≤24"
-            button(id="btn-utxo-minus", class="ui button", title="+1 UTXO"):
+            button(id="btn-utxo-minus", class="ui button", title="+1 Ball"):
               italic(class="plus circle icon")
       tdiv(class="ui list uri-options"):
         for d in uriOptions:
