@@ -591,7 +591,7 @@ proc recvAddressSelector(): VNode =
     tdiv(class="ui mini basic icon buttons"):
       button(id="btn-recv-copy", class="ui button", title="Copy"):
         italic(class="copy outline icon")
-      button(id="btn-recv-qrcode", class="ui button", title="QR code"):
+      button(id="btn-recv-qrcode", class="ui button", title="QR Code"):
         italic(class="qrcode icon")
     tdiv(id="address-text", class="address"): text ""
     tdiv(class="balls"):
@@ -649,7 +649,7 @@ proc sendForm(): VNode =
     tdiv(class="ui mini basic icon buttons"):
       button(id="btn-send-clear", class="ui button", title="Clear"):
         italic(class="eraser icon")
-      button(id="btn-send-qrcode", class="ui button", title="Scan QR code"):
+      button(id="btn-send-qrcode", class="ui button", title="Scan QR Code"):
         italic(class="camera icon")
     tdiv(class="ui form"):
       tdiv(class="field"):
