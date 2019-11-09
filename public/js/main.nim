@@ -879,7 +879,7 @@ proc settingsPage(): VNode =
     button(id="btn-reset", class="ui inverted red button"): text "Reset Wallet"
     tdiv(class="ui pink inverted segment"):
       text """
-        Delete all your wallet data in your web browser, including your encrypted secret keys and mnemonics.
+        Delete all your wallet data in your web browser, including your encrypted secret keys.
          If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards
          or mnemonics before deleting it. Otherwise you will lost your coins forever.
       """
