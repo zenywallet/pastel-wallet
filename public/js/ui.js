@@ -1037,7 +1037,12 @@ var Settings = (function() {
         onApprove: function() {
           location.reload();
         },
-        onDeny: function() {}
+        onDeny: function() {},
+        onHidden: function() {
+          $('body').removeClass('dimmable');
+          $('#settings-modal').unwrap();
+          $('#settings-modal').insertAfter($('#settings'));
+        }
       }).modal('show');
     } else {
       self.blur();
