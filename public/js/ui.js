@@ -532,13 +532,15 @@ var camDevice = (function() {
   var cam_ids = [];
   var sel_cam = null;
   var sel_cam_index = 0;
-  navigator.mediaDevices.enumerateDevices().then(function(devices) {
-    devices.forEach(function(device) {
-      if(device.kind == 'videoinput') {
-        cam_ids.push(device);
-      }
+  if(navigator.mediaDevices) {
+    navigator.mediaDevices.enumerateDevices().then(function(devices) {
+      devices.forEach(function(device) {
+        if(device.kind == 'videoinput') {
+          cam_ids.push(device);
+        }
+      });
     });
-  });
+  }
   return {
     set_current: function(deviceId) {
       var new_cam_index = 0;
@@ -938,24 +940,26 @@ var qrReaderModal = (function() {
     } else {
       constraints = {video: {deviceId: current_deviceId}};
     }
-    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-      if(!current_deviceId) {
-        var envcam;
-        stream.getTracks().forEach(function(track) {
-          envcam = track.getSettings().deviceId;
-          return true;
-        });
-        if(envcam) {
-          camDevice.set_current(envcam);
+    if(navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+        if(!current_deviceId) {
+          var envcam;
+          stream.getTracks().forEach(function(track) {
+            envcam = track.getSettings().deviceId;
+            return true;
+          });
+          if(envcam) {
+            camDevice.set_current(envcam);
+          }
         }
-      }
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true);
-      video.play();
-      video_status_change();
-      showing = true;
-      requestAnimationFrame(tick);
-    });
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true);
+        video.play();
+        video_status_change();
+        showing = true;
+        requestAnimationFrame(tick);
+      });
+    }
   }
 
   function show(cb) {
