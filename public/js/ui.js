@@ -514,7 +514,10 @@ function bip21reader(uri) {
     return null;
   }
   var a = s[0].split(':');
-  var result = {address: a[a.length - 1]};
+  var result = {}
+  if(a.length <= 2 && a[a.length - 1].length > 0) {
+    result.address = a[a.length - 1];
+  }
   for(var i = 1; i < s.length; i++) {
     var p = s[i].split('=');
     if(p.length == 2) {
