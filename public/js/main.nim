@@ -502,7 +502,7 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
         span(class="date"): text cardInfo.gen
       var clen = cardInfo.seed.len
       if clen > 0:
-        var half = clen - toInt(clen / 2)
+        var half = toInt(clen / 2)
         var seed = $cardInfo.seed
         var seed_upper = seed[0..<half]
         var seed_lower = seed[half..^1]
