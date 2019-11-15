@@ -6,6 +6,9 @@
 {.compile: "yespower_hash.c".}
 
 proc yespower_hash*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}
+proc yespower_n2r8*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}
+proc yespower_n4r16*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}
+proc yespower_n4r32*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}
 
 when isMainModule:
   var a: array[80, byte]
