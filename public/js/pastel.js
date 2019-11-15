@@ -377,6 +377,7 @@ pastel.load = function() {
 var Stream = (function() {
   var reconnect_timer;
   var reconnect = true;
+  var status = 0;
 
   function Stream(ws_url, ws_protocol) {
     if(this instanceof Stream) {
@@ -422,11 +423,17 @@ var Stream = (function() {
     }
   }
 
+  Stream.prototype.status = function() {
+    return status;
+  }
+
   Stream.prototype.start = function() {
+    status = 1;
     this.connect();
   }
 
   Stream.prototype.stop = function() {
+    status = 0;
     reconnect = false;
     clearTimeout(reconnect_timer);
     if(this.ws) {
@@ -600,6 +607,6 @@ pastel.ready = function() {
     }
   }
 
-  stream.start();
+  pastel.stream = stream;
 }
 pastel.load();
