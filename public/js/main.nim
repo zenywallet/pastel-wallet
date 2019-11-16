@@ -547,6 +547,9 @@ proc goSettings(): proc() =
     if not showPage4:
       viewSelector(WalletSettings, false)
       supressRedraw = true
+      asm """
+        $('#section4').show();
+      """
     else:
       asm """
         TradeLogs.stop();
@@ -563,6 +566,9 @@ proc goLogs(): proc() =
     if not showPage4:
       viewSelector(WalletLogs, false)
       supressRedraw = true
+      asm """
+        $('#section4').show();
+      """
     else:
       asm """
         TradeLogs.stop();
@@ -1040,7 +1046,7 @@ proc appMain(data: RouterData): VNode =
             tdiv(id="bottom-blink")
         textarea(id="clipboard", rows="1")
 
-    if showPage4:
+    if showPage3 or showPage4:
       section(id="section4", class="tradelogs-section"):
         tdiv(class="ui buttons settings backpage"):
           tdiv(class="ui button backwallet", onclick=backWallet()):
@@ -1172,6 +1178,11 @@ proc afterScript(data: RouterData) =
         }
       });
     """
+  else:
+    asm """
+      $('#section4').hide();
+    """
+
   if showPage3 or showPage4:
     asm """
       reloadViewSafeEnd();
