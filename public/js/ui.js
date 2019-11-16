@@ -515,8 +515,13 @@ function bip21reader(uri) {
   }
   var a = s[0].split(':');
   var result = {}
-  if(a.length <= 2 && a[a.length - 1].length > 0) {
-    result.address = a[a.length - 1];
+  if(a.length <= 2) {
+    var addr = a[a.length - 1];
+    if(addr.length > 0 && /^[a-z0-9]+$/i.test(addr)) {
+      result.address = a[a.length - 1];
+    } else {
+      result.unknown = d_uri;
+    }
   }
   for(var i = 1; i < s.length; i++) {
     var p = s[i].split('=');
