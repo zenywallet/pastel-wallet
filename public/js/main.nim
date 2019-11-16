@@ -1121,6 +1121,9 @@ proc afterScript(data: RouterData) =
         $('#section2').hide();
         window.scrollTo(0, 0);
         jsViewSelector(8);
+        if(pastel.stream && !pastel.stream.status()) {
+          pastel.stream.start();
+        }
         page_scroll_done = function() {};
       }
     """
@@ -1188,5 +1191,5 @@ proc afterScript(data: RouterData) =
       reloadViewSafeEnd();
     """
 
-viewSelector(Wallet, true)
+#viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)
