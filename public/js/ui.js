@@ -1039,7 +1039,7 @@ var Settings = (function() {
     var check = $('#settings .ui.checkbox').checkbox('is checked');
     if(check) {
       $('#btn-reset').blur();
-      $('.ui.basic.modal').modal("setting", {
+      $('#settings-modal').modal("setting", {
         closable: false,
         onApprove: function() {
           location.reload();
@@ -1047,8 +1047,10 @@ var Settings = (function() {
         onDeny: function() {},
         onHidden: function() {
           $('body').removeClass('dimmable');
-          $('#settings-modal').unwrap();
-          $('#settings-modal').insertAfter($('#settings'));
+          var modal = $('#settings-modal');
+          modal.unwrap();
+          modal.clone().insertAfter('#settings');
+          modal.remove();
         }
       }).modal('show');
     } else {
