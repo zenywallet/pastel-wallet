@@ -703,7 +703,9 @@ asm """
           if(k == 'address' || k == 'amount') {
             continue;
           }
-          uriOptions.push({key: crlftab_to_html(k), value: crlftab_to_html(p)});
+          var key = crlftab_to_html(k);
+          key = key.charAt(0).toUpperCase() + key.slice(1);
+          uriOptions.push({key: key, value: crlftab_to_html(p)});
         }
         jsViewSelector(11);
       });
