@@ -469,7 +469,7 @@ function showRecvAddress() {
           var copied = $('#address-text');
           clearTimeout(copied_popup_tval);
           copied.popup({
-            title: 'Copy to Clipboard',
+            title: 'Copied to clipboard',
             content: copydata,
             on: 'manual',
             variation: 'inverted',
