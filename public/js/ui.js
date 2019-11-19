@@ -1119,3 +1119,11 @@ ready(function() {
     reloadSection();
   });
 });
+
+window.onerror = function(e){
+  if(e) {
+    if(e.indexOf('karax') >= 0) {
+      location.reload();
+    }
+  }
+}
