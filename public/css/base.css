@@ -216,7 +216,7 @@ html::-webkit-scrollbar {
 .ui.buttons .or::before {
   line-height: 1.65em;
 }
-#qrcanvas {
+#qrcanvas, #seed-seg .qrcamera-loader, #seed-seg .qrcamera-shutter {
   position: absolute;
   top: 0;
   left: 0;
@@ -227,6 +227,9 @@ html::-webkit-scrollbar {
   overflow: hidden;
   object-fit: cover;
   pointer-events: none;
+}
+.ui.dimmer.qrcamera-loader {
+  z-index: 5;
 }
 #bt-camchange {
   display: block;
@@ -289,7 +292,7 @@ html::-webkit-scrollbar {
   top: 21px;
   right: 21px;
   float: right;
-  z-index: 4;
+  z-index: 6;
   background-color: rgba(136,136,136,0.6);
   visibility: hidden;
 }

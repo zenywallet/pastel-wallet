@@ -669,10 +669,30 @@ var qrReader = (function() {
             && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
-            console.log(code.data);
+            scan_done = true;
             qr_stop();
+            showing = false;
             if(!abort && cb_done) {
-              cb_done(code.data);
+              var active = true;
+              var count = 0;
+              function shutter() {
+                setTimeout(function() {
+                  if(active) {
+                    $('#qrcamera-shutter').addClass('active');
+                    active = false;
+                  } else {
+                    $('#qrcamera-shutter').removeClass('active');
+                    active = true;
+                    count++;
+                  }
+                  if(count < 3) {
+                    shutter();
+                  } else {
+                    cb_done(code.data);
+                  }
+                }, 50);
+              }
+              shutter();
             }
             return;
           }
@@ -689,14 +709,19 @@ var qrReader = (function() {
   var mode_show = true;
   var video = null;
   var qr_instance = null;
+  var scan_done = false;
 
   var prev_camera_scanning_flag = false;
   function camera_scanning(flag) {
     if(prev_camera_scanning_flag != flag) {
       if(flag) {
+        $('#qrcamera-loader').removeClass('active');
         $('.qr-scanning').show();
       } else {
         $('.qr-scanning').hide();
+        if(!abort) {
+          $('#qrcamera-loader').addClass('active');
+        }
       }
       prev_camera_scanning_flag = flag;
     }
@@ -705,62 +730,94 @@ var qrReader = (function() {
   function video_status_change() {
     if(mode_show) {
       canvasElement.hidden = false;
-      $('.bt-scan-seed').css('visibility', 'hidden');
       $('.camtools').css('visibility', 'visible');
     } else {
       camera_scanning(false);
       $('.camtools').css('visibility', 'hidden');
-      $('.bt-scan-seed').css('visibility', 'visible');
       if(canvasElement) {
         canvasElement.hidden = true;
       }
     }
   }
 
-  return {
-    show: function(cb) {
-      mode_show = true;
-      showing = false;
-      abort = false;
-      skip_first_tick = false;
-      video = video || document.createElement("video");
-      canvasElement = document.getElementById("qrcanvas");
-      canvas = canvasElement.getContext("2d");
-      seedseg = document.getElementById("seed-seg");
-      cb_done = cb;
+  var current_deviceId = null;
 
-      // Use facingMode: environment to attemt to get the front camera on phones
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+  function show(cb) {
+    mode_show = true;
+    showing = false;
+    abort = false;
+    scan_done = false;
+    $('.bt-scan-seed').css('visibility', 'hidden');
+    $('#qrcamera-loader').addClass('active');
+    skip_first_tick = false;
+    video = video || document.createElement("video");
+    canvasElement = document.getElementById("qrcanvas");
+    canvas = canvasElement.getContext("2d");
+    seedseg = document.getElementById("seed-seg");
+    cb_done = cb;
+
+    var constraints;
+    if(!current_deviceId) {
+      constraints = {video: {facingMode: "environment"}};
+    } else {
+      constraints = {video: {deviceId: current_deviceId}};
+    }
+    if(navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+        if(!current_deviceId) {
+          var envcam;
+          stream.getTracks().forEach(function(track) {
+            envcam = track.getSettings().deviceId;
+            return true;
+          });
+          if(envcam) {
+            camDevice.set_current(envcam);
+          }
+        }
         video.srcObject = stream;
-        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+        video.setAttribute("playsinline", true);
         video.play();
         video_status_change();
         showing = true;
         requestAnimationFrame(tick);
       });
-    },
-    hide: function(rescan) {
-      if(mode_show) {
-        abort = true;
-        if(showing) {
-          qr_stop();
-          showing = false;
-        }
-        if(canvas && canvasElement) {
-          canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        }
-        if(rescan) {
-          mode_show = false;
-          video_status_change();
-        } else {
-          if(canvasElement) {
-            canvasElement.hidden = true;
-          }
-        }
-        mode_show = false;
-      }
     }
   }
+
+  function next() {
+    hide(true);
+    current_deviceId = camDevice.next();
+    show(cb_done);
+  }
+
+  function hide(rescan) {
+    if(mode_show) {
+      abort = true;
+      if(showing) {
+        qr_stop();
+        showing = false;
+      }
+      if(canvas && canvasElement) {
+        canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+      mode_show = false;
+      video_status_change();
+      if(!rescan) {
+        if(canvasElement) {
+          canvasElement.hidden = true;
+        }
+        $('#qrcamera-loader').removeClass('active');
+      }
+      $('.bt-scan-seed').css('visibility', 'visible');
+    }
+  }
+
+  var Module = {
+    show: show,
+    next: next,
+    hide: hide
+  }
+  return Module;
 })();
 
 var qrReaderModal = (function() {
@@ -895,7 +952,7 @@ var qrReaderModal = (function() {
         $('.qr-scanning').show();
       } else {
         $('.qr-scanning').hide();
-        if(!scan_done) {
+        if(!abort) {
           $('#qrcamera-loader').addClass('active');
         }
       }
@@ -1013,8 +1070,8 @@ var qrReaderModal = (function() {
       if(canvas && canvasElement) {
         canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
       }
+      mode_show = false;
       if(rescan) {
-        mode_show = false;
         video_status_change();
       } else {
         if(canvasElement) {
@@ -1023,7 +1080,6 @@ var qrReaderModal = (function() {
         $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
         $('body').removeClass('dimmable dimmed');
       }
-      mode_show = false;
     }
   }
 

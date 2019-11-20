@@ -89,19 +89,17 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
   of MnemonicFulfill:
     showPage2 = true
   of SetPassphrase:
-    showScanSeedBtn = true
-    showScanning = true
-    showCamTools = true
-    showScanResult = false
-
     showScanSeedBtn2 = true
     showScanning2 = true
     showCamTools2 = true
     showScanResult2 = false
-
     showPage1 = false
     showPage2 = true
   of KeyAfterScan:
+    showScanSeedBtn2 = false
+    showScanning2 = false
+    showCamTools2 = false
+    showScanResult2 = true
     showPage3 = true
   of PassphraseDone:
     showPage3 = true
@@ -158,7 +156,7 @@ proc viewUpdate() =
 proc importSelector(importType: ImportType): proc() =
   result = proc() =
     asm """
-      qrReader.hide(true);
+      qrReader.hide();
     """
     currentImportType = importType
 
@@ -182,7 +180,7 @@ proc importSelector(importType: ImportType): proc() =
 proc protectSelector(protectType: ProtectType): proc() =
   result = proc() =
     asm """
-      qrReader.hide(true);
+      qrReader.hide();
     """
     currentProtectType = protectType
     showPage1 = false
@@ -235,23 +233,36 @@ proc cbSeedQrDone(data: cstring) =
   """
   viewSelector(SeedAfterScan)
 
-proc showQr(): proc() =
+proc cbKeyQrDone(data: cstring) =
+  echo "cbQrDone:", data
+  asm """
+    qrReader.hide();
+  """
+  viewSelector(KeyAfterScan)
+
+proc showSeedQr(): proc() =
   result = proc() =
     asm """
       qrReader.show(`cbSeedQrDone`);
+    """
+
+proc showKeyQr(): proc() =
+  result = proc() =
+    asm """
+      qrReader.show(`cbKeyQrDone`);
     """
 
 proc camChange(): proc() =
   result = proc() =
     asm """
       $('.camtools button').blur();
-      //qrReader.show(`cbSeedQrDone`);
+      qrReader.next();
     """
 
 proc camClose(): proc() =
   result = proc() =
     asm """
-      qrReader.hide(true);
+      qrReader.hide();
     """
 
 const levenshtein_js = staticRead("levenshtein.js")
@@ -930,7 +941,7 @@ proc appMain(data: RouterData): VNode =
                     tdiv()
                     tdiv()
                 if showScanSeedBtn:
-                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showQr()):
+                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showSeedQr()):
                     text "Scan seed card with camera"
                     italic(class="camera icon")
                 if showCamTools:
@@ -940,6 +951,10 @@ proc appMain(data: RouterData): VNode =
                     button(class="ui button", onclick=camClose()):
                       italic(class="window close icon")
                 canvas(id="qrcanvas")
+                tdiv(id="qrcamera-loader", class="ui dimmer qrcamera-loader"):
+                  tdiv(class="ui indeterminate text loader"):
+                    text "Preparing Camera"
+                tdiv(id="qrcamera-shutter", class="ui dimmer qrcamera-shutter")
             else:
               tdiv(class="ui left aligned segment mnemonic-seg"):
                 mnemonicEditor()
@@ -976,7 +991,7 @@ proc appMain(data: RouterData): VNode =
                     tdiv(class="seed-add-container"):
                       button(class="circular ui icon button bt-add-seed"):
                         italic(class="plus icon")
-                  a(class="pagenext", href="#section2"):
+                  a(class="pagenext", href="#section3"):
                     span()
                     text "Next"
                 if showScanning2:
@@ -984,7 +999,7 @@ proc appMain(data: RouterData): VNode =
                     tdiv()
                     tdiv()
                 if showScanSeedBtn2:
-                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showQr()):
+                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showKeyQr()):
                     text "Scan key card with camera"
                     italic(class="camera icon")
                 if showCamTools2:
@@ -994,6 +1009,10 @@ proc appMain(data: RouterData): VNode =
                     button(class="ui button", onclick=camClose()):
                       italic(class="window close icon")
                 canvas(id="qrcanvas")
+                tdiv(id="qrcamera-loader", class="ui dimmer qrcamera-loader"):
+                  tdiv(class="ui indeterminate text loader"):
+                    text "Preparing Camera"
+                tdiv(id="qrcamera-shutter", class="ui dimmer qrcamera-shutter")
             else:
               tdiv(class="ui left aligned segment mnemonic-seg"):
                 passphraseEditor()
