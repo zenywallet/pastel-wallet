@@ -891,7 +891,6 @@ i.receive {
   border-radius: 12px;
   overflow: hidden;
   object-fit: cover;
-  pointer-events: none;
   z-index: 5;
 }
 #qrreader-seg {
