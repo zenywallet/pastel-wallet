@@ -1,4 +1,5 @@
 /*! jquery-qrcode v0.14.0 - https://larsjung.de/jquery-qrcode/ */
+/*! jquery-qrcode v0.14.0 - https://larsjung.de/jquery-qrcode/ */
 (function (vendor_qrcode) {
     'use strict';
 
@@ -153,60 +154,91 @@
 
         if (ne) {
             ctx.lineTo(r - rad, t);
-            ctx.arcTo(r, t, r, b, rad);
+            ctx.arcTo(r, t, r, t + rad, rad);
         } else {
             ctx.lineTo(r, t);
         }
 
         if (se) {
             ctx.lineTo(r, b - rad);
-            ctx.arcTo(r, b, l, b, rad);
+            ctx.arcTo(r, b, r - rad, b, rad);
         } else {
             ctx.lineTo(r, b);
         }
 
         if (sw) {
             ctx.lineTo(l + rad, b);
-            ctx.arcTo(l, b, l, t, rad);
+            ctx.arcTo(l, b, l, b - rad, rad);
         } else {
             ctx.lineTo(l, b);
         }
 
         if (nw) {
             ctx.lineTo(l, t + rad);
-            ctx.arcTo(l, t, r, t, rad);
+            ctx.arcTo(l, t, l + rad, t, rad);
         } else {
             ctx.lineTo(l, t);
         }
     }
 
+    var arcto_mode = 0;
     function drawModuleRoundendLight(ctx, l, t, r, b, rad, nw, ne, se, sw) {
-        if (nw) {
-            ctx.moveTo(l, t + rad);
-            ctx.lineTo(l, t);
-            ctx.lineTo(l + rad, t);
-            ctx.arcTo(l, t, l, t + rad, rad);
-        }
+        if(arcto_mode) {
+            if (nw) {
+                ctx.moveTo(l + rad, t);
+                ctx.lineTo(l, t);
+                ctx.lineTo(l, t + rad);
+                ctx.arcTo(l, t, l + rad, t, rad);
+            }
 
-        if (ne) {
-            ctx.moveTo(r - rad, t);
-            ctx.lineTo(r, t);
-            ctx.lineTo(r, t + rad);
-            ctx.arcTo(r, t, r - rad, t, rad);
-        }
+            if (ne) {
+                ctx.moveTo(r, t + rad);
+                ctx.lineTo(r, t);
+                ctx.lineTo(r - rad, t);
+                ctx.arcTo(r, t, r, t + rad, rad);
+            }
 
-        if (se) {
-            ctx.moveTo(r, b - rad);
-            ctx.lineTo(r, b);
-            ctx.lineTo(r - rad, b);
-            ctx.arcTo(r, b, r, b - rad, rad);
-        }
+            if (se) {
+                ctx.moveTo(r - rad, b);
+                ctx.lineTo(r, b);
+                ctx.lineTo(r, b - rad);
+                ctx.arcTo(r, b, r - rad, b, rad);
+            }
 
-        if (sw) {
-            ctx.moveTo(l + rad, b);
-            ctx.lineTo(l, b);
-            ctx.lineTo(l, b - rad);
-            ctx.arcTo(l, b, l + rad, b, rad);
+            if (sw) {
+                ctx.moveTo(l, b - rad);
+                ctx.lineTo(l, b);
+                ctx.lineTo(l + rad, b);
+                ctx.arcTo(l, b, l, b - rad, rad);
+            }
+        } else {
+            if (nw) {
+                ctx.moveTo(l, t + rad);
+                ctx.lineTo(l, t);
+                ctx.lineTo(l + rad, t);
+                ctx.arcTo(l, t, l, t + rad, rad);
+            }
+
+            if (ne) {
+                ctx.moveTo(r - rad, t);
+                ctx.lineTo(r, t);
+                ctx.lineTo(r, t + rad);
+                ctx.arcTo(r, t, r - rad, t, rad);
+            }
+
+            if (se) {
+                ctx.moveTo(r, b - rad);
+                ctx.lineTo(r, b);
+                ctx.lineTo(r - rad, b);
+                ctx.arcTo(r, b, r, b - rad, rad);
+            }
+
+            if (sw) {
+                ctx.moveTo(l + rad, b);
+                ctx.lineTo(l, b);
+                ctx.lineTo(l, b - rad);
+                ctx.arcTo(l, b, l + rad, b, rad);
+            }
         }
     }
 
@@ -295,19 +327,40 @@
             return null;
         }
 
-        var $canvas = jq(canvas).data('qrcode', qr);
-        $canvas[0].width = settings.size * pixel_ratio;
-        $canvas[0].height = settings.size * pixel_ratio;
-        $canvas[0].style.width = settings.size + "px";
-        $canvas[0].style.height = settings.size + "px";
-        var context = $canvas[0].getContext('2d');
-        context.clearRect(0, 0, $canvas[0].width, $canvas[0].height);
-        context.setTransform(pixel_ratio, 0, 0, pixel_ratio, 0, 0);
+        var context;
+        if(settings.renderContext) {
+          context = settings.renderContext;
+        } else {
+          var $canvas = jq(canvas).data('qrcode', qr);
+          $canvas[0].width = settings.size * pixel_ratio;
+          $canvas[0].height = settings.size * pixel_ratio;
+          $canvas[0].style.width = settings.size + "px";
+          $canvas[0].style.height = settings.size + "px";
+          context = $canvas[0].getContext('2d');
+          context.clearRect(0, 0, $canvas[0].width, $canvas[0].height);
+          context.setTransform(pixel_ratio, 0, 0, pixel_ratio, 0, 0);
+        }
 
         drawBackground(qr, context, settings);
         drawModules(qr, context, settings);
 
         return $canvas;
+    }
+
+    function drawOnSvg(settings) {
+        var qr = createMinQRCode(settings.text, settings.ecLevel, settings.minVersion, settings.maxVersion, settings.quiet);
+        if (!qr) {
+            return null;
+        }
+
+        var context = C2S(settings.size, settings.size);
+        context.clearRect(0, 0, settings.size, settings.size);
+        context.setTransform(pixel_ratio, 0, 0, pixel_ratio, 0, 0);
+
+        drawBackground(qr, context, settings);
+        drawModules(qr, context, settings);
+
+        return context.getSerializedSvg(true);
     }
 
     var $canvasObj;
@@ -316,6 +369,10 @@
 
     // Returns a `canvas` element representing the QR code for the given settings.
     function createCanvas(settings) {
+        arcto_mode = 0;
+        if(settings.renderContext) {
+          return drawOnCanvas(null, settings);
+        }
         $canvasObj = jq('<canvas/>');
         canvasSettings = settings;
         if(!prevResizeFunc) {
@@ -326,6 +383,14 @@
             window.addEventListener("resize", prevResizeFunc);
         }
         return drawOnCanvas($canvasObj, settings);
+    }
+
+    function createSvg(settings) {
+        arcto_mode = 0;
+        var svgtext = drawOnSvg(settings);
+        var div = document.createElement('div');
+        div.innerHTML = svgtext;
+        return div.firstChild;
     }
 
     // Returns an `image` element representing the QR code for the given settings.
@@ -396,10 +461,11 @@
     function createHTML(settings) {
         if (hasCanvas && settings.render === 'canvas') {
             return createCanvas(settings);
+        } else if (hasCanvas && settings.render === 'svg') {
+            return createSvg(settings);
         } else if (hasCanvas && settings.render === 'image') {
             return createImage(settings);
         }
-
         return createDiv(settings);
     }
 
@@ -411,6 +477,7 @@
     var defaults = {
         // render method: `'canvas'`, `'image'` or `'div'`
         render: 'canvas',
+        renderContext: null,
 
         // version range somewhere in 1 .. 40
         minVersion: 1,
