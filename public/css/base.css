@@ -305,6 +305,10 @@ html::-webkit-scrollbar {
   background-color: rgba(136,136,136,0.6);
   visibility: hidden;
 }
+#qrcode-modal .camtools {
+  top: 21px;
+  right: 21px;
+}
 .ui.cards.seed-card-holder {
   position: relative;
   display: flex;
@@ -888,6 +892,7 @@ i.receive {
   overflow: hidden;
   object-fit: cover;
   pointer-events: none;
+  z-index: 5;
 }
 #qrreader-seg {
   height: calc(100vh - 300px);
