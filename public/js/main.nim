@@ -1147,8 +1147,9 @@ proc afterScript(data: RouterData) =
         seedCardQrUpdate();
       });
       var holder = document.getElementById('seed-card-holder');
-      console.log('holder', holder.scrollWidth, holder.clientWidth);
-      holder.scrollLeft = holder.scrollWidth - holder.clientWidth;
+      if(holder) {
+        holder.scrollLeft = holder.scrollWidth - holder.clientWidth;
+      }
     """
 
   if showScanResult or mnemonicFulfill:
