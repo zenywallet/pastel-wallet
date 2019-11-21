@@ -229,6 +229,7 @@ html::-webkit-scrollbar {
 }
 #qrcanvas {
   z-index: 5;
+  visibility: hidden;
 }
 .ui.dimmer.qrcamera-loader {
   z-index: 7;

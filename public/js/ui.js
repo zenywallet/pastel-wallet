@@ -752,6 +752,10 @@ var qrReader = (function() {
     skip_first_tick = false;
     video = video || document.createElement("video");
     canvasElement = document.getElementById("qrcanvas");
+    if(!canvasElement) {
+      return;
+    }
+    canvasElement.style.visibility = 'visible';
     canvas = canvasElement.getContext("2d");
     seedseg = document.getElementById("seed-seg");
     cb_done = cb;
@@ -804,7 +808,7 @@ var qrReader = (function() {
       video_status_change();
       if(!rescan) {
         if(canvasElement) {
-          canvasElement.hidden = true;
+          canvasElement.style.visibility = 'visible';
         }
         $('#qrcamera-loader').removeClass('active');
       }
