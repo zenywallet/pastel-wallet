@@ -1098,8 +1098,20 @@ proc afterScript(data: RouterData) =
         $('.seed-qrcode').each(function() {
           $(this).find('canvas').remove();
           var fillcolor;
+          var fillStyleFn;
           if($(this).hasClass('active')) {
             fillcolor = vivid ? '#000' : '#7f7f7f';
+            if(!vivid) {
+              fillStyleFn = function(ctx) {
+                var w = ctx.canvas.width;
+                var h = ctx.canvas.height;
+                var grd = ctx.createLinearGradient(0, 0, w, h);
+                grd.addColorStop(0, "#666");
+                grd.addColorStop(0.3, "#aaa");
+                grd.addColorStop(1, "#555");
+                return grd;
+              }
+            }
           } else {
             fillcolor = '#f8f8f8';
           }
@@ -1113,7 +1125,8 @@ proc afterScript(data: RouterData) =
             label: '',
             fontname: 'sans',
             fontcolor: '#393939',
-            fill: fillcolor
+            fill: fillcolor,
+            fillStyleFn: fillStyleFn
           });
         });
       }
