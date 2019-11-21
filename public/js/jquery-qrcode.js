@@ -302,7 +302,11 @@
             context.drawImage(settings.fill, 0, 0, settings.size, settings.size);
             context.restore();
         } else {
-            context.fillStyle = settings.fill;
+            if(settings.fillStyleFn) {
+              context.fillStyle = settings.fillStyleFn(context);
+            } else {
+              context.fillStyle = settings.fill;
+            }
             context.fill();
         }
     }
@@ -495,6 +499,7 @@
 
         // code color or image element
         fill: '#000',
+        fillStyleFn: null,
 
         // background color or image element, `null` for transparent background
         background: null,
