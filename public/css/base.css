@@ -305,10 +305,6 @@ html::-webkit-scrollbar {
   background-color: rgba(136,136,136,0.6);
   visibility: hidden;
 }
-#qrcode-modal .camtools {
-  top: 21px;
-  right: 21px;
-}
 .ui.cards.seed-card-holder {
   position: relative;
   display: flex;
@@ -885,20 +881,23 @@ i.receive {
   pointer-events: none;
 }
 #qrcanvas-modal {
-  margin: 0 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 7px 7px;
+  width: calc(100% - 14px);
+  height: calc(100% - 14px);
   border-radius: 12px;
   overflow: hidden;
   object-fit: cover;
   z-index: 5;
 }
 #qrreader-seg {
-  height: calc(100vh - 300px);
+  height: calc(100vh - 252px);
   margin: 16px 0;
   bottom: 30px;
   min-width: 352px;
-  min-height: 352px;
+  min-height: 393px;
   object-fit: cover;
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
 }
