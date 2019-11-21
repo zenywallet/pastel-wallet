@@ -669,9 +669,6 @@ var qrReader = (function() {
             && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
-            scan_done = true;
-            qr_stop();
-            showing = false;
             if(!abort && cb_done) {
               var active = true;
               var count = 0;
@@ -688,6 +685,9 @@ var qrReader = (function() {
                   if(count < 3) {
                     shutter();
                   } else {
+                    scan_done = true;
+                    qr_stop();
+                    showing = false;
                     cb_done(code.data);
                   }
                 }, 50);

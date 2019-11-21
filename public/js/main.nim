@@ -80,8 +80,8 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
     showPage2 = false
   of SeedAfterScan:
     showScanSeedBtn = false
-    showScanning = false
-    showCamTools = false
+    showScanning = true
+    showCamTools = true
     showScanResult = true
     showPage2 = true
   of MnemonicEdit:
@@ -203,18 +203,25 @@ proc protectSelector(protectType: ProtectType): proc() =
       """
     viewUpdate()
 
-type SeedCardInfo = object
+type SeedCardInfo = ref object
   seed: cstring
   gen: cstring
   tag: cstring
   orig: cstring
 
-var seedCardInfo: SeedCardInfo
+var seedCardInfos: seq[SeedCardInfo]
+
+proc clearSensitive() =
+  seedCardInfos = @[];
+
+proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
 proc cbSeedQrDone(data: cstring) =
   echo "cbQrDone:", data
-  var sdata = $data
+  var escape_data = escape_html(data)
+  var sdata = $escape_data
   var ds = sdata.split(',')
+  var seedCardInfo: SeedCardInfo = new SeedCardInfo
   for d in ds:
     if d.startsWith("seed:"):
       seedCardInfo.seed = d[5..^1]
@@ -226,7 +233,8 @@ proc cbSeedQrDone(data: cstring) =
       seedCardInfo.gen = d[4..^1]
       echo seedCardInfo.gen
   seedCardInfo.orig = data
-  echo seedCardInfo
+  echo repr(seedCardInfo)
+  seedCardInfos.add(seedCardInfo)
 
   asm """
     qrReader.hide();
@@ -505,7 +513,7 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
   result = buildHtml(tdiv(class="ui card seed-card")):
     tdiv(class="image"):
       tdiv(class="seed-qrcode", data-orig=cardInfo.orig):
-        canvas(width="196", height="196")
+        canvas(width="188", height="188")
     tdiv(class="content"):
       tdiv(class="ui tag label mini tag"): text cardInfo.tag
       tdiv(class="header"): text "Seed"
@@ -524,7 +532,7 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
           tdiv(class="seed"): text seed_lower
     tdiv(class="extra content"):
       tdiv(class="inline field"):
-        tdiv(class="vector-lavel"): text "Seed Vector:"
+        tdiv(class="vector-label"): text "Seed Vector:"
         tdiv(class="ui mini input vector-input"):
           input(type="text", placeholder="Type your seed vector")
     tdiv(class="bt-seed-del"):
@@ -927,11 +935,11 @@ proc appMain(data: RouterData): VNode =
             if currentImportType == ImportType.SeedCard:
               tdiv(id="seed-seg", class="ui left aligned segment seed-seg"):
                 if showScanResult:
-                  tdiv(class="ui link cards seed-card-holder"):
-                    seedCard(seedCardInfo)
-                    seedCard(seedCardInfo)
+                  tdiv(class="ui link cards seed-card-holder", id="seed-card-holder"):
+                    for seedCardInfo in seedCardInfos:
+                      seedCard(seedCardInfo)
                     tdiv(class="seed-add-container"):
-                      button(class="circular ui icon button bt-add-seed"):
+                      button(class="circular ui icon button bt-add-seed", onclick=showSeedQr()):
                         italic(class="plus icon")
                   a(class="pagenext", href="#section2"):
                     span()
@@ -986,8 +994,8 @@ proc appMain(data: RouterData): VNode =
               tdiv(id="seed-seg", class="ui left aligned segment seed-seg"):
                 if showScanResult2:
                   tdiv(class="ui link cards seed-card-holder"):
-                    seedCard(seedCardInfo)
-                    seedCard(seedCardInfo)
+                    #eedCard(seedCardInfo)
+                    #seedCard(seedCardInfo)
                     tdiv(class="seed-add-container"):
                       button(class="circular ui icon button bt-add-seed"):
                         italic(class="plus icon")
@@ -1086,12 +1094,12 @@ proc afterScript(data: RouterData) =
   jq(".ui.dropdown").dropdown()
   if showScanResult:
     asm """
-      function seedCardQrUpdate() {
+      function seedCardQrUpdate(vivid) {
         $('.seed-qrcode').each(function() {
           $(this).find('canvas').remove();
           var fillcolor;
           if($(this).hasClass('active')) {
-            fillcolor = '#000'
+            fillcolor = vivid ? '#000' : '#7f7f7f';
           } else {
             fillcolor = '#f8f8f8';
           }
@@ -1100,7 +1108,7 @@ proc afterScript(data: RouterData) =
             ecLevel: 'Q',
             radius: 0.39,
             text: $(this).data('orig'),
-            size: 196,
+            size: 188,
             mode: 2,
             label: '',
             fontname: 'sans',
@@ -1109,18 +1117,25 @@ proc afterScript(data: RouterData) =
           });
         });
       }
-      $('.seed-qrcode').last().addClass('active');
+      if(!$('.seed-qrcode .active').length) {
+        $('.seed-qrcode').last().addClass('active');
+      }
       seedCardQrUpdate();
 
       $('.seed-card').off('click').on('click', function() {
-        if(!$(this).find('.seed-qrcode').hasClass('active')) {
-          $('.seed-card').each(function() {
-            $(this).find('.seed-qrcode').removeClass('active');
-          });
-          $(this).find('.seed-qrcode').addClass('active');
-          seedCardQrUpdate();
-        }
+        $('.seed-card').not(this).each(function() {
+          $(this).find('.seed-qrcode').removeClass('active');
+        });
+        $(this).find('.seed-qrcode').addClass('active');
+        seedCardQrUpdate(true);
       });
+      $('.seed-card').off('mouseleave').mouseleave(function() {
+        $('.seed-qrcode').addClass('active');
+        seedCardQrUpdate();
+      });
+      var holder = document.getElementById('seed-card-holder');
+      console.log('holder', holder.scrollWidth, holder.clientWidth);
+      holder.scrollLeft = holder.scrollWidth - holder.clientWidth;
     """
 
   if showScanResult or mnemonicFulfill:
