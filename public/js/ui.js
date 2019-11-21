@@ -519,16 +519,16 @@ function bip21reader(uri) {
     var addr = a[a.length - 1];
     if(addr.length > 0 && /^[a-z0-9]+$/i.test(addr)) {
       result.address = a[a.length - 1];
-    } else {
-      result.unknown = d_uri;
+      for(var i = 1; i < s.length; i++) {
+        var p = s[i].split('=');
+        if(p.length == 2) {
+          result[escape_html(p[0])] = escape_html(Encoding.convert(p[1], 'UNICODE', 'SJIS'));
+        }
+      }
+      return result;
     }
   }
-  for(var i = 1; i < s.length; i++) {
-    var p = s[i].split('=');
-    if(p.length == 2) {
-      result[escape_html(p[0])] = escape_html(Encoding.convert(p[1], 'UNICODE', 'SJIS'));
-    }
-  }
+  result.unknown = d_uri;
   return result;
 }
 
