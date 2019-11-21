@@ -379,7 +379,7 @@ html::-webkit-scrollbar {
 }
 .seed-card .vector-label {
   display: inline;
-  font-size: 12px;
+  font-size: 10px;
   margin-right: 4px;
 }
 .ui.card.seed-card > .extra {
@@ -393,7 +393,7 @@ html::-webkit-scrollbar {
   font-size: 11px;
   line-height: 20px;
   height: 20px;
-  width: 130px;
+  width: 140px;
 }
 .ui.mini.input.vector-input > input {
   width: 100%;
