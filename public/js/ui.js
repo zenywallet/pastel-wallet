@@ -1033,7 +1033,8 @@ var qrReaderModal = (function() {
 
   function show(cb) {
     $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
-    $('body').removeClass('dimmable dimmed');
+    $('body').removeClass('dimmable dimmed scrolling');
+    $('body').css('height', '');
     $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">Scan QR Code</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button><button class="ui button btn-close"><i class="window close icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div id="qrcamera-loader" class="ui active dimmer"><div class="ui indeterminate text loader">Preparing Camera</div></div><div id="qrcamera-shutter" class="ui dimmer"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
 
     $('#qrcode-modal').modal("setting", {
@@ -1082,7 +1083,8 @@ var qrReaderModal = (function() {
           canvasElement.hidden = true;
         }
         $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
-        $('body').removeClass('dimmable dimmed');
+        $('body').removeClass('dimmable dimmed scrolling');
+        $('body').css('height', '');
       }
     }
   }
@@ -1111,7 +1113,8 @@ var Settings = (function() {
         },
         onDeny: function() {},
         onHidden: function() {
-          $('body').removeClass('dimmable');
+          $('body').removeClass('dimmable dimmed scrolling');
+          $('body').css('height', '');
           var modal = $('#settings-modal');
           modal.unwrap();
           modal.clone().insertAfter('#settings');
