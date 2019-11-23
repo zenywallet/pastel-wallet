@@ -835,6 +835,9 @@ i.receive {
   top: 0.4em;
   color: rgba(0,0,0,.3);
 }
+.btn-close {
+  cursor: pointer;
+}
 #send-coins .btn-maximize {
   position: absolute;
   right: 1.5em;
@@ -856,7 +859,6 @@ i.receive {
 #send-coins .ui.form input[name="amount"] {
   border-top-right-radius: 0;
 }
-
 #send-coins .utxoctrl .ui.button {
   padding: 3px 2px 3px 2px;
   color: #f0f0f0;

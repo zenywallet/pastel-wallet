@@ -606,102 +606,6 @@ proc backWallet(): proc() =
       goSection('#section3', page_scroll_done);
     """
 
-proc recvAddressSelector(): VNode =
-  result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment hidden")):
-    tdiv(class="ui top attached label recvaddress"):
-      text "Receive Address "
-      span:
-        italic(class="window maximize outline icon btn-maximize")
-        italic(class="close icon btn-close")
-    tdiv(class="ui mini basic icon buttons"):
-      button(id="btn-recv-copy", class="ui button", title="Copy"):
-        italic(class="copy outline icon")
-      button(id="btn-recv-qrcode", class="ui button", title="QR Code"):
-        italic(class="qrcode icon")
-    tdiv(id="address-text", class="address"): text ""
-    tdiv(class="balls"):
-      tdiv(class="used"):
-        tdiv(class="circular ui icon mini button ball"): img(src="")
-      tdiv(class="new"):
-        tdiv(class="circular ui icon mini button ball"): img(src="")
-        tdiv(class="circular ui icon mini button ball"): img(src="")
-        tdiv(class="circular ui icon mini button ball"): img(src="")
-        tdiv(class="circular ui icon mini button ball"): img(src="")
-        tdiv(class="circular ui icon mini button ball"): img(src="")
-
-proc recvAddressModal(): VNode =
-  result = buildHtml(tdiv(id="recv-modal", class="ui")):
-    italic(class="close icon btn-close-arc")
-    tdiv(class="close-arc")
-    tdiv(id="recv-qrcode", class="qrcode", title=""):
-      canvas(width="0", height="0")
-    tdiv(id="recvaddr-form", class="ui container"):
-      tdiv(class="ui form"):
-        tdiv(class="two fields"):
-          tdiv(class="field"):
-            label: text "Receive Address"
-            tdiv(class="ui selection dropdown addr-selection", tabindex="0"):
-              input(type="hidden", name="address", value="")
-              italic(class="dropdown icon")
-              tdiv(class="text"):
-                img(clsss="ui mini avatar image", src="")
-                text ""
-              tdiv(class="menu", tabindex="-1")
-          tdiv(class="field"):
-            label: text "Amount"
-            tdiv(class="ui right labeled input"):
-              input(class="right", type="text", name="amount", placeholder="Amount")
-              tdiv(class="ui basic label"): text "ZNY"
-        tdiv(class="two fields"):
-          tdiv(class="field"):
-            label: text "Label"
-            input(class="ui input", type="text", name="label", placeholder="Label")
-          tdiv(class="field"):
-            label: text "Message"
-            textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
-
-asm """
-  var uriOptions = [];
-"""
-var uriOptions {.importc, nodecl.}: JsObject
-proc sendForm(): VNode =
-  result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment hidden")):
-    tdiv(class="ui top attached label sendcoins"):
-      text "Send Coins "
-      span:
-        italic(class="window maximize outline icon btn-maximize")
-        italic(class="close icon btn-close")
-    tdiv(class="ui mini basic icon buttons"):
-      button(id="btn-send-clear", class="ui button", title="Clear"):
-        italic(class="eraser icon")
-      button(id="btn-send-qrcode", class="ui button", title="Scan QR Code"):
-        italic(class="camera icon")
-    tdiv(class="ui form"):
-      tdiv(class="field"):
-        label: text "Send Address"
-        tdiv(class="ui small input"):
-          input(class="center", type="text", name="address", placeholder="Address")
-      tdiv(class="field"):
-        label: text "Amount"
-        tdiv(class="ui small input"):
-          input(class="center", type="text", name="amount", placeholder="Amount")
-          tdiv(class="ui mini basic icon buttons utxoctrl"):
-            button(id="btn-utxo-plus", class="ui button", title="-1 Ball"):
-              italic(class="minus circle icon")
-            button(id="btn-utxo-count", class="ui button sendutxos"):
-              text "≤24"
-            button(id="btn-utxo-minus", class="ui button", title="+1 Ball"):
-              italic(class="plus circle icon")
-      tdiv(class="ui list uri-options"):
-        for d in uriOptions:
-          tdiv(class="item"):
-            tdiv(class="content"):
-              tdiv(class="header"): text cast[cstring](d.key)
-              tdiv(class="description"): text cast[cstring](d.value)
-      tdiv(class="fluid ui buttons"):
-        button(id="btn-send", class="ui inverted olive button center btn-send"):
-          text "Send"
-
 asm """
   function initSendForm() {
     $('#btn-send-clear').off('click').click(function() {
@@ -792,8 +696,8 @@ asm """
       });
     }
   }
-  function reset_switch() {
-    if(!$('#send-coins').hasClass('hidden')) {
+  function reset_switch(switch_id) {
+    if(!$('#send-coins').hasClass('hidden') && (switch_id == null || switch_id == 1)) {
       sendrecv_switch_busy = true;
       $('#send-coins').transition({
         animation: 'fade down',
@@ -803,7 +707,7 @@ asm """
         }
       });
     }
-    if(!$('#receive-address').hasClass('hidden')) {
+    if(!$('#receive-address').hasClass('hidden') && (switch_id == null || switch_id == 2)) {
       sendrecv_switch_busy = true;
       $('#receive-address').transition({
         animation: 'fade down',
@@ -859,6 +763,118 @@ proc btnReceive: proc() =
       }
       sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
     """
+
+proc btnSendClose: proc() =
+  result = proc() =
+    asm """
+      clearTimeout(sendrecv_switch_tval);
+      sendrecv_switch = 0;
+      reset_switch(1);
+    """
+
+proc btnRecvClose: proc() =
+  result = proc() =
+    asm """
+      clearTimeout(sendrecv_switch_tval);
+      sendrecv_switch = 0;
+      reset_switch(2);
+    """
+
+proc recvAddressSelector(): VNode =
+  result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment hidden")):
+    tdiv(class="ui top attached label recvaddress"):
+      text "Receive Address "
+      span:
+        italic(class="window maximize outline icon btn-maximize")
+        italic(class="close icon btn-close", onclick=btnRecvClose())
+    tdiv(class="ui mini basic icon buttons"):
+      button(id="btn-recv-copy", class="ui button", title="Copy"):
+        italic(class="copy outline icon")
+      button(id="btn-recv-qrcode", class="ui button", title="QR Code"):
+        italic(class="qrcode icon")
+    tdiv(id="address-text", class="address"): text ""
+    tdiv(class="balls"):
+      tdiv(class="used"):
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+      tdiv(class="new"):
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+        tdiv(class="circular ui icon mini button ball"): img(src="")
+
+proc recvAddressModal(): VNode =
+  result = buildHtml(tdiv(id="recv-modal", class="ui")):
+    italic(class="close icon btn-close-arc")
+    tdiv(class="close-arc")
+    tdiv(id="recv-qrcode", class="qrcode", title=""):
+      canvas(width="0", height="0")
+    tdiv(id="recvaddr-form", class="ui container"):
+      tdiv(class="ui form"):
+        tdiv(class="two fields"):
+          tdiv(class="field"):
+            label: text "Receive Address"
+            tdiv(class="ui selection dropdown addr-selection", tabindex="0"):
+              input(type="hidden", name="address", value="")
+              italic(class="dropdown icon")
+              tdiv(class="text"):
+                img(clsss="ui mini avatar image", src="")
+                text ""
+              tdiv(class="menu", tabindex="-1")
+          tdiv(class="field"):
+            label: text "Amount"
+            tdiv(class="ui right labeled input"):
+              input(class="right", type="text", name="amount", placeholder="Amount")
+              tdiv(class="ui basic label"): text "ZNY"
+        tdiv(class="two fields"):
+          tdiv(class="field"):
+            label: text "Label"
+            input(class="ui input", type="text", name="label", placeholder="Label")
+          tdiv(class="field"):
+            label: text "Message"
+            textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
+
+asm """
+  var uriOptions = [];
+"""
+var uriOptions {.importc, nodecl.}: JsObject
+proc sendForm(): VNode =
+  result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment hidden")):
+    tdiv(class="ui top attached label sendcoins"):
+      text "Send Coins "
+      span:
+        italic(class="window maximize outline icon btn-maximize")
+        italic(class="close icon btn-close", onclick=btnSendClose())
+    tdiv(class="ui mini basic icon buttons"):
+      button(id="btn-send-clear", class="ui button", title="Clear"):
+        italic(class="eraser icon")
+      button(id="btn-send-qrcode", class="ui button", title="Scan QR Code"):
+        italic(class="camera icon")
+    tdiv(class="ui form"):
+      tdiv(class="field"):
+        label: text "Send Address"
+        tdiv(class="ui small input"):
+          input(class="center", type="text", name="address", placeholder="Address")
+      tdiv(class="field"):
+        label: text "Amount"
+        tdiv(class="ui small input"):
+          input(class="center", type="text", name="amount", placeholder="Amount")
+          tdiv(class="ui mini basic icon buttons utxoctrl"):
+            button(id="btn-utxo-plus", class="ui button", title="-1 Ball"):
+              italic(class="minus circle icon")
+            button(id="btn-utxo-count", class="ui button sendutxos"):
+              text "≤24"
+            button(id="btn-utxo-minus", class="ui button", title="+1 Ball"):
+              italic(class="plus circle icon")
+      tdiv(class="ui list uri-options"):
+        for d in uriOptions:
+          tdiv(class="item"):
+            tdiv(class="content"):
+              tdiv(class="header"): text cast[cstring](d.key)
+              tdiv(class="description"): text cast[cstring](d.value)
+      tdiv(class="fluid ui buttons"):
+        button(id="btn-send", class="ui inverted olive button center btn-send"):
+          text "Send"
 
 #[
 proc qrCodeModal(): Vnode =
