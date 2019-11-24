@@ -675,10 +675,10 @@ var qrReader = (function() {
               function shutter() {
                 setTimeout(function() {
                   if(active) {
-                    $('#qrcamera-shutter').addClass('active');
+                    $('.qrcamera-shutter').addClass('active');
                     active = false;
                   } else {
-                    $('#qrcamera-shutter').removeClass('active');
+                    $('.qrcamera-shutter').removeClass('active');
                     active = true;
                     count++;
                   }
@@ -715,12 +715,12 @@ var qrReader = (function() {
   function camera_scanning(flag) {
     if(prev_camera_scanning_flag != flag) {
       if(flag) {
-        $('#qrcamera-loader').removeClass('active');
+        $('.qrcamera-loader').removeClass('active');
         $('.qr-scanning').show();
       } else {
         $('.qr-scanning').hide();
         if(!abort) {
-          $('#qrcamera-loader').addClass('active');
+          $('.qrcamera-loader').addClass('active');
         }
       }
       prev_camera_scanning_flag = flag;
@@ -729,13 +729,13 @@ var qrReader = (function() {
 
   function video_status_change() {
     if(mode_show) {
-      canvasElement.hidden = false;
+      canvasElement.style.visibility = 'visible';
       $('.camtools').css('visibility', 'visible');
     } else {
       camera_scanning(false);
       $('.camtools').css('visibility', 'hidden');
       if(canvasElement) {
-        canvasElement.hidden = true;
+        canvasElement.style.visibility = 'hidden';
       }
     }
   }
@@ -748,7 +748,7 @@ var qrReader = (function() {
     abort = false;
     scan_done = false;
     $('.bt-scan-seed').css('visibility', 'hidden');
-    $('#qrcamera-loader').addClass('active');
+    $('.qrcamera-loader').addClass('active');
     skip_first_tick = false;
     video = video || document.createElement("video");
     canvasElement = document.getElementById("qrcanvas");
@@ -808,11 +808,13 @@ var qrReader = (function() {
       video_status_change();
       if(!rescan) {
         if(canvasElement) {
-          canvasElement.style.visibility = 'visible';
+          canvasElement.style.visibility = 'hidden';
         }
-        $('#qrcamera-loader').removeClass('active');
+        $('.qrcamera-loader').removeClass('active');
       }
       $('.bt-scan-seed').css('visibility', 'visible');
+    } else {
+      console.log('hide mode_show', mode_show);
     }
   }
 
@@ -907,29 +909,30 @@ var qrReaderModal = (function() {
             && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
-            scan_done = true;
-            qr_stop();
-            showing = false;
             if(!abort && cb_done) {
               var active = true;
               var count = 0;
               function shutter() {
                 setTimeout(function() {
                   if(active) {
-                    $('#qrcamera-shutter').addClass('active');
+                    $('#qrcode-modal .qrcamera-shutter').addClass('active');
                     active = false;
                   } else {
-                    $('#qrcamera-shutter').removeClass('active');
+                    $('#qrcode-modal .qrcamera-shutter').removeClass('active');
                     active = true;
                     count++;
                   }
                   if(count < 3) {
                     shutter();
+                  } else {
+                    scan_done = true;
+                    qr_stop();
+                    showing = false;
+                    cb_done(code.data);
                   }
                 }, 50);
               }
               shutter();
-              cb_done(code.data);
             }
             return;
           }
@@ -952,12 +955,12 @@ var qrReaderModal = (function() {
   function camera_scanning(flag) {
     if(prev_camera_scanning_flag != flag) {
       if(flag) {
-        $('#qrcamera-loader').removeClass('active');
-        $('.qr-scanning').show();
+        $('#qrcode-modal .qrcamera-loader').removeClass('active');
+        $('#qrcode-modal .qr-scanning').show();
       } else {
-        $('.qr-scanning').hide();
+        $('#qrcode-modal .qr-scanning').hide();
         if(!abort) {
-          $('#qrcamera-loader').addClass('active');
+          $('#qrcode-modal .qrcamera-loader').addClass('active');
         }
       }
       prev_camera_scanning_flag = flag;
@@ -966,7 +969,7 @@ var qrReaderModal = (function() {
 
   function video_status_change() {
     if(mode_show) {
-      canvasElement.hidden = false;
+      canvasElement.style.visibility = 'visible';
       $('.camtools').css('visibility', 'visible');
       $('#qrcode-modal .camtools .btn-camera').off('click').click(function() {
         hide(true);
@@ -977,12 +980,11 @@ var qrReaderModal = (function() {
         hide();
         $('#qrcode-modal').modal('hide');
       });
-
     } else {
       camera_scanning(false);
       $('.camtools').css('visibility', 'hidden');
       if(canvasElement) {
-        canvasElement.hidden = true;
+        canvasElement.style.visibility = 'hidden';
       }
     }
   }
@@ -995,7 +997,7 @@ var qrReaderModal = (function() {
     showing = false;
     abort = false;
     scan_done = false;
-    $('#qrcamera-loader').addClass('active');
+    $('#qrcode-modal .qrcamera-loader').addClass('active');
     skip_first_tick = false;
     video = video || document.createElement("video");
     canvasElement = document.getElementById("qrcanvas-modal");
@@ -1035,20 +1037,15 @@ var qrReaderModal = (function() {
     $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
     $('body').removeClass('dimmable dimmed scrolling');
     $('body').css('height', '');
-    $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">Scan QR Code</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button><button class="ui button btn-close"><i class="window close icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div id="qrcamera-loader" class="ui active dimmer"><div class="ui indeterminate text loader">Preparing Camera</div></div><div id="qrcamera-shutter" class="ui dimmer"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
+    $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">Scan QR Code</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button><button class="ui button btn-close"><i class="window close icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">Preparing Camera</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
 
     $('#qrcode-modal').modal("setting", {
       closable: false,
       autofocus: false,
       onShow: function() {
         qrShow(function(data) {
-          setTimeout(function() {
-            if(data) {
-              hide();
-              cb(data);
-              $('#qrcode-modal').modal('hide');
-            }
-          }, 1000);
+          cb(data);
+          hide();
         });
       },
       onApprove: function() {
@@ -1080,8 +1077,9 @@ var qrReaderModal = (function() {
         video_status_change();
       } else {
         if(canvasElement) {
-          canvasElement.hidden = true;
+          canvasElement.style.visibility = 'hidden';
         }
+        $('#qrcode-modal .qrcamera-loader').removeClass('active');
         $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
         $('body').removeClass('dimmable dimmed scrolling');
         $('body').css('height', '');

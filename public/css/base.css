@@ -216,7 +216,7 @@ html::-webkit-scrollbar {
 .ui.buttons .or::before {
   line-height: 1.65em;
 }
-#qrcanvas, #seed-seg .qrcamera-loader, #seed-seg .qrcamera-shutter {
+#qrcanvas, #seed-seg .qrcamera-loader, #seed-seg .qrcamera-shutter, #qrcode-modal .qrcamera-loader, #qrcode-modal .qrcamera-shutter {
   position: absolute;
   top: 0;
   left: 0;

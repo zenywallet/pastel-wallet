@@ -892,9 +892,10 @@ proc qrCodeModal(): Vnode =
           button(class="ui button btn-close"):
             italic(class="window close icon")
         canvas(id="qrcanvas-modal", width="0", height="0")
-        tdiv(id="qrcamera-loader", class="ui dimmer active"):
-          tdiv(class="ui indeterminate text loader"): text "Preparing Camera"
-        tdiv(id="qrcamera-shutter", class="ui dimmer")
+        tdiv(class="ui dimmer qrcamera-loader"):
+          tdiv(class="ui indeterminate text loader"):
+            text "Preparing Camera"
+        tdiv(class="ui dimmer qrcamera-shutter")
     tdiv(class="actions"):
       tdiv(class="ui basic cancel inverted button"):
         italic(class="remove icon")
@@ -975,10 +976,10 @@ proc appMain(data: RouterData): VNode =
                     button(class="ui button", onclick=camClose()):
                       italic(class="window close icon")
                 canvas(id="qrcanvas")
-                tdiv(id="qrcamera-loader", class="ui dimmer qrcamera-loader"):
+                tdiv(class="ui dimmer qrcamera-loader"):
                   tdiv(class="ui indeterminate text loader"):
                     text "Preparing Camera"
-                tdiv(id="qrcamera-shutter", class="ui dimmer qrcamera-shutter")
+                tdiv(class="ui dimmer qrcamera-shutter")
             else:
               tdiv(class="ui left aligned segment mnemonic-seg"):
                 mnemonicEditor()
@@ -1033,10 +1034,10 @@ proc appMain(data: RouterData): VNode =
                     button(class="ui button", onclick=camClose()):
                       italic(class="window close icon")
                 canvas(id="qrcanvas")
-                tdiv(id="qrcamera-loader", class="ui dimmer qrcamera-loader"):
+                tdiv(class="ui dimmer qrcamera-loader"):
                   tdiv(class="ui indeterminate text loader"):
                     text "Preparing Camera"
-                tdiv(id="qrcamera-shutter", class="ui dimmer qrcamera-shutter")
+                tdiv(class="ui dimmer qrcamera-shutter")
             else:
               tdiv(class="ui left aligned segment mnemonic-seg"):
                 passphraseEditor()
