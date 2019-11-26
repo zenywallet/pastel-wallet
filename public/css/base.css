@@ -134,6 +134,24 @@ html::-webkit-scrollbar {
     transform: rotate(-45deg) translate(0, 0);
   }
 }
+.notify-container {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  pointer-events: none;
+}
+.notify-container .ui.message {
+  width: 282px;
+  min-width: 282px;
+  min-height: 0;
+}
+.notify-container .ui.message .close {
+  pointer-events: auto;
+}
+.notify-container .message .hidden {
+  display: none;
+}
 .intro {
   position: relative;
   width: 100%;

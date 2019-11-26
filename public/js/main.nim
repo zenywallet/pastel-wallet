@@ -931,8 +931,70 @@ proc settingsPage(): VNode =
       input(type="checkbox", name="confirm")
       label: text "I confirmed that I have the seed cards or mnemonics or no coins in my wallet."
 
+type
+  NotifyData* = ref object
+    title: cstring
+
+    message: cstring
+    msgtype: cstring
+    notifyId: int
+
+var notifyDatas: seq[NotifyData]
+var notifyId = 0
+
+proc addNotifyData(title, message, msgtype: cstring, notifyId: int) =
+  var n = NotifyData(title: title, message: message, msgtype: msgtype, notifyId: notifyId)
+  notifyDatas.add(n)
+
+proc removeOldestNotifyData() =
+  notifyDatas.delete(0)
+
+proc removeNotifyData(notifyId: int): bool =
+  for idx, n in notifyDatas:
+    if n.notifyId == notifyId:
+      notifyDatas.delete(idx)
+      result = true
+      return
+  result = false
+
+proc existsNotifyData(notifyId: int): bool =
+  for idx, n in notifyDatas:
+    if n.notifyId == notifyId:
+      result = true
+      return
+  result = false
+
+proc countNotifyData(): int =
+  notifyDatas.len
+
+var Notify {.importc, nodecl.}: JsObject
+asm """
+  Notify.add = `addNotifyData`;
+  Notify.removeOldest = `removeOldestNotifyData`;
+  Notify.removeById = `removeNotifyData`;
+  Notify.exists = `existsNotifyData`;
+  Notify.count = `countNotifyData`;
+  Notify.update = `viewUpdate`;
+  Notify.datas = [];
+  Notify.show = function(title, message, msgtype) {
+    `notifyId`++;
+    Notify.datas.push({title: title, message: message, msgtype: msgtype, notifyId: `notifyId`});
+    Notify.start();
+  }
+"""
+
+proc notifyMessage(): VNode =
+  result = buildHtml(tdiv(class="notify-container")):
+    for idx, n in notifyDatas:
+      var hidden = if idx == notifyDatas.high: " hidden" else: ""
+      tdiv(class="ui negative tiny message" & hidden, data-value=cast[cstring](n.notifyId)):
+        italic(class="close icon")
+        tdiv(class="header"):text n.title
+        p: text n.message
+
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
+    notifyMessage()
     if showPage1:
       section(id="section1", class="section"):
         tdiv(class="intro"):

@@ -1160,6 +1160,124 @@ var Settings = (function() {
   return Module;
 })();
 
+var Notify = (function() {
+  function wait_notify_add(id, cb) {
+    function worker() {
+      var l = document.querySelector('.notify-container .message:last-child');
+      if(l && l.dataset.value == id) {
+        cb();
+      } else {
+        if(Notify.exists(id)) {
+          setTimeout(worker, 50);
+        }
+      }
+    }
+    worker();
+  }
+  function wait_notify_remove(id, cb) {
+    function worker() {
+      var fs = document.querySelectorAll('.notify-container .message');
+      var find = false;
+      for(var i in fs) {
+        var f = fs[i];
+        if(f.dataset && f.dataset.value == id) {
+          find = true;
+          break;
+        }
+      }
+      if(!find) {
+        cb();
+      } else {
+        setTimeout(worker, 50);
+      }
+    }
+    worker();
+  }
+  var notify_worker_active = false;
+  var notify_remove_queue = [];
+  function notify_worker() {
+    var quelen = Notify.datas ? Notify.datas.length : 0;
+    if(notify_remove_queue.length > 0 && ((quelen > 0 && notify_remove_queue.length > 3) || quelen == 0 || Notify.count() > 7)) {
+      var id = notify_remove_queue.shift();
+      var elm = null;
+      $('.notify-container .message').each(function() {
+        if(Number($(this).data('value')) == id) {
+          elm = $(this);
+          return false;
+        }
+      });
+      if(elm) {
+        elm.stop(true, true).animate({opacity: 0}, 100).animate({height: 0, 'padding-top': 0, 'padding-bottom': 0}, {
+          duration: 100,
+          complete: function() {
+            if(Notify.removeById(id)) {
+              Notify.update();
+              wait_notify_remove(id, function() {
+                setTimeout(notify_worker, 100);
+              });
+            } else {
+              setTimeout(notify_worker, 100);
+            }
+          }
+        });
+      } else {
+        if(Notify.removeById(id)) {
+          Notify.update();
+          wait_notify_remove(id, function() {
+            setTimeout(notify_worker, 100);
+          });
+        } else {
+          setTimeout(notify_worker, 100);
+        }
+      }
+    } else {
+      var n = Notify.datas.shift();
+      if(n) {
+        Notify.add(n.title, n.message + n.notifyId, n.msgtype, n.notifyId);
+        Notify.update();
+        wait_notify_add(n.notifyId, function() {
+          $('.notify-container .message.hidden .close').off('click').click(function() {
+            var elm = $(this).closest('.message');
+            var id = elm.data('value');
+            if(id) {
+              elm.stop(true, true).animate({opacity: 0}, 100).animate({height: 0, 'padding-top': 0, 'padding-bottom': 0}, {
+                duration: 100,
+                complete: function() {
+                  if(Notify.removeById(id)) {
+                    Notify.update();
+                  }
+                }
+              });
+            }
+          });
+          $('.notify-container .message.hidden').transition({
+            animation: 'fade left',
+            onComplete: function() {
+              setTimeout(function() {
+                notify_remove_queue.push(n.notifyId);
+                notify_worker_start();
+              }, 5000);
+              setTimeout(notify_worker, 100);
+            }
+          });
+        });
+      } else {
+        notify_worker_active = false;
+      }
+    }
+  }
+  function notify_worker_start() {
+    if(!notify_worker_active) {
+      notify_worker_active = true;
+      notify_worker();
+    }
+  }
+  var Module = {
+    start: notify_worker_start
+  }
+  return Module;
+})();
+
 var registerEventList = [];
 ready(function() {
   var elms = document.querySelectorAll('a');
