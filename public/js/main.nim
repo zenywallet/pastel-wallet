@@ -243,7 +243,7 @@ proc cbSeedQrDone(data: cstring) =
 
   if dupcheck:
     asm """
-      Notify.show("Error", "The seed card has already been scanned.", "error");
+      Notify.show("Error", "The seed card has already been scanned.", Notify.msgtype.error);
     """
   else:
     seedCardInfos.add(seedCardInfo)
@@ -943,17 +943,23 @@ proc settingsPage(): VNode =
       input(type="checkbox", name="confirm")
       label: text "I confirmed that I have the seed cards or mnemonics or no coins in my wallet."
 
+type NotifyMsgType {.pure.} = enum
+  None
+  Error
+  Warning
+  Info
+
 type
   NotifyData* = ref object
     title: cstring
     message: cstring
-    msgtype: cstring
+    msgtype: NotifyMsgType
     notifyId: int
 
 var notifyDatas: seq[NotifyData]
 var notifyId = 0
 
-proc addNotifyData(title, message, msgtype: cstring, notifyId: int) =
+proc addNotifyData(title, message: cstring, msgtype: NotifyMsgType, notifyId: int) =
   var n = NotifyData(title: title, message: message, msgtype: msgtype, notifyId: notifyId)
   notifyDatas.add(n)
 
@@ -998,7 +1004,16 @@ proc notifyMessage(): VNode =
   result = buildHtml(tdiv(class="notify-container")):
     for idx, n in notifyDatas:
       var hidden = if idx == notifyDatas.high: " hidden" else: ""
-      tdiv(class="ui negative tiny message" & hidden, data-value=cast[cstring](n.notifyId)):
+      var msgfmt: cstring = case n.msgtype
+        of NotifyMsgType.Error:
+          " error"
+        of NotifyMsgType.Warning:
+          " warning"
+        of NotifyMsgType.Info:
+          " info"
+        else:
+          ""
+      tdiv(class="ui" & msgfmt & " tiny message" & hidden, data-value=cast[cstring](n.notifyId)):
         italic(class="close icon")
         tdiv(class="header"):text n.title
         p: text n.message

@@ -1273,7 +1273,8 @@ var Notify = (function() {
     }
   }
   var Module = {
-    start: notify_worker_start
+    start: notify_worker_start,
+    msgtype: {none: 0, error: 1, warning: 2, info: 3}
   }
   return Module;
 })();
