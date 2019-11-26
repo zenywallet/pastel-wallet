@@ -234,7 +234,19 @@ proc cbSeedQrDone(data: cstring) =
       echo seedCardInfo.gen
   seedCardInfo.orig = data
   echo repr(seedCardInfo)
-  seedCardInfos.add(seedCardInfo)
+
+  var dupcheck = false
+  for s in seedCardInfos:
+    if s.seed == seedCardInfo.seed or s.tag == seedCardInfo.tag:
+      dupcheck = true
+      break
+
+  if dupcheck:
+    asm """
+      Notify.show("Error", "The seed card has already been scanned.", "error");
+    """
+  else:
+    seedCardInfos.add(seedCardInfo)
 
   asm """
     qrReader.hide();
@@ -934,7 +946,6 @@ proc settingsPage(): VNode =
 type
   NotifyData* = ref object
     title: cstring
-
     message: cstring
     msgtype: cstring
     notifyId: int

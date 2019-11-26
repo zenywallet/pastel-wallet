@@ -1134,7 +1134,7 @@ var Settings = (function() {
       }).popup('show');
       confirm_popup_tval = setTimeout(function() {
         confirm.popup('hide');
-      }, 5000);
+      }, 10000);
     }
   }
 
@@ -1233,7 +1233,7 @@ var Notify = (function() {
     } else {
       var n = Notify.datas.shift();
       if(n) {
-        Notify.add(n.title, n.message + n.notifyId, n.msgtype, n.notifyId);
+        Notify.add(n.title, n.message, n.msgtype, n.notifyId);
         Notify.update();
         wait_notify_add(n.notifyId, function() {
           $('.notify-container .message.hidden .close').off('click').click(function() {
