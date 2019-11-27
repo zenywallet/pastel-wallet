@@ -214,6 +214,17 @@ var seedCardInfos: seq[SeedCardInfo]
 proc clearSensitive() =
   seedCardInfos = @[];
 
+proc removeSeedCard(tag: cstring): proc() =
+  result = proc() =
+    for idx, s in seedCardInfos:
+      if s.tag == tag:
+        seedCardInfos.delete(idx)
+        if seedCardInfos.len == 0:
+          viewSelector(SeedScanning)
+        else:
+          viewUpdate()
+        break;
+
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
 proc cbSeedQrDone(data: cstring) =
@@ -548,7 +559,7 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
         tdiv(class="ui mini input vector-input"):
           input(type="text", placeholder="Type your seed vector")
     tdiv(class="bt-seed-del"):
-      button(class="circular ui icon mini button"):
+      button(class="circular ui icon mini button", onclick=removeSeedCard(cardInfo.tag)):
         italic(class="cut icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
