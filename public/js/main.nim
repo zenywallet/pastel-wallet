@@ -208,6 +208,7 @@ type SeedCardInfo = ref object
   gen: cstring
   tag: cstring
   orig: cstring
+  sv: cstring
 
 var seedCardInfos: seq[SeedCardInfo]
 
@@ -554,7 +555,9 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
       tdiv(class="inline field"):
         tdiv(class="vector-label"): text "Seed Vector:"
         tdiv(class="ui mini input vector-input"):
-          input(type="text", placeholder="Type your seed vector")
+          input(type="text", placeholder="Type your seed vector"):
+            proc onkeyup(ev: Event; n: Vnode) =
+              seedCardInfos[idx].sv = n.value
     tdiv(class="bt-seed-del"):
       button(class="circular ui icon mini button", onclick=removeSeedCard(idx)):
         italic(class="cut icon")
