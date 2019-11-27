@@ -449,11 +449,13 @@ function showRecvAddress() {
         var copydata = '';
         var textarea = document.getElementById('clipboard');
         if(textarea) {
+          textarea.style.visibility ="visible";
           copydata = address_elm.textContent;
           textarea.textContent = copydata;
           textarea.select();
           ret = document.execCommand('copy');
           textarea.textContent = '';
+          textarea.style.visibility ="hidden";
         }
         if(!ret && window.getSelection) {
           var getsel = window.getSelection();

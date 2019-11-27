@@ -1189,7 +1189,7 @@ proc appMain(data: RouterData): VNode =
               text "Logs"
               span: italic(class="chevron down icon")
             tdiv(id="bottom-blink")
-        textarea(id="clipboard", rows="1")
+        textarea(id="clipboard", rows="1", tabindex="-1")
 
     if showPage3 or showPage4:
       section(id="section4", class="tradelogs-section"):
