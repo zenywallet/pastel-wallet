@@ -214,16 +214,13 @@ var seedCardInfos: seq[SeedCardInfo]
 proc clearSensitive() =
   seedCardInfos = @[];
 
-proc removeSeedCard(tag: cstring): proc() =
+proc removeSeedCard(idx: int): proc() =
   result = proc() =
-    for idx, s in seedCardInfos:
-      if s.tag == tag:
-        seedCardInfos.delete(idx)
-        if seedCardInfos.len == 0:
-          viewSelector(SeedScanning)
-        else:
-          viewUpdate()
-        break;
+    seedCardInfos.delete(idx)
+    if seedCardInfos.len == 0:
+      viewSelector(SeedScanning)
+    else:
+      viewUpdate()
 
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
@@ -532,7 +529,7 @@ proc mnemonicEditor(): VNode =
               button(class="ui mini blue basic label", onclick=fixWord(input_id, chklist[i].idx, lev)):
                 text lev
 
-proc seedCard(cardInfo: SeedCardInfo): VNode =
+proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
   result = buildHtml(tdiv(class="ui card seed-card")):
     tdiv(class="image"):
       tdiv(class="seed-qrcode", data-orig=cardInfo.orig):
@@ -559,7 +556,7 @@ proc seedCard(cardInfo: SeedCardInfo): VNode =
         tdiv(class="ui mini input vector-input"):
           input(type="text", placeholder="Type your seed vector")
     tdiv(class="bt-seed-del"):
-      button(class="circular ui icon mini button", onclick=removeSeedCard(cardInfo.tag)):
+      button(class="circular ui icon mini button", onclick=removeSeedCard(idx)):
         italic(class="cut icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
@@ -1052,8 +1049,8 @@ proc appMain(data: RouterData): VNode =
               tdiv(id="seed-seg", class="ui left aligned segment seed-seg"):
                 if showScanResult:
                   tdiv(class="ui link cards seed-card-holder", id="seed-card-holder"):
-                    for seedCardInfo in seedCardInfos:
-                      seedCard(seedCardInfo)
+                    for idx, seedCardInfo in seedCardInfos:
+                      seedCard(seedCardInfo, idx)
                     tdiv(class="seed-add-container"):
                       button(class="circular ui icon button bt-add-seed", onclick=showSeedQr()):
                         italic(class="plus icon")
