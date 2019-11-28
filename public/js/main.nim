@@ -217,6 +217,7 @@ type SeedCardInfo = ref object
 var seedCardInfos: seq[SeedCardInfo]
 
 var editingWords: cstring = ""
+var inputWords: cstring = ""
 var autocompleteWords: seq[cstring] = @[]
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
 var prevCheckWord: cstring = ""
@@ -232,6 +233,7 @@ var wl_select_id = 1
 proc clearSensitive() =
   seedCardInfos = @[]
   editingWords = ""
+  inputWords = ""
   autocompleteWords = @[]
   chklist = @[]
   prevCheckWord = ""
@@ -515,7 +517,8 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
     if not s.isNil and s.len > 0:
       var words: seq[cstring]
       asm """
-        `words` = `s`.replace(/[ 　\n\r]+/g, ' ').trim().split(' ');
+        `inputWords` = `s`.replace(/[ 　\n\r]+/g, ' ').trim();
+        `words` = `inputWords`.split(' ');
       """
       chklist = @[]
       var idx: int = 0
@@ -533,8 +536,16 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
           allvalid = false
         inc(idx)
       if allvalid and idx >= 12 and idx mod 3 == 0:
-        mnemonicFulfill = true
-        viewSelector(MnemonicFulfill)
+        asm """
+          var bip39 = coinlibs.bip39;
+          if(bip39.validateMnemonic(`inputWords`, `bip39_wordlist`)) {
+            `mnemonicFulfill` = true
+          } else {
+            Notify.show('Warning', 'There are no misspellings, but some words seem to be wrong.' + (`advance` ? '' : ' Try to use [Advanced Check]'), Notify.msgtype.warning);
+          }
+        """
+        if mnemonicFulfill:
+          viewSelector(MnemonicFulfill)
     else:
       chklist = @[]
     autocompleteWords = @[]
