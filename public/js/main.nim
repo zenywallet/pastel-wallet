@@ -382,7 +382,7 @@ function levens(word, wordlist) {
   for(var i in wordlist) {
     var wl = wordlist[i];
     var maxlen = Math.max(word.length, wl.length);
-    var lev = levenshtein(word, wl)
+    var lev = levenshtein(word, wl);
     var score = lev / maxlen;
     if(data[score]) {
       data[score].push(wl);
@@ -405,6 +405,33 @@ function levens(word, wordlist) {
   }
   return result;
 }
+function levens_one(word, wordlist) {
+  if(word.length == 0) {
+    return;
+  }
+  var data = {}
+  for(var i in wordlist) {
+    var wl = wordlist[i];
+    var maxlen = Math.max(word.length, wl.length);
+    var lev = levenshtein(word, wl);
+    if(lev != 1) {
+      continue;
+    }
+    var score = lev / maxlen;
+    if(data[score]) {
+      data[score].push(wl);
+    } else {
+      data[score] = [wl];
+    }
+  }
+  var result = [];
+  var svals = Object.keys(data).sort();
+  for(var i in svals) {
+    var score = svals[i];
+    result = result.concat(data[score]);
+  }
+  return result;
+}
 """.}
 
 proc replace*(s, a, b: cstring): cstring {.importcpp, nodecl.}
@@ -413,6 +440,7 @@ proc includes*(s: seq[cstring], a: cstring): bool {.importcpp, nodecl.}
 
 #proc levenshtein(a, b: JsObject): JsObject {.importc, nodecl.}
 proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
+proc levens_one(word, wordlist: JsObject): JsObject {.importc, nodecl.}
 
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
@@ -478,8 +506,10 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
     autocompleteWords = @[]
     viewUpdate()
 
-proc confirmMnemonic(input_id: cstring): proc() =
+var confirm_mnemonic_advanced = false
+proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
   result = proc() =
+    confirm_mnemonic_advanced = advance
     let x = getVNodeById(input_id)
     var s = x.value
     if not s.isNil and s.len > 0:
@@ -492,7 +522,11 @@ proc confirmMnemonic(input_id: cstring): proc() =
       var allvalid = true
       for word in words:
         if wl_select.includes(cast[cstring](word)):
-          chklist.add (idx, word, true, @[])
+          if advance:
+            let levs = cast[seq[cstring]](levens_one(word.toJs, bip39_wordlist))
+            chklist.add (idx, word, true, levs)
+          else:
+            chklist.add (idx, word, true, @[])
         else:
           let levs = cast[seq[cstring]](levens(word.toJs, bip39_wordlist))
           chklist.add (idx, word, false, levs)
@@ -540,7 +574,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
       """
       x.setInputText(ret)
       editingWords = ret
-      confirmMnemonic(input_id)()
+      confirmMnemonic(input_id, confirm_mnemonic_advanced)()
 
 proc changeLanguage(ev: Event; n: VNode) =
   var langId = cast[int](n.value)
@@ -578,8 +612,10 @@ proc mnemonicEditor(): VNode =
           label:
             text "Import your mnemonic you already have"
           textarea(id=input_id, value=editingWords, onkeyup=checkMnemonic, onmouseup=checkMnemonic, spellcheck="false")
-      button(class="ui right floated primary button", onclick=confirmMnemonic(input_id)):
+      button(class="ui right floated primary button", onclick=confirmMnemonic(input_id, false)):
         text "Check"
+      button(class="ui right floated default button", onclick=confirmMnemonic(input_id, true)):
+        text "Advanced Check"
     tdiv(class="medit-autocomp"):
       for word in autocompleteWords:
         button(class="ui mini teal label", onclick=selectWord(input_id, word)):
@@ -589,6 +625,10 @@ proc mnemonicEditor(): VNode =
           button(class="ui mini green label"):
             italic(class="check circle icon"):
               text " " & chklist[i].word
+            for lev in chklist[i].levs:
+              if chklist[i].word != lev:
+                button(class="ui mini blue basic label", onclick=fixWord(input_id, chklist[i].idx, lev)):
+                  text lev
         else:
           button(class="ui mini pink label"):
             italic(class="x icon"):

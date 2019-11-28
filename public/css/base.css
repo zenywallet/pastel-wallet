@@ -209,11 +209,14 @@ html::-webkit-scrollbar {
   min-height: 98px;
   resize: none;
 }
-.medit-seg button {
-  position: absolute;
-  bottom: 14px;
-  right: 14px;
-  height: 35px;
+.medit-seg .ui[class*="right floated"].button {
+  margin-left: 7px;
+}
+.medit-autocomp .ui.label > .icon {
+  margin: 4px 0;
+}
+.medit-autocomp .ui.label {
+  padding: 2px 4px;
 }
 .intro .caption {
   color: #fff;
