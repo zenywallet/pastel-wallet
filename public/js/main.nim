@@ -288,7 +288,7 @@ proc seedToKeys() =
     """
   elif currentImportType == ImportType.Mnemonic:
     asm """
-      var sds = wallet.getMnemonicToSeeds(`editingWords`, `wl_select_id`);
+      var sds = wallet.getMnemonicToSeeds(`inputWords`, `wl_select_id`);
       for(var i in sds) {
         var sd = sds[i];
         keys.push(wallet.getHdNodeKeyPairs(sd.seed));
