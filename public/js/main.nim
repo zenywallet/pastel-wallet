@@ -484,11 +484,11 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
 proc changeLanguage(ev: Event; n: VNode) =
   var langId = cast[int](n.value)
   if langId == 0:
-    bip39_wordlist = bip39.wordlists.japanese
-    wl_select = wl_japanese
-  elif langId == 1:
     bip39_wordlist = bip39.wordlists.english
     wl_select = wl_english
+  elif langId == 1:
+    bip39_wordlist = bip39.wordlists.japanese
+    wl_select = wl_japanese
   autocompleteWords = @[]
   chklist = @[]
   viewUpdate()
@@ -502,14 +502,14 @@ proc mnemonicEditor(): VNode =
           label:
             text "Select mnemonic language"
           tdiv(class="ui selection dropdown"):
-            input(type="hidden", name="mnemonic-language", value="0", onchange=changeLanguage)
+            input(type="hidden", name="mnemonic-language", value="1", onchange=changeLanguage)
             italic(class="dropdown icon")
             tdiv(class="default text"):
               text "Mnemonic Language"
             tdiv(class="menu"):
-              tdiv(class="item", data-value="0"):
-                text "Japanese"
               tdiv(class="item", data-value="1"):
+                text "Japanese"
+              tdiv(class="item", data-value="0"):
                 text "English"
         tdiv(class="field minput-field"):
           label:
