@@ -2,6 +2,7 @@ import templates, strutils
 proc layout_base*(debug: bool): string =
   const debug_script = """
 <script type="text/javascript" src="/js/cipher.js"></script>
+<script type="text/javascript" src="/js/base58.js"></script>
 <script type="text/javascript" src="/js/coinlibs.js"></script>
 <script type="text/javascript" src="/js/zopfli.raw.min.js"></script>
 <script type="text/javascript" src="/js/rawinflate.min.js"></script>
