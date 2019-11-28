@@ -32,6 +32,9 @@ pastel.load = function() {
       cipher.mod_add_scalar = Module.cwrap('ed25519_add_scalar', null, ['number', 'number', 'number']);
 
       cipher.mod_yespower_hash = Module.cwrap('yespower_hash', 'number', ['number', 'number', 'number']);
+      cipher.mod_yespower_n2r8 = Module.cwrap('yespower_n2r8', 'number', ['number', 'number', 'number']);
+      cipher.mod_yespower_n4r16 = Module.cwrap('yespower_n4r16', 'number', ['number', 'number', 'number']);
+      cipher.mod_yespower_n4r32 = Module.cwrap('yespower_n4r32', 'number', ['number', 'number', 'number']);
 
       cipher.mod_murmurhash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
 
@@ -321,6 +324,39 @@ pastel.load = function() {
         var a_output = cipher.alloc(32);
         a_input.set(input);
         cipher.mod_yespower_hash(a_input, size, a_output);
+        var ret = a_output.get();
+        a_output.free();
+        a_input.free();
+        return ret;
+      }
+
+      cipher.yespower_n2r8 = function(input, size) {
+        var a_input = cipher.alloc(size);
+        var a_output = cipher.alloc(32);
+        a_input.set(input);
+        cipher.mod_yespower_n2r8(a_input, size, a_output);
+        var ret = a_output.get();
+        a_output.free();
+        a_input.free();
+        return ret;
+      }
+
+      cipher.yespower_n4r16 = function(input, size) {
+        var a_input = cipher.alloc(size);
+        var a_output = cipher.alloc(32);
+        a_input.set(input);
+        cipher.mod_yespower_n4r16(a_input, size, a_output);
+        var ret = a_output.get();
+        a_output.free();
+        a_input.free();
+        return ret;
+      }
+
+      cipher.yespower_n4r32 = function(input, size) {
+        var a_input = cipher.alloc(size);
+        var a_output = cipher.alloc(32);
+        a_input.set(input);
+        cipher.mod_yespower_n4r32(a_input, size, a_output);
         var ret = a_output.get();
         a_output.free();
         a_input.free();
