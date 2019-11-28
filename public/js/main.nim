@@ -89,6 +89,8 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
   of MnemonicFulfill:
     showPage2 = true
   of SetPassphrase:
+    showScanResult = false
+    mnemonicFulfill = false
     showScanSeedBtn2 = true
     showScanning2 = true
     showCamTools2 = true
@@ -104,6 +106,8 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
   of PassphraseDone:
     showPage3 = true
   of Wallet:
+    showScanResult2 = false
+    passphraseFulfill = false
     showPage1 = false
     showPage2 = false
     showPage3 = true
