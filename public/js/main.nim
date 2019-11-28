@@ -216,8 +216,25 @@ type SeedCardInfo = ref object
 
 var seedCardInfos: seq[SeedCardInfo]
 
+var editingWords: cstring = ""
+var autocompleteWords: seq[cstring] = @[]
+var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
+var prevCheckWord: cstring = ""
+
+var coinlibs {.importc, nodecl.}: JsObject
+var bip39 = coinlibs.bip39
+var bip39_wordlist = bip39.wordlists.japanese
+var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObject): cstring = cast[cstring](x)))
+var wl_english = cast[seq[cstring]](bip39.wordlists.english.map(proc(x: JsObject): cstring = cast[cstring](x)))
+var wl_select = wl_japanese
+var wl_select_id = 1
+
 proc clearSensitive() =
-  seedCardInfos = @[];
+  seedCardInfos = @[]
+  editingWords = ""
+  autocompleteWords = @[]
+  chklist = @[]
+  prevCheckWord = ""
 
 proc removeSeedCard(idx: int): proc() =
   result = proc() =
@@ -226,6 +243,62 @@ proc removeSeedCard(idx: int): proc() =
       viewSelector(SeedScanning)
     else:
       viewUpdate()
+
+proc seedToKeys() =
+  asm """
+    var cipher = pastel.cipher;
+    var coin = pastel.coin;
+    var wallet = new Wallet();
+    var keys = [];
+    function xc(b1, b2) {
+      if(b1.length == b2.length) {
+        for(var i = 0; i < b1.length; i++) {
+          b1[i] ^= b2[i];
+        }
+      }
+    }
+    function sha256d(data) {
+      return coin.crypto.sha256(coin.crypto.sha256(data));
+    }
+  """
+  if currentImportType == ImportType.SeedCard:
+    asm """
+      var mix;
+    """
+    for s in seedCardInfos:
+      asm """
+        var sbuf = base58.dec(`s`.seed);
+        if(`s`.sv && `s`.sv.length > 0) {
+          var sv = cipher.yespower_n4r32(sha256d(`s`.sv), 32);
+          xc(sbuf, sv);
+          sbuf = cipher.yespower_n4r32(sha256d(sbuf), 32);
+        }
+        if(mix) {
+          xc(mix, sbuf);
+        } else {
+          mix = sbuf;
+        }
+      """
+    asm """
+      if(mix) {
+        keys.push(wallet.getHdNodeKeyPairs(cipher.buf2hex(mix), "m/44'/123'/0'"));
+      }
+    """
+  elif currentImportType == ImportType.Mnemonic:
+    asm """
+      var sds = wallet.getMnemonicToSeeds(`editingWords`, `wl_select_id`);
+      for(var i in sds) {
+        var sd = sds[i];
+        keys.push(wallet.getHdNodeKeyPairs(sd.seed, "m/44'/123'/0'"));
+      }
+    """
+  asm """
+    wallet.setShieldedKeys(keys);
+  """
+
+asm """
+  jsSeedToKeys = `seedToKeys`;
+"""
 
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
@@ -338,16 +411,8 @@ proc replace*(s, a, b: cstring): cstring {.importcpp, nodecl.}
 proc join*(s: cstring): cstring {.importcpp, nodecl.}
 proc includes*(s: seq[cstring], a: cstring): bool {.importcpp, nodecl.}
 
-var coinlibs {.importc, nodecl.}: JsObject
-var bip39 = coinlibs.bip39
-var bip39_wordlist = bip39.wordlists.japanese
 #proc levenshtein(a, b: JsObject): JsObject {.importc, nodecl.}
 proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
-
-var editingWords: cstring = ""
-var autocompleteWords: seq[cstring] = @[]
-var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
-var prevCheckWord: cstring = ""
 
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
@@ -412,10 +477,6 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
         input_elm.selectionEnd = newcur
     autocompleteWords = @[]
     viewUpdate()
-
-var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObject): cstring = cast[cstring](x)))
-var wl_english = cast[seq[cstring]](bip39.wordlists.english.map(proc(x: JsObject): cstring = cast[cstring](x)))
-var wl_select = wl_japanese
 
 proc confirmMnemonic(input_id: cstring): proc() =
   result = proc() =
@@ -486,9 +547,11 @@ proc changeLanguage(ev: Event; n: VNode) =
   if langId == 0:
     bip39_wordlist = bip39.wordlists.english
     wl_select = wl_english
+    wl_select_id = 0
   elif langId == 1:
     bip39_wordlist = bip39.wordlists.japanese
     wl_select = wl_japanese
+    wl_select_id = 1
   autocompleteWords = @[]
   chklist = @[]
   viewUpdate()
@@ -1279,6 +1342,7 @@ proc afterScript(data: RouterData) =
         $('a.pagenext').css('visibility', 'hidden');
         $('#section1').hide();
         window.scrollTo(0, 0);
+        jsSeedToKeys();
         jsViewSelector(5);
         page_scroll_done = function() {};
       }

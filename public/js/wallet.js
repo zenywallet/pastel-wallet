@@ -64,19 +64,19 @@ var Wallet = (function() {
   }
 
   Wallet.prototype.getHdNodeKeyPairs = function(seed, hdpath) {
-    var node = bip32.fromSeed(seed);
+    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
     var child = node.derivePath(hdpath);
     return {priv: child.toBase58(), pub: child.neutered().toBase58()};
   }
 
   Wallet.prototype.getHdNodePrivate = function(seed, hdpath) {
-    var node = bip32.fromSeed(seed);
+    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
     var child = node.derivePath(hdpath);
     return child.toBase58();
   }
 
   Wallet.prototype.getHdNodePublic = function(seed, hdpath) {
-    var node = bip32.fromSeed(seed);
+    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
     var child = node.derivePath(hdpath);
     return child.neutered().toBase58();
   }
@@ -183,6 +183,20 @@ var Wallet = (function() {
       addrs.push(p2pkh.address);
     }
     return addrs;
+  }
+
+  var shieldedKeys = [];
+  Wallet.prototype.setShieldedKeys = function(keys) {
+    shieldedKeys = keys;
+  }
+
+  Wallet.prototype.addShieldedKeys = function(keys) {
+    shieldedKeys = shieldedKeys.concat(keys);
+    console.log(JSON.stringify(shieldedKeys));
+  }
+
+  Wallet.prototype.getShieldedKeysCount = function() {
+    return shieldedKeys.length;
   }
 
   return Wallet;
