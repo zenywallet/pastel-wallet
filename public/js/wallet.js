@@ -5,6 +5,7 @@ var Wallet = (function() {
   var coin = coinlibs.coin;
   var network = coin.networks.bitzeny;
   var stor = new Stor();
+  var _hdpash = "m/44'/123'/0'";
 
   function Wallet() {
     if(!(this instanceof Wallet)) {
@@ -63,36 +64,40 @@ var Wallet = (function() {
     return seeds;
   }
 
+  Wallet.prototype.setHdpath = function(hdpath) {
+    _hdpash = hdpath;
+  }
+
   Wallet.prototype.getHdNodeKeyPairs = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
-    var child = node.derivePath(hdpath);
+    var child = node.derivePath(hdpath || _hdpash);
     return {priv: child.toBase58(), pub: child.neutered().toBase58()};
   }
 
   Wallet.prototype.getHdNodePrivate = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
-    var child = node.derivePath(hdpath);
+    var child = node.derivePath(hdpath || _hdpash);
     return child.toBase58();
   }
 
   Wallet.prototype.getHdNodePublic = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
-    var child = node.derivePath(hdpath);
+    var child = node.derivePath(hdpath || _hdpash);
     return child.neutered().toBase58();
   }
 
-  Wallet.prototype.resetXpubFromSeed = function(seed) {
+  Wallet.prototype.resetXpubFromSeed = function(seed, hdpath) {
     stor.del_xpubs();
-    var xpub = wallet.getHdNodePublic(seed, "m/44'/123'/0'");
+    var xpub = wallet.getHdNodePublic(seed, hdpath || _hdpash);
     stor.add_xpub(xpub);
   }
 
-  Wallet.prototype.resetXpubFromMnemonic = function(mnemonic, mlang, password) {
+  Wallet.prototype.resetXpubFromMnemonic = function(mnemonic, mlang, password, hdpath) {
     var seeds = wallet.getMnemonicToSeeds(mnemonic, mlang, password);
     stor.del_xpubs();
     for(var i in seeds) {
       var seed = seeds[i].seed;
-      var xpub = wallet.getHdNodePublic(seed, "m/44'/123'/0'");
+      var xpub = wallet.getHdNodePublic(seed, hdpath || _hdpash);
       stor.add_xpub(xpub);
     }
   }

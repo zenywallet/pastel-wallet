@@ -281,7 +281,7 @@ proc seedToKeys() =
       """
     asm """
       if(mix) {
-        keys.push(wallet.getHdNodeKeyPairs(cipher.buf2hex(mix), "m/44'/123'/0'"));
+        keys.push(wallet.getHdNodeKeyPairs(cipher.buf2hex(mix)));
       }
     """
   elif currentImportType == ImportType.Mnemonic:
@@ -289,7 +289,7 @@ proc seedToKeys() =
       var sds = wallet.getMnemonicToSeeds(`editingWords`, `wl_select_id`);
       for(var i in sds) {
         var sd = sds[i];
-        keys.push(wallet.getHdNodeKeyPairs(sd.seed, "m/44'/123'/0'"));
+        keys.push(wallet.getHdNodeKeyPairs(sd.seed));
       }
     """
   asm """
