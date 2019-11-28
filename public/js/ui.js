@@ -96,7 +96,7 @@ window.onscroll = function() {
     var section_id = section.getAttribute('id');
     difflist['#' + section_id] = Math.abs(rect.top);
   });
-  if(tradelogs_section) {
+  if(tradelogs_section && !(tradelogs_section.style && tradelogs_section.style.display == 'none')) {
     var rect = tradelogs_section.getBoundingClientRect();
     if(rect.top <= 0) {
       return;
