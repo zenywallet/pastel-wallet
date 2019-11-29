@@ -831,6 +831,10 @@ i.receive {
   max-height: calc(100vh - 288px);
   display: none;
 }
+#send-coins input::selection {
+  background-color: rgba(100,100,100,.4);
+  color: rgba(255,255,255,.87);
+}
 #send-coins .ui.label.sendcoins {
   text-align: center;
   background-color: rgba(213, 113, 113, 0.5);
