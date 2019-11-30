@@ -136,10 +136,12 @@ html::-webkit-scrollbar {
 }
 .notify-container {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 7px;
+  right: 7px;
   z-index: 10;
   pointer-events: none;
+  height: calc(100% - 7px);
+  overflow: hidden;
 }
 .notify-container .ui.message {
   width: 282px;

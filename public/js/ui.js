@@ -1166,120 +1166,76 @@ var Settings = (function() {
 })();
 
 var Notify = (function() {
-  function wait_notify_add(id, cb) {
-    function worker() {
-      var l = document.querySelector('.notify-container .message:last-child');
-      if(l && l.dataset.value == id) {
-        cb();
-      } else {
-        if(Notify.exists(id)) {
-          setTimeout(worker, 50);
-        }
+  function hide(elm) {
+    elm.addClass('remove').stop(true, true).animate({opacity: 0}, 100).animate({height: 0, 'padding-top': 0, 'padding-bottom': 0}, {
+      duration: 100,
+      complete: function() {
+        elm.remove();
       }
-    }
-    worker();
+    });
   }
-  function wait_notify_remove(id, cb) {
-    function worker() {
-      var fs = document.querySelectorAll('.notify-container .message');
-      var find = false;
-      for(var i in fs) {
-        var f = fs[i];
-        if(f.dataset && f.dataset.value == id) {
-          find = true;
-          break;
-        }
-      }
-      if(!find) {
-        cb();
-      } else {
-        setTimeout(worker, 50);
-      }
-    }
-    worker();
-  }
-  var notify_worker_active = false;
-  var notify_remove_queue = [];
-  function notify_worker() {
-    var quelen = Notify.datas ? Notify.datas.length : 0;
-    if(notify_remove_queue.length > 0 && ((quelen > 0 && notify_remove_queue.length > 3) || quelen == 0 || Notify.count() > 7)) {
-      var id = notify_remove_queue.shift();
-      var elm = null;
-      $('.notify-container .message').each(function() {
-        if(Number($(this).data('value')) == id) {
-          elm = $(this);
-          return false;
-        }
-      });
-      if(elm) {
-        elm.stop(true, true).animate({opacity: 0}, 100).animate({height: 0, 'padding-top': 0, 'padding-bottom': 0}, {
-          duration: 100,
-          complete: function() {
-            if(Notify.removeById(id)) {
-              Notify.update();
-              wait_notify_remove(id, function() {
-                setTimeout(notify_worker, 100);
-              });
-            } else {
-              setTimeout(notify_worker, 100);
-            }
-          }
-        });
-      } else {
-        if(Notify.removeById(id)) {
-          Notify.update();
-          wait_notify_remove(id, function() {
-            setTimeout(notify_worker, 100);
-          });
+  var _msgtype = {none: 0, error: 1, warning: 2, info: 3};
+  function show(title, message, msgtype) {
+    var m = $('#tools .notify-container .message').not('remove');
+    var count = m.length - 6;
+    if(count > 0) {
+      for(var i = 0; i < count; i++) {
+        var tval = m.eq(i).data('tval');
+        clearTimeout(tval);
+        if(i < count - 1) {
+          m.eq(i).remove();
         } else {
-          setTimeout(notify_worker, 100);
+          hide(m.eq(i));
         }
       }
-    } else {
-      var n = Notify.datas.shift();
-      if(n) {
-        Notify.add(n.title, n.message, n.msgtype, n.notifyId);
-        Notify.update();
-        wait_notify_add(n.notifyId, function() {
-          $('.notify-container .message.hidden .close').off('click').click(function() {
-            var elm = $(this).closest('.message');
-            var id = elm.data('value');
-            if(id) {
-              elm.stop(true, true).animate({opacity: 0}, 100).animate({height: 0, 'padding-top': 0, 'padding-bottom': 0}, {
-                duration: 100,
-                complete: function() {
-                  if(Notify.removeById(id)) {
-                    Notify.update();
-                  }
-                }
-              });
-            }
-          });
-          $('.notify-container .message.hidden').transition({
-            animation: 'fade left',
-            onComplete: function() {
-              setTimeout(function() {
-                notify_remove_queue.push(n.notifyId);
-                notify_worker_start();
-              }, 5000);
-              setTimeout(notify_worker, 100);
-            }
-          });
-        });
-      } else {
-        notify_worker_active = false;
+    }
+    var msgfmt;
+    switch(msgtype) {
+      case _msgtype.error:
+        msgfmt = ' error';
+        break;
+      case _msgtype.warning:
+        msgfmt = ' warning';
+        break;
+      case _msgtype.info:
+        msgfmt = ' info';
+        break;
+      default:
+        msgfmt = '';
+    }
+    var notify_html = '<div class="ui' + msgfmt +
+      ' tiny message hidden"><i class="close icon"></i><div class="header">' + title +
+      '</div><p>' + message + '</p></div>';
+    $(notify_html).appendTo('#tools .notify-container').transition({
+      animation: 'fade left',
+      onComplete: function() {
+        var self = $(this);
+        var tval = setTimeout(function() {
+          hide(self);
+        }, 7000);
+        self.attr('data-tval', tval);
       }
-    }
+    }).find('.close').click(function() {
+      var elm = $(this).closest('.message');
+      var tval = elm.data('tval');
+      clearTimeout(tval);
+      hide(elm);
+    });
   }
-  function notify_worker_start() {
-    if(!notify_worker_active) {
-      notify_worker_active = true;
-      notify_worker();
+
+  $(function() {
+    var tools = document.getElementById('tools');
+    if(!tools) {
+      tools = document.createElement('div');
+      tools.setAttribute('id', 'tools');
+      document.body.appendChild(tools);
+      $('<div class="notify-container"></div>').appendTo('#tools');
     }
-  }
+  });
+
   var Module = {
-    start: notify_worker_start,
-    msgtype: {none: 0, error: 1, warning: 2, info: 3}
+    show: show,
+    msgtype: _msgtype
   }
   return Module;
 })();
