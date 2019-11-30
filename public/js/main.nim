@@ -1087,6 +1087,7 @@ type
 
 var notifyDatas: seq[NotifyData]
 var notifyId = 0
+var lastNotifyId = 0
 
 proc addNotifyData(title, message: cstring, msgtype: NotifyMsgType, notifyId: int) =
   var n = NotifyData(title: title, message: message, msgtype: msgtype, notifyId: notifyId)
@@ -1094,6 +1095,9 @@ proc addNotifyData(title, message: cstring, msgtype: NotifyMsgType, notifyId: in
 
 proc removeOldestNotifyData() =
   notifyDatas.delete(0)
+  if notifyDatas.len == 0:
+    lastNotifyId = 0
+    notifyId = 0
 
 proc removeNotifyData(notifyId: int): bool =
   for idx, n in notifyDatas:
@@ -1132,7 +1136,12 @@ asm """
 proc notifyMessage(): VNode =
   result = buildHtml(tdiv(class="notify-container")):
     for idx, n in notifyDatas:
-      var hidden = if idx == notifyDatas.high: " hidden" else: ""
+      var hidden: cstring
+      if n.notifyId > lastNotifyId:
+        hidden = " hidden"
+        lastNotifyId = n.notifyId
+      else:
+        hidden = ""
       var msgfmt: cstring = case n.msgtype
         of NotifyMsgType.Error:
           " error"
@@ -1144,7 +1153,10 @@ proc notifyMessage(): VNode =
           ""
       tdiv(class="ui" & msgfmt & " tiny message" & hidden, data-value=cast[cstring](n.notifyId)):
         italic(class="close icon")
-        tdiv(class="header"):text n.title
+        tdiv(class="header"):
+          text n.title
+          span(class="hidden"):
+            text $n.notifyId
         p: text n.message
 
 proc appMain(data: RouterData): VNode =
