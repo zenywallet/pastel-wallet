@@ -65,10 +65,12 @@ function scrollPos(pos, duration, done) {
 var lastSection = null;
 function goSection(selector, cb) {
   var section = document.querySelector(selector);
-  var rect = section.getBoundingClientRect();
-  var offset_top = rect.top + (window.pageYOffset || document.documentElement.scrollTop);
-  scrollPos(offset_top, 800, cb);
-  lastSection = selector;
+  if(section) {
+    var rect = section.getBoundingClientRect();
+    var offset_top = rect.top + (window.pageYOffset || document.documentElement.scrollTop);
+    scrollPos(offset_top, 800, cb);
+    lastSection = selector;
+  }
 }
 
 function reloadSection(cb) {
