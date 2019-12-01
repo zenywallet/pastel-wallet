@@ -613,6 +613,7 @@ var qrReader = (function() {
   var cb_done = function() {}
 
   function qr_stop() {
+    Quagga.stop();
     camera_scanning(false);
     video.pause();
     if(video.srcObject) {
@@ -622,6 +623,32 @@ var qrReader = (function() {
     }
     video.removeAttribute('src');
     video.load();
+  }
+
+  function shutter(data) {
+    var active = true;
+    var count = 0;
+    function _shutter() {
+      setTimeout(function() {
+        if(active) {
+          $('.qrcamera-shutter').addClass('active');
+          active = false;
+        } else {
+          $('.qrcamera-shutter').removeClass('active');
+          active = true;
+          count++;
+        }
+        if(count < 3) {
+          _shutter();
+        } else {
+          scan_done = true;
+          qr_stop();
+          showing = false;
+          cb_done(data);
+        }
+      }, 50);
+    }
+    _shutter();
   }
 
   var skip_first_tick = false;
@@ -675,29 +702,7 @@ var qrReader = (function() {
             && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
             if(!abort && cb_done) {
-              var active = true;
-              var count = 0;
-              function shutter() {
-                setTimeout(function() {
-                  if(active) {
-                    $('.qrcamera-shutter').addClass('active');
-                    active = false;
-                  } else {
-                    $('.qrcamera-shutter').removeClass('active');
-                    active = true;
-                    count++;
-                  }
-                  if(count < 3) {
-                    shutter();
-                  } else {
-                    scan_done = true;
-                    qr_stop();
-                    showing = false;
-                    cb_done(code.data);
-                  }
-                }, 50);
-              }
-              shutter();
+              shutter(code.data);
             }
             return;
           }
@@ -745,6 +750,15 @@ var qrReader = (function() {
     }
   }
 
+  var quagga_detected = false;
+  Quagga.onDetected(function(data) {
+    if(data.codeResult && !quagga_detected) {
+      quagga_detected = true;
+      console.log(data.codeResult);
+      shutter(data.codeResult.code);
+    }
+  });
+
   var current_deviceId = null;
 
   function show(cb) {
@@ -786,6 +800,30 @@ var qrReader = (function() {
         video.srcObject = stream;
         video.setAttribute("playsinline", true);
         video.play();
+
+        quagga_detected = false;
+        Quagga.init({
+          inputStream : {
+            name: "Live",
+            type: "LiveStream",
+            target: video,
+          },
+          decoder: {
+            readers : ["code_128_reader", "ean_reader", "code_39_reader", "codabar_reader", "i2of5_reader", "2of5_reader", "code_93_reader"],
+            multiple: false
+          },
+          locator: {
+            halfSample: true,
+            patchSize: "medium"
+          }
+        }, function(err) {
+          if (err) {
+            console.log(err);
+            return
+          }
+          Quagga.start();
+        });
+
         video_status_change();
         showing = true;
         requestAnimationFrame(tick);
