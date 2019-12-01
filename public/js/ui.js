@@ -586,6 +586,49 @@ var camDevice = (function() {
   };
 })();
 
+var barcodeReader = (function() {
+  var quagga_detected = false;
+  var _cb = function() {};
+  Quagga.onDetected(function(data) {
+    if(data.codeResult && !quagga_detected) {
+      quagga_detected = true;
+      console.log(data.codeResult);
+      _cb(data.codeResult.code);
+    }
+  });
+
+  return {
+    start: function(video, cb) {
+      quagga_detected = false;
+      _cb = cb;
+      Quagga.init({
+        inputStream : {
+          name: "Live",
+          type: "LiveStream",
+          target: video,
+        },
+        decoder: {
+          readers : ["code_128_reader", "ean_reader", "code_39_reader", "codabar_reader", "i2of5_reader", "2of5_reader", "code_93_reader"],
+          multiple: false
+        },
+        locator: {
+          halfSample: true,
+          patchSize: "medium"
+        }
+      }, function(err) {
+        if (err) {
+          console.log(err);
+          return
+        }
+        Quagga.start();
+      });
+    },
+    stop: function() {
+      Quagga.stop();
+    }
+  }
+})();
+
 var qrReader = (function() {
   var video, canvasElement, canvas, seedseg;
   var abort = false;
@@ -613,7 +656,7 @@ var qrReader = (function() {
   var cb_done = function() {}
 
   function qr_stop() {
-    Quagga.stop();
+    barcodeReader.stop();
     camera_scanning(false);
     video.pause();
     if(video.srcObject) {
@@ -750,15 +793,6 @@ var qrReader = (function() {
     }
   }
 
-  var quagga_detected = false;
-  Quagga.onDetected(function(data) {
-    if(data.codeResult && !quagga_detected) {
-      quagga_detected = true;
-      console.log(data.codeResult);
-      shutter(data.codeResult.code);
-    }
-  });
-
   var current_deviceId = null;
 
   function show(cb) {
@@ -801,27 +835,8 @@ var qrReader = (function() {
         video.setAttribute("playsinline", true);
         video.play();
 
-        quagga_detected = false;
-        Quagga.init({
-          inputStream : {
-            name: "Live",
-            type: "LiveStream",
-            target: video,
-          },
-          decoder: {
-            readers : ["code_128_reader", "ean_reader", "code_39_reader", "codabar_reader", "i2of5_reader", "2of5_reader", "code_93_reader"],
-            multiple: false
-          },
-          locator: {
-            halfSample: true,
-            patchSize: "medium"
-          }
-        }, function(err) {
-          if (err) {
-            console.log(err);
-            return
-          }
-          Quagga.start();
+        barcodeReader.start(video, function(data) {
+          shutter(data);
         });
 
         video_status_change();
