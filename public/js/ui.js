@@ -630,7 +630,7 @@ var barcodeReader = (function() {
 })();
 
 var qrReader = (function() {
-  var video, canvasElement, canvas, seedseg;
+  var video, canvas, ctx, seedseg;
   var abort = false;
   var showing = false;
   //var scandata = null;
@@ -640,12 +640,12 @@ var qrReader = (function() {
   //var outputData = document.getElementById("outputData");
 
   function drawLine(begin, end, color) {
-    canvas.beginPath();
-    canvas.moveTo(begin.x, begin.y);
-    canvas.lineTo(end.x, end.y);
-    canvas.lineWidth = 4;
-    canvas.strokeStyle = color;
-    canvas.stroke();
+    ctx.beginPath();
+    ctx.moveTo(begin.x, begin.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = color;
+    ctx.stroke();
   }
 
   function checkRange(rect, x1, y1, x2, y2) {
@@ -698,10 +698,10 @@ var qrReader = (function() {
   function tick() {
     if(video.readyState === video.HAVE_ENOUGH_DATA) {
       camera_scanning(true);
-      canvasElement.height = video.videoHeight;
-      canvasElement.width = video.videoWidth;
-      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       var code = jsQR(imageData.data, imageData.width, imageData.height, {
         inversionAttempts: "dontInvert",
       });
@@ -713,26 +713,26 @@ var qrReader = (function() {
 
         var sw = seedseg.offsetWidth - 28;
         var sh = seedseg.offsetHeight - 28;
-        if(canvasElement.width > 0 && sw > 0) {
+        if(canvas.width > 0 && sw > 0) {
           var mergin = 14;
-          var c = canvasElement.height / canvasElement.width;
+          var c = canvas.height / canvas.width;
           var s = sh / sw;
           var x1, y1, x2, y2;
           if(c < s) {
-            var w = canvasElement.height / s;
-            x1 = (canvasElement.width - w) / 2;
+            var w = canvas.height / s;
+            x1 = (canvas.width - w) / 2;
             y1 = 0;
             x2 = x1 + w;
-            y2 = canvasElement.height;
+            y2 = canvas.height;
             x1 += mergin;
             x2 -= mergin;
             y1 += mergin;
             y2 -= mergin;
           } else {
-            var h = canvasElement.width * s;
+            var h = canvas.width * s;
             x1 = 0;
-            y1 = (canvasElement.height - h) / 2;
-            x2 = canvasElement.width;
+            y1 = (canvas.height - h) / 2;
+            x2 = canvas.width;
             y2 = y1 + h;
             x1 += mergin;
             x2 -= mergin;
@@ -782,13 +782,13 @@ var qrReader = (function() {
 
   function video_status_change() {
     if(mode_show) {
-      canvasElement.style.visibility = 'visible';
+      canvas.style.visibility = 'visible';
       $('.camtools').css('visibility', 'visible');
     } else {
       camera_scanning(false);
       $('.camtools').css('visibility', 'hidden');
-      if(canvasElement) {
-        canvasElement.style.visibility = 'hidden';
+      if(canvas) {
+        canvas.style.visibility = 'hidden';
       }
     }
   }
@@ -804,12 +804,12 @@ var qrReader = (function() {
     $('.qrcamera-loader').addClass('active');
     skip_first_tick = false;
     video = video || document.createElement("video");
-    canvasElement = document.getElementById("qrcanvas");
-    if(!canvasElement) {
+    canvas = document.getElementById("qrcanvas");
+    if(!canvas) {
       return;
     }
-    canvasElement.style.visibility = 'visible';
-    canvas = canvasElement.getContext("2d");
+    canvas.style.visibility = 'visible';
+    ctx = canvas.getContext("2d");
     seedseg = document.getElementById("seed-seg");
     cb_done = cb;
 
@@ -859,14 +859,14 @@ var qrReader = (function() {
         qr_stop();
         showing = false;
       }
-      if(canvas && canvasElement) {
-        canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      if(ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       mode_show = false;
       video_status_change();
       if(!rescan) {
-        if(canvasElement) {
-          canvasElement.style.visibility = 'hidden';
+        if(canvas) {
+          canvas.style.visibility = 'hidden';
         }
         $('.qrcamera-loader').removeClass('active');
       }
@@ -885,17 +885,17 @@ var qrReader = (function() {
 })();
 
 var qrReaderModal = (function() {
-  var video, canvasElement, canvas, qrseg;
+  var video, canvas, ctx, qrseg;
   var abort = false;
   var showing = false;
 
   function drawLine(begin, end, color) {
-    canvas.beginPath();
-    canvas.moveTo(begin.x, begin.y);
-    canvas.lineTo(end.x, end.y);
-    canvas.lineWidth = 4;
-    canvas.strokeStyle = color;
-    canvas.stroke();
+    ctx.beginPath();
+    ctx.moveTo(begin.x, begin.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = color;
+    ctx.stroke();
   }
 
   function checkRange(rect, x1, y1, x2, y2) {
@@ -921,10 +921,10 @@ var qrReaderModal = (function() {
   function tick() {
     if(video.readyState === video.HAVE_ENOUGH_DATA) {
       camera_scanning(true);
-      canvasElement.height = video.videoHeight;
-      canvasElement.width = video.videoWidth;
-      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       var code = jsQR(imageData.data, imageData.width, imageData.height, {
         inversionAttempts: "dontInvert",
       });
@@ -936,26 +936,26 @@ var qrReaderModal = (function() {
 
         var sw = qrseg.offsetWidth - 28;
         var sh = qrseg.offsetHeight - 28;
-        if(canvasElement.width > 0 && sw > 0) {
+        if(canvas.width > 0 && sw > 0) {
           var mergin = 14;
-          var c = canvasElement.height / canvasElement.width;
+          var c = canvas.height / canvas.width;
           var s = sh / sw;
           var x1, y1, x2, y2;
           if(c < s) {
-            var w = canvasElement.height / s;
-            x1 = (canvasElement.width - w) / 2;
+            var w = canvas.height / s;
+            x1 = (canvas.width - w) / 2;
             y1 = 0;
             x2 = x1 + w;
-            y2 = canvasElement.height;
+            y2 = canvas.height;
             x1 += mergin;
             x2 -= mergin;
             y1 += mergin;
             y2 -= mergin;
           } else {
-            var h = canvasElement.width * s;
+            var h = canvas.width * s;
             x1 = 0;
-            y1 = (canvasElement.height - h) / 2;
-            x2 = canvasElement.width;
+            y1 = (canvas.height - h) / 2;
+            x2 = canvas.width;
             y2 = y1 + h;
             x1 += mergin;
             x2 -= mergin;
@@ -1027,7 +1027,7 @@ var qrReaderModal = (function() {
 
   function video_status_change() {
     if(mode_show) {
-      canvasElement.style.visibility = 'visible';
+      canvas.style.visibility = 'visible';
       $('.camtools').css('visibility', 'visible');
       $('#qrcode-modal .camtools .btn-camera').off('click').click(function() {
         hide(true);
@@ -1041,8 +1041,8 @@ var qrReaderModal = (function() {
     } else {
       camera_scanning(false);
       $('.camtools').css('visibility', 'hidden');
-      if(canvasElement) {
-        canvasElement.style.visibility = 'hidden';
+      if(canvas) {
+        canvas.style.visibility = 'hidden';
       }
     }
   }
@@ -1058,8 +1058,8 @@ var qrReaderModal = (function() {
     $('#qrcode-modal .qrcamera-loader').addClass('active');
     skip_first_tick = false;
     video = video || document.createElement("video");
-    canvasElement = document.getElementById("qrcanvas-modal");
-    canvas = canvasElement.getContext("2d");
+    canvas = document.getElementById("qrcanvas-modal");
+    ctx = canvas.getContext("2d");
     qrseg = document.getElementById("qrreader-seg");
     cb_done = cb;
 
@@ -1127,15 +1127,15 @@ var qrReaderModal = (function() {
         qr_stop();
         showing = false;
       }
-      if(canvas && canvasElement) {
-        canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      if(ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       mode_show = false;
       if(rescan) {
         video_status_change();
       } else {
-        if(canvasElement) {
-          canvasElement.style.visibility = 'hidden';
+        if(canvas) {
+          canvas.style.visibility = 'hidden';
         }
         $('#qrcode-modal .qrcamera-loader').removeClass('active');
         $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
