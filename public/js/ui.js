@@ -917,6 +917,32 @@ var qrReaderModal = (function() {
     video.load();
   }
 
+  function shutter(data) {
+    var active = true;
+    var count = 0;
+    function _shutter() {
+      setTimeout(function() {
+        if(active) {
+          $('#qrcode-modal .qrcamera-shutter').addClass('active');
+          active = false;
+        } else {
+          $('#qrcode-modal .qrcamera-shutter').removeClass('active');
+          active = true;
+          count++;
+        }
+        if(count < 3) {
+          _shutter();
+        } else {
+          scan_done = true;
+          qr_stop();
+          showing = false;
+          cb_done(data);
+        }
+      }, 50);
+    }
+    _shutter();
+  }
+
   var skip_first_tick = false;
   function tick() {
     if(video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -968,29 +994,7 @@ var qrReaderModal = (function() {
             && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
             && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
             if(!abort && cb_done) {
-              var active = true;
-              var count = 0;
-              function shutter() {
-                setTimeout(function() {
-                  if(active) {
-                    $('#qrcode-modal .qrcamera-shutter').addClass('active');
-                    active = false;
-                  } else {
-                    $('#qrcode-modal .qrcamera-shutter').removeClass('active');
-                    active = true;
-                    count++;
-                  }
-                  if(count < 3) {
-                    shutter();
-                  } else {
-                    scan_done = true;
-                    qr_stop();
-                    showing = false;
-                    cb_done(code.data);
-                  }
-                }, 50);
-              }
-              shutter();
+              shutter(code.data);
             }
             return;
           }
