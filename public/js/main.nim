@@ -325,7 +325,11 @@ proc cbSeedQrDone(data: cstring) =
 
   var dupcheck = false
   for s in seedCardInfos:
-    if s.seed == seedCardInfo.seed or s.tag == seedCardInfo.tag:
+    if s.seed.isNil and seedCardInfo.seed.isNil:
+      if s.orig == seedCardInfo.orig:
+        dupcheck = true
+        break
+    elif s.seed == seedCardInfo.seed or s.tag == seedCardInfo.tag:
       dupcheck = true
       break
 
