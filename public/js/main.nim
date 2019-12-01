@@ -654,10 +654,11 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
       tdiv(class="seed-qrcode", data-orig=cardInfo.orig):
         canvas(width="188", height="188")
     tdiv(class="content"):
-      tdiv(class="ui tag label mini tag"): text cardInfo.tag
+      if not cardInfo.tag.isNil:
+        tdiv(class="ui tag label mini tag"): text cardInfo.tag
       tdiv(class="header"): text "Seed"
       tdiv(class="meta"):
-        span(class="date"): text cardInfo.gen
+        span(class="date"): text if not cardInfo.gen.isNil: cardInfo.gen else: "unknown"
       var clen = cardInfo.seed.len
       if clen > 0:
         var half = toInt(clen / 2)
@@ -669,6 +670,16 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
         tdiv(class="seed-body"):
           tdiv(class="seed"): text seed_upper
           tdiv(class="seed"): text seed_lower
+      else:
+        tdiv(class="seed-body"):
+          clen = cardInfo.orig.len
+          if clen > 20:
+            var half = toInt(clen / 2)
+            var orig = $cardInfo.orig
+            tdiv(class="seed"): text orig[0..<half]
+            tdiv(class="seed"): text orig[half..^1]
+          else:
+            tdiv(class="seed"): text cardInfo.orig
     tdiv(class="extra content"):
       tdiv(class="inline field"):
         tdiv(class="vector-label"): text "Seed Vector:"
