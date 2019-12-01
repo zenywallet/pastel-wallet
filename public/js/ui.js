@@ -906,6 +906,7 @@ var qrReaderModal = (function() {
   var cb_done = function() {}
 
   function qr_stop() {
+    barcodeReader.stop();
     camera_scanning(false);
     video.pause();
     if(video.srcObject) {
@@ -1088,6 +1089,11 @@ var qrReaderModal = (function() {
         video.srcObject = stream;
         video.setAttribute("playsinline", true);
         video.play();
+
+        barcodeReader.start(video, function(data) {
+          shutter(data);
+        });
+
         video_status_change();
         showing = true;
         requestAnimationFrame(tick);
