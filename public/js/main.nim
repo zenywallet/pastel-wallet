@@ -323,6 +323,20 @@ proc cbSeedQrDone(data: cstring) =
   seedCardInfo.orig = data
   echo repr(seedCardInfo)
 
+  asm """
+    var seed_valid = false;
+    if(`seedCardInfo`.seed) {
+      var dec = base58.dec(`seedCardInfo`.seed);
+      if(dec && dec.length == 32) {
+        seed_valid = true;
+      }
+    }
+    if(!seed_valid) {
+      Notify.show("Warning", "Unsupported seed card was scanned.", Notify.msgtype.warning);
+    }
+
+  """
+
   var dupcheck = false
   for s in seedCardInfos:
     if s.seed.isNil and seedCardInfo.seed.isNil:
