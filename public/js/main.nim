@@ -35,6 +35,7 @@ type ViewType = enum
   KeyNone
   KeyScanning
   KeyAfterScan
+  KeyCardDone
   PassphraseEdit
   PassphraseDone
   Wallet
@@ -56,6 +57,7 @@ var showPage2 = false
 var showPage3 = false
 var showPage4 = false
 var mnemonicFulfill = false
+var keyCardFulfill = false
 var passphraseFulfill = false
 var supressRedraw = false
 var showRecvAddressSelector = true
@@ -99,14 +101,17 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
     showPage2 = true
   of KeyAfterScan:
     showScanSeedBtn2 = false
-    showScanning2 = false
-    showCamTools2 = false
+    showScanning2 = true
+    showCamTools2 = true
     showScanResult2 = true
+    showPage3 = false #true
+  of KeyCardDone:
     showPage3 = true
   of PassphraseDone:
     showPage3 = true
   of Wallet:
     showScanResult2 = false
+    keyCardFulfill = false
     passphraseFulfill = false
     showPage1 = false
     showPage2 = false
@@ -359,8 +364,11 @@ proc cbSeedQrDone(data: cstring) =
   """
   viewSelector(SeedAfterScan)
 
+var keyCardVal: cstring = ""
+
 proc cbKeyQrDone(data: cstring) =
   echo "cbQrDone:", data
+  keyCardVal = data
   asm """
     qrReader.hide();
   """
@@ -377,6 +385,11 @@ proc showKeyQr(): proc() =
     asm """
       qrReader.show(`cbKeyQrDone`);
     """
+
+proc confirmkeyCard(ev: Event; n: VNode) =
+  keyCardFulfill = true
+  showPage3 = true
+  viewUpdate()
 
 proc camChange(): proc() =
   result = proc() =
@@ -721,13 +734,13 @@ proc confirmPassphrase(ev: Event; n: VNode) =
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
-    tdiv(class="ui clearing segment medit-seg"):
-      tdiv(class="ui form"):
-        tdiv(class="field"):
-          label:
-            text "Input passphrase"
-          input(type="text", name="input-passphrase", value="", onchange=changePassphrase)
-      button(class="ui right floated primary button", onclick=confirmPassphrase):
+    tdiv(class="ui clearing segment passphrase-seg"):
+      tdiv(class="ui inverted segment"):
+        h4(class="ui grey inverted header center"): text "Input passphrase"
+        tdiv(class="ui form"):
+          tdiv(class="field"):
+            input(class="center", type="text", name="input-passphrase", value="", placeholder="Passphrase", onchange=changePassphrase)
+      button(class="ui right floated olive button", onclick=confirmPassphrase):
         text "Save"
 
 proc goSettings(): proc() =
@@ -782,7 +795,7 @@ asm """
       $('#send-coins input[name="address"]').val('');
       $('#send-coins input[name="amount"]').val('');
       uriOptions = [];
-      jsViewSelector(11);
+      jsViewSelector(12);
       $(this).blur();
     });
     $('#btn-send-qrcode').off('click').click(function() {
@@ -800,7 +813,7 @@ asm """
           key = key.charAt(0).toUpperCase() + key.slice(1);
           uriOptions.push({key: key, value: crlftab_to_html(p)});
         }
-        jsViewSelector(11);
+        jsViewSelector(12);
       });
       $(this).blur();
     });
@@ -1180,12 +1193,15 @@ proc appMain(data: RouterData): VNode =
             if currentProtectType == ProtectType.KeyCard:
               tdiv(id="seed-seg", class="ui left aligned segment seed-seg"):
                 if showScanResult2:
-                  tdiv(class="ui link cards seed-card-holder"):
-                    #eedCard(seedCardInfo)
-                    #seedCard(seedCardInfo)
-                    tdiv(class="seed-add-container"):
-                      button(class="circular ui icon button bt-add-seed"):
-                        italic(class="plus icon")
+                  tdiv(class="ui clearing segment keycard-seg"):
+                    tdiv(class="ui inverted segment"):
+                      h4(class="ui grey inverted header center"): text "Scanned key card"
+                      p(class="center"): text keyCardVal
+                    button(class="ui right floated olive button", onclick=confirmkeyCard):
+                      text "Save"
+                    button(class="ui right floated grey button", onclick=showKeyQr()):
+                      text "Rescan"
+                if keyCardFulfill:
                   a(class="pagenext", href="#section3"):
                     span()
                     text "Next"
@@ -1351,21 +1367,21 @@ proc afterScript(data: RouterData) =
         page_scroll_done = function() {};
       }
     """
-  if showScanResult2 or passphraseFulfill:
+  if keyCardFulfill or passphraseFulfill:
     asm """
       target_page_scroll = '#section3';
       page_scroll_done = function() {
         $('a.pagenext').css('visibility', 'hidden');
         $('#section2').hide();
         window.scrollTo(0, 0);
-        jsViewSelector(8);
+        jsViewSelector(9);
         if(pastel.stream && !pastel.stream.status()) {
           pastel.stream.start();
         }
         page_scroll_done = function() {};
       }
     """
-  if showScanResult or mnemonicFulfill or showScanResult2 or passphraseFulfill:
+  if showScanResult or mnemonicFulfill or keyCardFulfill or passphraseFulfill:
     asm """
       var elms = document.querySelectorAll('a.pagenext');
       Array.prototype.forEach.call(elms, function(elm) {
@@ -1413,7 +1429,7 @@ proc afterScript(data: RouterData) =
           window.scrollTo(0, 0);
           setSupressRedraw(false);
           reloadViewSafeStart();
-          jsViewSelector(11);
+          jsViewSelector(12);
           page_scroll_done = function() {};
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
