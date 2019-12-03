@@ -175,7 +175,7 @@ html::-webkit-scrollbar {
   bottom: 30px;
   min-width: 324px;
   z-index: 2;
-  background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
+  background: linear-gradient(0deg, rgba(136,136,136,.6), rgba(221,221,221,.6));
 }
 .intro-body .seed-seg {
   min-height: 464px;
@@ -187,7 +187,7 @@ html::-webkit-scrollbar {
   position: absolute;
   top: 14px;
   z-index: 2;
-  background: linear-gradient(-90deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
+  background: linear-gradient(-90deg, rgba(136,136,136,.6), rgba(221,221,221,.6));
   height: 274px;
   width: calc(100% - 28px);
 }
@@ -219,6 +219,51 @@ html::-webkit-scrollbar {
 }
 .medit-autocomp .ui.label {
   padding: 2px 4px;
+}
+.intro-body .keycard-seg {
+  position: absolute;
+  top: 14px;
+  z-index: 2;
+  background: linear-gradient(-90deg, rgba(136,136,136,.6), rgba(221,221,221,.6));
+  width: calc(100% - 28px);
+}
+.intro-body .keycard-seg .center {
+  text-align: center;
+}
+.intro-body .keycard-seg .ui[class*="right floated"].button {
+  margin-left: 7px;
+}
+.intro-body .keycard-seg .ui.inverted.segment p {
+  font-color: #dcddde;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px #333;
+  word-wrap: break-word;
+}
+.intro-body .keycard-seg .ui.inverted.segment {
+  background-color: rgba(72,81,75,.3);
+}
+.intro-body .passphrase-seg {
+  position: absolute;
+  top: 14px;
+  z-index: 2;
+  background: linear-gradient(-90deg, rgba(136,136,136,.6), rgba(221,221,221,.6));
+  width: calc(100% - 28px);
+}
+.intro-body .passphrase-seg .center {
+  text-align: center;
+}
+.intro-body .passphrase-seg .ui.inverted.segment p {
+  font-color: #dcddde;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px #333;
+  word-wrap: break-word;
+}
+.intro-body .passphrase-seg .ui.inverted.segment {
+  background-color: rgba(72,81,75,.3);
+}
+.intro-body .passphrase-seg .ui.form input[type="text"] {
+  background: rgba(128, 128, 128, 0.6);
+  color: #f0f0f0;
 }
 .intro .caption {
   color: #fff;
