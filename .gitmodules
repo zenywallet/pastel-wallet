@@ -10,3 +10,6 @@
 [submodule "deps/ed25519"]
 	path = deps/ed25519
 	url = https://github.com/orlp/ed25519
+[submodule "deps/zbar"]
+	path = deps/zbar
+	url = https://github.com/ZBar/ZBar
