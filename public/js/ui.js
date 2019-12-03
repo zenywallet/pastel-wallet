@@ -596,9 +596,12 @@ var barcodeReader = (function() {
       _cb(data.codeResult.code);
     }
   });
-
+  var start_status = 0;
+  var abort = false;
   return {
     start: function(video, cb) {
+      start_status = 1;
+      var abort = false;
       quagga_detected = false;
       _cb = cb;
       Quagga.init({
@@ -618,15 +621,27 @@ var barcodeReader = (function() {
       }, function(err) {
         if (err) {
           console.log(err);
+          start_status = 0;
           return
         }
         Quagga.start();
+        start_status = 2;
       });
     },
     stop: function() {
-      Quagga.stop();
+      abort = true;
+      var count = 0;
+      function wait() {
+        if(start_status == 2) {
+          Quagga.stop();
+          start_status = 0;
+        } else if(start_status > 0 && abort) {
+          setTimeout(wait, 100);
+        }
+      }
+      wait();
     }
-  }
+  };
 })();
 
 var qrReader = (function() {
