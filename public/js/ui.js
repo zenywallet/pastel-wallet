@@ -586,92 +586,31 @@ var camDevice = (function() {
   };
 })();
 
-var barcodeReader = (function() {
-  var quagga_detected = false;
-  var _cb = function() {};
-  Quagga.onDetected(function(data) {
-    if(data.codeResult && !quagga_detected) {
-      quagga_detected = true;
-      console.log(data.codeResult);
-      _cb(data.codeResult.code);
-    }
-  });
-  var start_status = 0;
-  var abort = false;
-  return {
-    start: function(video, cb) {
-      start_status = 1;
-      var abort = false;
-      quagga_detected = false;
-      _cb = cb;
-      Quagga.init({
-        inputStream : {
-          name: "Live",
-          type: "LiveStream",
-          target: video,
-        },
-        decoder: {
-          readers : ["code_128_reader", "ean_reader", "code_39_reader", "codabar_reader", "i2of5_reader", "2of5_reader", "code_93_reader"],
-          multiple: false
-        },
-        locator: {
-          halfSample: true,
-          patchSize: "medium"
-        }
-      }, function(err) {
-        if (err) {
-          console.log(err);
-          start_status = 0;
-          return
-        }
-        Quagga.start();
-        start_status = 2;
-      });
-    },
-    stop: function() {
-      abort = true;
-      var count = 0;
-      function wait() {
-        if(start_status == 2) {
-          Quagga.stop();
-          start_status = 0;
-        } else if(start_status > 0 && abort) {
-          setTimeout(wait, 100);
-        }
-      }
-      wait();
-    }
-  };
-})();
-
 var qrReader = (function() {
-  var video, canvas, ctx, seedseg;
+  var video, canvas, ctx, seg;
+  var cipher = {};
   var abort = false;
   var showing = false;
-  //var scandata = null;
-  //var loadingMessage = document.getElementById("loadingMessage");
-  //var outputContainer = document.getElementById("output");
-  //var outputMessage = document.getElementById("outputMessage");
-  //var outputData = document.getElementById("outputData");
 
-  function drawLine(begin, end, color) {
+  function drawPoly(poly, lineWidth, color) {
     ctx.beginPath();
-    ctx.moveTo(begin.x, begin.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.lineWidth = 4;
+    ctx.moveTo(poly[0], poly[1]);
+    for(item = 2; item < poly.length - 1; item += 2) {
+      ctx.lineTo(poly[item], poly[item + 1]);
+    }
+    ctx.lineWidth = lineWidth;
     ctx.strokeStyle = color;
+    ctx.closePath();
     ctx.stroke();
   }
 
-  function checkRange(rect, x1, y1, x2, y2) {
-    return (rect.x > x1 && rect.x < x2
-      && rect.y > y1 && rect.y < y2);
+  function checkRange(x, y, x1, y1, x2, y2) {
+    return (x > x1 && x < x2 && y > y1 && y < y2);
   }
 
   var cb_done = function() {}
 
   function qr_stop() {
-    barcodeReader.stop();
     camera_scanning(false);
     video.pause();
     if(video.srcObject) {
@@ -709,7 +648,56 @@ var qrReader = (function() {
     _shutter();
   }
 
-  var skip_first_tick = false;
+  function zbar_result(symbol, data, polygon) {
+    console.log(symbol, data);
+    if(symbol == 'QR-Code') {
+      drawPoly(polygon, 4, 'rgba(255,59,88,.4)');
+    } else {
+      drawPoly(polygon, 1, 'rgba(0,153,255,.4)');
+    }
+    var sw = seg.offsetWidth - 28;
+    var sh = seg.offsetHeight - 28;
+    if(canvas.width > 0 && sw > 0) {
+      var mergin = 14;
+      var c = canvas.height / canvas.width;
+      var s = sh / sw;
+      var x1, y1, x2, y2;
+      if(c < s) {
+        var w = canvas.height / s;
+        x1 = (canvas.width - w) / 2;
+        y1 = 0;
+        x2 = x1 + w;
+        y2 = canvas.height;
+        x1 += mergin;
+        x2 -= mergin;
+        y1 += mergin;
+        y2 -= mergin;
+      } else {
+        var h = canvas.width * s;
+        x1 = 0;
+        y1 = (canvas.height - h) / 2;
+        x2 = canvas.width;
+        y2 = y1 + h;
+        x1 += mergin;
+        x2 -= mergin;
+        y1 += mergin;
+        y2 -= mergin;
+      }
+      var range_flag = true;
+      for(i = 0; i < polygon.length - 1; i += 2) {
+        if(!checkRange(polygon[i], polygon[i + 1], x1, y1, x2, y2)) {
+          range_flag = false;
+          break;
+        }
+      }
+      if(range_flag && !abort && cb_done) {
+        abort = true;
+        shutter(data);
+        return;
+      }
+    }
+  }
+
   function tick() {
     if(video.readyState === video.HAVE_ENOUGH_DATA) {
       camera_scanning(true);
@@ -717,56 +705,13 @@ var qrReader = (function() {
       canvas.width = video.videoWidth;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      var code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "dontInvert",
-      });
-      if(code) {
-        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#ff3b58");
-        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#ff3b58");
-        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#ff3b58");
-        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#ff3b58");
-
-        var sw = seedseg.offsetWidth - 28;
-        var sh = seedseg.offsetHeight - 28;
-        if(canvas.width > 0 && sw > 0) {
-          var mergin = 14;
-          var c = canvas.height / canvas.width;
-          var s = sh / sw;
-          var x1, y1, x2, y2;
-          if(c < s) {
-            var w = canvas.height / s;
-            x1 = (canvas.width - w) / 2;
-            y1 = 0;
-            x2 = x1 + w;
-            y2 = canvas.height;
-            x1 += mergin;
-            x2 -= mergin;
-            y1 += mergin;
-            y2 -= mergin;
-          } else {
-            var h = canvas.width * s;
-            x1 = 0;
-            y1 = (canvas.height - h) / 2;
-            x2 = canvas.width;
-            y2 = y1 + h;
-            x1 += mergin;
-            x2 -= mergin;
-            y1 += mergin;
-            y2 -= mergin;
-          }
-          if(skip_first_tick
-            && checkRange(code.location.topLeftCorner, x1, y1, x2, y2)
-            && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
-            && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
-            && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
-            if(!abort && cb_done) {
-              shutter(code.data);
-            }
-            return;
-          }
-          skip_first_tick = true;
-        }
+      var grayData = [];
+      var d = imageData.data;
+      for(var i = 0, j = 0; i < d.length; i += 4, j++) {
+        grayData[j] = (d[i] * 66 + d[i + 1] * 129 + d[i + 2] * 25 + 4096) >> 8;
       }
+      cipher.result = zbar_result;
+      cipher.zbar_scan(grayData, imageData.width, imageData.height);
     }
     if(abort) {
       return;
@@ -811,21 +756,21 @@ var qrReader = (function() {
   var current_deviceId = null;
 
   function show(cb) {
+    canvas = document.getElementById("qrcanvas");
+    if(!canvas || !pastel.cipher) {
+      return;
+    }
+    cipher = pastel.cipher;
     mode_show = true;
     showing = false;
     abort = false;
     scan_done = false;
     $('.bt-scan-seed').css('visibility', 'hidden');
     $('.qrcamera-loader').addClass('active');
-    skip_first_tick = false;
     video = video || document.createElement("video");
-    canvas = document.getElementById("qrcanvas");
-    if(!canvas) {
-      return;
-    }
     canvas.style.visibility = 'visible';
     ctx = canvas.getContext("2d");
-    seedseg = document.getElementById("seed-seg");
+    seg = document.getElementById("seed-seg");
     cb_done = cb;
 
     var constraints;
@@ -849,10 +794,6 @@ var qrReader = (function() {
         video.srcObject = stream;
         video.setAttribute("playsinline", true);
         video.play();
-
-        barcodeReader.start(video, function(data) {
-          shutter(data);
-        });
 
         video_status_change();
         showing = true;
@@ -900,28 +841,30 @@ var qrReader = (function() {
 })();
 
 var qrReaderModal = (function() {
-  var video, canvas, ctx, qrseg;
+  var video, canvas, ctx, seg;
+  var cipher = {};
   var abort = false;
   var showing = false;
 
-  function drawLine(begin, end, color) {
+  function drawPoly(poly, lineWidth, color) {
     ctx.beginPath();
-    ctx.moveTo(begin.x, begin.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.lineWidth = 4;
+    ctx.moveTo(poly[0], poly[1]);
+    for(item = 2; item < poly.length - 1; item += 2) {
+      ctx.lineTo(poly[item], poly[item + 1]);
+    }
+    ctx.lineWidth = lineWidth;
     ctx.strokeStyle = color;
+    ctx.closePath();
     ctx.stroke();
   }
 
-  function checkRange(rect, x1, y1, x2, y2) {
-    return (rect.x > x1 && rect.x < x2
-      && rect.y > y1 && rect.y < y2);
+  function checkRange(x, y, x1, y1, x2, y2) {
+    return (x > x1 && x < x2 && y > y1 && y < y2);
   }
 
   var cb_done = function() {}
 
   function qr_stop() {
-    barcodeReader.stop();
     camera_scanning(false);
     video.pause();
     if(video.srcObject) {
@@ -959,7 +902,56 @@ var qrReaderModal = (function() {
     _shutter();
   }
 
-  var skip_first_tick = false;
+  function zbar_result(symbol, data, polygon) {
+    console.log(symbol, data);
+    if(symbol == 'QR-Code') {
+      drawPoly(polygon, 4, 'rgba(255,59,88,.4)');
+    } else {
+      drawPoly(polygon, 1, 'rgba(0,153,255,.4)');
+    }
+    var sw = seg.offsetWidth - 28;
+    var sh = seg.offsetHeight - 28;
+    if(canvas.width > 0 && sw > 0) {
+      var mergin = 14;
+      var c = canvas.height / canvas.width;
+      var s = sh / sw;
+      var x1, y1, x2, y2;
+      if(c < s) {
+        var w = canvas.height / s;
+        x1 = (canvas.width - w) / 2;
+        y1 = 0;
+        x2 = x1 + w;
+        y2 = canvas.height;
+        x1 += mergin;
+        x2 -= mergin;
+        y1 += mergin;
+        y2 -= mergin;
+      } else {
+        var h = canvas.width * s;
+        x1 = 0;
+        y1 = (canvas.height - h) / 2;
+        x2 = canvas.width;
+        y2 = y1 + h;
+        x1 += mergin;
+        x2 -= mergin;
+        y1 += mergin;
+        y2 -= mergin;
+      }
+      var range_flag = true;
+      for(i = 0; i < polygon.length - 1; i += 2) {
+        if(!checkRange(polygon[i], polygon[i + 1], x1, y1, x2, y2)) {
+          range_flag = false;
+          break;
+        }
+      }
+      if(range_flag && !abort && cb_done) {
+        abort = true;
+        shutter(data);
+        return;
+      }
+    }
+  }
+
   function tick() {
     if(video.readyState === video.HAVE_ENOUGH_DATA) {
       camera_scanning(true);
@@ -967,56 +959,13 @@ var qrReaderModal = (function() {
       canvas.width = video.videoWidth;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      var code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "dontInvert",
-      });
-      if(code) {
-        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#ff3b58");
-        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#ff3b58");
-        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#ff3b58");
-        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#ff3b58");
-
-        var sw = qrseg.offsetWidth - 28;
-        var sh = qrseg.offsetHeight - 28;
-        if(canvas.width > 0 && sw > 0) {
-          var mergin = 14;
-          var c = canvas.height / canvas.width;
-          var s = sh / sw;
-          var x1, y1, x2, y2;
-          if(c < s) {
-            var w = canvas.height / s;
-            x1 = (canvas.width - w) / 2;
-            y1 = 0;
-            x2 = x1 + w;
-            y2 = canvas.height;
-            x1 += mergin;
-            x2 -= mergin;
-            y1 += mergin;
-            y2 -= mergin;
-          } else {
-            var h = canvas.width * s;
-            x1 = 0;
-            y1 = (canvas.height - h) / 2;
-            x2 = canvas.width;
-            y2 = y1 + h;
-            x1 += mergin;
-            x2 -= mergin;
-            y1 += mergin;
-            y2 -= mergin;
-          }
-          if(skip_first_tick
-            && checkRange(code.location.topLeftCorner, x1, y1, x2, y2)
-            && checkRange(code.location.topRightCorner, x1, y1, x2, y2)
-            && checkRange(code.location.bottomRightCorner, x1, y1, x2, y2)
-            && checkRange(code.location.bottomLeftCorner, x1, y1, x2, y2)) {
-            if(!abort && cb_done) {
-              shutter(code.data);
-            }
-            return;
-          }
-          skip_first_tick = true;
-        }
+      var grayData = [];
+      var d = imageData.data;
+      for(var i = 0, j = 0; i < d.length; i += 4, j++) {
+        grayData[j] = (d[i] * 66 + d[i + 1] * 129 + d[i + 2] * 25 + 4096) >> 8;
       }
+      cipher.result = zbar_result;
+      cipher.zbar_scan(grayData, imageData.width, imageData.height);
     }
     if(abort) {
       return;
@@ -1070,17 +1019,20 @@ var qrReaderModal = (function() {
   var current_deviceId = null;
 
   function qrShow(cb) {
+    canvas = document.getElementById("qrcanvas-modal");
+    if(!canvas || !pastel.cipher) {
+      return;
+    }
+    cipher = pastel.cipher;
     $.fn.transition.settings.silent = true;
     mode_show = true;
     showing = false;
     abort = false;
     scan_done = false;
     $('#qrcode-modal .qrcamera-loader').addClass('active');
-    skip_first_tick = false;
     video = video || document.createElement("video");
-    canvas = document.getElementById("qrcanvas-modal");
     ctx = canvas.getContext("2d");
-    qrseg = document.getElementById("qrreader-seg");
+    seg = document.getElementById("qrreader-seg");
     cb_done = cb;
 
     var constraints;
@@ -1104,10 +1056,6 @@ var qrReaderModal = (function() {
         video.srcObject = stream;
         video.setAttribute("playsinline", true);
         video.play();
-
-        barcodeReader.start(video, function(data) {
-          shutter(data);
-        });
 
         video_status_change();
         showing = true;
