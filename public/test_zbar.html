@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/js/zbar.js"></script>
+  <title>test zbar</title>
+</head>
+<body>
+  <canvas id="canvas" style="width: 640px;"></canvas>
+<script>
+var zbar = {};
+
+zbar.load = function(cb) {
+  var Module = Zbar({
+    onRuntimeInitialized: function() {
+      var Module = this;
+      for(var o in Module) {
+        console.log(o);
+      }
+      zbar.zbar_scan = Module.cwrap('zbar_scan', 'number', ['number', 'number', 'number']);
+      zbar.alloclist = zbar.alloclist || [];
+
+      zbar.free = function() {
+        var p = zbar.alloclist.shift();
+        while(p) {
+          Module._free(p);
+          p = zbar.alloclist.shift();
+        }
+      }
+
+      if(zbar.alloclist.length > 0) {
+        zbar.free();
+      }
+
+      zbar.alloc = function(size) {
+        var p = new Number(Module._malloc(size));
+        p.set = function(array) {
+          Module.HEAPU8.set(array, p);
+        }
+        p.get = function() {
+          return (new Uint8Array(Module.HEAPU8.buffer, p, size)).slice();
+        }
+        p.free = function() {
+          Module._free(p);
+          zbar.alloclist.splice(zbar.alloclist.indexOf(p), 1);
+        }
+        zbar.alloclist.push(p);
+        return p;
+      }
+
+      zbar.result = function(symbol, data, polygon) {}
+
+      zbar.stream = function(symbol, data, polygon, polysize) {
+        var resultView = new Int32Array(Module.HEAP32.buffer, polygon, polysize * 2);
+        var coordinates = new Int32Array(resultView);
+        zbar.result(Module.UTF8ToString(symbol), Module.UTF8ToString(data), coordinates);
+      }
+
+      cb();
+      zbar.ready_flag = true;
+    }
+  });
+
+  return Module;
+}
+
+zbar.run = function(cb) {
+  if(this.ready_flag) {
+    if(this.pending) {
+      clearTimeout(this.worker_tval);
+      var p = this.pending.shift();
+      while(p) {
+        p();
+        p = this.pending.shift();
+      }
+    }
+    cb();
+  } else {
+    if(!this.load_flag) {
+      this.load_flag = true;
+      this.load(cb);
+    } else {
+      if(this.pending) {
+        this.pending.push(cb);
+      } else {
+        this.pending = [cb];
+        var self = this;
+        function worker() {
+          if(self.ready_flag) {
+            var p = self.pending.shift();
+            while(p) {
+              p();
+              p = self.pending.shift();
+            }
+          } else {
+            self.worker_tval = setTimeout(worker, 100);
+          }
+        }
+        worker();
+      }
+    }
+  }
+}
+
+zbar.run(function() {
+  var video = document.createElement("video");
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext('2d');
+
+  function tick() {
+    if(video.readyState === video.HAVE_ENOUGH_DATA) {
+      detectSymbols();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}}).then((stream) => {
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    video.play();
+    requestAnimationFrame(tick);
+  }).catch((e) => {
+    throw e;
+  });
+
+  function detectSymbols() {
+    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    var image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var grayData = [];
+    var d = image.data;
+    for(var i = 0, j = 0; i < d.length; i += 4, j++) {
+      grayData[j] = (d[i] * 66 + d[i + 1] * 129 + d[i + 2] * 25 + 4096) >> 8;
+    }
+    var p = zbar.alloc(image.width * image.height * 4);
+    p.set(grayData);
+    zbar.zbar_scan(p, image.width, image.height);
+    p.free();
+  }
+
+  function drawPoly(ctx, poly) {
+    ctx.beginPath();
+    ctx.moveTo(poly[0], poly[1]);
+    for(item = 2; item < poly.length - 1; item += 2) {
+      ctx.lineTo(poly[item], poly[item + 1]);
+    }
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#FF0000";
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  function renderData(ctx, data, x, y) {
+    ctx.font = "15px Arial";
+    ctx.fillStyle = "red";
+    ctx.fillText(data, x, y);
+  }
+
+  zbar.result = function(symbol, data, polygon) {
+    drawPoly(ctx, polygon);
+    renderData(ctx, data, polygon[0], polygon[1] - 10);
+    console.log(symbol, data);
+  }
+});
+</script>
+</body>
+</html>
