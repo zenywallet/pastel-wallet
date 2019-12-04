@@ -10,6 +10,7 @@ Object.defineProperty(String.prototype, 'toByteArray', {
 });
 //function StringByteArray(s, e){for(var b=[],c=0,f=s.length;c<f;c++){var a=s.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=s.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b}
 
+var zbar_stream = function(symbol, data, polygon, polysize) {}
 pastel.ready = function() {}
 pastel.load = function() {
   var ready_flag = {cipher: false, coin: false};
@@ -37,6 +38,7 @@ pastel.load = function() {
       cipher.mod_yespower_n4r32 = Module.cwrap('yespower_n4r32', 'number', ['number', 'number', 'number']);
 
       cipher.mod_murmurhash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
+      cipher.mod_zbar_scan = Module.cwrap('zbar_scan', 'number', ['number', 'number', 'number']);
 
       cipher.alloclist = cipher.alloclist || [];
 
@@ -373,6 +375,23 @@ pastel.load = function() {
         input.free();
         return ret;
       }
+
+      cipher.zbar_scan = function(raw, width, height) {
+        var p = cipher.alloc(width * height * 4);
+        p.set(raw);
+        var ret = cipher.mod_zbar_scan(p, width, height);
+        p.free();
+        return ret;
+      }
+
+      cipher.result = function(symbol, data, polygon) {}
+
+      cipher.stream = function(symbol, data, polygon, polysize) {
+        var resultView = new Int32Array(Module.HEAP32.buffer, polygon, polysize * 2);
+        var coordinates = new Int32Array(resultView);
+        cipher.result(Module.UTF8ToString(symbol), Module.UTF8ToString(data), coordinates);
+      }
+      zbar_stream = cipher.stream
 
       pastel.cipher = cipher;
       ready_flag.cipher = true;
