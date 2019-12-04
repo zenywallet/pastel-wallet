@@ -9,6 +9,7 @@
   <canvas id="canvas" style="width: 640px;"></canvas>
 <script>
 var zbar = {};
+var zbar_stream = function(symbol, data, polygon, polysize) {}
 
 zbar.load = function(cb) {
   var Module = Zbar({
@@ -55,6 +56,7 @@ zbar.load = function(cb) {
         var coordinates = new Int32Array(resultView);
         zbar.result(Module.UTF8ToString(symbol), Module.UTF8ToString(data), coordinates);
       }
+      zbar_stream = zbar.stream;
 
       cb();
       zbar.ready_flag = true;

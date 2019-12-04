@@ -1,7 +1,7 @@
 # cd deps/zbar
 # sed -i "s/ -Werror//" $(pwd)/configure.ac
 # autoreconf -i
-# emconfigure ./configure --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all
+# emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x --without-jpeg --without-imagemagick --without-npapi --without-gtk --without-python --without-qt --without-xshm --disable-video --disable-pthread --enable-codes=all
 # emmake make
 # see https://github.com/Naahuel/zbar-wasm-barcode-reader
 # nim c -d:release -d:emscripten -o:zbar.js zbar.nim
@@ -46,7 +46,7 @@ int zbar_scan(uint8_t *raw, int width, int height)
     }
 
     EM_ASM({
-      zbar.stream($0, $1, $2, $3);
+      zbar_stream($0, $1, $2, $3);
     }, zbar_get_symbol_name(typ), data, poly, poly_size);
   }
 
