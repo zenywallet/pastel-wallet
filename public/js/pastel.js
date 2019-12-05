@@ -38,7 +38,9 @@ pastel.load = function() {
       cipher.mod_yespower_n4r32 = Module.cwrap('yespower_n4r32', 'number', ['number', 'number', 'number']);
 
       cipher.mod_murmurhash = Module.cwrap('murmurhash', null, ['number', 'number', 'number']);
-      cipher.mod_zbar_scan = Module.cwrap('zbar_scan', 'number', ['number', 'number', 'number']);
+      cipher.zbar_init = Module.cwrap('zbar_init', null, [null]);
+      cipher.zbar_destroy = Module.cwrap('zbar_destroy', null, [null]);
+      cipher.mod_zbar_scan = Module.cwrap('zbar_scan', null, ['number', 'number', 'number']);
 
       cipher.alloclist = cipher.alloclist || [];
 
@@ -392,6 +394,7 @@ pastel.load = function() {
         cipher.result(Module.UTF8ToString(symbol), Module.UTF8ToString(data), coordinates);
       }
       zbar_stream = cipher.stream
+      cipher.zbar_init();
 
       pastel.cipher = cipher;
       ready_flag.cipher = true;

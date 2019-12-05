@@ -15,12 +15,20 @@ const zbarPath = splitPath(currentSourcePath()).head & "/../deps/zbar"
 #include "../deps/zbar/include/zbar.h"
 #include <emscripten.h>
 
-int zbar_scan(uint8_t *raw, int width, int height)
-{
-  zbar_image_scanner_t *scanner = zbar_image_scanner_create();
+zbar_image_scanner_t *scanner;
+
+void zbar_init() {
+  scanner = zbar_image_scanner_create();
   zbar_image_scanner_set_config(scanner, 0, ZBAR_CFG_X_DENSITY, 1);
   zbar_image_scanner_set_config(scanner, 0, ZBAR_CFG_Y_DENSITY, 1);
+}
 
+void zbar_destroy() {
+  zbar_image_scanner_destroy(scanner);
+}
+
+void zbar_scan(uint8_t *raw, int width, int height)
+{
   zbar_image_t *image = zbar_image_create();
   zbar_image_set_format(image, zbar_fourcc('Y', '8', '0', '0'));
   zbar_image_set_size(image, width, height);
@@ -29,8 +37,7 @@ int zbar_scan(uint8_t *raw, int width, int height)
   int n = zbar_scan_image(scanner, image);
 
   const zbar_symbol_t *symbol = zbar_image_first_symbol(image);
-  for(; symbol; symbol = zbar_symbol_next(symbol))
-  {
+  for(; symbol; symbol = zbar_symbol_next(symbol)) {
     zbar_symbol_type_t typ = zbar_symbol_get_type(symbol);
     const char *data = zbar_symbol_get_data(symbol);
 
@@ -38,8 +45,7 @@ int zbar_scan(uint8_t *raw, int width, int height)
 
     int poly[poly_size * 2];
     unsigned u = 0;
-    for(unsigned p = 0; p < poly_size; p++)
-    {
+    for(unsigned p = 0; p < poly_size; p++) {
       poly[u] = zbar_symbol_get_loc_x(symbol, p);
       poly[u + 1] = zbar_symbol_get_loc_y(symbol, p);
       u += 2;
@@ -51,8 +57,5 @@ int zbar_scan(uint8_t *raw, int width, int height)
   }
 
   zbar_image_destroy(image);
-  zbar_image_scanner_destroy(scanner);
-
-  return (0);
 }
 """.}

@@ -18,7 +18,9 @@ zbar.load = function(cb) {
       for(var o in Module) {
         console.log(o);
       }
-      zbar.zbar_scan = Module.cwrap('zbar_scan', 'number', ['number', 'number', 'number']);
+      zbar.zbar_init = Module.cwrap('zbar_init', null, [null]);
+      zbar.zbar_destroy = Module.cwrap('zbar_destroy', null, [null]);
+      zbar.zbar_scan = Module.cwrap('zbar_scan', null, ['number', 'number', 'number']);
       zbar.alloclist = zbar.alloclist || [];
 
       zbar.free = function() {
@@ -105,6 +107,7 @@ zbar.run = function(cb) {
 }
 
 zbar.run(function() {
+  zbar.zbar_init();
   var video = document.createElement("video");
   var canvas = document.getElementById("canvas");
   var ctx = canvas.getContext('2d');
