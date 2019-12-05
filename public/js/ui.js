@@ -523,7 +523,7 @@ function bip21reader(uri) {
   if(a.length <= 2) {
     if(a.length == 2) {
       if(a[0].toLowerCase() != 'bitzeny') {
-        result.unknown = d_uri;
+        result.unknown = escape_html(d_uri);
         return result;
       }
     }
@@ -535,7 +535,7 @@ function bip21reader(uri) {
           coin.address.toOutputScript(addr, coin.networks.bitzeny);
           result.address = addr;
         } catch(e) {
-          result.unknown = d_uri;
+          result.unknown = escape_html(d_uri);
           return result;
         }
       } else {
@@ -550,7 +550,7 @@ function bip21reader(uri) {
       return result;
     }
   }
-  result.unknown = d_uri;
+  result.unknown = escape_html(d_uri);
   return result;
 }
 
