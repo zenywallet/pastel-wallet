@@ -739,7 +739,7 @@ proc passphraseEditor(): VNode =
         h4(class="ui grey inverted header center"): text "Input passphrase"
         tdiv(class="ui form"):
           tdiv(class="field"):
-            input(class="center", type="text", name="input-passphrase", value="", placeholder="Passphrase", onchange=changePassphrase)
+            input(class="center", type="text", name="input-passphrase", value="", placeholder="Passphrase", onkeyup=changePassphrase)
       button(class="ui right floated olive button", onclick=confirmPassphrase):
         text "Save"
 
