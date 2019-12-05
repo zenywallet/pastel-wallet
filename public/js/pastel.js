@@ -153,10 +153,15 @@ pastel.load = function() {
 
       var coin = coinlibs.coin;
 
-      cipher.enc_json = function(key, json) {
+      cipher.enc_json = function(key, json, deflate) {
         var h = cipher.setkey(key);
         var d = JSON.stringify(json);
-        var comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+        var comp;
+        if(deflate) {
+          comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+        } else {
+          comp = d.toByteArray(false);
+        }
         var encdata = new Uint8Array(comp.length);
         var enc_iv = cipher.yespower(coin.crypto.sha256(key), 32).slice(0, 16);
         var pos = 0, next_pos = 16;
@@ -188,7 +193,7 @@ pastel.load = function() {
         return encdata;
       }
 
-      cipher.dec_json = function(key, encdata) {
+      cipher.dec_json = function(key, encdata, deflate) {
         var h = cipher.setkey(key);
         var data = new Uint8Array(encdata, 0, encdata.length);
         var decdata = new Uint8Array(data.length);
@@ -217,9 +222,11 @@ pastel.load = function() {
           decdata.set(dec, pos);
         }
         console.log('decdata=', decdata);
-        var decomp = new Zlib.RawInflate(decdata, {verify: true}).decompress();
-        console.log('decomp=', decomp);
-        var json = JSON.parse(new TextDecoder().decode(decomp));
+        if(deflate) {
+          decdata = new Zlib.RawInflate(decdata, {verify: true}).decompress();
+          console.log('decomp=', decdata);
+        }
+        var json = JSON.parse(new TextDecoder().decode(decdata));
         console.log(JSON.stringify(json));
         h.free();
         return json;
