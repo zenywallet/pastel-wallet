@@ -89,8 +89,7 @@ window.onscroll = function() {
   }
   var sections = document.getElementsByClassName('section');
   var tradelogs_section = document.getElementById('section4');
-  if((sections.length <= 1 && !tradelogs_section) ||
-    (tradelogs_section && tradelogs_section.style && tradelogs_section.style.display == 'none')) {
+  if(sections.length <= 1 && !tradelogs_section) {
     return;
   }
   var difflist = {};
