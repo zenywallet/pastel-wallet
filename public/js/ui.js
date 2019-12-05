@@ -521,9 +521,26 @@ function bip21reader(uri) {
   var a = s[0].split(':');
   var result = {}
   if(a.length <= 2) {
+    if(a.length == 2) {
+      if(a[0].toLowerCase() != 'bitzeny') {
+        result.unknown = d_uri;
+        return result;
+      }
+    }
     var addr = a[a.length - 1];
     if(addr.length > 0 && /^[a-z0-9]+$/i.test(addr)) {
-      result.address = a[a.length - 1];
+      var coin = pastel.coin;
+      if(coin) {
+        try {
+          coin.address.toOutputScript(addr, coin.networks.bitzeny);
+          result.address = addr;
+        } catch(e) {
+          result.unknown = d_uri;
+          return result;
+        }
+      } else {
+        result.address = addr;
+      }
       for(var i = 1; i < s.length; i++) {
         var p = s[i].split('=');
         if(p.length == 2) {
