@@ -33,6 +33,10 @@ var Stor = (function() {
     }
   }
 
+  Stor.prototype.set_xpubs = function(xpubs) {
+    db['xpubs'] = JSON.stringify(xpubs);
+  }
+
   Stor.prototype.get_xpubs = function() {
     var xpubs = db['xpubs'];
     if(xpubs) {
