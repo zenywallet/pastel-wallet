@@ -439,6 +439,13 @@ proc delBalance*(wid: uint64) =
   let key = concat(Prefix.balances.toByte, wid.toByte)
   db.del(key)
 
+proc getLastUsedAddrIndex(wid: uint64, change: uint32): tuple[err: DbStatus, res: uint32] =
+  result = (DbStatus.NotFound, cast[uint32](nil))
+  let key = concat(Prefix.addrvals.toByte, wid.toByte, change.toByte)
+  for d in db.getsReverse(key):
+    result = (DbStatus.Success, d.key[13..16].toUint32)
+    break
+
 block start:
   debug "db open"
   db.open(".pasteldb", ".pasteldb_backup")
@@ -506,3 +513,11 @@ when isMainModule:
   echo getBalance(1)
   delBalance(1)
   echo getBalance(1)
+
+  setAddrval(1, 0, 0, "address1", 100, 100)
+  setAddrval(1, 0, 1, "address2", 100, 100)
+  setAddrval(1, 1, 2, "address1", 100, 100)
+  setAddrval(1, 1, 3, "address2", 100, 100)
+  echo getLastUsedAddrIndex(1, 0)
+  echo getLastUsedAddrIndex(1, 1)
+  echo getLastUsedAddrIndex(1, 2)
