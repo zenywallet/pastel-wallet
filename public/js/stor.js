@@ -72,5 +72,42 @@ var Stor = (function() {
     db.clear();
   }
 
+  Stor.prototype.get_salt = function(create_no_exists) {
+    var salt = db['salt'];
+    if(salt) {
+      return hex2buf(salt);
+    }
+
+    if(create_no_exists) {
+      var buf = new Uint8Array(32);
+      crypto.getRandomValues(buf);
+      db['salt'] = buf2hex(buf);
+
+      salt = db['salt'];
+      if(salt) {
+        return hex2buf(salt);
+      }
+      return null;
+    } else {
+      return null;
+    }
+  }
+
+  Stor.prototype.set_shield = function(data) {
+    db['shield'] = buf2hex(data);
+  }
+
+  Stor.prototype.get_shield = function(data) {
+    return hex2buf(db['shield']);
+  }
+
+  Stor.prototype.set_lock_type = function(lock_type) {
+    db['locktype'] = lock_type;
+  }
+
+  Stor.prototype.get_lock_type = function() {
+    return db['locktype'];
+  }
+
   return Stor;
 }());
