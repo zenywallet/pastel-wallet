@@ -1386,6 +1386,10 @@ proc afterScript(data: RouterData) =
     """
   if showScanResult or mnemonicFulfill or keyCardFulfill or passphraseFulfill:
     asm """
+      for(var i in registerEventList) {
+        var ev = registerEventList[i];
+        ev.elm.removeEventListener(ev.type, ev.cb);
+      }
       var elms = document.querySelectorAll('a.pagenext');
       Array.prototype.forEach.call(elms, function(elm) {
         var href = elm.getAttribute("href");
