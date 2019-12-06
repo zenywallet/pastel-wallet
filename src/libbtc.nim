@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, byteutils, marshal, sequtils
+import os, byteutils, marshal, sequtils, logs
 
 const libbtcPath = splitPath(currentSourcePath()).head & "/../deps/libbtc"
 {.passL: libbtcPath & "/.libs/libbtc.a".}
@@ -129,7 +129,7 @@ proc hd_print_node*(chain: ptr btc_chainparams; nodeser: cstring): btc_bool =
   var strsize: csize = 128
   var str: cstring = newString(strsize) #array[strsize, char]
   btc_hdnode_get_p2pkh_address(addr(node), chain, str, cast[cint](strsize))
-  echo "ext key: ", nodeser
+  debug "ext key: ", nodeser
   const privkey_wif_size_bin: csize = 34
   var pkeybase58c: array[privkey_wif_size_bin, uint8_t]
   pkeybase58c[0] = chain.b58prefix_secret_address
@@ -138,25 +138,25 @@ proc hd_print_node*(chain: ptr btc_chainparams; nodeser: cstring): btc_bool =
   const privkey_wif_size: csize = 128
   var privkey_wif: cstring = newString(privkey_wif_size) #array[privkey_wif_size, char]
   #memcpy(addr(pkeybase58c[1]), node.private_key, BTC_ECKEY_PKEY_LENGTH)
-  echo $$node.private_key
-  echo node.private_key.toHex()
+  debug $$node.private_key
+  debug node.private_key.toHex()
   copyMem(addr pkeybase58c[1], unsafeAddr node.private_key, BTC_ECKEY_PKEY_LENGTH)
   assert(btc_base58_encode_check(cast[ptr UncheckedArray[uint8_t]](addr pkeybase58c),
                                  cast[cint](privkey_wif_size_bin), privkey_wif,
                                  cast[cint](privkey_wif_size)) != 0)
 
   if btc_hdnode_has_privkey(addr(node)):
-    echo "privatekey WIF: ", $privkey_wif
-  echo "depth: ", $node.depth
-  echo "child index: ", $node.child_num
-  echo "p2pkh address: ", $str
-  #echo "p2wpkh address: " & $str
+    debug "privatekey WIF: ", $privkey_wif
+  debug "depth: ", $node.depth
+  debug "child index: ", $node.child_num
+  debug "p2pkh address: ", $str
+  #debug "p2wpkh address: " & $str
   if not btc_hdnode_get_pub_hex(addr(node), str, addr(strsize)):
     return false
-  echo "pubkey hex: ", str
+  debug "pubkey hex: ", str
   strsize = 128
   btc_hdnode_serialize_public(addr(node), chain, str, cast[cint](strsize))
-  echo "extended pubkey: ", str
+  debug "extended pubkey: ", str
   return true
 
 proc btc_hd_generate_key*(node: ptr btc_hdnode; keypath: cstring;
@@ -189,39 +189,39 @@ proc set_chainparams*(params: chainparams): btc_chainparams =
   zeroMem(addr chain.chainname, chain.chainname.len)
   for i, c in params.chainname:
     if i > chain.chainname.high:
-      echo "ERROR[set_chainparams]: chainname too long"
+      debug "ERROR[set_chainparams]: chainname too long"
       break
     chain.chainname[i] = c
 
   zeroMem(addr chain.bech32_hrp, chain.bech32_hrp.len)
   for i, c in params.bech32_hrp:
     if i > chain.bech32_hrp.high:
-      echo "ERROR[set_chainparams]: bech32_hrp too long"
+      debug "ERROR[set_chainparams]: bech32_hrp too long"
       break
     chain.bech32_hrp[i] = c
 
   zeroMem(addr chain.netmagic, chain.netmagic.len)
   for i, c in params.netmagic:
     if i > chain.netmagic.high:
-      echo "ERROR[set_chainparams]: netmagic too long"
+      debug "ERROR[set_chainparams]: netmagic too long"
       break
     chain.netmagic[i] = cast[cuchar](c)
 
   zeroMem(addr chain.genesisblockhash, chain.genesisblockhash.len)
   for i, c in params.genesisblockhash:
     if i > chain.genesisblockhash.high:
-      echo "ERROR[set_chainparams]: genesisblockhash too long"
+      debug "ERROR[set_chainparams]: genesisblockhash too long"
       break
     chain.genesisblockhash[i] = c
 
   zeroMem(addr chain.dnsseeds, btc_dns_seed.domain.len * chain.dnsseeds.len)
   for i, seed in params.dnsseeds:
     if i > chain.dnsseeds.high:
-      echo "ERROR[set_chainparams]: dnsseeds too long"
+      debug "ERROR[set_chainparams]: dnsseeds too long"
       break
     for j, c in seed:
       if j > chain.dnsseeds[i].domain.high:
-        echo "ERROR[set_chainparams]: domain too long"
+        debug "ERROR[set_chainparams]: domain too long"
         break
       chain.dnsseeds[i].domain[j] = c
   chain

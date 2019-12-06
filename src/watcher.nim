@@ -2,7 +2,7 @@
 
 import os, locks, asyncdispatch, sequtils
 import libbtc
-import blockstor, db, events
+import blockstor, db, events, logs
 
 const gaplimit: uint32 = 20
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
@@ -35,21 +35,21 @@ template enumRangeCheck(enumtype: type, value: int): bool =
 proc main() =
   let marker = blockstor.getMarker(blockstor_apikey)
   if marker.kind == JNull:
-    echo "error: getmarker is null"
+    debug "error: getmarker is null"
     return
 
   let err_int = marker["err"].getInt
   if not BsErrorCode.enumRangeCheck(err_int):
-    echo "error: out of range", err_int
+    debug "error: out of range", err_int
     return
   let getmarker_err = BsErrorCode(err_int)
   case getmarker_err
   of BsErrorCode.ROLLBACKING:
-    echo "info: blockstor rollbacking"
+    debug "info: blockstor rollbacking"
     return
 
   of BsErrorCode.UNKNOWN_APIKEY:
-    echo "error: invalid apikey"
+    debug "error: invalid apikey"
     return
 
   of BsErrorCode.SUCCESS:
@@ -57,10 +57,10 @@ proc main() =
     var max_sequence = marker_sequence
 
     for d in db.getWallets(""):
-      echo "wid=", d.wallet_id, " ", d.xpubkey
-      echo "max_sequence=", max_sequence, " d.sequence=", d.sequence
+      debug "wid=", d.wallet_id, " ", d.xpubkey
+      debug "max_sequence=", max_sequence, " d.sequence=", d.sequence
       if max_sequence <= d.sequence and d.sequence != 0'u64:
-        echo "skip - wid=", d.wallet_id
+        debug "skip - wid=", d.wallet_id
         continue
       var address_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string]]
       var target_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string,
@@ -123,18 +123,18 @@ proc main() =
         if try_limit <= 0:
           break
 
-      echo target_list
+      debug target_list
       if find_0 or find_1:
-        echo "postpone ", find_0, " ", find_1, " ", new_last_0_index, " ",
+        debug "postpone ", find_0, " ", find_1, " ", new_last_0_index, " ",
               new_last_1_index, " wid=", d.wallet_id, " ", d.xpubkey
 
       target_list.keepIf(proc(d: auto): bool =
         (d.change == 0 and d.index < new_last_0_index + gap_limit) or
         (d.change == 1 and d.index < new_last_1_index + gap_limit))
 
-      echo target_list
-      echo "new_last_0_index=", new_last_0_index
-      echo "new_last_1_index=", new_last_1_index
+      debug target_list
+      debug "new_last_0_index=", new_last_0_index
+      debug "new_last_1_index=", new_last_1_index
 
       for t in target_list:
         let addrlogs = blockstor.getAddrlog(t.address, (gt: marker_sequence,
@@ -153,7 +153,7 @@ proc main() =
           db.setUnspent(t.wid, a["sequence"].getUint64, a["txid"].getStr,
                         a["n"].getUint32, t.address, a["value"].getUint64)
 
-      echo "max_sequence=", max_sequence
+      debug "max_sequence=", max_sequence
 
       for t in target_list:
         if t.used:
@@ -163,35 +163,35 @@ proc main() =
       db.setWallet(d.xpubkey, d.wallet_id, max_sequence,
                   new_last_0_index, new_last_1_index)
 
-      echo "---getWallet"
-      echo db.getWallet(d.xpubkey)
-      echo "---getAddrvals"
+      debug "---getWallet"
+      debug db.getWallet(d.xpubkey)
+      debug "---getAddrvals"
       for g in db.getAddrvals(1'u64):
-        echo g
-      echo "---getAddrlogs"
+        debug g
+      debug "---getAddrlogs"
       for g in db.getAddrlogs(1'u64):
-        echo g
-      echo "---getUnspents"
+        debug g
+      debug "---getUnspents"
       for g in db.getUnspents(1'u64):
-        echo g
-      echo "---getAddresses"
+        debug g
+      debug "---getAddresses"
       for g in db.getAddresses("Z.."):
-          echo g
+          debug g
 
     let smarker = blockstor.setMarker(blockstor_apikey, max_sequence)
     if smarker.kind == JNull:
-      echo "error: setmarker is null"
+      debug "error: setmarker is null"
       return
     let s_err_int = smarker["err"].getInt
     if not BsErrorCode.enumRangeCheck(s_err_int):
-      echo "error: out of range err=", s_err_int
+      debug "error: out of range err=", s_err_int
       return
     let smarker_err = BsErrorCode(s_err_int)
     if smarker_err != BsErrorCode.SUCCESS:
-      echo "info: setmarker err=", smarker_err
+      debug "info: setmarker err=", smarker_err
 
   of BsErrorCode.ROLLBACKED:
-    echo marker
+    debug marker
     let rollbacked_sequence = marker["res"].getUint64
     for d in db.getWallets(""):
       var tbd_addrs: seq[tuple[change: uint32, index: uint32, address: string]] = @[]
@@ -206,7 +206,7 @@ proc main() =
 
       let balance = blockstor.getAddress(addrs)
       if addrs.len != balance.resLen:
-        echo "error: getaddress len=", addrs.len, " reslen=", balance.resLen
+        debug "error: getaddress len=", addrs.len, " reslen=", balance.resLen
         return
 
       var pos = 0
@@ -225,35 +225,35 @@ proc main() =
         db.setAddress(a.address, a.change, a.index, d.wallet_id, rollbacked_sequence)
       delAddrlogs_gt(d.wallet_id, rollbacked_sequence)
 
-      echo "---getWallet"
-      echo db.getWallet(d.xpubkey)
-      echo "---getAddrvals"
+      debug "---getWallet"
+      debug db.getWallet(d.xpubkey)
+      debug "---getAddrvals"
       for g in db.getAddrvals(1'u64):
-        echo g
-      echo "---getAddrlogs"
+        debug g
+      debug "---getAddrlogs"
       for g in db.getAddrlogs(1'u64):
-        echo g
-      echo "---getUnspents"
+        debug g
+      debug "---getUnspents"
       for g in db.getUnspents(1'u64):
-        echo g
-      echo "---getAddresses"
+        debug g
+      debug "---getAddresses"
       for g in db.getAddresses("Z.."):
-          echo g
+          debug g
 
     let smarker_update = blockstor.setMarker(blockstor_apikey, rollbacked_sequence)
     if smarker_update.kind == JNull:
-      echo "error: setmarker in rollback is null"
+      debug "error: setmarker in rollback is null"
       return
     let su_err_int = smarker_update["err"].getInt
     if not BsErrorCode.enumRangeCheck(su_err_int):
-      echo "error: out of range err=", su_err_int
+      debug "error: out of range err=", su_err_int
       return
     let smarker_update_err = BsErrorCode(su_err_int)
     if smarker_update_err != BsErrorCode.SUCCESS:
-      echo "info: setmarker err=", smarker_update_err
+      debug "info: setmarker err=", smarker_update_err
 
   else:
-    echo "error: getmarker err=", getmarker_err
+    debug "error: getmarker err=", getmarker_err
 
   when isMainModule:
     active = false
@@ -274,16 +274,16 @@ proc watcher_main() {.thread.} =
     if ready:
       doWork()
       for d in db.getWallets(""):
-        echo "wid=", d.wallet_id, " ", d.xpubkey
-        echo "---getAddrvals"
+        debug "wid=", d.wallet_id, " ", d.xpubkey
+        debug "---getAddrvals"
         for g in db.getAddrvals(d.wallet_id):
-          echo g
-        echo "---getAddrlogs"
+          debug g
+        debug "---getAddrlogs"
         for g in db.getAddrlogs(d.wallet_id):
-          echo g
-        echo "---getUnspents"
+          debug g
+        debug "---getUnspents"
         for g in db.getUnspents(d.wallet_id):
-          echo g
+          debug g
 
     sleep(3000)
 
@@ -292,7 +292,7 @@ proc stop*() =
   event.setEvent()
   joinThread(worker)
   btc_ecc_stop()
-  echo "watcher stop"
+  debug "watcher stop"
 
 proc quit() {.noconv.} =
     stop()
@@ -300,7 +300,7 @@ proc quit() {.noconv.} =
 var watcher_thread: Thread[void]
 
 proc start*(): Thread[void] =
-  echo "watcher start"
+  debug "watcher start"
   active = true
   btc_ecc_start()
   createThread(worker, threadWorkerFunc, 0)

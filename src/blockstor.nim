@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import httpclient, json, asyncdispatch, strutils
+import httpclient, json, asyncdispatch, strutils, logs
 export json
 
 const baseurl = "http://localhost:8000/api/"
@@ -29,11 +29,11 @@ proc get(cmdurl: string): JsonNode =
     if res.status == Http200:
       parseJson(res.body)
     else:
-      echo "blockstor-get: " & res.status & " " & cmdurl
+      debug "blockstor-get: " & res.status & " " & cmdurl
       newJNull()
   except:
     let e = getCurrentException()
-    echo e.name, ": ", e.msg
+    debug e.name, ": ", e.msg
     newJNull()
 
 proc post(cmdurl: string, postdata: JsonNode): JsonNode =
@@ -46,11 +46,11 @@ proc post(cmdurl: string, postdata: JsonNode): JsonNode =
     if res.status == Http200:
       parseJson(res.body)
     else:
-      echo "blockstor-post: " & res.status & " " & cmdurl
+      debug "blockstor-post: " & res.status & " " & cmdurl
       newJNull()
   except:
     let e = getCurrentException()
-    echo e.name, ": ", e.msg
+    debug e.name, ": ", e.msg
     newJNull()
 
 proc getAsync(cmdurl: string, cb: proc(data: JsonNode)) {.async.} =
@@ -62,11 +62,11 @@ proc getAsync(cmdurl: string, cb: proc(data: JsonNode)) {.async.} =
     if res.status == Http200:
       cb(parseJson(await res.body))
     else:
-      echo "blockstor-get: " & res.status & " " & cmdurl
+      debug "blockstor-get: " & res.status & " " & cmdurl
       cb(newJNull())
   except:
     let e = getCurrentException()
-    echo e.name, ": ", e.msg
+    debug e.name, ": ", e.msg
     cb(newJNull())
 
 proc postAsync(cmdurl: string, postdata: JsonNode, cb: proc(data: JsonNode)) {.async.} =
@@ -77,14 +77,14 @@ proc postAsync(cmdurl: string, postdata: JsonNode, cb: proc(data: JsonNode)) {.a
     let url = baseurl & cmdurl
     let res = await clientAsync.request(url, httpMethod = HttpPost, body = $postdata)
     if res.status == Http200:
-      echo res.status
+      debug res.status
       cb(parseJson(await res.body))
     else:
-      echo "blockstor-post: " & res.status & " " & cmdurl
+      debug "blockstor-post: " & res.status & " " & cmdurl
       cb(newJNull())
   except:
     let e = getCurrentException()
-    echo e.name, ": ", e.msg
+    debug e.name, ": ", e.msg
     cb(newJNull())
 
 proc toUrlParam(params: tuple): string =

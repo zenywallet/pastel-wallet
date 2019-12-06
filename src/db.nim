@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import sequtils, endians, algorithm, locks
+import sequtils, endians, algorithm, locks, logs
 import rocksdblib
 export rocksdblib.RocksDbErr
 
@@ -79,7 +79,7 @@ proc toUint(s: var seq[byte]): uint8 or uint16 or uint32 or uint64 =
     bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
     result = cast[ptr uint64](addr b[0])[]
   elif s.len == 4:
-    echo "s=4"
+    debug "s=4"
     var r32: uint32
     var b = newSeq[byte](4)
     bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
@@ -230,7 +230,7 @@ proc loadWalletId() =
     wallet_id = wid
   else:
     wallet_id = 0
-  echo "load wallet_id=", wallet_id
+  debug "load wallet_id=", wallet_id
 
 proc acquireWalletId(): uint64 =
   inc(wallet_id)
@@ -440,12 +440,12 @@ proc delBalance*(wid: uint64) =
   db.del(key)
 
 block start:
-  echo "db open"
+  debug "db open"
   db.open(".pasteldb", ".pasteldb_backup")
 
   proc quit() {.noconv.} =
     db.close()
-    echo "db close"
+    debug "db close"
 
   addQuitProc(quit)
   loadWalletId()

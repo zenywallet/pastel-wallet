@@ -1,7 +1,16 @@
 # Copyright (c) 2019 zenywallet
 
-import terminal, parseopt, db, blockstor
+import terminal, parseopt, db, blockstor, logs
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
+
+proc usage() =
+  stdout.styledWriteLine(styleBright, fgCyan, """
+usage:
+  debug { 1 | 0 }
+    1 - enable, 0 - disable
+  wallets
+  delwallets
+""");
 
 proc cmd_main() {.thread.} =
   while true:
@@ -23,6 +32,14 @@ proc cmd_main() {.thread.} =
           db.delWallets()
           echo blockstor.setMarker(blockstor_apikey, 0)
           break
+        elif p.key == "debug":
+          p.next()
+          if p.key == "1" or p.key == "true":
+            debugEnable()
+          elif p.key == "0" or p.key == "false":
+            debugDisable()
+          else:
+            usage()
       else: discard
 
 var cmd_thread: Thread[void]

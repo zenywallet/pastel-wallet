@@ -8,6 +8,7 @@ import ../src/ctrmode
 import db
 import events
 import yespower
+import logs
 
 type ClientData* = ref object
   ws: AsyncWebSocket
@@ -51,7 +52,7 @@ proc stream_main() {.thread.} =
       if not closedclients.contains(fd):
         closedclients.add(fd)
       let client_count = clients.len - closedclients.len
-      echo "client count=", client_count
+      debug "client count=", client_count
 
   proc toStr(oa: openarray[byte]): string =
     result = newString(oa.len)
@@ -83,9 +84,9 @@ proc stream_main() {.thread.} =
     let iv_cli_sha256 = sha256.digest(shared_key xor seed_cli)
     let iv_srv = yespower(iv_srv_sha256.data)
     let iv_cli = yespower(iv_cli_sha256.data)
-    echo "shared=", shared_key
-    echo "iv_srv=", iv_srv
-    echo "iv_cli=", iv_cli
+    debug "shared=", shared_key
+    debug "iv_srv=", iv_srv
+    debug "iv_cli=", iv_cli
     client.ctr.init(shared_key, iv_srv, iv_cli)
 
   proc sendClient(client: var ClientData, data: string) =
@@ -115,14 +116,14 @@ proc stream_main() {.thread.} =
     while true:
       try:
         let (opcode, data) = await ws.readData()
-        echo "opcode=", opcode, " len=", data.len
+        debug "opcode=", opcode, " len=", data.len
         case opcode
         of Opcode.Text:
-          echo "text: ", data
+          debug "text: ", data
         of Opcode.Binary:
           if not exchange:
             if not data.len == 32:
-              echo "error: invalid data len=", data.len
+              debug "error: invalid data len=", data.len
               break
             clientKeyExchange(client, data)
             exchange = true
@@ -147,7 +148,7 @@ proc stream_main() {.thread.} =
               copyMem(addr rdata[pos], addr dec[0], plen)
             let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
             let json = parseJson(uncomp)
-            echo json
+            debug json
 
             # set: xpubs, data
             # get: xpubs
@@ -203,13 +204,13 @@ proc stream_main() {.thread.} =
 
         of Opcode.Close:
           let (closeCode, reason) = extractCloseData(data)
-          echo "client close code=", closeCode, " reason=", reason
+          debug "client close code=", closeCode, " reason=", reason
           break
 
         else: discard
       except:
         let e = getCurrentException()
-        echo e.name, ": ", e.msg
+        debug e.name, ": ", e.msg
         break
 
     try:
@@ -227,7 +228,7 @@ proc stream_main() {.thread.} =
       clientDelete(fd)
       waitFor ws.close()
     except:
-      echo "close error"
+      debug "close error"
       discard
 
   proc deleteClosedClient() =
@@ -241,41 +242,41 @@ proc stream_main() {.thread.} =
       try:
         deleteClosedClient()
         for fd, client in clients:
-          echo "fd=", fd
+          debug "fd=", fd
           if fd in pingclients and pingclients[fd]:
             clientDelete(fd)
             waitFor client.ws.close()
         clear(pingclients)
         deleteClosedClient()
         for fd, client in clients:
-          echo "fd=", fd
+          debug "fd=", fd
           pingclients.add(fd, true)
           await client.ws.sendPing()
       except:
         let e = getCurrentException()
-        echo e.name, ": ", e.msg
+        debug e.name, ": ", e.msg
       await sleepAsync(10000)
-      echo "client count=", clients.len
+      debug "client count=", clients.len
 
   proc senddata() {.async.} =
     while true:
       try:
         deleteClosedClient()
         for fd, client in clients:
-          echo "fd=", fd
+          debug "fd=", fd
           if not client.ws.sock.isClosed:
             waitFor client.ws.sendText("test")
       except:
         let e = getCurrentException()
-        echo e.name, ": ", e.msg
+        debug e.name, ": ", e.msg
       await sleepAsync(2000)
-      echo "client count=", clients.len
+      debug "client count=", clients.len
 
   proc sendManager() {.async.} =
     while true:
       while sendMesChannel.peek() > 0:
         let sdata = sendMesChannel.recv()
-        echo "sendManager wid=", sdata.wallet_id, " data=", sdata.data
+        debug "sendManager wid=", sdata.wallet_id, " data=", sdata.data
         if walletmap.hasKey(sdata.wallet_id):
           let wmdatas = walletmap[sdata.wallet_id]
           for wmdata in wmdatas:
@@ -294,7 +295,7 @@ proc stream_main() {.thread.} =
     salt[0..31] = seed()
     salt[32..63] = seed()
     clients[fd] = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
-    echo "client count=", clients.len
+    debug "client count=", clients.len
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
     asyncCheck recvdata(fd, ws)
 
@@ -305,7 +306,7 @@ proc stream_main() {.thread.} =
   proc cb(req: Request) {.async, gcsafe.} =
     let (ws, error) = await verifyWebsocketRequest(req, "pastel-v0.1")
     if ws.isNil:
-      echo "WS negotiation failed: ", error
+      debug "WS negotiation failed: ", error
       await req.respond(Http400, "Websocket negotiation failed: " & error)
       req.client.close()
       return
