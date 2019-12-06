@@ -388,7 +388,7 @@ proc showKeyQr(): proc() =
       qrReader.show(`cbKeyQrDone`);
     """
 
-proc confirmkeyCard(ev: Event; n: VNode) =
+proc confirmKeyCard(ev: Event; n: VNode) =
   keyCardFulfill = true
   showPage3 = true
   viewUpdate()
@@ -1200,7 +1200,7 @@ proc appMain(data: RouterData): VNode =
                     tdiv(class="ui inverted segment"):
                       h4(class="ui grey inverted header center"): text "Scanned key card"
                       p(class="center"): text keyCardVal
-                    button(class="ui right floated olive button", onclick=confirmkeyCard):
+                    button(class="ui right floated olive button", onclick=confirmKeyCard):
                       text "Save"
                     button(class="ui right floated grey button", onclick=showKeyQr()):
                       text "Rescan"
