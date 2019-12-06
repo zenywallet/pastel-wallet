@@ -64,19 +64,19 @@ function Wallet() {
   }
 
   this.getHdNodeKeyPairs = function(seed, hdpath) {
-    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
+    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
     var child = node.derivePath(hdpath || _hdpash);
     return {priv: child.toBase58(), pub: child.neutered().toBase58()};
   }
 
   this.getHdNodePrivate = function(seed, hdpath) {
-    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
+    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
     var child = node.derivePath(hdpath || _hdpash);
     return child.toBase58();
   }
 
   this.getHdNodePublic = function(seed, hdpath) {
-    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
+    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
     var child = node.derivePath(hdpath || _hdpash);
     return child.neutered().toBase58();
   }
@@ -132,7 +132,7 @@ function Wallet() {
         return false;
       }
       if(!_nodes[xpub]) {
-        _nodes[xpub] = bip32.fromBase58(xpub);
+        _nodes[xpub] = bip32.fromBase58(xpub, network);
       }
       var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
       if(utxo.address == coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address) {
