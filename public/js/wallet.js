@@ -1,17 +1,12 @@
 // Copyright (c) 2019 zenywallet
-var Wallet = (function() {
+function Wallet() {
   var bip39 = coinlibs.bip39;
   var bip32 = coinlibs.bip32;
   var coin = coinlibs.coin;
   var network = coin.networks.bitzeny;
   var stor = new Stor();
   var _hdpash = "m/44'/123'/0'";
-
-  function Wallet() {
-    if(!(this instanceof Wallet)) {
-      return new Wallet();
-    }
-  }
+  var self = this;
 
   function getWordList(mlang) {
     if(mlang == 1) {
@@ -21,7 +16,7 @@ var Wallet = (function() {
     }
   }
 
-  Wallet.prototype.getMnemonicToSeed = function(mnemonic, password) {
+  this.getMnemonicToSeed = function(mnemonic, password) {
     var m = mnemonic.replace(/[ 　\n\r]+/g, ' ').trim();
     return bip39.mnemonicToSeedSync(m, password);
   }
@@ -34,11 +29,11 @@ var Wallet = (function() {
     "102": "Non-standard 2"
   };
 
-  Wallet.prototype.getMnemonicSeedType = function(type) {
+  this.getMnemonicSeedType = function(type) {
     return MnemonicSeedType[type];
   }
 
-  Wallet.prototype.getNonStandardMnemonicToSeeds = function(mnemonic, mlang) {
+  this.getNonStandardMnemonicToSeeds = function(mnemonic, mlang) {
     var seeds = [];
     var m = mnemonic.replace(/[ 　\n\r]+/g, ' ').trim();
     if(m.split(' ').length == 24) {
@@ -53,7 +48,7 @@ var Wallet = (function() {
     return seeds;
   }
 
-  Wallet.prototype.getMnemonicToSeeds = function(mnemonic, mlang, password) {
+  this.getMnemonicToSeeds = function(mnemonic, mlang, password) {
     var seeds = [];
     var m = mnemonic.replace(/[ 　\n\r]+/g, ' ').trim();
     var seed = bip39.mnemonicToSeedSync(m, password);
@@ -64,35 +59,35 @@ var Wallet = (function() {
     return seeds;
   }
 
-  Wallet.prototype.setHdpath = function(hdpath) {
+  this.setHdpath = function(hdpath) {
     _hdpash = hdpath;
   }
 
-  Wallet.prototype.getHdNodeKeyPairs = function(seed, hdpath) {
+  this.getHdNodeKeyPairs = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
     var child = node.derivePath(hdpath || _hdpash);
     return {priv: child.toBase58(), pub: child.neutered().toBase58()};
   }
 
-  Wallet.prototype.getHdNodePrivate = function(seed, hdpath) {
+  this.getHdNodePrivate = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
     var child = node.derivePath(hdpath || _hdpash);
     return child.toBase58();
   }
 
-  Wallet.prototype.getHdNodePublic = function(seed, hdpath) {
+  this.getHdNodePublic = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed) : bip32.fromSeed(seed);
     var child = node.derivePath(hdpath || _hdpash);
     return child.neutered().toBase58();
   }
 
-  Wallet.prototype.resetXpubFromSeed = function(seed, hdpath) {
+  this.resetXpubFromSeed = function(seed, hdpath) {
     stor.del_xpubs();
     var xpub = wallet.getHdNodePublic(seed, hdpath || _hdpash);
     stor.add_xpub(xpub);
   }
 
-  Wallet.prototype.resetXpubFromMnemonic = function(mnemonic, mlang, password, hdpath) {
+  this.resetXpubFromMnemonic = function(mnemonic, mlang, password, hdpath) {
     var seeds = wallet.getMnemonicToSeeds(mnemonic, mlang, password);
     stor.del_xpubs();
     for(var i in seeds) {
@@ -110,16 +105,16 @@ var Wallet = (function() {
   var _utxos = [];
   var _nodes = {};
 
-  Wallet.prototype.getXpubs = function() {
+  this.getXpubs = function() {
     _xpubs = stor.get_xpubs();
     return _xpubs;
   }
 
-  Wallet.prototype.getXpub = function(xpub_idx) {
+  this.getXpub = function(xpub_idx) {
     return _xpubs[xpub_idx];
   }
 
-  Wallet.prototype.checkXpubs = function(xpubs) {
+  this.checkXpubs = function(xpubs) {
     for(var i in xpubs) {
       if(_xpubs.indexOf(xpubs[i]) < 0) {
         return false;
@@ -155,7 +150,7 @@ var Wallet = (function() {
     return true;
   }
 
-  Wallet.prototype.setUtxos = function(utxos) {
+  this.setUtxos = function(utxos) {
     if(checkUtxos(utxos)) {
       _utxos = utxos;
       return true;
@@ -163,7 +158,7 @@ var Wallet = (function() {
     return false;
   }
 
-  Wallet.prototype.addUtxos = function(utxos, deduplicate) {
+  this.addUtxos = function(utxos, deduplicate) {
     if(checkUtxos(utxos)) {
       if(deduplicate) {
         error('unimplemented');
@@ -176,11 +171,11 @@ var Wallet = (function() {
     return false;
   }
 
-  Wallet.prototype.getUtxos = function(utxos) {
+  this.getUtxos = function(utxos) {
     return _utxos;
   }
 
-  Wallet.prototype.getUnusedAddressList = function(count) {
+  this.getUnusedAddressList = function(count) {
     var addrs = [];
     for(var i = 0; i < count; i++) {
       var keyPair = coin.ECPair.makeRandom();
@@ -190,19 +185,168 @@ var Wallet = (function() {
     return addrs;
   }
 
-  var shieldedKeys = [];
-  Wallet.prototype.setShieldedKeys = function(keys) {
+  function xc(b1, b2) {
+    if(b1.length == b2.length) {
+      for(var i = 0; i < b1.length; i++) {
+        b1[i] ^= b2[i];
+      }
+    }
+  }
+
+  function sha256d(data) {
+    return coin.crypto.sha256(coin.crypto.sha256(data));
+  }
+
+  function buf2hex(buffer) {
+    return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+  }
+
+  function hex2buf(hexstr) {
+    if(hexstr.length % 2) {
+      throw new Error('no even number');
+    }
+    return new Uint8Array(hexstr.match(/.{2}/g).map(function(byte) {return parseInt(byte, 16)}));
+  }
+
+  var shieldedKeys = {priv: [], pub: []};
+  this.initShieldedKeys = function(keys) {
+    shieldedKeys = {priv: [], pub: []};
+  }
+
+  this.setShieldedKeys = function(keys) {
     shieldedKeys = keys;
   }
 
-  Wallet.prototype.addShieldedKeys = function(keys) {
-    shieldedKeys = shieldedKeys.concat(keys);
-    console.log(JSON.stringify(shieldedKeys));
+  this.addShieldedKey = function(key) {
+    shieldedKeys.priv.push(key.priv);
+    shieldedKeys.pub.push(key.pub);
   }
 
-  Wallet.prototype.getShieldedKeysCount = function() {
-    return shieldedKeys.length;
+  this.getShieldedKeysCount = function() {
+    return shieldedKeys.pub.length;
   }
 
-  return Wallet;
-}());
+  this.getLockShieldedType = function() {
+    return stor.get_lock_type();
+  }
+
+  this.getLockShieldedStatus = function() {
+    return (shieldedKeys.pub.length > 0 && shieldedKeys.priv.length == 0);
+  }
+
+  this.lockShieldedKeys = function(phrase, lock_type, prelock) {
+    var cipher = pastel.cipher;
+    if(!cipher) {
+      return false;
+    }
+    if(!phrase || phrase.length == 0) {
+      if(self.getLockShieldedStatus()) {
+        return true;
+      }
+      if(!prelock && shieldedKeys.unlock) {
+        shieldedKeys.priv = [];
+        delete shieldedKeys.unlock;
+        console.log('after relock: ' + JSON.stringify(shieldedKeys));
+        return true;
+      }
+      return false;
+    }
+    if(shieldedKeys.priv.length == 0 || shieldedKeys.pub.length == 0 ||
+      shieldedKeys.priv.length != shieldedKeys.pub.length) {
+      return false;
+    }
+    var salt = stor.get_salt(true);
+    if(!salt) {
+      return false;
+    }
+    var p = cipher.yespower_n4r32(sha256d(phrase), 32);
+    xc(p, salt);
+    p = cipher.yespower_n4r32(sha256d(p), 32);
+    var enc = cipher.enc_json(p, shieldedKeys.priv);
+
+    console.log(enc);
+    stor.set_shield(enc);
+    stor.set_lock_type(lock_type);
+    console.log('get_shield=', stor.get_shield());
+
+    if(stor.get_lock_type() != lock_type) {
+      return false;
+    }
+    var dec = cipher.dec_json(p, stor.get_shield());
+    for(var i in shieldedKeys.priv) {
+      if(shieldedKeys.priv[i] != dec[i]) {
+        return false;
+      }
+    }
+
+    stor.set_xpubs(shieldedKeys.pub);
+
+    if(prelock) {
+      shieldedKeys.unlock = true;
+    } else {
+      shieldedKeys.priv = [];
+    }
+    console.log('after lock: ' + JSON.stringify(shieldedKeys));
+    return true;
+  }
+
+  this.unlockShieldedKeys = function(phrase) {
+    var cipher = pastel.cipher;
+    if(!cipher) {
+      return false;
+    }
+    if(!phrase || phrase.length == 0) {
+      return false;
+    }
+    var salt = stor.get_salt(true);
+    if(!salt) {
+      return false;
+    }
+    var p = cipher.yespower_n4r32(sha256d(phrase), 32);
+    xc(p, salt);
+    p = cipher.yespower_n4r32(sha256d(p), 32);
+    var dec = cipher.dec_json(p, stor.get_shield());
+    shieldedKeys.priv = dec;
+    if(shieldedKeys.priv.length != shieldedKeys.pub.length) {
+      return false;
+    }
+    shieldedKeys.unlock = true;
+    console.log('after unlock: ' + JSON.stringify(shieldedKeys));
+    return true;
+  }
+
+  this.setSeedCard = function(cardInfos) {
+    this.initShieldedKeys();
+    var mix;
+    for(var i in cardInfos) {
+      var s = cardInfos[i];
+      console.log('cardInfos', JSON.stringify(s));
+      var sbuf = base58.dec(s.seed || s.orig);
+      if(s.sv && s.sv.length > 0) {
+        var sv = cipher.yespower_n4r32(sha256d(s.sv), 32);
+        xc(sbuf, sv);
+        sbuf = cipher.yespower_n4r32(sha256d(sbuf), 32);
+      }
+      if(mix) {
+        xc(mix, sbuf);
+      } else {
+        mix = sbuf;
+      }
+      if(mix) {
+        var kp = this.getHdNodeKeyPairs(buf2hex(mix));
+        this.addShieldedKey(kp);
+      }
+    }
+  }
+
+  this.setMnemonic = function(words, lang_id) {
+    this.initShieldedKeys();
+    var sds = this.getMnemonicToSeeds(words, lang_id);
+    console.log(sds);
+    for(var i in sds) {
+      var sd = sds[i];
+      var kp = this.getHdNodeKeyPairs(sd.seed);
+      this.addShieldedKey(kp);
+    }
+  }
+}

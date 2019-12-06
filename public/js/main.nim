@@ -255,58 +255,20 @@ proc removeSeedCard(idx: int): proc() =
 
 proc seedToKeys() =
   asm """
-    var cipher = pastel.cipher;
-    var coin = pastel.coin;
-    var wallet = new Wallet();
-    var keys = [];
-    function xc(b1, b2) {
-      if(b1.length == b2.length) {
-        for(var i = 0; i < b1.length; i++) {
-          b1[i] ^= b2[i];
-        }
-      }
-    }
-    function sha256d(data) {
-      return coin.crypto.sha256(coin.crypto.sha256(data));
-    }
+    var wallet = pastel.wallet;
   """
   if currentImportType == ImportType.SeedCard:
     asm """
-      var mix;
-    """
-    for s in seedCardInfos:
-      asm """
-        var sbuf = base58.dec(`s`.seed || `s`.orig);
-        if(`s`.sv && `s`.sv.length > 0) {
-          var sv = cipher.yespower_n4r32(sha256d(`s`.sv), 32);
-          xc(sbuf, sv);
-          sbuf = cipher.yespower_n4r32(sha256d(sbuf), 32);
-        }
-        if(mix) {
-          xc(mix, sbuf);
-        } else {
-          mix = sbuf;
-        }
-      """
-    asm """
-      if(mix) {
-        keys.push(wallet.getHdNodeKeyPairs(cipher.buf2hex(mix)));
-      }
+      wallet.setSeedCard(`seedCardInfos`);
     """
   elif currentImportType == ImportType.Mnemonic:
     asm """
-      var sds = wallet.getMnemonicToSeeds(`inputWords`, `wl_select_id`);
-      for(var i in sds) {
-        var sd = sds[i];
-        keys.push(wallet.getHdNodeKeyPairs(sd.seed));
-      }
+      wallet.setMnemonic(`inputWords`, `wl_select_id`);
     """
-  asm """
-    wallet.setShieldedKeys(keys);
-  """
 
 asm """
   jsSeedToKeys = `seedToKeys`;
+  jsClearSensitive = `clearSensitive`;
 """
 
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
@@ -384,14 +346,27 @@ proc showSeedQr(): proc() =
 
 proc showKeyQr(): proc() =
   result = proc() =
+    keyCardFulfill = false
+    showPage3 = false
     asm """
       qrReader.show(`cbKeyQrDone`);
     """
 
 proc confirmKeyCard(ev: Event; n: VNode) =
-  keyCardFulfill = true
-  showPage3 = true
-  viewUpdate()
+  var ret_lock: bool = false
+  asm """
+    console.log('confirmKeyCard');
+    var wallet = pastel.wallet;
+    `ret_lock` = wallet.lockShieldedKeys(`keyCardVal`, 1, true);
+  """
+  if ret_lock:
+    keyCardFulfill = true
+    showPage3 = true
+    viewUpdate()
+  else:
+    asm """
+      Notify.show("Error", "Failed to lock your wallet with the key card.", Notify.msgtype.error);
+    """
 
 proc camChange(): proc() =
   result = proc() =
@@ -725,15 +700,26 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
         italic(class="cut icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
+  passphraseFulfill = false
+  showPage3 = false
   passPhrase = n.value
   viewUpdate()
   discard
 
 proc confirmPassphrase(ev: Event; n: VNode) =
-  passphraseFulfill = true
-  showPage3 = true
-  viewUpdate()
-
+  var ret_lock: bool = false
+  asm """
+    var wallet = pastel.wallet;
+    `ret_lock` = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
+  """
+  if ret_lock:
+    passphraseFulfill = true
+    showPage3 = true
+    viewUpdate()
+  else:
+    asm """
+      Notify.show("Error", "Failed to lock your wallet with the passphrase.", Notify.msgtype.error);
+    """
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
@@ -1374,6 +1360,12 @@ proc afterScript(data: RouterData) =
     asm """
       target_page_scroll = '#section3';
       page_scroll_done = function() {
+        var wallet = pastel.wallet;
+        var ret = wallet.lockShieldedKeys();
+        if(!ret) {
+          Notify.show("Error", "Failed to lock keys.", Notify.msgtype.error);
+        }
+        jsClearSensitive();
         $('a.pagenext').css('visibility', 'hidden');
         $('#section2').hide();
         window.scrollTo(0, 0);
