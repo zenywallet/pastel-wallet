@@ -3,7 +3,7 @@ function Wallet() {
   var bip39 = coinlibs.bip39;
   var bip32 = coinlibs.bip32;
   var coin = coinlibs.coin;
-  var network = coin.networks.bitzeny;
+  var network = coin.networks[pastel.config.network];
   var stor = new Stor();
   var _hdpash = "m/44'/123'/0'";
   var self = this;

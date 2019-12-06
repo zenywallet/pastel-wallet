@@ -531,7 +531,7 @@ function bip21reader(uri) {
       var coin = pastel.coin;
       if(coin) {
         try {
-          coin.address.toOutputScript(addr, coin.networks.bitzeny);
+          coin.address.toOutputScript(addr, coin.networks[pastel.config.network]);
           result.address = addr;
         } catch(e) {
           result.unknown = escape_html(d_uri);

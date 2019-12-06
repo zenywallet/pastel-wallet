@@ -52,7 +52,7 @@ UtxoBalls.simple = function() {
 
 
   var coin = coinlibs.coin;
-  var network = coin.networks.bitzeny;
+  var network = coin.networks[pastel.config.network];
   var crypto = window.crypto || window.msCrypto;
 
   function sanitize(str) {

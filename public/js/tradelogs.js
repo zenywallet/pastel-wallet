@@ -135,7 +135,7 @@ var TradeLogs = (function() {
   TradeLogs.start = function() {
     cipher = cipher || pastel.cipher;
     coin = coin || coinlibs.coin;
-    network = network || coin.networks.bitzeny;
+    network = network || coin.networks[pastel.config.network];
     crypto = crypto || window.crypto || window.msCrypto;
 
     if(!$('#tradelogs').length) {
