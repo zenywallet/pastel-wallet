@@ -226,6 +226,7 @@ var inputWords: cstring = ""
 var autocompleteWords: seq[cstring] = @[]
 var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
 var prevCheckWord: cstring = ""
+var passPhrase: cstring = ""
 
 var coinlibs {.importc, nodecl.}: JsObject
 var bip39 = coinlibs.bip39
@@ -242,6 +243,7 @@ proc clearSensitive() =
   autocompleteWords = @[]
   chklist = @[]
   prevCheckWord = ""
+  passPhrase = ""
 
 proc removeSeedCard(idx: int): proc() =
   result = proc() =
@@ -723,6 +725,7 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
         italic(class="cut icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
+  passPhrase = n.value
   viewUpdate()
   discard
 
@@ -739,7 +742,7 @@ proc passphraseEditor(): VNode =
         h4(class="ui grey inverted header center"): text "Input passphrase"
         tdiv(class="ui form"):
           tdiv(class="field"):
-            input(class="center", type="text", name="input-passphrase", value="", placeholder="Passphrase", onkeyup=changePassphrase)
+            input(class="center", type="text", name="input-passphrase", value=passPhrase, placeholder="Passphrase", onkeyup=changePassphrase)
       button(class="ui right floated olive button", onclick=confirmPassphrase):
         text "Save"
 
