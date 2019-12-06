@@ -9,6 +9,17 @@ var Stor = (function() {
     }
   }
 
+  function buf2hex(buffer) {
+    return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
+  }
+
+  function hex2buf(hexstr) {
+    if(hexstr.length % 2) {
+      throw new Error('no even number');
+    }
+    return new Uint8Array(hexstr.match(/.{2}/g).map(function(byte) {return parseInt(byte, 16)}));
+  }
+
   Stor.prototype.add_xpub = function(xpub) {
     var xpubs = db['xpubs'];
     if(xpubs) {
