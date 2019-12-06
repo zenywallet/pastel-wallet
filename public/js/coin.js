@@ -19960,6 +19960,17 @@ module.exports = {
     pubKeyHash: 0x51,
     scriptHash: 0x05,
     wif: 0x80
+  },
+  testnet_bitzeny: {
+    messagePrefix: '\x18BitZeny Signed Message:\n',
+    bech32: 'tz',
+    bip32: {
+      public: 0x043587cf,
+      private: 0x04358394
+    },
+    pubKeyHash: 0x6f,
+    scriptHash: 0xc4,
+    wif: 0xef
   }
 }
 
