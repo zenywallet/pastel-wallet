@@ -16,6 +16,13 @@ type
     BUSY
     TOO_MANY
     TOO_HIGH
+    UNKNOWN
+
+proc getBsErrorCode*(code: int): BsErrorCode =
+  if (BsErrorCode.low.ord..<BsErrorCode.high.ord).contains(code):
+    BsErrorCode(code)
+  else:
+    BsErrorCode.UNKNOWN
 
 var client {.threadvar.}: HttpClient
 var clientAsync {.threadvar.}: AsyncHttpClient

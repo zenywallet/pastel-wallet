@@ -1,11 +1,13 @@
 # Copyright (c) 2019 zenywallet
 
-import os, locks, asyncdispatch, sequtils
+import os, locks, asyncdispatch, sequtils, tables, random
+from times import getTime, toUnix, nanosecond
 import libbtc
 import blockstor, db, events, logs
 
 const gaplimit: uint32 = 20
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
+var chain = testnet_bitzeny_chain
 
 var
   worker: Thread[int]
@@ -13,251 +15,213 @@ var
   active = true
   ready* = true
 
-var chain = testnet_bitzeny_chain
 const extkeyout_size: csize = 128
 const address_size: csize = 128
 proc hdaddress(xpubkey: string, change, index: uint32): string =
   result = ""
   let keypath: cstring = "m/" & $change & "/" & $index
   var extkeyout: cstring = newString(extkeyout_size)
-  if not hd_derive(addr chain, xpubkey, keypath, extkeyout, extkeyout_size):
-    return
-  var node: btc_hdnode
-  if not btc_hdnode_deserialize(extkeyout, addr chain, addr node):
-    return
-  var address: cstring = newString(address_size)
-  btc_hdnode_get_p2pkh_address(addr node, addr chain, address, cast[cint](address_size))
-  result = $address
+  if hd_derive(addr chain, xpubkey, keypath, extkeyout, extkeyout_size):
+    var node: btc_hdnode
+    if btc_hdnode_deserialize(extkeyout, addr chain, addr node):
+      var address: cstring = newString(address_size)
+      btc_hdnode_get_p2pkh_address(addr node, addr chain, address, cast[cint](address_size))
+      result = $address
 
 template enumRangeCheck(enumtype: type, value: int): bool =
   (enumtype.low.ord..enumtype.high.ord).contains(value)
 
-proc main() =
-  let marker = blockstor.getMarker(blockstor_apikey)
-  if marker.kind == JNull:
-    debug "error: getmarker is null"
-    return
+proc timeseed() =
+  let now = getTime()
+  randomize(now.toUnix * 1000000000 + now.nanosecond)
 
-  let err_int = marker["err"].getInt
-  if not BsErrorCode.enumRangeCheck(err_int):
-    debug "error: out of range", err_int
-    return
-  let getmarker_err = BsErrorCode(err_int)
-  case getmarker_err
-  of BsErrorCode.ROLLBACKING:
-    debug "info: blockstor rollbacking"
-    return
+type
+  WalletInfo = ref object
+    xpubkey: string
+    wid: uint64
+    sequence: uint64
+    last_0_index: uint32
+    last_1_index: uint32
 
-  of BsErrorCode.UNKNOWN_APIKEY:
-    debug "error: invalid apikey"
-    return
+  AddrInfo = ref object
+    wid: uint64
+    change: uint32
+    index: uint32
+    address: string
 
-  of BsErrorCode.SUCCESS:
-    let marker_sequence = marker["res"].getUint64
-    var max_sequence = marker_sequence
+  AddrBalance = ref object
+    balance: uint64
+    utxo_count: uint32
 
-    for d in db.getWallets(""):
-      debug "wid=", d.wallet_id, " ", d.xpubkey
-      debug "max_sequence=", max_sequence, " d.sequence=", d.sequence
-      if max_sequence <= d.sequence and d.sequence != 0'u64:
-        debug "skip - wid=", d.wallet_id
-        continue
-      var address_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string]]
-      var target_list: seq[tuple[wid: uint64, change: uint32, index: uint32, address: string,
-                          used: bool, value: uint64, utxo_count: uint32]]
-      var addrs: seq[string]
-      var new_last_0_index, new_last_1_index: uint32
-      var base_index: uint32 = 0
-      var find_0 = true
-      var find_1 = true
-      new_last_0_index = d.last_0_index
-      new_last_1_index = d.last_1_index
+proc addressFinder(sequence: uint64, last_sequence: uint64) =
+  var walletInfos = initTable[uint64, WalletInfo]()
+  var addrInfos: seq[AddrInfo]
+  for d in db.getWallets(""):
+    if sequence > d.sequence or d.sequence == 0'u64:
 
-      var try_limit = 10
-      target_list = @[]
-      while find_0 or find_1:
-        address_list = @[]
-        addrs = @[]
-        if find_0:
-          for i in (d.last_0_index + base_index)..<(d.last_0_index + base_index + gaplimit):
-            var address = hdaddress(d.xpubkey, 0, i)
-            if address.len <= 0:
-              break
-            address_list.add((wid: d.wallet_id, change: 0'u32, index: i, address: address))
-            addrs.add(address)
+      var used_0_index: uint32 = 0
+      var used_0 = db.getLastUsedAddrIndex(d.wallet_id, 0)
+      if used_0.err == DbStatus.Success:
+        used_0_index = used_0.res
 
-        if find_1:
-          for i in (d.last_1_index + base_index)..<(d.last_1_index + base_index + gaplimit):
-            var address = hdaddress(d.xpubkey, 1, i)
-            if address.len <= 0:
-              break
-            address_list.add((wid: d.wallet_id, change: 1'u32, index: i, address: address))
-            addrs.add(address)
-        base_index = base_index + gaplimit
+      var used_1_index: uint32 = 0
+      var used_1 = db.getLastUsedAddrIndex(d.wallet_id, 1)
+      if used_1.err == DbStatus.Success:
+        used_1_index = used_1.res
 
-        find_0 = false
-        find_1 = false
-        if addrs.len > 0:
-          let balance = blockstor.getAddress(addrs)
-          if addrs.len == balance.resLen:
-            var pos = 0
-            for b in balance.toApiResIterator:
-              if b{"balance"} != nil:
-                if address_list[pos].change == 0:
-                  new_last_0_index = address_list[pos].index + 1
-                  find_0 = true
-                elif address_list[pos].change == 1:
-                  new_last_1_index = address_list[pos].index + 1
-                  find_1 = true
-                target_list.add((address_list[pos].wid, address_list[pos].change,
-                              address_list[pos].index, address_list[pos].address,
-                              true, b["balance"].getUint64,
-                              b["utxo_count"].getUint32))
-              else:
-                target_list.add((address_list[pos].wid, address_list[pos].change,
-                              address_list[pos].index, address_list[pos].address,
-                              false, 0'u64, 0'u32))
-              inc(pos)
+      var new_0_index = used_0_index + gaplimit
+      var new_1_index = used_1_index + gaplimit
+      for i in (d.last_0_index..<new_0_index):
+        var address = hdaddress(d.xpubkey, 0, i)
+        if address.len > 0:
+          addrInfos.add(AddrInfo(wid: d.wallet_id, change: 0, index: i, address: address))
+      for i in (d.last_1_index..<new_1_index):
+        var address = hdaddress(d.xpubkey, 1, i)
+        if address.len > 0:
+          addrInfos.add(AddrInfo(wid: d.wallet_id, change: 1, index: i, address: address))
 
-        dec(try_limit)
-        if try_limit <= 0:
-          break
+      if d.last_0_index < new_0_index or d.last_1_index < new_1_index:
+        walletInfos[d.wallet_id] = WalletInfo(xpubkey: d.xpubkey,
+                                  sequence: d.sequence,
+                                  last_0_index: new_0_index,
+                                  last_1_index: new_1_index)
 
-      debug target_list
-      if find_0 or find_1:
-        debug "postpone ", find_0, " ", find_1, " ", new_last_0_index, " ",
-              new_last_1_index, " wid=", d.wallet_id, " ", d.xpubkey
+  if addrInfos.len > 0:
+    var addrs: seq[string]
+    for a in addrInfos:
+      addrs.add(a.address)
+    timeseed()
+    shuffle(addrs)
 
-      target_list.keepIf(proc(d: auto): bool =
-        (d.change == 0 and d.index < new_last_0_index + gap_limit) or
-        (d.change == 1 and d.index < new_last_1_index + gap_limit))
+    var addrBalances = initTable[string, AddrBalance]()
+    var split_addrs = addrs.distribute(1 + addrs.len div 50)
+    for sa in split_addrs:
+      let balance = blockstor.getAddress(sa)
+      if sa.len == balance.resLen:
+        var i = 0
+        for b in balance.toApiResIterator:
+          if b{"balance"} != nil:
+            addrBalances[sa[i]] = AddrBalance(balance: b["balance"].getUint64,
+                                              utxo_count: b["utxo_count"].getUint32)
+          inc(i)
 
-      debug target_list
-      debug "new_last_0_index=", new_last_0_index
-      debug "new_last_1_index=", new_last_1_index
-
-      for t in target_list:
-        let addrlogs = blockstor.getAddrlog(t.address, (gt: marker_sequence,
+    for a in addrInfos:
+      if not addrBalances.hasKey(a.address):
+        db.setAddress(a.address, a.change, a.index, a.wid, 0)
+      else:
+        var cur_log_sequence = walletInfos[a.wid].sequence
+        var addrlogs = blockstor.getAddrlog(a.address, (gt: cur_log_sequence,
                                             limit: 1000, reverse: 0,
                                             seqbreak: 1))
-        for a in addrlogs.toApiResIterator:
-          db.setAddrlog(t.wid, a["sequence"].getUint64, a["type"].getUint8,
-                        t.change, t.index, t.address, a["value"].getUint64,
-                        a["txid"].getStr, a["height"].getUint32,
-                        a["time"].getUint32)
-        if addrlogs.resLen > 0:
-          max_sequence = max(max_sequence, addrlogs["res"][addrlogs.resLen - 1]["sequence"].getUint64)
-        let utxos = blockstor.getUtxo(t.address, (gt: marker_sequence,
+        echo addrlogs
+        while true:
+          for alog in addrlogs.toApiResIterator:
+            db.setAddrlog(a.wid, alog["sequence"].getUint64, alog["type"].getUint8,
+                          a.change, a.index, a.address, alog["value"].getUint64,
+                          alog["txid"].getStr, alog["height"].getUint32,
+                          alog["time"].getUint32)
+          if addrlogs.resLen == 0:
+            break
+          cur_log_sequence = addrlogs["res"][addrlogs.resLen - 1]["sequence"].getUint64
+          if addrlogs.resLen < 1000:
+            break
+          addrlogs = blockstor.getAddrlog(a.address, (gte: cur_log_sequence,
+                                          limit: 1000, reverse: 0,
+                                          seqbreak: 1))
+
+        var cur_utxo_sequence = sequence
+        var utxos = blockstor.getUtxo(a.address, (gt: cur_utxo_sequence,
                                       limit: 1000, reverse: 0, seqbreak: 1))
-        for a in utxos.toApiResIterator:
-          db.setUnspent(t.wid, a["sequence"].getUint64, a["txid"].getStr,
-                        a["n"].getUint32, t.address, a["value"].getUint64)
+        while true:
+          for utxo in utxos.toApiResIterator:
+            db.setUnspent(a.wid, utxo["sequence"].getUint64, utxo["txid"].getStr,
+                          utxo["n"].getUint32, a.address, utxo["value"].getUint64)
+          if utxos.resLen == 0:
+            break
+          cur_utxo_sequence = utxos["res"][utxos.resLen - 1]["sequence"].getUint64
+          if utxos.resLen < 1000:
+            break
+          utxos = blockstor.getUtxo(a.address, (gte: cur_utxo_sequence,
+                                    limit: 1000, reverse: 0, seqbreak: 1))
 
-      debug "max_sequence=", max_sequence
+        var b = addrBalances[a.address]
+        db.setAddrval(a.wid, a.change, a.index, a.address, b.balance, b.utxo_count)
+        db.setAddress(a.address, a.change, a.index, a.wid, cur_log_sequence)
+        walletInfos[a.wid].sequence = max(walletInfos[a.wid].sequence, cur_log_sequence)
 
-      for t in target_list:
-        if t.used:
-          db.setAddrval(t.wid, t.change, t.index, t.address, t.value, t.utxo_count)
-        db.setAddress(t.address, t.change, t.index, t.wid, max_sequence)
+    for wid in walletInfos.keys:
+      var w = walletInfos[wid]
+      db.setWallet(w.xpubkey, wid, w.sequence, w.last_0_index, w.last_1_index)
 
-      db.setWallet(d.xpubkey, d.wallet_id, max_sequence,
-                  new_last_0_index, new_last_1_index)
+proc walletRollback(rollbacked_sequence: uint64) =
+  for d in db.getWallets(""):
+    var tbd_addrs: seq[tuple[change: uint32, index: uint32, address: string]] = @[]
+    var addrs: seq[string] = @[]
+    for a in getAddrlogs_gt(d.wallet_id, rollbacked_sequence):
+      tbd_addrs.add((a.change, a.index, a.address))
+    tbd_addrs = deduplicate(tbd_addrs)
+    for a in tbd_addrs:
+      addrs.add(a.address)
 
-      debug "---getWallet"
-      debug db.getWallet(d.xpubkey)
-      debug "---getAddrvals"
-      for g in db.getAddrvals(1'u64):
-        debug g
-      debug "---getAddrlogs"
-      for g in db.getAddrlogs(1'u64):
-        debug g
-      debug "---getUnspents"
-      for g in db.getUnspents(1'u64):
-        debug g
-      debug "---getAddresses"
-      for g in db.getAddresses("Z.."):
-          debug g
+    delUnspents_gt(d.wallet_id, rollbacked_sequence)
 
-    let smarker = blockstor.setMarker(blockstor_apikey, max_sequence)
-    if smarker.kind == JNull:
-      debug "error: setmarker is null"
+    let balance = blockstor.getAddress(addrs)
+    if addrs.len != balance.resLen:
+      debug "error: getaddress len=", addrs.len, " reslen=", balance.resLen
       return
-    let s_err_int = smarker["err"].getInt
-    if not BsErrorCode.enumRangeCheck(s_err_int):
-      debug "error: out of range err=", s_err_int
-      return
-    let smarker_err = BsErrorCode(s_err_int)
-    if smarker_err != BsErrorCode.SUCCESS:
-      debug "info: setmarker err=", smarker_err
 
-  of BsErrorCode.ROLLBACKED:
-    debug marker
-    let rollbacked_sequence = marker["res"].getUint64
-    for d in db.getWallets(""):
-      var tbd_addrs: seq[tuple[change: uint32, index: uint32, address: string]] = @[]
-      var addrs: seq[string] = @[]
-      for a in getAddrlogs_gt(d.wallet_id, rollbacked_sequence):
-        tbd_addrs.add((a.change, a.index, a.address))
-      tbd_addrs = deduplicate(tbd_addrs)
-      for a in tbd_addrs:
-        addrs.add(a.address)
+    var pos = 0
+    for b in balance.toApiResIterator:
+      if b{"balance"} != nil:
+        db.delAddrval(d.wallet_id, tbd_addrs[pos].change,
+                      tbd_addrs[pos].index, tbd_addrs[pos].address)
+      else:
+        db.setAddrval(d.wallet_id, tbd_addrs[pos].change,
+                      tbd_addrs[pos].index, tbd_addrs[pos].address,
+                      b["balance"].getUint64, b["utxo_count"].getUint32)
+    db.setWallet(d.xpubkey, d.wallet_id, rollbacked_sequence,
+                d.last_0_index, d.last_1_index)
 
-      delUnspents_gt(d.wallet_id, rollbacked_sequence)
+    for a in tbd_addrs:
+      db.setAddress(a.address, a.change, a.index, d.wallet_id, rollbacked_sequence)
+    delAddrlogs_gt(d.wallet_id, rollbacked_sequence)
 
-      let balance = blockstor.getAddress(addrs)
-      if addrs.len != balance.resLen:
-        debug "error: getaddress len=", addrs.len, " reslen=", balance.resLen
+proc main() =
+  let j_marker = blockstor.getMarker(blockstor_apikey)
+  if j_marker.kind == JNull:
+    echo "error: getMarker is null"
+    return
+  let marker_err = getBsErrorCode(j_marker["err"].getInt)
+  case marker_err
+    of BsErrorCode.SUCCESS:
+      let res = j_marker["res"]
+      let marker_sequence = res["sequence"].getUint64
+      let last_sequence = res["last"].getUint64
+      addressFinder(marker_sequence, last_sequence)
+      let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
+      if smarker.kind == JNull:
+        debug "error: setmarker is null"
         return
-
-      var pos = 0
-      for b in balance.toApiResIterator:
-        if b{"balance"} != nil:
-          db.delAddrval(d.wallet_id, tbd_addrs[pos].change,
-                        tbd_addrs[pos].index, tbd_addrs[pos].address)
-        else:
-          db.setAddrval(d.wallet_id, tbd_addrs[pos].change,
-                        tbd_addrs[pos].index, tbd_addrs[pos].address,
-                        b["balance"].getUint64, b["utxo_count"].getUint32)
-      db.setWallet(d.xpubkey, d.wallet_id, rollbacked_sequence,
-                  d.last_0_index, d.last_1_index)
-
-      for a in tbd_addrs:
-        db.setAddress(a.address, a.change, a.index, d.wallet_id, rollbacked_sequence)
-      delAddrlogs_gt(d.wallet_id, rollbacked_sequence)
-
-      debug "---getWallet"
-      debug db.getWallet(d.xpubkey)
-      debug "---getAddrvals"
-      for g in db.getAddrvals(1'u64):
-        debug g
-      debug "---getAddrlogs"
-      for g in db.getAddrlogs(1'u64):
-        debug g
-      debug "---getUnspents"
-      for g in db.getUnspents(1'u64):
-        debug g
-      debug "---getAddresses"
-      for g in db.getAddresses("Z.."):
-          debug g
-
-    let smarker_update = blockstor.setMarker(blockstor_apikey, rollbacked_sequence)
-    if smarker_update.kind == JNull:
-      debug "error: setmarker in rollback is null"
-      return
-    let su_err_int = smarker_update["err"].getInt
-    if not BsErrorCode.enumRangeCheck(su_err_int):
-      debug "error: out of range err=", su_err_int
-      return
-    let smarker_update_err = BsErrorCode(su_err_int)
-    if smarker_update_err != BsErrorCode.SUCCESS:
-      debug "info: setmarker err=", smarker_update_err
-
-  else:
-    debug "error: getmarker err=", getmarker_err
-
-  when isMainModule:
-    active = false
-    event.setEvent()
+      let smarker_err = getBsErrorCode(smarker["err"].getInt)
+      if smarker_err != BsErrorCode.SUCCESS:
+        debug "info: setmarker err=", smarker_err
+    of BsErrorCode.ROLLBACKED:
+      let res = j_marker["res"]
+      let rollbacked_sequence = res["sequence"].getUint64
+      walletRollback(rollbacked_sequence)
+      let smarker_update = blockstor.setMarker(blockstor_apikey, rollbacked_sequence)
+      if smarker_update.kind == JNull:
+        debug "error: setmarker in rollback is null"
+        return
+      let smarker_update_err = getBsErrorCode(smarker_update["err"].getInt)
+      if smarker_update_err != BsErrorCode.SUCCESS:
+        debug "info: setmarker err=", smarker_update_err
+    of BsErrorCode.ROLLBACKING:
+      debug "info: blockstor rollbacking"
+    of BsErrorCode.UNKNOWN_APIKEY:
+      echo "error: invalid apikey"
+    else:
+      echo "error: getMarker err=", marker_err
 
 proc threadWorkerFunc(cb: int) {.thread.} =
   while active:
