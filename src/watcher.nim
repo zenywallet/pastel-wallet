@@ -40,8 +40,8 @@ type
     xpubkey: string
     wid: uint64
     sequence: uint64
-    last_0_index: uint32
-    last_1_index: uint32
+    next_0_index: uint32
+    next_1_index: uint32
 
   AddrInfo = ref object
     wid: uint64
@@ -71,20 +71,20 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
 
       var new_0_index = used_0_index + gaplimit
       var new_1_index = used_1_index + gaplimit
-      for i in (d.last_0_index..<new_0_index):
+      for i in (d.next_0_index..<new_0_index):
         var address = hdaddress(d.xpubkey, 0, i)
         if address.len > 0:
           addrInfos.add(AddrInfo(wid: d.wallet_id, change: 0, index: i, address: address))
-      for i in (d.last_1_index..<new_1_index):
+      for i in (d.next_1_index..<new_1_index):
         var address = hdaddress(d.xpubkey, 1, i)
         if address.len > 0:
           addrInfos.add(AddrInfo(wid: d.wallet_id, change: 1, index: i, address: address))
 
-      if d.last_0_index < new_0_index or d.last_1_index < new_1_index:
+      if d.next_0_index < new_0_index or d.next_1_index < new_1_index:
         walletInfos[d.wallet_id] = WalletInfo(xpubkey: d.xpubkey,
                                   sequence: d.sequence,
-                                  last_0_index: new_0_index,
-                                  last_1_index: new_1_index)
+                                  next_0_index: new_0_index,
+                                  next_1_index: new_1_index)
 
   if addrInfos.len > 0:
     var addrs: seq[string]
@@ -151,7 +151,7 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
 
     for wid in walletInfos.keys:
       var w = walletInfos[wid]
-      db.setWallet(w.xpubkey, wid, w.sequence, w.last_0_index, w.last_1_index)
+      db.setWallet(w.xpubkey, wid, w.sequence, w.next_0_index, w.next_1_index)
 
 proc walletRollback(rollbacked_sequence: uint64) =
   for d in db.getWallets(""):
@@ -180,7 +180,7 @@ proc walletRollback(rollbacked_sequence: uint64) =
                       tbd_addrs[pos].index, tbd_addrs[pos].address,
                       b["balance"].getUint64, b["utxo_count"].getUint32)
     db.setWallet(d.xpubkey, d.wallet_id, rollbacked_sequence,
-                d.last_0_index, d.last_1_index)
+                d.next_0_index, d.next_1_index)
 
     for a in tbd_addrs:
       db.setAddress(a.address, a.change, a.index, d.wallet_id, rollbacked_sequence)

@@ -8,7 +8,7 @@ type Prefix {.pure.} = enum
   params = 0  # param_id = value
               # 1 - last_wallet_id'u64 = value
               # 2 - last_hashcash_id'u64 = value
-  wallets     # xpubkey, wallet_id = sequence, last_0_index, last_1_index
+  wallets     # xpubkey, wallet_id = sequence, next_0_index, next_1_index
   addresses   # address, change, index, wallet_id = sequence
   addrvals    # wallet_id, change, index, address = value, utxo_count
   addrlogs    # wallet_id, sequence, type (0 - out | 1 - in),
@@ -178,41 +178,41 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
     (DbStatus.NotFound, cast[string](nil))
 
 proc setWallet*(xpubkey: string, wid: uint64, sequence: uint64,
-                last_0_index: uint32, last_1_index: uint32) =
+                next_0_index: uint32, next_1_index: uint32) =
   let key = concat(Prefix.wallets.toByte,
                   xpubkey.toByte,
                   wid.toByte)
   let val = concat(sequence.toByte,
-                  last_0_index.toByte,
-                  last_1_index.toByte)
+                  next_0_index.toByte,
+                  next_1_index.toByte)
   db.put(key, val)
 
 proc getWallet*(xpubkey: string): tuple[err: DbStatus,
                 res: tuple[wallet_id: uint64, sequence: uint64,
-                last_0_index: uint32, last_1_index: uint32]] =
+                next_0_index: uint32, next_1_index: uint32]] =
   let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
   var d = db.gets(key)
   if d.len > 0:
     let wid = d[0].key[^8..^1].toUint64
     let sequence = d[0].value[0..7].toUint64
-    let last_0_index = d[0].value[8..11].toUint32
-    let last_1_index = d[0].value[12..15].toUint32
-    result = (DbStatus.Success, (wid, sequence, last_0_index, last_1_index))
+    let next_0_index = d[0].value[8..11].toUint32
+    let next_1_index = d[0].value[12..15].toUint32
+    result = (DbStatus.Success, (wid, sequence, next_0_index, next_1_index))
   else:
     result = (DbStatus.NotFound, (cast[uint64](nil), cast[uint64](nil),
               cast[uint32](nil), cast[uint32](nil)))
 
 iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
                     wallet_id: uint64, sequence: uint64,
-                    last_0_index: uint32, last_1_index: uint32] =
+                    next_0_index: uint32, next_1_index: uint32] =
   let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
   for d in db.gets(key):
     let xpubkey = d.key[1..^9].toString
     let wid = d.key[^8..^1].toUint64
     let sequence = d.value[0..7].toUint64
-    let last_0_index = d.value[8..11].toUint32
-    let last_1_index = d.value[12..15].toUint32
-    yield (xpubkey, wid, sequence, last_0_index, last_1_index)
+    let next_0_index = d.value[8..11].toUint32
+    let next_1_index = d.value[12..15].toUint32
+    yield (xpubkey, wid, sequence, next_0_index, next_1_index)
 
 proc delWallets*() =
   let key = concat(Prefix.wallets.toByte)
@@ -238,8 +238,8 @@ proc acquireWalletId(): uint64 =
   result = wallet_id
 
 proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
-                        sequence: uint64, last_0_index: uint32,
-                        last_1_index: uint32] =
+                        sequence: uint64, next_0_index: uint32,
+                        next_1_index: uint32] =
   withLock createWalletLock:
     let d = getWallet(xpubkey)
     if d.err == DbStatus.Success:
