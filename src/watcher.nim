@@ -114,7 +114,7 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
         var addrlogs = blockstor.getAddrlog(a.address, (gt: cur_log_sequence,
                                             limit: 1000, reverse: 0,
                                             seqbreak: 1))
-        echo addrlogs
+
         while true:
           for alog in addrlogs.toApiResIterator:
             db.setAddrlog(a.wid, alog["sequence"].getUint64, alog["type"].getUint8,
