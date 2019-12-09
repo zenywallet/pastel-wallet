@@ -29,9 +29,6 @@ proc hdaddress(xpubkey: string, change, index: uint32): string =
       btc_hdnode_get_p2pkh_address(addr node, addr chain, address, cast[cint](address_size))
       result = $address
 
-template enumRangeCheck(enumtype: type, value: int): bool =
-  (enumtype.low.ord..enumtype.high.ord).contains(value)
-
 proc timeseed() =
   let now = getTime()
   randomize(now.toUnix * 1000000000 + now.nanosecond)
