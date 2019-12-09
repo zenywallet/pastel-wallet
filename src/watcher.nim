@@ -110,40 +110,36 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
       if not addrBalances.hasKey(a.address):
         db.setAddress(a.address, a.change, a.index, a.wid, 0)
       else:
-        var cur_log_sequence = walletInfos[a.wid].sequence
-        var addrlogs = blockstor.getAddrlog(a.address, (gt: cur_log_sequence,
-                                            limit: 1000, reverse: 0,
-                                            seqbreak: 1))
-
+        var cur_log_sequence = 0'u64
         while true:
+          var addrlogs = blockstor.getAddrlog(a.address, (gte: cur_log_sequence,
+                                              limit: 1000, reverse: 0,
+                                              seqbreak: 1))
+          let reslen = addrlogs.resLen
           for alog in addrlogs.toApiResIterator:
             db.setAddrlog(a.wid, alog["sequence"].getUint64, alog["type"].getUint8,
                           a.change, a.index, a.address, alog["value"].getUint64,
                           alog["txid"].getStr, alog["height"].getUint32,
                           alog["time"].getUint32)
-          if addrlogs.resLen == 0:
+          if reslen == 0:
             break
-          cur_log_sequence = addrlogs["res"][addrlogs.resLen - 1]["sequence"].getUint64
-          if addrlogs.resLen < 1000:
+          cur_log_sequence = addrlogs["res"][reslen - 1]["sequence"].getUint64
+          if reslen < 1000:
             break
-          addrlogs = blockstor.getAddrlog(a.address, (gte: cur_log_sequence,
-                                          limit: 1000, reverse: 0,
-                                          seqbreak: 1))
 
-        var cur_utxo_sequence = sequence
-        var utxos = blockstor.getUtxo(a.address, (gt: cur_utxo_sequence,
-                                      limit: 1000, reverse: 0, seqbreak: 1))
+        var cur_utxo_sequence = 0'u64
         while true:
+          var utxos = blockstor.getUtxo(a.address, (gte: cur_utxo_sequence,
+                                        limit: 1000, reverse: 0, seqbreak: 1))
+          let reslen = utxos.resLen
           for utxo in utxos.toApiResIterator:
             db.setUnspent(a.wid, utxo["sequence"].getUint64, utxo["txid"].getStr,
                           utxo["n"].getUint32, a.address, utxo["value"].getUint64)
-          if utxos.resLen == 0:
+          if reslen == 0:
             break
-          cur_utxo_sequence = utxos["res"][utxos.resLen - 1]["sequence"].getUint64
-          if utxos.resLen < 1000:
+          cur_utxo_sequence = utxos["res"][reslen - 1]["sequence"].getUint64
+          if reslen < 1000:
             break
-          utxos = blockstor.getUtxo(a.address, (gte: cur_utxo_sequence,
-                                    limit: 1000, reverse: 0, seqbreak: 1))
 
         var b = addrBalances[a.address]
         db.setAddrval(a.wid, a.change, a.index, a.address, b.balance, b.utxo_count)
