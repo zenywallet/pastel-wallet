@@ -2,15 +2,16 @@
 
 import os, locks, asyncdispatch, sequtils, tables, random
 from times import getTime, toUnix, nanosecond
+import ../deps/"websocket.nim"/websocket
 import libbtc
-import blockstor, db, events, logs
+import blockstor, db, events, logs, stream
 
 const gaplimit: uint32 = 20
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
 var chain = testnet_bitzeny_chain
 
 var
-  worker: Thread[int]
+  threads: array[3, Thread[void]]
   event = createEvent()
   active = true
   ready* = true
@@ -223,7 +224,7 @@ proc main() =
     else:
       echo "error: getMarker err=", marker_err
 
-proc threadWorkerFunc(cb: int) {.thread.} =
+proc threadWorkerFunc() {.thread.} =
   while active:
     ready = false
     main()
@@ -248,26 +249,46 @@ proc watcher_main() {.thread.} =
         debug "---getUnspents"
         for g in db.getUnspents(d.wallet_id):
           debug g
+    for i in 0..<6:
+      if not active:
+        return
+      sleep(500)
 
-    sleep(3000)
+proc stream_main() {.thread.} =
+  let ws = waitFor newAsyncWebsocketClient("localhost", Port(8001),
+    path = "/api", ssl = false, protocols = @[], userAgent = "pastel-v0.1")
+
+  proc read() {.async.} =
+    while true:
+      let (opcode, data) = await ws.readData()
+      if opcode == Opcode.Text:
+        echo parseJson(data).pretty
+        # test send
+        for d in db.getWallets(""):
+          stream.send(d.wallet_id, data);
+
+  asyncCheck read()
+  while true:
+    if not active:
+      break
+    poll()
 
 proc stop*() =
   active = false
   event.setEvent()
-  joinThread(worker)
+  joinThreads(threads)
   btc_ecc_stop()
   debug "watcher stop"
 
 proc quit() {.noconv.} =
     stop()
 
-var watcher_thread: Thread[void]
-
 proc start*(): Thread[void] =
   debug "watcher start"
   active = true
   btc_ecc_start()
-  createThread(worker, threadWorkerFunc, 0)
-  createThread(watcher_thread, watcher_main)
+  createThread(threads[0], threadWorkerFunc)
+  createThread(threads[1], watcher_main)
+  createThread(threads[2], stream_main)
   addQuitProc(quit)
-  watcher_thread
+  threads[1]
