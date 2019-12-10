@@ -267,6 +267,12 @@ proc stream_main() {.thread.} =
       break
     poll()
 
+proc j_uint64(val: uint64): JsonNode =
+  if val > 9007199254740991'u64:
+    newJString($val)
+  else:
+    newJInt(BiggestInt(val))
+
 proc cmd_main() {.thread.} =
   while true:
     let cdata = cmdChannel.recv()
@@ -295,6 +301,12 @@ proc cmd_main() {.thread.} =
             json["data"].add("unconfs", newJObject())
             for a in addresses:
               json["data"]["unconfs"].add(a, j_unconfs["res"])
+      stream.send(cdata.wallet_id, $json)
+    of StreamCommand.Balance:
+      var balance: uint64 = 0'u64
+      for addrval in getAddrvals(cdata.wallet_id):
+        balance += addrval.value
+      var json = %*{"type": "balance", "data": j_uint64(balance)}
       stream.send(cdata.wallet_id, $json)
     of StreamCommand.BsStream:
       echo "StreamCommand.BsStream"
