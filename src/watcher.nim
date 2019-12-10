@@ -311,13 +311,14 @@ proc cmd_main() {.thread.} =
     of StreamCommand.Addresses:
       var json = %*{"type": "addresses", "data": []}
       for addrval in getAddrvals(cdata.wallet_id):
-        var v = newJObject()
-        v["change"] = newJInt(addrval.change.BiggestInt)
-        v["index"] = newJInt(addrval.index.BiggestInt)
-        v["address"] = newJString(addrval.address)
-        v["value"] = j_uint64(addrval.value)
-        v["utxo_cunt"] = newJInt(addrval.utxo_cunt.BiggestInt)
-        json["data"].add(v)
+        if addrval.value > 0'u64:
+          var v = newJObject()
+          v["change"] = newJInt(addrval.change.BiggestInt)
+          v["index"] = newJInt(addrval.index.BiggestInt)
+          v["address"] = newJString(addrval.address)
+          v["value"] = j_uint64(addrval.value)
+          v["utxo_cunt"] = newJInt(addrval.utxo_cunt.BiggestInt)
+          json["data"].add(v)
       stream.send(cdata.wallet_id, $json)
     of StreamCommand.BsStream:
       echo "StreamCommand.BsStream"
