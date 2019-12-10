@@ -5,10 +5,7 @@ import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, js
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
-import db
-import events
-import yespower
-import logs
+import db, events, yespower, logs
 
 type ClientData* = ref object
   ws: AsyncWebSocket
@@ -32,11 +29,25 @@ type UnspentsData = object
   index: uint32
   xpub_idx: int
 
-proc UnspentsDataCmp(x, y: UnspentsData): int =
-  if x.sequence > y.sequence: 1 else: -1
+type StreamCommand* {.pure.} = enum
+  Abort
+  Unconfs
+  BsStream
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
+
+proc send*(wallet_id: uint64, data: string) =
+  sendMesChannel.send((wallet_id, data))
+
+var cmdChannel*: Channel[tuple[cmd: StreamCommand, wallet_id: uint64, data: string]]
+cmdChannel.open()
+
+proc send*(cmd: StreamCommand, wallet_id: uint64 = 0, data: string = "") =
+  cmdChannel.send((cmd, wallet_id, data))
+
+proc UnspentsDataCmp(x, y: UnspentsData): int =
+  if x.sequence > y.sequence: 1 else: -1
 
 proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
@@ -167,6 +178,8 @@ proc stream_main() {.thread.} =
                     withLock clientsLock:
                       if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
                         walletmap[w.wallet_id].add(wmdata)
+
+                    StreamCommand.Unconfs.send(w.wallet_id)
                 var json = %*{"type": "xpubs", "data": client.xpubs}
                 sendClient(client, $json)
 
@@ -320,6 +333,3 @@ var stream_thread: Thread[void]
 proc start*(): Thread[void] =
   createThread(stream_thread, stream_main)
   stream_thread
-
-proc send*(wallet_id: uint64, data: string) =
-  sendMesChannel.send((wallet_id, data))

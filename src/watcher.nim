@@ -11,7 +11,7 @@ const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
 var chain = testnet_bitzeny_chain
 
 var
-  threads: array[3, Thread[void]]
+  threads: array[4, Thread[void]]
   event = createEvent()
   active = true
   ready* = true
@@ -257,8 +257,9 @@ proc stream_main() {.thread.} =
       if opcode == Opcode.Text:
         echo parseJson(data).pretty
         # test send
+        StreamCommand.BsStream.send(0, data)
         for d in db.getWallets(""):
-          stream.send(d.wallet_id, data);
+          stream.send(d.wallet_id, data)
 
   asyncCheck read()
   while true:
@@ -266,9 +267,45 @@ proc stream_main() {.thread.} =
       break
     poll()
 
+proc cmd_main() {.thread.} =
+  while true:
+    let cdata = cmdChannel.recv()
+    debug "cmdManager cmd=", cdata.cmd, " wid=", cdata.wallet_id, " data=", cdata.data
+    case cdata.cmd
+    of StreamCommand.Unconfs:
+      var json = %*{"type": "unconfs"}
+      let j_mempool = blockstor.getMempool()
+      if j_mempool.kind != JNull and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+        json.add("data", newJObject())
+        var addresses: seq[string]
+        for m in j_mempool["res"]:
+          for a in m["addrs"].pairs:
+            var find = false
+            for ba in db.getAddresses(a.key):
+              if ba.wid == cdata.wallet_id:
+                find = true
+                addresses.add(a.key)
+            if not find:
+              m["addrs"].delete(a.key)
+          if m["addrs"].len > 0:
+            json["data"].add("mempool", m)
+        if addresses.len > 0:
+          let j_unconfs = blockstor.getUnconf(addresses)
+          if j_unconfs.kind != JNull:
+            json["data"].add("unconfs", newJObject())
+            for a in addresses:
+              json["data"]["unconfs"].add(a, j_unconfs["res"])
+      stream.send(cdata.wallet_id, $json)
+    of StreamCommand.BsStream:
+      echo "StreamCommand.BsStream"
+      echo cdata.data
+    of StreamCommand.Abort:
+      return
+
 proc stop*() =
   active = false
   event.setEvent()
+  StreamCommand.Abort.send()
   joinThreads(threads)
   btc_ecc_stop()
   debug "watcher stop"
@@ -281,7 +318,8 @@ proc start*(): Thread[void] =
   active = true
   btc_ecc_start()
   createThread(threads[0], threadWorkerFunc)
-  createThread(threads[1], watcher_main)
-  createThread(threads[2], stream_main)
+  createThread(threads[1], cmd_main)
+  createThread(threads[2], watcher_main)
+  createThread(threads[3], stream_main)
   addQuitProc(quit)
-  threads[1]
+  threads[2]
