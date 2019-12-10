@@ -187,35 +187,35 @@ proc main() =
     return
   let marker_err = getBsErrorCode(j_marker["err"].getInt)
   case marker_err
-    of BsErrorCode.SUCCESS:
-      let res = j_marker["res"]
-      let marker_sequence = res["sequence"].getUint64
-      let last_sequence = res["last"].getUint64
-      addressFinder(marker_sequence, last_sequence)
-      let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
-      if smarker.kind == JNull:
-        debug "error: setmarker is null"
-        return
-      let smarker_err = getBsErrorCode(smarker["err"].getInt)
-      if smarker_err != BsErrorCode.SUCCESS:
-        debug "info: setmarker err=", smarker_err
-    of BsErrorCode.ROLLBACKED:
-      let res = j_marker["res"]
-      let rollbacked_sequence = res["sequence"].getUint64
-      walletRollback(rollbacked_sequence)
-      let smarker_update = blockstor.setMarker(blockstor_apikey, rollbacked_sequence)
-      if smarker_update.kind == JNull:
-        debug "error: setmarker in rollback is null"
-        return
-      let smarker_update_err = getBsErrorCode(smarker_update["err"].getInt)
-      if smarker_update_err != BsErrorCode.SUCCESS:
-        debug "info: setmarker err=", smarker_update_err
-    of BsErrorCode.ROLLBACKING:
-      debug "info: blockstor rollbacking"
-    of BsErrorCode.UNKNOWN_APIKEY:
-      echo "error: invalid apikey"
-    else:
-      echo "error: getMarker err=", marker_err
+  of BsErrorCode.SUCCESS:
+    let res = j_marker["res"]
+    let marker_sequence = res["sequence"].getUint64
+    let last_sequence = res["last"].getUint64
+    addressFinder(marker_sequence, last_sequence)
+    let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
+    if smarker.kind == JNull:
+      debug "error: setmarker is null"
+      return
+    let smarker_err = getBsErrorCode(smarker["err"].getInt)
+    if smarker_err != BsErrorCode.SUCCESS:
+      debug "info: setmarker err=", smarker_err
+  of BsErrorCode.ROLLBACKED:
+    let res = j_marker["res"]
+    let rollbacked_sequence = res["sequence"].getUint64
+    walletRollback(rollbacked_sequence)
+    let smarker_update = blockstor.setMarker(blockstor_apikey, rollbacked_sequence)
+    if smarker_update.kind == JNull:
+      debug "error: setmarker in rollback is null"
+      return
+    let smarker_update_err = getBsErrorCode(smarker_update["err"].getInt)
+    if smarker_update_err != BsErrorCode.SUCCESS:
+      debug "info: setmarker err=", smarker_update_err
+  of BsErrorCode.ROLLBACKING:
+    debug "info: blockstor rollbacking"
+  of BsErrorCode.UNKNOWN_APIKEY:
+    echo "error: invalid apikey"
+  else:
+    echo "error: getMarker err=", marker_err
 
 proc threadWorkerFunc() {.thread.} =
   while active:
