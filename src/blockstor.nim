@@ -148,6 +148,12 @@ proc getAddrlog*(addresses: openarray[string], params: tuple or JsonNode): JsonN
 proc getMempool*(): JsonNode {.inline.} =
   get("mempool")
 
+proc getUnconf*(address: string): JsonNode {.inline.} =
+  get("unconf/" & address)
+
+proc getUnconf*(addresses: openarray[string]): JsonNode {.inline.} =
+  post("unconfs", %*{"addrs": addresses})
+
 proc getMarker*(apikey: string): JsonNode {.inline.} =
   get("marker/" & apikey)
 
@@ -199,6 +205,12 @@ proc getAddrlog*(addresses: openarray[string], params: tuple or JsonNode, cb: pr
 
 proc getMempool*(cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("mempool", cb)
+
+proc getUnconf*(address: string, cb: proc(data: JsonNode)) {.inline.} =
+  asyncCheck getAsync("unconf/" & address, cb)
+
+proc getUnconf*(addresses: openarray[string], cb: proc(data: JsonNode)) {.inline.} =
+  asyncCheck postAsync("unconfs", %*{"addrs": addresses}, cb)
 
 proc getMarker*(apikey: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("marker/" & apikey, cb)
