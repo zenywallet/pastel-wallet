@@ -67,8 +67,8 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
       if used_1.err == DbStatus.Success:
         used_1_index = used_1.res
 
-      var new_0_index = used_0_index + gaplimit
-      var new_1_index = used_1_index + gaplimit
+      var new_0_index = used_0_index + gaplimit + 1
+      var new_1_index = used_1_index + gaplimit + 1
       for i in (d.next_0_index..<new_0_index):
         var address = hdaddress(d.xpubkey, 0, i)
         if address.len > 0:
