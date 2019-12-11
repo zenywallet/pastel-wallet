@@ -257,7 +257,7 @@ proc stream_main() {.thread.} =
       if opcode == Opcode.Text:
         echo parseJson(data).pretty
         # test send
-        StreamCommand.BsStream.send(0, data)
+        StreamCommand.BsStream.send(ClientWalletId(wallet_id: 0'u64), data)
         for d in db.getWallets(""):
           stream.send(d.wallet_id, data)
 
@@ -276,9 +276,10 @@ proc j_uint64(val: uint64): JsonNode =
 proc cmd_main() {.thread.} =
   while true:
     let cdata = cmdChannel.recv()
-    debug "cmdManager cmd=", cdata.cmd, " wid=", cdata.wallet_id, " data=", cdata.data
+    debug "cmdManager cmd=", cdata.cmd
     case cdata.cmd
     of StreamCommand.Unconfs:
+      var client = ClientWalletIds(cdata.client)
       var json = %*{"type": "unconfs"}
       let j_mempool = blockstor.getMempool()
       if j_mempool.kind != JNull and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
@@ -288,9 +289,10 @@ proc cmd_main() {.thread.} =
           for a in m["addrs"].pairs:
             var find = false
             for ba in db.getAddresses(a.key):
-              if ba.wid == cdata.wallet_id:
-                find = true
-                addresses.add(a.key)
+              for wid in client.wallets:
+                if ba.wid == wid:
+                  find = true
+                  addresses.add(a.key)
             if not find:
               m["addrs"].delete(a.key)
           if m["addrs"].len > 0:
@@ -301,44 +303,55 @@ proc cmd_main() {.thread.} =
             json["data"].add("unconfs", newJObject())
             for a in addresses:
               json["data"]["unconfs"].add(a, j_unconfs["res"])
-      stream.send(cdata.wallet_id, $json)
+      stream.send(client.wallets[0], $json)
     of StreamCommand.Balance:
+      var client = ClientWalletIds(cdata.client)
       var balance: uint64 = 0'u64
-      for addrval in getAddrvals(cdata.wallet_id):
-        balance += addrval.value
+      for wid in client.wallets:
+        for addrval in getAddrvals(wid):
+          balance += addrval.value
       var json = %*{"type": "balance", "data": j_uint64(balance)}
-      stream.send(cdata.wallet_id, $json)
+      stream.send(client.wallets[0], $json)
     of StreamCommand.Addresses:
+      var client = ClientWalletIds(cdata.client)
       var json = %*{"type": "addresses", "data": []}
-      for addrval in getAddrvals(cdata.wallet_id):
-        if addrval.value > 0'u64:
-          var v = newJObject()
-          v["change"] = newJInt(addrval.change.BiggestInt)
-          v["index"] = newJInt(addrval.index.BiggestInt)
-          v["address"] = newJString(addrval.address)
-          v["value"] = j_uint64(addrval.value)
-          v["utxo_cunt"] = newJInt(addrval.utxo_cunt.BiggestInt)
-          json["data"].add(v)
-      stream.send(cdata.wallet_id, $json)
+      for wid in client.wallets:
+        for addrval in getAddrvals(wid):
+          if addrval.value > 0'u64:
+            var v = newJObject()
+            v["change"] = newJInt(addrval.change.BiggestInt)
+            v["index"] = newJInt(addrval.index.BiggestInt)
+            v["address"] = newJString(addrval.address)
+            v["value"] = j_uint64(addrval.value)
+            v["utxo_cunt"] = newJInt(addrval.utxo_cunt.BiggestInt)
+            json["data"].add(v)
+      stream.send(client.wallets[0], $json)
     of StreamCommand.Unused:
       const UnusedMax = 20
+      var client = ClientWalletId(cdata.client)
       var json = %*{"type": "unused", "data": []}
       var count = 0
       var index = 0
+      var unused_index: uint32 = 0
+      var used_0 = db.getLastUsedAddrIndex(client.wallet_id, 0)
+      if used_0.err == DbStatus.Success:
+        unused_index = used_0.res + 1
       block searchUnused:
-        for addrval in getAddrvals(cdata.wallet_id):
+        for addrval in getAddrvals(client.wallet_id):
           if addrval.change != 0:
             break
           for i in index..<addrval.index.ord:
             json["data"].add(newJInt(i))
             inc(count)
-            if count >= UnusedMax:
+            if i >= unused_index.ord and count >= UnusedMax:
               break searchUnused
           index = addrval.index.ord + 1
         for i in count..<UnusedMax:
           json["data"].add(newJInt(index))
           inc(index)
-      stream.send(cdata.wallet_id, $json)
+          if index >= unused_index.ord:
+            break
+      stream.send(client.wallet_id, $json)
     of StreamCommand.BsStream:
       echo "StreamCommand.BsStream"
       echo cdata.data

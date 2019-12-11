@@ -7,13 +7,19 @@ import unicode
 import ../src/ctrmode
 import db, events, yespower, logs
 
+type
+  WalletId = uint64
+  WalletIds = seq[WalletId]
+  WalletXpub = string
+  WalletXPubs = seq[WalletXpub]
+
 type ClientData* = ref object
   ws: AsyncWebSocket
   kp: KeyPair
   ctr: ctrmode.CTR
   salt: array[64, byte]
-  wallets: seq[uint64]
-  xpubs: seq[string]
+  wallets: WalletIds
+  xpubs: WalletXPubs
 
 type WalletMapData = ref object
   fd: int
@@ -37,17 +43,36 @@ type StreamCommand* {.pure.} = enum
   Unused
   BsStream
 
+type
+  ClientWallet* = ref object of RootObj
+  ClientWalletId* = ref object of ClientWallet
+    wallet_id*: WalletId
+  ClientWalletIds* = ref object of ClientWallet
+    wallets*: WalletIds
+  ClientWalletXPub* = ref object of ClientWallet
+    wallet_id*: WalletId
+    xpub*: WalletXpub
+  ClientWalletXpubs* = ref object of ClientWallet
+    wallets*: WalletIds
+    xpubs*: WalletXPubs
+
+proc `$`*(x: ClientWallet): string = ""
+proc `$`*(x: ClientWalletId): string = $x.wallet_id
+proc `$`*(x: ClientWalletIds): string = $x.wallets
+proc `$`*(x: ClientWalletXpub): string = $x.wallet_id & " " & $x.xpub
+proc `$`*(x: ClientWalletXpubs): string = $x.wallets & " " & $x.xpubs
+
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
 
 proc send*(wallet_id: uint64, data: string) =
   sendMesChannel.send((wallet_id, data))
 
-var cmdChannel*: Channel[tuple[cmd: StreamCommand, wallet_id: uint64, data: string]]
+var cmdChannel*: Channel[tuple[cmd: StreamCommand, client: ClientWallet, data: string]]
 cmdChannel.open()
 
-proc send*(cmd: StreamCommand, wallet_id: uint64 = 0, data: string = "") =
-  cmdChannel.send((cmd, wallet_id, data))
+proc send*(cmd: StreamCommand, client: ClientWallet = nil, data: string = "") =
+  cmdChannel.send((cmd, client, data))
 
 proc UnspentsDataCmp(x, y: UnspentsData): int =
   if x.sequence > y.sequence: 1 else: -1
@@ -182,12 +207,14 @@ proc stream_main() {.thread.} =
                       if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
                         walletmap[w.wallet_id].add(wmdata)
 
-                    StreamCommand.Unconfs.send(w.wallet_id)
-                    StreamCommand.Balance.send(w.wallet_id)
-                    StreamCommand.Addresses.send(w.wallet_id)
-                    StreamCommand.Unused.send(w.wallet_id)
                 var json = %*{"type": "xpubs", "data": client.xpubs}
                 sendClient(client, $json)
+
+                if client.wallets.len > 0:
+                  StreamCommand.Unconfs.send(ClientWalletIds(wallets: client.wallets))
+                  StreamCommand.Balance.send(ClientWalletIds(wallets: client.wallets))
+                  StreamCommand.Addresses.send(ClientWalletIds(wallets: client.wallets))
+                  StreamCommand.Unused.send(ClientWalletId(wallet_id: client.wallets[0]))
 
               elif cmd == "unspents":
                 var unspents: seq[UnspentsData]
