@@ -34,6 +34,7 @@ type StreamCommand* {.pure.} = enum
   Unconfs
   Balance
   Addresses
+  Unused
   BsStream
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
@@ -184,6 +185,7 @@ proc stream_main() {.thread.} =
                     StreamCommand.Unconfs.send(w.wallet_id)
                     StreamCommand.Balance.send(w.wallet_id)
                     StreamCommand.Addresses.send(w.wallet_id)
+                    StreamCommand.Unused.send(w.wallet_id)
                 var json = %*{"type": "xpubs", "data": client.xpubs}
                 sendClient(client, $json)
 

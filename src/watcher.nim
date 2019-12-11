@@ -320,6 +320,25 @@ proc cmd_main() {.thread.} =
           v["utxo_cunt"] = newJInt(addrval.utxo_cunt.BiggestInt)
           json["data"].add(v)
       stream.send(cdata.wallet_id, $json)
+    of StreamCommand.Unused:
+      const UnusedMax = 20
+      var json = %*{"type": "unused", "data": []}
+      var count = 0
+      var index = 0
+      block searchUnused:
+        for addrval in getAddrvals(cdata.wallet_id):
+          if addrval.change != 0:
+            break
+          for i in index..<addrval.index.ord:
+            json["data"].add(newJInt(i))
+            inc(count)
+            if count >= UnusedMax:
+              break searchUnused
+          index = addrval.index.ord + 1
+        for i in count..<UnusedMax:
+          json["data"].add(newJInt(index))
+          inc(index)
+      stream.send(cdata.wallet_id, $json)
     of StreamCommand.BsStream:
       echo "StreamCommand.BsStream"
       echo cdata.data
