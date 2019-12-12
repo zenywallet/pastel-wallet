@@ -1013,6 +1013,9 @@ i.receive {
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
+#send-coins .ui.list.uri-options .header {
+  font-size: .92857143em;
+}
 #clipboard {
   position: absolute;
   visibility: hidden;
