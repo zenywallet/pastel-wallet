@@ -322,6 +322,9 @@ function Wallet() {
       var s = cardInfos[i];
       console.log('cardInfos', JSON.stringify(s));
       var sbuf = base58.dec(s.seed || s.orig);
+      if(!sbuf && !s.seed && s.orig) {
+        sbuf = cipher.yespower_n4r32(sha256d(s.orig), 32);
+      }
       if(s.sv && s.sv.length > 0) {
         var sv = cipher.yespower_n4r32(sha256d(s.sv), 32);
         xc(sbuf, sv);
