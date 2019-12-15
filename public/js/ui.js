@@ -248,6 +248,8 @@ function recvform_change() {
       uri += (firstflag ? '?' : '&') + 'amount=' + Encoding.convert(amount, 'SJIS', 'UNICODE');
       firstflag = false;
     }
+  } else {
+    amount_elm.closest('.field').removeClass('error');
   }
   if(label) {
     uri += (firstflag ? '?' : '&') + 'label=' + Encoding.convert(label, 'SJIS', 'UNICODE');
