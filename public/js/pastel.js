@@ -566,6 +566,35 @@ pastel.ready = function() {
     return true;
   }
 
+  function conv_coin(uint64_val) {
+    strval = uint64_val.toString();
+    val = parseInt(strval);
+    if(val > Number.MAX_SAFE_INTEGER) {
+      var d = strval.slice(-8).replace(/0+$/, '');
+      var n = strval.substr(0, strval.length - 8);
+      if(d.length > 0) {
+        return n + '.' + d;
+      } else {
+        return n;
+      }
+    }
+    return val / 100000000;
+  }
+
+  function fadeIn(el, speed) {
+    el.style.opacity = 0;
+    el.style.display = "block";
+    var start = null;
+    requestAnimationFrame(function fade(timestamp) {
+      if (!start) start = timestamp;
+      var progress = (timestamp - start) / speed;
+      el.style.opacity = Math.min(progress, 1);
+      if (progress < 1) {
+        requestAnimationFrame(fade);
+      }
+    });
+  }
+
   pastel.secure_recv = function(json) {
     var type = json['type'];
     if(type == 'xpubs') {
@@ -591,6 +620,48 @@ pastel.ready = function() {
           pastel.utxoballs.click(click_cb);
         }, 1400);
       });
+    } else if(type == 'unconfs') {
+      console.log('unconfs: ' + JSON.stringify(json));
+      var data = json.data;
+      var send = UINT64(0);
+      var recv = UINT64(0);
+      if(data) {
+        var mempool = data.mempool;
+        if(mempool && mempool.addrs) {
+          for(addr in mempool.addrs) {
+            console.log()
+            var vals = mempool.addrs[addr];
+            for(key in vals) {
+              if(key == 0) {
+                send.add(UINT64(vals[key]));
+              } else if(key == 1) {
+                recv.add(UINT64(vals[key]));
+              }
+            }
+          }
+        }
+      }
+      if(send.greaterThan(UINT64(0))) {
+        $('#wallet-balance .send span').text(conv_coin(send));
+        $('#wallet-balance .send').fadeIn(400);
+      } else {
+        $('#wallet-balance .send').fadeOut(400);
+      }
+      if(recv.greaterThan(UINT64(0))) {
+        $('#wallet-balance .receive span').text(conv_coin(recv));
+        $('#wallet-balance .receive').fadeIn(400);
+      } else {
+        $('#wallet-balance .receive').fadeOut(400);
+      }
+    } else if(type == 'balance') {
+      console.log('balance: ' + JSON.stringify(json));
+      $('#wallet-balance .balance').text(conv_coin(json.data));
+      var el = document.getElementById("wallet-balance");
+      fadeIn(el, 800);
+    } else if(type == 'addresses') {
+      console.log('addresses: ' + JSON.stringify(json));
+    } else if(type == 'unused') {
+      console.log('unused: ' + JSON.stringify(json));
     } else if(type == 'ready') {
       console.log('server ready');
       var xpubs = wallet.getXpubs();

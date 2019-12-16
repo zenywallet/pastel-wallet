@@ -1236,13 +1236,17 @@ proc appMain(data: RouterData): VNode =
           tdiv(class="intro-body wallet-body"):
             tdiv(id="wallet-balance", class="ui center aligned segment"):
               tdiv(class="ui top left attached tiny label send"):
-                text "456.789" & " "
+                span:
+                  text "0"
+                text " "
                 italic(class="counterclockwise rotated sign-out icon")
               tdiv(class="ui top right attached tiny label receive"):
                 italic(class="clockwise rotated sign-in icon")
-                text "123.456"
+                span:
+                  text "0"
               tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
-              text "12345.6789"
+              span(class="balance"):
+                text "0"
             if showRecvAddressSelector:
               recvAddressSelector()
             if showRecvAddressModal:

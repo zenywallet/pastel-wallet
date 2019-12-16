@@ -526,15 +526,20 @@ i.send {
 i.receive {
   color: #23b195;
 }
+#wallet-balance {
+  display: none;
+}
 #wallet-balance .ui.attached.label.send {
   background-color: rgba(213, 113, 113, 0.5);
   color: #eee;
   padding: 5px 0px 5px 6px;
+  display: none;
 }
 #wallet-balance .ui.attached.label.receive {
   background-color: rgba(35, 177, 149, 0.5);
   color: #eee;
   padding: 5px 6px 5px 6px;
+  display: none;
 }
 #wallet-balance .ui.attached.label.symbol {
   background-color: rgba(118, 118, 118, 0.5);
