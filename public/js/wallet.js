@@ -175,14 +175,42 @@ function Wallet() {
     return _utxos;
   }
 
-  this.getUnusedAddressList = function(count) {
-    var addrs = [];
-    for(var i = 0; i < count; i++) {
-      var keyPair = coin.ECPair.makeRandom();
-      var p2pkh = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
-      addrs.push(p2pkh.address);
+  this.unusedAddressList_cb = function(json) {}
+
+  this.getUnusedAddressList = function(count, cb) {
+    this.unusedAddressList_cb = function(json) {
+      var xpub = _xpubs[0];
+      if(!xpub) {
+       xpub = this.getXpubs();
+      }
+      if(!_nodes[xpub]) {
+        _nodes[xpub] = bip32.fromBase58(xpub, network);
+      }
+      var addrs = [];
+      var data = json.data;
+      var datatmp = [];
+      if(data.length == 0) {
+        for(var i = 0; i < count; i++) {
+          datatmp.push(i);
+        }
+      } else {
+        for(var i in data) {
+          datatmp.push(data[i]);
+        }
+        var last = data[data.length - 1];
+        for(var i = 1; i <= count - data.length; i++) {
+          datatmp.push(last + i);
+        }
+      }
+      console.log('datatmp=', datatmp);
+      for(var i in datatmp) {
+        var child = _nodes[xpub].derive(0).derive(datatmp[i]);
+        var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network});
+        addrs.push(p2pkh.address);
+      }
+      cb(addrs);
     }
-    return addrs;
+    pastel.send({cmd: "unused"});
   }
 
   function xc(b1, b2) {

@@ -845,26 +845,28 @@ asm """
       $('#send-coins').transition({
         animation: 'fade down',
         onComplete : function() {
-          showRecvAddress();
-          $('#receive-address').transition({
-            animation: 'fade down',
-            onComplete : function() {
-              showRecvAddressAfterEffect();
-              sendrecv_last = 2;
-              sendrecv_switch_busy = false;
-            }
+          showRecvAddress(function() {
+            $('#receive-address').transition({
+              animation: 'fade down',
+              onComplete : function() {
+                showRecvAddressAfterEffect();
+                sendrecv_last = 2;
+                sendrecv_switch_busy = false;
+              }
+            });
           });
         }
       });
     } else {
-      showRecvAddress();
-      $('#receive-address').transition({
-        animation: 'fade down',
-        onComplete : function() {
-          showRecvAddressAfterEffect();
-          sendrecv_last = 2;
-          sendrecv_switch_busy = false;
-        }
+      showRecvAddress(function() {
+        $('#receive-address').transition({
+          animation: 'fade down',
+          onComplete : function() {
+            showRecvAddressAfterEffect();
+            sendrecv_last = 2;
+            sendrecv_switch_busy = false;
+          }
+        });
       });
     }
   }

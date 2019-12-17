@@ -216,6 +216,9 @@ proc stream_main() {.thread.} =
                   StreamCommand.Addresses.send(ClientWalletIds(wallets: client.wallets))
                   StreamCommand.Unused.send(ClientWalletId(wallet_id: client.wallets[0]))
 
+              elif cmd == "unused":
+                StreamCommand.Unused.send(ClientWalletId(wallet_id: client.wallets[0]))
+
               elif cmd == "unspents":
                 var unspents: seq[UnspentsData]
                 var xpub_idx = 0
