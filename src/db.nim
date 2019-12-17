@@ -269,6 +269,17 @@ iterator getAddresses*(address: string): tuple[change: uint32,
     let sequence = d.value.toUint64
     yield (change, index, wid, sequence)
 
+iterator getAddresses*(): tuple[address: string, change: uint32,
+                      index: uint32, wid: uint64, sequence: uint64] =
+  let key = concat(Prefix.addresses.toByte)
+  for d in db.gets(key):
+    let address = d.key[1..^17].toString
+    let change = d.key[^16..^13].toUint32
+    let index = d.key[^12..^9].toUint32
+    let wid = d.key[^8..^1].toUint64
+    let sequence = d.value.toUint64
+    yield (address, change, index, wid, sequence)
+
 proc setAddrval*(wid: uint64, change: uint32, index: uint32,
                 address: string, value: uint64, utxo_count: uint32) =
   let key = concat(Prefix.addrvals.toByte, wid.toByte,

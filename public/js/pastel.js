@@ -627,10 +627,9 @@ pastel.ready = function() {
       var recv = UINT64(0);
       if(data) {
         var mempool = data.mempool;
-        if(mempool && mempool.addrs) {
-          for(addr in mempool.addrs) {
-            console.log()
-            var vals = mempool.addrs[addr];
+        if(mempool) {
+          for(addr in mempool) {
+            var vals = mempool[addr];
             for(key in vals) {
               if(key == 0) {
                 send.add(UINT64(vals[key]));

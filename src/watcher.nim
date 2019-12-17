@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, locks, asyncdispatch, sequtils, tables, random
+import os, locks, asyncdispatch, sequtils, tables, random, sets
 from times import getTime, toUnix, nanosecond
 import ../deps/"websocket.nim"/websocket
 import libbtc
@@ -180,6 +180,108 @@ proc walletRollback(rollbacked_sequence: uint64) =
       db.setAddress(a.address, a.change, a.index, d.wallet_id, rollbacked_sequence)
     delAddrlogs_gt(d.wallet_id, rollbacked_sequence)
 
+type
+  UpdateAddrInfo = ref object
+    address: string
+    change: uint32
+    index: uint32
+    wid: uint64
+    sequence: uint64
+
+proc updateAddresses(marker_sequence: uint64, last_sequence: uint64) =
+  var updateAddrInfos: seq[UpdateAddrInfo]
+  for a in db.getAddresses():
+    updateAddrInfos.add(UpdateAddrInfo(address: a.address, change: a.change,
+                                      index: a.index, wid: a.wid,
+                                      sequence: a.sequence))
+  if updateAddrInfos.len > 0:
+    var addrs: seq[string]
+    for a in updateAddrInfos:
+      addrs.add(a.address)
+    timeseed()
+    shuffle(addrs)
+
+    var addrBalances = initTable[string, AddrBalance]()
+    var split_addrs = addrs.distribute(1 + addrs.len div 50)
+    for sa in split_addrs:
+      let balance = blockstor.getAddress(sa)
+      if sa.len == balance.resLen:
+        var i = 0
+        for b in balance.toApiResIterator:
+          if b{"balance"} != nil:
+            addrBalances[sa[i]] = AddrBalance(balance: b["balance"].getUint64,
+                                              utxo_count: b["utxo_count"].getUint32)
+          inc(i)
+
+    for a in updateAddrInfos:
+      if addrBalances.hasKey(a.address):
+        var cur_log_sequence = 0'u64
+        while true:
+          var addrlogs = blockstor.getAddrlog(a.address, (gte: cur_log_sequence,
+                                              limit: 1000, reverse: 0,
+                                              seqbreak: 1))
+          let reslen = addrlogs.resLen
+          for alog in addrlogs.toApiResIterator:
+            db.setAddrlog(a.wid, alog["sequence"].getUint64, alog["type"].getUint8,
+                          a.change, a.index, a.address, alog["value"].getUint64,
+                          alog["txid"].getStr, alog["height"].getUint32,
+                          alog["time"].getUint32)
+          if reslen == 0:
+            break
+          cur_log_sequence = addrlogs["res"][reslen - 1]["sequence"].getUint64
+          if reslen < 1000:
+            break
+
+        var b = addrBalances[a.address]
+        db.setAddrval(a.wid, a.change, a.index, a.address, b.balance, b.utxo_count)
+        db.setAddress(a.address, a.change, a.index, a.wid, cur_log_sequence)
+
+proc updateBalance(wid: uint64) =
+  discard
+
+var block_header_prev_height: uint32 = 0'u32
+var blockDataChannel*: Channel[JsonNode]
+blockDataChannel.open()
+
+proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
+  var wids = initHashSet[uint64]()
+  while blockDataChannel.peek() > 0:
+    var json = blockDataChannel.recv()
+    var height = json["height"].getUint32
+    var time = json["time"].getUint32
+    if block_header_prev_height + 1 == height:
+      var addresses = json["addrs"]
+      for b in json["addrs"].pairs:
+        var address = b.key
+        var val = b.val
+        for a in db.getAddresses(address):
+          wids.incl(a.wid)
+          db.setAddrval(a.wid, a.change, a.index, address,
+                        val["balance"].getUint64, val["utxo_count"].getUint32)
+          for v in val["vals"]:
+            var sequence = v["sequence"].getUint64
+            var txid = json["txs"][$sequence].getStr
+            db.setAddrlog(a.wid, v["sequence"].getUint64, v["type"].getUint8,
+                          a.change, a.index, address, v["value"].getUint64,
+                          txid, height, time)
+      block_header_prev_height = height
+    else:
+      for w in db.getWallets(""):
+        wids.incl(w.wallet_id)
+      while blockDataChannel.peek() > 0:
+        json = blockDataChannel.recv()
+      height = json["height"].getUint32
+      updateAddresses(marker_sequence, last_sequence)
+      block_header_prev_height = height
+      break
+
+  for wid in wids:
+    updateBalance(wid)
+
+  for w in db.getWallets(""):
+    if wids.contains(w.wallet_id):
+      db.setWallet(w.xpubkey, w.wallet_id, last_sequence, w.next_0_index, w.next_1_index)
+
 proc main() =
   let j_marker = blockstor.getMarker(blockstor_apikey)
   if j_marker.kind == JNull:
@@ -191,6 +293,7 @@ proc main() =
     let res = j_marker["res"]
     let marker_sequence = res["sequence"].getUint64
     let last_sequence = res["last"].getUint64
+    applyBlockData(marker_sequence, last_sequence)
     addressFinder(marker_sequence, last_sequence)
     let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
     if smarker.kind == JNull:
@@ -247,6 +350,11 @@ proc watcher_main() {.thread.} =
         return
       sleep(500)
 
+proc block_reader(json: JsonNode) =
+  if json.hasKey("height"):
+    blockDataChannel.send(json)
+    doWork()
+
 proc stream_main() {.thread.} =
   let ws = waitFor newAsyncWebsocketClient("localhost", Port(8001),
     path = "/api", ssl = false, protocols = @[], userAgent = "pastel-v0.1")
@@ -255,7 +363,14 @@ proc stream_main() {.thread.} =
     while true:
       let (opcode, data) = await ws.readData()
       if opcode == Opcode.Text:
-        echo parseJson(data).pretty
+        try:
+          var json = parseJson(data)
+          echo json.pretty
+          block_reader(json)
+        except:
+          let e = getCurrentException()
+          echo e.name, ": ", e.msg
+
         # test send
         StreamCommand.BsStream.send(ClientWalletId(wallet_id: 0'u64), data)
         for d in db.getWallets(""):
@@ -282,9 +397,11 @@ proc cmd_main() {.thread.} =
       var client = ClientWalletIds(cdata.client)
       var json = %*{"type": "unconfs"}
       let j_mempool = blockstor.getMempool()
-      if j_mempool.kind != JNull and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+      if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
         json.add("data", newJObject())
-        var addresses: seq[string]
+        json["data"].add("mempool", newJObject())
+        var addresses = initHashSet[string]()
+        var addrbalances = initTable[string, uint64]()
         for m in j_mempool["res"]:
           for a in m["addrs"].pairs:
             var find = false
@@ -292,17 +409,25 @@ proc cmd_main() {.thread.} =
               for wid in client.wallets:
                 if ba.wid == wid:
                   find = true
-                  addresses.add(a.key)
-            if not find:
-              m["addrs"].delete(a.key)
-          if m["addrs"].len > 0:
-            json["data"].add("mempool", m)
+                  addresses.incl(a.key)
+                  var j_mempool = json["data"]["mempool"]
+                  if j_mempool.hasKey(a.key):
+                    for v in a.val.pairs:
+                      if j_mempool[a.key].hasKey(v.key):
+                        j_mempool[a.key][v.key] = j_uint64(j_mempool[a.key][v.key].getUint64 + v.val.getUint64)
+                      else:
+                        j_mempool[a.key].add(v.key, v.val)
+                  else:
+                    j_mempool.add(a.key, a.val)
         if addresses.len > 0:
-          let j_unconfs = blockstor.getUnconf(addresses)
+          var addrs_array: seq[string]
+          for a in addresses:
+            addrs_array.add(a)
+          let j_unconfs = blockstor.getUnconf(addrs_array)
           if j_unconfs.kind != JNull:
             json["data"].add("unconfs", newJObject())
-            for a in addresses:
-              json["data"]["unconfs"].add(a, j_unconfs["res"])
+            for a in addrs_array:
+              json["data"]["unconfs"][a] = j_unconfs["res"]
       stream.send(client.wallets[0], $json)
     of StreamCommand.Balance:
       var client = ClientWalletIds(cdata.client)
