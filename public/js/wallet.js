@@ -175,50 +175,42 @@ function Wallet() {
     return _utxos;
   }
 
-  this.unusedAddressList_cb = function(json) {}
+  var _unusedList = [];
+  this.setUnusedAddress = function(data) {
+    _unusedList = data;
+  }
 
   this.getUnusedAddressList = function(count, cb) {
-    var cb_called_tval = null;
-    this.unusedAddressList_cb = function(json) {
-      clearTimeout(cb_called_tval);
-      var xpub = _xpubs[0];
-      if(!xpub) {
-       xpub = this.getXpubs();
-      }
-      if(!_nodes[xpub]) {
-        _nodes[xpub] = bip32.fromBase58(xpub, network);
-      }
-      var addrs = [];
-      var data = json.data;
-      var datatmp = [];
-      if(data.length == 0) {
-        for(var i = 0; i < count; i++) {
-          datatmp.push(i);
-        }
-      } else {
-        for(var i in data) {
-          datatmp.push(data[i]);
-        }
-        var last = data[data.length - 1];
-        for(var i = 1; i <= count - data.length; i++) {
-          datatmp.push(last + i);
-        }
-      }
-      console.log('datatmp=', datatmp);
-      for(var i in datatmp) {
-        var child = _nodes[xpub].derive(0).derive(datatmp[i]);
-        var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network});
-        addrs.push(p2pkh.address);
-      }
-      cb(addrs);
+    var xpub = _xpubs[0];
+    if(!xpub) {
+     xpub = this.getXpubs();
     }
-    pastel.send({cmd: "unused"});
-    cb_called_tval = setTimeout(function() {
-      var cur_cb = self.unusedAddressList_cb;
-      self.unusedAddressList_cb = function(json) {}
-      Notify.show("Error", "Server no response.", Notify.msgtype.error);
-      cur_cb({data: []});
-    }, 5000);
+    if(!_nodes[xpub]) {
+      _nodes[xpub] = bip32.fromBase58(xpub, network);
+    }
+    var addrs = [];
+    var data = _unusedList;
+    var datatmp = [];
+    if(data.length == 0) {
+      for(var i = 0; i < count; i++) {
+        datatmp.push(i);
+      }
+    } else {
+      for(var i in data) {
+        datatmp.push(data[i]);
+      }
+      var last = data[data.length - 1];
+      for(var i = 1; i <= count - data.length; i++) {
+        datatmp.push(last + i);
+      }
+    }
+    console.log('datatmp=', datatmp);
+    for(var i in datatmp) {
+      var child = _nodes[xpub].derive(0).derive(datatmp[i]);
+      var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network});
+      addrs.push(p2pkh.address);
+    }
+    cb(addrs);
   }
 
   function xc(b1, b2) {

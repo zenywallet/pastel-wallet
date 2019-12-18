@@ -661,7 +661,7 @@ pastel.ready = function() {
       console.log('addresses: ' + JSON.stringify(json));
     } else if(type == 'unused') {
       console.log('unused: ' + JSON.stringify(json));
-      wallet.unusedAddressList_cb(json);
+      wallet.setUnusedAddress(json.data);
     } else if(type == 'ready') {
       console.log('server ready');
       var xpubs = wallet.getXpubs();
