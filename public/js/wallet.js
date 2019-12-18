@@ -178,7 +178,9 @@ function Wallet() {
   this.unusedAddressList_cb = function(json) {}
 
   this.getUnusedAddressList = function(count, cb) {
+    var cb_called_tval = null;
     this.unusedAddressList_cb = function(json) {
+      clearTimeout(cb_called_tval);
       var xpub = _xpubs[0];
       if(!xpub) {
        xpub = this.getXpubs();
@@ -211,6 +213,12 @@ function Wallet() {
       cb(addrs);
     }
     pastel.send({cmd: "unused"});
+    cb_called_tval = setTimeout(function() {
+      var cur_cb = self.unusedAddressList_cb;
+      self.unusedAddressList_cb = function(json) {}
+      Notify.show("Error", "Server no response.", Notify.msgtype.error);
+      cur_cb({data: []});
+    }, 5000);
   }
 
   function xc(b1, b2) {
