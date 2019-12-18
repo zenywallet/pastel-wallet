@@ -42,25 +42,20 @@ type StreamCommand* {.pure.} = enum
   Addresses
   Unused
   BsStream
+  BsStreamInit
 
 type
-  ClientWallet* = ref object of RootObj
-  ClientWalletId* = ref object of ClientWallet
-    wallet_id*: WalletId
-  ClientWalletIds* = ref object of ClientWallet
+  StreamData* = ref object of RootObj
+  StreamDataUnconfs* = ref object of StreamData
     wallets*: WalletIds
-  ClientWalletXPub* = ref object of ClientWallet
-    wallet_id*: WalletId
-    xpub*: WalletXpub
-  ClientWalletXpubs* = ref object of ClientWallet
+  StreamDataBalance* = ref object of StreamData
     wallets*: WalletIds
-    xpubs*: WalletXPubs
-
-proc `$`*(x: ClientWallet): string = ""
-proc `$`*(x: ClientWalletId): string = $x.wallet_id
-proc `$`*(x: ClientWalletIds): string = $x.wallets
-proc `$`*(x: ClientWalletXpub): string = $x.wallet_id & " " & $x.xpub
-proc `$`*(x: ClientWalletXpubs): string = $x.wallets & " " & $x.xpubs
+  StreamDataAddresses* = ref object of StreamData
+    wallets*: WalletIds
+  StreamDataUnused* = ref object of StreamData
+    wallet_id*: WalletId
+  StreamDataBsStream* = ref object of StreamData
+    data*: JsonNode
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
@@ -68,11 +63,11 @@ sendMesChannel.open()
 proc send*(wallet_id: uint64, data: string) =
   sendMesChannel.send((wallet_id, data))
 
-var cmdChannel*: Channel[tuple[cmd: StreamCommand, client: ClientWallet, data: string]]
+var cmdChannel*: Channel[tuple[cmd: StreamCommand, data: StreamData]]
 cmdChannel.open()
 
-proc send*(cmd: StreamCommand, client: ClientWallet = nil, data: string = "") =
-  cmdChannel.send((cmd, client, data))
+proc send*(cmd: StreamCommand, data: StreamData = nil) =
+  cmdChannel.send((cmd, data))
 
 proc UnspentsDataCmp(x, y: UnspentsData): int =
   if x.sequence > y.sequence: 1 else: -1
@@ -211,13 +206,13 @@ proc stream_main() {.thread.} =
                 sendClient(client, $json)
 
                 if client.wallets.len > 0:
-                  StreamCommand.Unconfs.send(ClientWalletIds(wallets: client.wallets))
-                  StreamCommand.Balance.send(ClientWalletIds(wallets: client.wallets))
-                  StreamCommand.Addresses.send(ClientWalletIds(wallets: client.wallets))
-                  StreamCommand.Unused.send(ClientWalletId(wallet_id: client.wallets[0]))
+                  StreamCommand.Unconfs.send(StreamDataUnconfs(wallets: client.wallets))
+                  StreamCommand.Balance.send(StreamDataBalance(wallets: client.wallets))
+                  StreamCommand.Addresses.send(StreamDataAddresses(wallets: client.wallets))
+                  StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
 
               elif cmd == "unused":
-                StreamCommand.Unused.send(ClientWalletId(wallet_id: client.wallets[0]))
+                StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
 
               elif cmd == "unspents":
                 var unspents: seq[UnspentsData]

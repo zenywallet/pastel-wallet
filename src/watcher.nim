@@ -290,18 +290,23 @@ proc main() =
   let marker_err = getBsErrorCode(j_marker["err"].getInt)
   case marker_err
   of BsErrorCode.SUCCESS:
-    let res = j_marker["res"]
-    let marker_sequence = res["sequence"].getUint64
-    let last_sequence = res["last"].getUint64
-    applyBlockData(marker_sequence, last_sequence)
-    addressFinder(marker_sequence, last_sequence)
-    let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
-    if smarker.kind == JNull:
-      debug "error: setmarker is null"
-      return
-    let smarker_err = getBsErrorCode(smarker["err"].getInt)
-    if smarker_err != BsErrorCode.SUCCESS:
-      debug "info: setmarker err=", smarker_err
+    try:
+      let res = j_marker["res"]
+      let marker_sequence = res["sequence"].getUint64
+      let last_sequence = res["last"].getUint64
+      applyBlockData(marker_sequence, last_sequence)
+      addressFinder(marker_sequence, last_sequence)
+      let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
+      if smarker.kind == JNull:
+        debug "error: setmarker is null"
+        return
+      let smarker_err = getBsErrorCode(smarker["err"].getInt)
+      if smarker_err != BsErrorCode.SUCCESS:
+        debug "info: setmarker err=", smarker_err
+    except:
+        echo "EXCEPTION: BsErrorCode.SUCCESS ", j_marker
+        let e = getCurrentException()
+        debug e.name, ": ", e.msg
   of BsErrorCode.ROLLBACKED:
     let res = j_marker["res"]
     let rollbacked_sequence = res["sequence"].getUint64
@@ -367,16 +372,18 @@ proc stream_main() {.thread.} =
           var json = parseJson(data)
           echo json.pretty
           block_reader(json)
+
+          # test send
+          StreamCommand.BsStream.send(StreamDataBsStream(data: json))
+          for d in db.getWallets(""):
+            stream.send(d.wallet_id, data)
+
         except:
           let e = getCurrentException()
           echo e.name, ": ", e.msg
 
-        # test send
-        StreamCommand.BsStream.send(ClientWalletId(wallet_id: 0'u64), data)
-        for d in db.getWallets(""):
-          stream.send(d.wallet_id, data)
-
   asyncCheck read()
+  StreamCommand.BsStreamInit.send()
   while true:
     if not active:
       break
@@ -389,48 +396,56 @@ proc j_uint64(val: uint64): JsonNode =
     newJInt(BiggestInt(val))
 
 proc cmd_main() {.thread.} =
+  var mempool: JsonNode = newJArray()
+
   while true:
     let cdata = cmdChannel.recv()
     debug "cmdManager cmd=", cdata.cmd
     case cdata.cmd
     of StreamCommand.Unconfs:
-      var client = ClientWalletIds(cdata.client)
+      var client = StreamDataUnconfs(cdata.data)
       var json = %*{"type": "unconfs"}
-      let j_mempool = blockstor.getMempool()
-      if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
-        json.add("data", newJObject())
-        json["data"].add("mempool", newJObject())
-        var addresses = initHashSet[string]()
-        var addrbalances = initTable[string, uint64]()
-        for m in j_mempool["res"]:
-          for a in m["addrs"].pairs:
-            var find = false
-            for ba in db.getAddresses(a.key):
-              for wid in client.wallets:
-                if ba.wid == wid:
-                  find = true
-                  addresses.incl(a.key)
-                  var j_mempool = json["data"]["mempool"]
-                  if j_mempool.hasKey(a.key):
-                    for v in a.val.pairs:
-                      if j_mempool[a.key].hasKey(v.key):
-                        j_mempool[a.key][v.key] = j_uint64(j_mempool[a.key][v.key].getUint64 + v.val.getUint64)
-                      else:
-                        j_mempool[a.key].add(v.key, v.val)
-                  else:
-                    j_mempool.add(a.key, a.val)
-        if addresses.len > 0:
-          var addrs_array: seq[string]
-          for a in addresses:
-            addrs_array.add(a)
-          let j_unconfs = blockstor.getUnconf(addrs_array)
+      #let j_mempool = blockstor.getMempool()
+      #if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+      json.add("data", newJObject())
+      json["data"].add("mempool", newJObject())
+      var addresses = initHashSet[string]()
+      var addrbalances = initTable[string, uint64]()
+      for m in mempool:
+        for a in m["addrs"].pairs:
+          var find = false
+          for ba in db.getAddresses(a.key):
+            for wid in client.wallets:
+              if ba.wid == wid:
+                find = true
+                addresses.incl(a.key)
+                var jd_mempool = json["data"]["mempool"]
+                if jd_mempool.hasKey(a.key):
+                  for v in a.val.pairs:
+                    if jd_mempool[a.key].hasKey(v.key):
+                      jd_mempool[a.key][v.key] = j_uint64(jd_mempool[a.key][v.key].getUint64 + v.val.getUint64)
+                    else:
+                      jd_mempool[a.key].add(v.key, v.val)
+                else:
+                  jd_mempool.add(a.key, a.val)
+      if addresses.len > 0:
+        var addrs_array: seq[string]
+        for a in addresses:
+          addrs_array.add(a)
+        var j_unconfs: JsonNode
+        try:
+          j_unconfs = blockstor.getUnconf(addrs_array)
           if j_unconfs.kind != JNull:
             json["data"].add("unconfs", newJObject())
             for a in addrs_array:
               json["data"]["unconfs"][a] = j_unconfs["res"]
+        except:
+          echo "EXCEPTION: StreamCommand.Unconfs ", j_unconfs
+          let e = getCurrentException()
+          debug e.name, ": ", e.msg
       stream.send(client.wallets[0], $json)
     of StreamCommand.Balance:
-      var client = ClientWalletIds(cdata.client)
+      var client = StreamDataBalance(cdata.data)
       var balance: uint64 = 0'u64
       for wid in client.wallets:
         for addrval in getAddrvals(wid):
@@ -438,7 +453,7 @@ proc cmd_main() {.thread.} =
       var json = %*{"type": "balance", "data": j_uint64(balance)}
       stream.send(client.wallets[0], $json)
     of StreamCommand.Addresses:
-      var client = ClientWalletIds(cdata.client)
+      var client = StreamDataAddresses(cdata.data)
       var json = %*{"type": "addresses", "data": []}
       for wid in client.wallets:
         for addrval in getAddrvals(wid):
@@ -453,7 +468,7 @@ proc cmd_main() {.thread.} =
       stream.send(client.wallets[0], $json)
     of StreamCommand.Unused:
       const UnusedMax = 20
-      var client = ClientWalletId(cdata.client)
+      var client = StreamDataUnused(cdata.data)
       var json = %*{"type": "unused", "data": []}
       var count = 0
       var index = 0
@@ -479,7 +494,34 @@ proc cmd_main() {.thread.} =
       stream.send(client.wallet_id, $json)
     of StreamCommand.BsStream:
       echo "StreamCommand.BsStream"
-      echo cdata.data
+      try:
+        var json = StreamDataBsStream(cdata.data).data
+        echo json.pretty
+        if json.hasKey("height"):
+          echo "height"
+          var mempool_tmp: JsonNode = newJArray()
+          let j_mempool = blockstor.getMempool()
+          if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+            for m in j_mempool["res"]:
+              mempool_tmp.add(m)
+          mempool = mempool_tmp
+
+        elif json.hasKey("mempool"):
+          echo "mempool"
+          for m in json["mempool"]:
+            mempool.add(m)
+
+
+      except:
+        let e = getCurrentException()
+        echo e.name, ": ", e.msg
+
+    of StreamCommand.BsStreamInit:
+      let j_mempool = blockstor.getMempool()
+      if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+        for m in j_mempool["res"]:
+          mempool.add(m)
+
     of StreamCommand.Abort:
       return
 
