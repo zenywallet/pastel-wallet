@@ -191,13 +191,13 @@ proc stream_main() {.thread.} =
               if cmd == "xpubs":
                 if json.hasKey("data"):
                   var xpubs = json["data"]
+                  let wmdata = WalletMapData(fd: fd, salt: client.salt)
                   for xpub in xpubs:
                     let xpub_str = xpub.getStr
                     let w = getOrCreateWallet(xpub_str)
                     if client.wallets.find(w.wallet_id) < 0:
                       client.wallets.add(w.wallet_id)
                       client.xpubs.add(xpub_str)
-                    let wmdata = WalletMapData(fd: fd, salt: client.salt)
                     withLock clientsLock:
                       if walletmap.hasKeyOrPut(w.wallet_id, @[wmdata]):
                         walletmap[w.wallet_id].add(wmdata)
