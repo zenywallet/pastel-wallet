@@ -1,31 +1,37 @@
 # Copyright (c) 2019 zenywallet
 
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
-import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, json, algorithm
+import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, json, algorithm, hashes
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
 import db, events, yespower, logs
 
 type
-  WalletId = uint64
-  WalletIds = seq[WalletId]
-  WalletXpub = string
-  WalletXPubs = seq[WalletXpub]
+  WalletId* = uint64
+  WalletIds* = seq[WalletId]
+  WalletXpub* = string
+  WalletXPubs* = seq[WalletXpub]
 
 type ClientData* = ref object
   ws: AsyncWebSocket
   kp: KeyPair
   ctr: ctrmode.CTR
   salt: array[64, byte]
-  wallets: WalletIds
-  xpubs: WalletXPubs
+  wallets*: WalletIds
+  xpubs*: WalletXPubs
+
+proc hash*(xs: WalletIds): Hash =
+  var s: string
+  for x in xs:
+    s.add("#" & $x)
+  result = s.hash
 
 type WalletMapData = ref object
   fd: int
   salt: array[64, byte]
 
-type UnspentsData = object
+type UnspentsData* = object
   sequence: uint64
   txid: string
   n: uint32
@@ -68,6 +74,35 @@ cmdChannel.open()
 
 proc send*(cmd: StreamCommand, data: StreamData = nil) =
   cmdChannel.send((cmd, data))
+
+type
+  BallCommand* {.pure.} = enum
+    Abort
+    AddClient
+    DelClient
+    MemPool
+    Unspents
+    BsStream
+
+  BallData* = ref object of RootObj
+  BallDataSetClients* = ref object of BallData
+    clients*: seq[ClientData]
+  BallDataAddClient* = ref object of BallData
+    client*: ClientData
+  BallDataDelClient* = ref object of BallData
+    client*: ClientData
+  BallDataMemPool* = ref object of BallData
+    client*: ClientData
+  BallDataUnspents* = ref object of BallData
+    client*: ClientData
+  BallDataBsStream* = ref object of BallData
+    data*: JsonNode
+
+var ballChannel*: Channel[tuple[cmd: BallCommand, data: BallData]]
+ballChannel.open()
+
+proc send*(cmd: BallCommand, data: BallData = nil) =
+  ballChannel.send((cmd, data))
 
 proc UnspentsDataCmp(x, y: UnspentsData): int =
   if x.sequence > y.sequence: 1 else: -1
@@ -203,6 +238,7 @@ proc stream_main() {.thread.} =
                         walletmap[w.wallet_id].add(wmdata)
 
                 var json = %*{"type": "xpubs", "data": client.xpubs}
+                BallCommand.AddClient.send(BallDataAddClient(client: client))
                 sendClient(client, $json)
 
                 if client.wallets.len > 0:
@@ -278,7 +314,9 @@ proc stream_main() {.thread.} =
   proc deleteClosedClient() =
     withLock clientsLock:
       for fd in closedclients:
+        let clientdata = clients[fd]
         clients.del(fd)
+        BallCommand.DelClient.send(BallDataDelClient(client: clientdata))
       closedclients = @[]
 
   proc activecheck() {.async.} =
@@ -338,7 +376,8 @@ proc stream_main() {.thread.} =
     var salt: array[64, byte]
     salt[0..31] = seed()
     salt[32..63] = seed()
-    clients[fd] = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
+    let clientdata = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
+    clients[fd] = clientdata;
     debug "client count=", clients.len
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
     asyncCheck recvdata(fd, ws)

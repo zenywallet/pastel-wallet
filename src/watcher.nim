@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, locks, asyncdispatch, sequtils, tables, random, sets
+import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes
 from times import getTime, toUnix, nanosecond
 import ../deps/"websocket.nim"/websocket
 import libbtc
@@ -11,7 +11,7 @@ const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
 var chain = testnet_bitzeny_chain
 
 var
-  threads: array[4, Thread[void]]
+  threads: array[5, Thread[void]]
   event = createEvent()
   active = true
   ready* = true
@@ -244,7 +244,7 @@ var blockDataChannel*: Channel[JsonNode]
 blockDataChannel.open()
 
 proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
-  var wids = initHashSet[uint64]()
+  var wids = initHashSet[WalletId]()
   while blockDataChannel.peek() > 0:
     var json = blockDataChannel.recv()
     var height = json["height"].getUint32
@@ -372,6 +372,7 @@ proc stream_main() {.thread.} =
           var json = parseJson(data)
           echo json.pretty
           block_reader(json)
+          BallCommand.BsStream.send(BallDataBsStream(data: json))
 
           # test send
           StreamCommand.BsStream.send(StreamDataBsStream(data: json))
@@ -510,8 +511,6 @@ proc cmd_main() {.thread.} =
           echo "mempool"
           for m in json["mempool"]:
             mempool.add(m)
-
-
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
@@ -525,10 +524,208 @@ proc cmd_main() {.thread.} =
     of StreamCommand.Abort:
       return
 
+type
+  UserUtxo = object
+    sequence: uint64
+    txid: string
+    n: uint32
+    address: string
+    value: uint64
+    change: uint32
+    index: uint32
+    xpub_idx: int
+
+  UserAddrInfo = object
+    change: uint32
+    index: uint32
+    xpub_idx: int
+
+  WidAddressPairs = object
+    wid: WalletId
+    address: string
+
+proc UserUtxoCmp(x, y: UserUtxo): int =
+  result = cmp(x.sequence, y.sequence)
+  if result == 0:
+    result = cmp(x.change, y.change)
+    if result == 0:
+      result = cmp(x.index, y.index)
+
+proc hash*(x: UserUtxo): Hash =
+  var s: string = $x.sequence & "-" & x.txid & "-" & $x.n
+  result = s.hash
+
+proc hash*(x: WidAddressPairs): Hash =
+  var s: string = $x.wid & "-" & x.address
+  result = s.hash
+
+proc clientUnspents(wallets: seq[uint64]): seq[UserUtxo] =
+  var addrInfos = initTable[string, UserAddrInfo]()
+  for i, wid in wallets:
+    for a in db.getAddrvals(wid):
+      addrInfos.add(a.address, UserAddrInfo(change: a.change, index: a.index, xpub_idx: i))
+
+  var addrs: seq[string]
+  if addrInfos.len > 0:
+      for address in addrInfos.keys:
+        addrs.add(address)
+      timeseed()
+      shuffle(addrs)
+
+  var unspents: seq[UserUtxo] = @[]
+  var split_addrs = addrs.distribute(1 + addrs.len div 50)
+  for sa in split_addrs:
+    var utxos = blockstor.getUtxo(sa, (gte: 0, limit: 1000, reverse: 0, seqbreak: 1))
+    var i = 0
+    for utxo in utxos.toApiResIterator:
+      let address = sa[i]
+      let a = addrInfos[address]
+      for u in utxo:
+        unspents.add(UserUtxo(sequence: u["sequence"].getUint64, txid: u["txid"].getStr,
+                              n: u["n"].getUint32, address: address, value: u["value"].getUint64,
+                              change: a.change, index: a.index, xpub_idx: a.xpub_idx))
+      inc(i)
+  unspents.sort(UserUtxoCmp)
+  if unspents.len > 1000:
+    unspents.delete(1000, unspents.high)
+  unspents
+
+proc ball_main() {.thread.} =
+  var wallet_ids = initHashSet[WalletIds]()
+  var client_unspents = initTable[WalletId, HashSet[UserUtxo]]()
+  var active_wids = initHashSet[WalletId]()
+  var full_wid_addrs = initHashSet[WidAddressPairs]()
+
+  proc sendUnconfs(wid_addrs: HashSet[WidAddressPairs], wids: seq[WalletIds], send_empty: bool = false): WalletIds {.discardable.} =
+    var sent_wids: WalletIds
+    for wallets in wids:
+      var sent = false
+      var addrs_array: seq[string] = @[]
+      for wid_addr in wid_addrs:
+        if wallets.contains(wid_addr.wid):
+          addrs_array.add(wid_addr.address)
+      echo "addrs_array.len=", addrs_array.len, " ", addrs_array
+      if addrs_array.len > 0:
+        echo blockstor.getAddress(addrs_array)
+        var j_unconfs = blockstor.getUnconf(addrs_array)
+        echo "j_unconfs=", j_unconfs
+        if j_unconfs.kind != JNull:
+          var json = %*{"type": "unconfs"}
+          json.add("data", newJObject())
+          for i, a in addrs_array:
+            var j = j_unconfs["res"][i]
+            if j.hasKey("spents"):
+              for v in j["spents"]:
+                v["value"] = j_uint64(v["value"].getUint64)
+            if j.hasKey("txouts"):
+              for v in j["txouts"]:
+                v["value"] = j_uint64(v["value"].getUint64)
+              json["data"][a] = j
+          let client_wid: WalletId = wallets[0]
+          stream.send(client_wid, $json)
+          sent_wids.add(client_wid)
+          sent = true
+          echo "BallCommand.BsStream=", json
+      if send_empty and not sent:
+        var json = %*{"type": "unconfs"}
+        json.add("data", newJObject())
+        let client_wid: WalletId = wallets[0]
+        stream.send(client_wid, $json)
+    sent_wids
+
+  proc fullMempoolAddrs(): HashSet[WidAddressPairs] =
+    var wid_addrs = initHashSet[WidAddressPairs]()
+    let j_mempool = blockstor.getMempool()
+    if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+      for m in j_mempool["res"]:
+        for a in m["addrs"].pairs:
+          for da in db.getAddresses(a.key):
+            if active_wids.contains(da.wid):
+              wid_addrs.incl([WidAddressPairs(wid: da.wid, address: a.key)].toHashSet())
+    wid_addrs
+
+  proc mempoolAddrs(mempool: JsonNode): HashSet[WidAddressPairs] =
+    var wid_addrs = initHashSet[WidAddressPairs]()
+    for m in mempool:
+      for a in m["addrs"].pairs:
+        for da in db.getAddresses(a.key):
+          if active_wids.contains(da.wid):
+            wid_addrs.incl([WidAddressPairs(wid: da.wid, address: a.key)].toHashSet())
+    for w in wid_addrs:
+      echo w.wid, " ", w.address
+    wid_addrs
+
+  while true:
+    let ch_data = ballChannel.recv()
+    debug "ballChannel cmd=", ch_data.cmd
+    case ch_data.cmd
+    of BallCommand.BsStream:
+      try:
+        var j_bs = BallDataBsStream(ch_data.data).data
+        echo j_bs.pretty
+        var sent_wids: WalletIds
+        if j_bs.hasKey("height"):
+          full_wid_addrs = fullMempoolAddrs()
+          sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq)
+        elif j_bs.hasKey("mempool"):
+          var wid_addrs = mempoolAddrs(j_bs["mempool"])
+          full_wid_addrs = full_wid_addrs + wid_addrs
+          sent_wids = sendUnconfs(wid_addrs, wallet_ids.toSeq)
+        for w in sent_wids:
+          StreamCommand.Unused.send(StreamDataUnused(wallet_id: w))
+      except:
+        let e = getCurrentException()
+        echo e.name, ": ", e.msg
+
+    of BallCommand.MemPool:
+      var data = BallDataMemPool(ch_data.data)
+      echo data.client.wallets
+      full_wid_addrs = fullMempoolAddrs()
+      sendUnconfs(full_wid_addrs, @[data.client.wallets], true)
+
+    of BallCommand.Unspents:
+      var data = BallDataUnspents(ch_data.data)
+      echo data.client.wallets
+      var unspents: seq[UserUtxo] = @[]
+      let client_wid: WalletId = data.client.wallets[0]
+      if data.client.wallets.len > 0:
+        unspents = clientUnspents(data.client.wallets)
+        client_unspents[client_wid] = unspents.toHashSet()
+      var json = %*{"type": "unspents", "data": unspents}
+      for j in json["data"]:
+        j["value"] = j_uint64(j["value"].getUint64)
+      echo json
+      stream.send(client_wid, $json)
+
+    of BallCommand.AddClient:
+      var data = BallDataAddClient(ch_data.data)
+      echo data.client.wallets
+      wallet_ids.incl(data.client.wallets)
+      active_wids.incl(data.client.wallets.toHashSet())
+      BallCommand.Unspents.send(BallDataUnspents(client: data.client))
+      BallCommand.MemPool.send(BallDataMemPool(client: data.client))
+
+    of BallCommand.DelClient:
+      var data = BallDataDelClient(ch_data.data)
+      echo data.client.wallets
+      let client_wid: WalletId = data.client.wallets[0]
+      wallet_ids.excl(data.client.wallets)
+      var find = false
+      for wallets in wallet_ids:
+        if wallets[0] == client_wid:
+          find = true
+          break
+      if not find:
+        active_wids.excl(data.client.wallets.toHashSet())
+
+    of BallCommand.Abort:
+      return
+
 proc stop*() =
   active = false
   event.setEvent()
   StreamCommand.Abort.send()
+  BallCommand.Abort.send()
   joinThreads(threads)
   btc_ecc_stop()
   debug "watcher stop"
@@ -541,8 +738,9 @@ proc start*(): Thread[void] =
   active = true
   btc_ecc_start()
   createThread(threads[0], threadWorkerFunc)
-  createThread(threads[1], cmd_main)
-  createThread(threads[2], watcher_main)
-  createThread(threads[3], stream_main)
+  createThread(threads[1], ball_main)
+  createThread(threads[2], cmd_main)
+  createThread(threads[3], watcher_main)
+  createThread(threads[4], stream_main)
   addQuitProc(quit)
-  threads[2]
+  threads[3]
