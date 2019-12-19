@@ -438,8 +438,8 @@ proc cmd_main() {.thread.} =
           j_unconfs = blockstor.getUnconf(addrs_array)
           if j_unconfs.kind != JNull:
             json["data"].add("unconfs", newJObject())
-            for a in addrs_array:
-              json["data"]["unconfs"][a] = j_unconfs["res"]
+            for i, a in addrs_array:
+              json["data"]["unconfs"][a] = j_unconfs["res"][i]
         except:
           echo "EXCEPTION: StreamCommand.Unconfs ", j_unconfs
           let e = getCurrentException()
