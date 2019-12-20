@@ -679,7 +679,7 @@ proc ball_main() {.thread.} =
           full_wid_addrs = full_wid_addrs + wid_addrs
           sent_wids = sendUnconfs(wid_addrs, wallet_ids.toSeq)
         for w in sent_wids:
-          StreamCommand.Unused.send(StreamDataUnused(wallet_id: w))
+          BallCommand.Unused.send(BallDataUnused(wallet_id: w))
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
@@ -704,6 +704,55 @@ proc ball_main() {.thread.} =
       echo json
       stream.send(client_wid, $json)
 
+    of BallCommand.Unused:
+      const UnusedMax = 20
+      var data = BallDataUnused(ch_data.data)
+      let client_wid: WalletId = data.wallet_id
+      var unconf_addrs: seq[string] = @[]
+      for f in full_wid_addrs:
+        if f.wid == client_wid:
+          unconf_addrs.add(f.address)
+      var unconf_idxs: seq[uint32] = @[]
+      for a in unconf_addrs:
+        for da in db.getAddresses(a):
+          if da.change == 0:
+            unconf_idxs.add(da.index)
+      var json = %*{"type": "unused", "data": []}
+      var count = 0
+      var index: uint32 = 0
+      var unused_index: uint32 = 0
+      var used_0 = db.getLastUsedAddrIndex(client_wid, 0)
+      if used_0.err == DbStatus.Success:
+        unused_index = used_0.res + 1
+      if unconf_idxs.len > 0:
+        unconf_idxs.sort()
+        echo "unconf_idxs=", unconf_idxs
+        var last_unconf_idx = unconf_idxs[unconf_idxs.high]
+        if last_unconf_idx >= unused_index:
+          unused_index = last_unconf_idx + 1
+      block searchBallUnused:
+        for addrval in db.getAddrvals(client_wid):
+          if addrval.change != 0:
+            break
+          for i in index..<addrval.index:
+            if not unconf_idxs.contains(i.uint32):
+              json["data"].add(newJInt(i.BiggestInt))
+              inc(count)
+              if count >= UnusedMax:
+                break searchBallUnused
+            if i >= unused_index:
+              break searchBallUnused
+          index = addrval.index + 1'u32
+        while count < UnusedMax:
+          if not unconf_idxs.contains(index.uint32):
+            json["data"].add(newJInt(index.BiggestInt))
+            inc(count)
+          if index >= unused_index:
+            break
+          inc(index)
+      echo json
+      stream.send(client_wid, $json)
+
     of BallCommand.AddClient:
       var data = BallDataAddClient(ch_data.data)
       echo data.client.wallets
@@ -711,6 +760,7 @@ proc ball_main() {.thread.} =
       active_wids.incl(data.client.wallets.toHashSet())
       BallCommand.Unspents.send(BallDataUnspents(client: data.client))
       BallCommand.MemPool.send(BallDataMemPool(client: data.client))
+      BallCommand.Unused.send(BallDataUnused(wallet_id: data.client.wallets[0]))
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
