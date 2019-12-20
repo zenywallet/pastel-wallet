@@ -1160,6 +1160,8 @@ var Settings = (function() {
       $('#settings-modal').modal("setting", {
         closable: false,
         onApprove: function() {
+          var stor = new Stor();
+          stor.del_all();
           location.reload();
         },
         onDeny: function() {},
