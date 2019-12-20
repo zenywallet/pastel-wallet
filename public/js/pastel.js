@@ -625,18 +625,31 @@ pastel.ready = function() {
       var data = json.data;
       var send = UINT64(0);
       var recv = UINT64(0);
+      var recv_change = UINT64(0);
       if(data) {
-        var mempool = data.mempool;
-        if(mempool) {
-          for(addr in mempool) {
-            var vals = mempool[addr];
-            for(key in vals) {
-              if(key == 0) {
-                send.add(UINT64(vals[key]));
-              } else if(key == 1) {
-                recv.add(UINT64(vals[key]));
+        for(var addr in data) {
+          var txouts = data[addr].txouts;
+          if(txouts) {
+            if(data[addr].change == 0) {
+              for(var i in txouts) {
+                var txout = txouts[i];
+                recv.add(UINT64(txout.value));
+              }
+            } else {
+              for(var i in txouts) {
+                var txout = txouts[i];
+                recv_change.add(UINT64(txout.value));
               }
             }
+            recv.subtract(recv_change)
+          }
+          var spents = data[addr].spents;
+          if(spents) {
+            for(var i in spents) {
+              var spent = spents[i];
+              send.add(UINT64(spent.value));
+            }
+            send.subtract(recv_change)
           }
         }
       }
