@@ -86,8 +86,6 @@ type
     BsStream
 
   BallData* = ref object of RootObj
-  BallDataSetClients* = ref object of BallData
-    clients*: seq[ClientData]
   BallDataAddClient* = ref object of BallData
     client*: ClientData
   BallDataDelClient* = ref object of BallData
