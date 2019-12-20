@@ -274,7 +274,7 @@ function Wallet() {
       if(!prelock && shieldedKeys.unlock) {
         shieldedKeys.priv = [];
         delete shieldedKeys.unlock;
-        console.log('after relock: ' + JSON.stringify(shieldedKeys));
+        console.log('after prelock: ' + JSON.stringify(shieldedKeys));
         return true;
       }
       return false;
