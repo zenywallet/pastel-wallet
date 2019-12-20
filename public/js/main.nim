@@ -1450,5 +1450,25 @@ proc afterScript(data: RouterData) =
       reloadViewSafeEnd();
     """
 
-#viewSelector(Wallet, true)
+var walletSetup = false
+asm """
+  var stor  = new Stor()
+  var xpubs = stor.get_xpubs()
+  stor = null;
+  if(xpubs.length > 0) {
+    `walletSetup` = true;
+    function check_stream_ready() {
+      setTimeout(function() {
+        if(pastel.stream && !pastel.stream.status()) {
+          pastel.stream.start();
+        } else {
+          check_stream_ready();
+        }
+      }, 50);
+    }
+    check_stream_ready();
+  }
+"""
+if walletSetup:
+  viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)
