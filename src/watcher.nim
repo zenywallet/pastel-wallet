@@ -621,6 +621,13 @@ proc ball_main() {.thread.} =
               for v in j["txouts"]:
                 v["value"] = j_uint64(v["value"].getUint64)
               json["data"][a] = j
+            for da in db.getAddresses(a):
+              var idx = wallets.find(da.wid)
+              if idx >= 0:
+                json["data"][a].add("change", newJInt(da.change.BiggestInt))
+                json["data"][a].add("index", newJInt(da.index.BiggestInt))
+                json["data"][a].add("xpub_idx", newJInt(idx.BiggestInt))
+                break
           let client_wid: WalletId = wallets[0]
           stream.send(client_wid, $json)
           sent_wids.add(client_wid)
