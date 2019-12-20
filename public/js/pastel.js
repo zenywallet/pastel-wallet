@@ -676,7 +676,12 @@ pastel.ready = function() {
       console.log('addresses: ' + JSON.stringify(json));
     } else if(type == 'unused') {
       console.log('unused: ' + JSON.stringify(json));
-      wallet.setUnusedAddress(json.data);
+      var changed = wallet.setUnusedAddress(json.data);
+      if(changed) {
+        showRecvAddress(function() {
+          showRecvAddressAfterEffect();
+        });
+      }
     } else if(type == 'ready') {
       console.log('server ready');
       var xpubs = wallet.getXpubs();

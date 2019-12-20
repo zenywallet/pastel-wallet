@@ -177,7 +177,19 @@ function Wallet() {
 
   var _unusedList = [];
   this.setUnusedAddress = function(data) {
+    var changed = false;
+    if(_unusedList.length == data.length) {
+      for(i in _unusedList) {
+        if(_unusedList[i] != data[i]) {
+          changed = true;
+          break;
+        }
+      }
+    } else {
+      changed = true;
+    }
     _unusedList = data;
+    return changed;
   }
 
   this.getUnusedAddressList = function(count, cb) {
