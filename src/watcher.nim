@@ -673,7 +673,7 @@ proc ball_main() {.thread.} =
         var sent_wids: WalletIds
         if j_bs.hasKey("height"):
           full_wid_addrs = fullMempoolAddrs()
-          sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq)
+          sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq, true)
         elif j_bs.hasKey("mempool"):
           var wid_addrs = mempoolAddrs(j_bs["mempool"])
           full_wid_addrs = full_wid_addrs + wid_addrs
