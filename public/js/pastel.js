@@ -669,7 +669,9 @@ pastel.ready = function() {
       console.log('balance: ' + JSON.stringify(json));
       $('#wallet-balance .balance').text(conv_coin(json.data));
       var el = document.getElementById("wallet-balance");
-      fadeIn(el, 800);
+      if(!el.style.display) {
+        fadeIn(el, 800);
+      }
     } else if(type == 'addresses') {
       console.log('addresses: ' + JSON.stringify(json));
     } else if(type == 'unused') {
