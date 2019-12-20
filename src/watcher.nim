@@ -677,7 +677,7 @@ proc ball_main() {.thread.} =
         elif j_bs.hasKey("mempool"):
           var wid_addrs = mempoolAddrs(j_bs["mempool"])
           full_wid_addrs = full_wid_addrs + wid_addrs
-          sent_wids = sendUnconfs(wid_addrs, wallet_ids.toSeq)
+          sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq)
         for w in sent_wids:
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
       except:
