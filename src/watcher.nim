@@ -788,7 +788,7 @@ proc stop*() =
   debug "watcher stop"
 
 proc quit() {.noconv.} =
-    stop()
+  stop()
 
 proc start*(): Thread[void] =
   debug "watcher start"
