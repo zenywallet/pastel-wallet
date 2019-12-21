@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import httpclient, json, asyncdispatch, strutils, logs
+import httpclient, json, asyncdispatch, strutils, logs, libcurl
 export json
 
 const baseurl = "http://localhost:8000/api/"
@@ -27,6 +27,7 @@ proc getBsErrorCode*(code: int): BsErrorCode =
 var client {.threadvar.}: HttpClient
 var clientAsync {.threadvar.}: AsyncHttpClient
 
+#[
 proc get(cmdurl: string): JsonNode =
   try:
     if client.isNil:
@@ -49,11 +50,78 @@ proc post(cmdurl: string, postdata: JsonNode): JsonNode =
       client = newHttpClient()
     client.headers = newHttpHeaders({"Content-Type": "application/json"})
     let url = baseurl & cmdurl
-    let res = client.request(url, httpMethod = HttpPost, body = $postdata)
+    let res = client.request(url, httpMethod = HttpMethod.HttpPost, body = $postdata)
     if res.status == Http200:
       parseJson(res.body)
     else:
       debug "blockstor-post: " & res.status & " " & cmdurl
+      newJNull()
+  except:
+    let e = getCurrentException()
+    debug e.name, ": ", e.msg
+    newJNull()
+]#
+
+var headers: PSlist
+headers = slist_append(headers, "Content-Type: application/json")
+
+proc write_callback(buffer: cstring, size: int, nitems: int, outstream: pointer): int =
+  var outbuf = cast[ref string](outstream)
+  outbuf[] &= buffer
+  result = size * nitems;
+
+proc http_get(url: string): tuple[code: Code, data: string] =
+  var outbuf: ref string = new string
+  let curl: Pcurl = easy_init()
+  discard curl.easy_setopt(OPT_URL, url)
+  discard curl.easy_setopt(OPT_WRITEDATA, outbuf)
+  discard curl.easy_setopt(OPT_WRITEFUNCTION, write_callback)
+  discard curl.easy_setopt(OPT_USERAGENT, "pastel-v0.1")
+  let ret = curl.easy_perform()
+  curl.easy_cleanup()
+  (ret, outbuf[])
+
+proc http_post(url: string, post_data: string): tuple[code: Code, data: string] =
+  var outbuf: ref string = new string
+  let curl: Pcurl = easy_init()
+  discard curl.easy_setopt(OPT_URL, url)
+  discard curl.easy_setopt(OPT_POST, 1)
+  discard curl.easy_setopt(OPT_HTTPHEADER, headers)
+  discard curl.easy_setopt(OPT_POSTFIELDS, post_data);
+  discard curl.easy_setopt(OPT_WRITEDATA, outbuf)
+  discard curl.easy_setopt(OPT_WRITEFUNCTION, write_callback)
+  discard curl.easy_setopt(OPT_USERAGENT, "pastel-v0.1")
+  let ret = curl.easy_perform()
+  curl.easy_cleanup()
+  (ret, outbuf[])
+
+discard libcurl.global_init(GLOBAL_ALL);
+proc quit() {.noconv.} =
+  libcurl.global_cleanup()
+addQuitProc(quit)
+
+proc get(cmdurl: string): JsonNode =
+  try:
+    let url = baseurl & cmdurl
+    let res = http_get(url)
+    if res.code == E_OK:
+      res.data.parseJson()
+    else:
+      debug "blockstor-get: ", res.code, " ", cmdurl
+      newJNull()
+  except:
+    let e = getCurrentException()
+    debug e.name, ": ", e.msg
+    newJNull()
+
+proc post(cmdurl: string, postdata: JsonNode): JsonNode =
+  try:
+    let url = baseurl & cmdurl
+    let res = http_post(url, $postdata)
+    if res.code == E_OK:
+      res.data.parseJson()
+    else:
+      debug "blockstor-post: ", res.code, " ", cmdurl
       newJNull()
   except:
     let e = getCurrentException()
@@ -82,7 +150,7 @@ proc postAsync(cmdurl: string, postdata: JsonNode, cb: proc(data: JsonNode)) {.a
       clientAsync = newAsyncHttpClient()
     client.headers = newHttpHeaders({"Content-Type": "application/json"})
     let url = baseurl & cmdurl
-    let res = await clientAsync.request(url, httpMethod = HttpPost, body = $postdata)
+    let res = await clientAsync.request(url, httpMethod = HttpMethod.HttpPost, body = $postdata)
     if res.status == Http200:
       debug res.status
       cb(parseJson(await res.body))
