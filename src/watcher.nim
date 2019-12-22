@@ -693,6 +693,8 @@ proc ball_main() {.thread.} =
         updateAddresses(active_wids)
         for w in sent_wids:
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
+        for ids in wallet_ids:
+          StreamCommand.Balance.send(StreamDataBalance(wallets: ids))
 
       except:
         let e = getCurrentException()
