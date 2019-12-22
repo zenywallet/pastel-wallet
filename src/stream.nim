@@ -105,8 +105,12 @@ ballChannel.open()
 proc send*(cmd: BallCommand, data: BallData = nil) =
   ballChannel.send((cmd, data))
 
-proc UnspentsDataCmp(x, y: UnspentsData): int =
-  if x.sequence > y.sequence: 1 else: -1
+proc SequenceCmp[T](x, y: T): int =
+  result = cmp(x.sequence, y.sequence)
+  if result == 0:
+    result = cmp(x.change, y.change)
+    if result == 0:
+      result = cmp(x.index, y.index)
 
 proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
@@ -269,7 +273,7 @@ proc stream_main() {.thread.} =
                     if count >= 1000:
                       break
                   inc(xpub_idx)
-                unspents.sort(UnspentsDataCmp)
+                unspents.sort(SequenceCmp)
                 if unspents.len > 1000:
                   unspents.delete(1000, unspents.high)
                 var json = %*{"type": "unspents", "data": unspents}
