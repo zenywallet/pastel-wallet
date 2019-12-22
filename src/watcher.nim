@@ -188,12 +188,7 @@ type
     wid: uint64
     sequence: uint64
 
-proc updateAddresses(marker_sequence: uint64, last_sequence: uint64) =
-  var updateAddrInfos: seq[UpdateAddrInfo]
-  for a in db.getAddresses():
-    updateAddrInfos.add(UpdateAddrInfo(address: a.address, change: a.change,
-                                      index: a.index, wid: a.wid,
-                                      sequence: a.sequence))
+proc updateAddressInfos(updateAddrInfos: seq[UpdateAddrInfo]) =
   if updateAddrInfos.len > 0:
     var addrs: seq[string]
     for a in updateAddrInfos:
@@ -236,6 +231,23 @@ proc updateAddresses(marker_sequence: uint64, last_sequence: uint64) =
         db.setAddrval(a.wid, a.change, a.index, a.address, b.balance, b.utxo_count)
         db.setAddress(a.address, a.change, a.index, a.wid, cur_log_sequence)
 
+proc updateAddresses() =
+  var updateAddrInfos: seq[UpdateAddrInfo]
+  for a in db.getAddresses():
+    updateAddrInfos.add(UpdateAddrInfo(address: a.address, change: a.change,
+                                      index: a.index, wid: a.wid,
+                                      sequence: a.sequence))
+  updateAddressInfos(updateAddrInfos)
+
+proc updateAddresses(target_wids: HashSet[WalletId]) =
+  var updateAddrInfos: seq[UpdateAddrInfo]
+  for a in db.getAddresses():
+    if target_wids.contains(a.wid):
+      updateAddrInfos.add(UpdateAddrInfo(address: a.address, change: a.change,
+                                        index: a.index, wid: a.wid,
+                                        sequence: a.sequence))
+  updateAddressInfos(updateAddrInfos)
+
 proc updateBalance(wid: uint64) =
   discard
 
@@ -271,7 +283,7 @@ proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
       while blockDataChannel.peek() > 0:
         json = blockDataChannel.recv()
       height = json["height"].getUint32
-      updateAddresses(marker_sequence, last_sequence)
+      updateAddresses()
       block_header_prev_height = height
       break
 
@@ -678,8 +690,10 @@ proc ball_main() {.thread.} =
           var wid_addrs = mempoolAddrs(j_bs["mempool"])
           full_wid_addrs = full_wid_addrs + wid_addrs
           sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq)
+        updateAddresses(active_wids)
         for w in sent_wids:
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
+
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
