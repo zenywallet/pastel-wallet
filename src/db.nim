@@ -352,6 +352,46 @@ iterator getAddrlogs_gt*(wid: uint64, sequence: uint64): tuple[
       yield (d_sequence, d_txtype, d_change, d_index, d_address, d_value,
             d_txid, d_height, d_time)
 
+iterator getAddrlogsReverse*(wid: uint64): tuple[
+                            sequence: uint64, txtype: uint8, change: uint32,
+                            index: uint32, address: string, value: uint64,
+                            txid: string, height: uint32, time: uint32] =
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte)
+  for d in db.getsReverse(key):
+    let sequence = d.key[9..16].toUint64
+    let txtype = d.key[17].toUint8
+    let change = d.key[18..21].toUint32
+    let index = d.key[22..25].toUint32
+    let address = d.key[26..^1].toString
+    let value = d.value[0..7].toUint64
+    let txid = d.value[8..^9].toString
+    let height = d.value[^8..^5].toUint32
+    let time = d.value[^4..^1].toUint32
+    yield (sequence, txtype, change, index, address, value, txid, height, time)
+
+iterator getAddrlogsReverse_lt*(wid: uint64, sequence: uint64): tuple[
+                                sequence: uint64, txtype: uint8, change: uint32,
+                                index: uint32, address: string, value: uint64,
+                                txid: string, height: uint32, time: uint32] =
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  for d in db.getsReverse_nobreak(key):
+    let prefix = d.key[0].toUint8
+    let d_wid = d.key[1..8]
+    if Prefix(prefix) != Prefix.addrlogs or d_wid.toUint64 != wid:
+      break
+    let d_sequence = d.key[9..16].toUint64
+    if d_sequence < sequence:
+      let d_txtype = d.key[17].toUint8
+      let d_change = d.key[18..21].toUint32
+      let d_index = d.key[22..25].toUint32
+      let d_address = d.key[26..^1].toString
+      let d_value = d.value[0..7].toUint64
+      let d_txid = d.value[8..^9].toString
+      let d_height = d.value[^8..^5].toUint32
+      let d_time = d.value[^4..^1].toUint32
+      yield (d_sequence, d_txtype, d_change, d_index, d_address, d_value,
+            d_txid, d_height, d_time)
+
 proc delAddrlogs*(wid: uint64, sequence: uint64) =
   let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
   db.dels(key)

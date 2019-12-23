@@ -211,3 +211,20 @@ iterator getsReverse*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
         rocksdb_iter_prev(iter)
   finally:
     rocksdb_iter_destroy(iter)
+
+iterator getsReverse_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
+  var iter: rocksdb_iterator_t
+  try:
+    iter = rocksdb_create_iterator(rocks.db, rocks.readOptions)
+    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len)
+    let (carry, lastkey) = key_countup(key)
+    if carry:
+      rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+    else:
+      rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+    while cast[bool](rocksdb_iter_valid(iter)):
+      let kv = get_iter_key_value(iter)
+      yield kv
+      rocksdb_iter_prev(iter)
+  finally:
+    rocksdb_iter_destroy(iter)

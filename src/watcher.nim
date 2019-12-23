@@ -402,12 +402,6 @@ proc stream_main() {.thread.} =
       break
     poll()
 
-proc j_uint64(val: uint64): JsonNode =
-  if val > 9007199254740991'u64:
-    newJString($val)
-  else:
-    newJInt(BiggestInt(val))
-
 proc cmd_main() {.thread.} =
   var mempool: JsonNode = newJArray()
 

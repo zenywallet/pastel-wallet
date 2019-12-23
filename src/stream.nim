@@ -5,7 +5,7 @@ import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, js
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
-import db, events, yespower, logs
+import db, events, yespower, logs, blockstor
 
 type
   WalletId* = uint64
@@ -105,12 +105,39 @@ ballChannel.open()
 proc send*(cmd: BallCommand, data: BallData = nil) =
   ballChannel.send((cmd, data))
 
+type
+  TxLog = ref object
+    sequence: uint64
+    txtype: uint8
+    address: string
+    value: uint64
+    txid: string
+    height: uint32
+    time: uint32
+    change: uint32
+    index: uint32
+    xpub_idx: int
+  TxLogs = seq[Txlog]
+
 proc SequenceCmp[T](x, y: T): int =
   result = cmp(x.sequence, y.sequence)
   if result == 0:
     result = cmp(x.change, y.change)
     if result == 0:
       result = cmp(x.index, y.index)
+
+proc SequenceRevCmp[T](x, y: T): int =
+  result = cmp(y.sequence, x.sequence)
+  if result == 0:
+    result = cmp(y.change, x.change)
+    if result == 0:
+      result = cmp(y.index, x.index)
+
+proc j_uint64*(val: uint64): JsonNode =
+  if val > 9007199254740991'u64:
+    newJString($val)
+  else:
+    newJInt(BiggestInt(val))
 
 proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
@@ -277,6 +304,33 @@ proc stream_main() {.thread.} =
                 if unspents.len > 1000:
                   unspents.delete(1000, unspents.high)
                 var json = %*{"type": "unspents", "data": unspents}
+                sendClient(client, $json)
+
+              elif cmd == "txlogs":
+                var txlogs: TxLogs
+                if json.hasKey("data"):
+                  var sequence = json["data"].getUint64
+                  for i, wid in client.wallets:
+                    for l in db.getAddrlogsReverse_lt(wid, sequence):
+                      txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                      value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                      change: l.change, index: l.index, xpub_idx: i))
+                      if txlogs.len >= 1000:
+                        break
+                else:
+                  for i, wid in client.wallets:
+                    for l in db.getAddrlogsReverse(wid):
+                      txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                      value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                      change: l.change, index: l.index, xpub_idx: i))
+                      if txlogs.len >= 1000:
+                        break
+                txlogs.sort(SequenceRevCmp)
+                if txlogs.len > 1000:
+                  txlogs.delete(1000, txlogs.high)
+                var json = %*{"type": "txlogs", "data": txlogs}
+                for j in json["data"]:
+                  j["value"] = j_uint64(j["value"].getUint64)
                 sendClient(client, $json)
 
               elif cmd == "ready":
