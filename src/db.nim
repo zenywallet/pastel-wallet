@@ -15,6 +15,7 @@ type Prefix {.pure.} = enum
               #   change, index, address = value, txid, height, time
   unspents    # wallet_id, sequence, txid, n = address, value
   balances    # wallet_id = value, utxo_count, address_count
+  txtimes     # txid = transmission_time
   rawtxs      # txid = rawtx, transmission_time
   hashcash    # hashcash_id = header_block(80bytes)
               #               version(4), previous_block(32), merkle_root(32),
@@ -488,6 +489,24 @@ proc getBalance*(wid: uint64): tuple[err: DbStatus,
 
 proc delBalance*(wid: uint64) =
   let key = concat(Prefix.balances.toByte, wid.toByte)
+  db.del(key)
+
+proc setTxtime*(txid: string, trans_time: uint64) =
+  let key = concat(Prefix.txtimes.toByte, txid.toByte)
+  let val = trans_time.toByte
+  db.put(key, val)
+
+proc getTxtime*(txid: string): tuple[err: DbStatus, res: uint64] =
+  let key = concat(Prefix.txtimes.toByte, txid.toByte)
+  var d = db.get(key)
+  if d.len > 0:
+    let trans_time = d.toUint64
+    result = (DbStatus.Success, trans_time)
+  else:
+    result = (DbStatus.NotFound, cast[uint64](nil))
+
+proc delTxtime*(txid: string) =
+  let key = concat(Prefix.txtimes.toByte, txid.toByte)
   db.del(key)
 
 proc getLastUsedAddrIndex*(wid: uint64, change: uint32): tuple[err: DbStatus, res: uint32] =

@@ -1,7 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes
-from times import getTime, toUnix, nanosecond
+import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times
 import ../deps/"websocket.nim"/websocket
 import libbtc
 import blockstor, db, events, logs, stream
@@ -646,11 +645,17 @@ proc ball_main() {.thread.} =
         stream.send(client_wid, $json)
     sent_wids
 
+  proc setTransimissionTime(txid: string) =
+    let d = db.getTxtime(txid)
+    if d.err == DbStatus.NotFound:
+      db.setTxtime(txid, cast[uint64](getTime().toUnix))
+
   proc fullMempoolAddrs(): HashSet[WidAddressPairs] =
     var wid_addrs = initHashSet[WidAddressPairs]()
     let j_mempool = blockstor.getMempool()
     if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
       for m in j_mempool["res"]:
+        setTransimissionTime(m["txid"].getStr)
         for a in m["addrs"].pairs:
           for da in db.getAddresses(a.key):
             if active_wids.contains(da.wid):
@@ -660,6 +665,7 @@ proc ball_main() {.thread.} =
   proc mempoolAddrs(mempool: JsonNode): HashSet[WidAddressPairs] =
     var wid_addrs = initHashSet[WidAddressPairs]()
     for m in mempool:
+      setTransimissionTime(m["txid"].getStr)
       for a in m["addrs"].pairs:
         for da in db.getAddresses(a.key):
           if active_wids.contains(da.wid):

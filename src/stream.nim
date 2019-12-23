@@ -331,6 +331,9 @@ proc stream_main() {.thread.} =
                 var json = %*{"type": "txlogs", "data": txlogs}
                 for j in json["data"]:
                   j["value"] = j_uint64(j["value"].getUint64)
+                  var ret_txtime = db.getTxtime(j["txid"].getStr)
+                  if ret_txtime.err == DbStatus.Success:
+                    j.add("trans_time", j_uint64(ret_txtime.res))
                 sendClient(client, $json)
 
               elif cmd == "ready":
