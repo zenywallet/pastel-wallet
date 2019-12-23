@@ -333,7 +333,7 @@ iterator getAddrlogs_gt*(wid: uint64, sequence: uint64): tuple[
                         sequence: uint64, txtype: uint8, change: uint32,
                         index: uint32, address: string, value: uint64,
                         txid: string, height: uint32, time: uint32] =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte)
+  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
@@ -394,7 +394,7 @@ iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
 iterator getUnspents_gt*(wid: uint64, sequence: uint64): tuple[
                         sequence: uint64, txid: string, n: uint32,
                         address: string, value: uint64] =
-  let key = concat(Prefix.unspents.toByte, wid.toByte)
+  let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
