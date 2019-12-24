@@ -600,6 +600,7 @@ proc ball_main() {.thread.} =
   var client_unspents = initTable[WalletId, HashSet[UserUtxo]]()
   var active_wids = initHashSet[WalletId]()
   var full_wid_addrs = initHashSet[WidAddressPairs]()
+  var height: uint32
 
   proc sendUnconfs(wid_addrs: HashSet[WidAddressPairs], wids: seq[WalletIds], send_empty: bool = false): WalletIds {.discardable.} =
     var sent_wids: WalletIds
@@ -674,6 +675,10 @@ proc ball_main() {.thread.} =
       echo w.wid, " ", w.address
     wid_addrs
 
+  let j_height = blockstor.getHeight()
+  if j_height.kind != JNull:
+    height = j_height["res"].getUint32
+
   while true:
     let ch_data = ballChannel.recv()
     debug "ballChannel cmd=", ch_data.cmd
@@ -683,7 +688,10 @@ proc ball_main() {.thread.} =
         var j_bs = BallDataBsStream(ch_data.data).data
         echo j_bs.pretty
         var sent_wids: WalletIds
+        var height_flag = false
         if j_bs.hasKey("height"):
+          height_flag = true
+          height = j_bs["height"].getUint32
           full_wid_addrs = fullMempoolAddrs()
           sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq, true)
         elif j_bs.hasKey("mempool"):
@@ -695,7 +703,9 @@ proc ball_main() {.thread.} =
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
         for ids in wallet_ids:
           StreamCommand.Balance.send(StreamDataBalance(wallets: ids))
-
+        if height_flag:
+          for ids in wallet_ids:
+            BallCommand.Height.send(BallDataHeight(wallet_id: ids[0]))
       except:
         let e = getCurrentException()
         echo e.name, ": ", e.msg
@@ -769,6 +779,12 @@ proc ball_main() {.thread.} =
       echo json
       stream.send(client_wid, $json)
 
+    of BallCommand.Height:
+      var data = BallDataHeight(ch_data.data)
+      let client_wid: WalletId = data.wallet_id
+      var json = %*{"type": "height", "data": height}
+      stream.send(client_wid, $json)
+
     of BallCommand.AddClient:
       var data = BallDataAddClient(ch_data.data)
       echo data.client.wallets
@@ -777,6 +793,7 @@ proc ball_main() {.thread.} =
       BallCommand.Unspents.send(BallDataUnspents(client: data.client))
       BallCommand.MemPool.send(BallDataMemPool(client: data.client))
       BallCommand.Unused.send(BallDataUnused(wallet_id: data.client.wallets[0]))
+      BallCommand.Height.send(BallDataHeight(wallet_id: data.client.wallets[0]))
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)

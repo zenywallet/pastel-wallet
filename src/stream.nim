@@ -83,6 +83,7 @@ type
     MemPool
     Unspents
     Unused
+    Height
     BsStream
 
   BallData* = ref object of RootObj
@@ -95,6 +96,8 @@ type
   BallDataUnspents* = ref object of BallData
     client*: ClientData
   BallDataUnused* = ref object of BallData
+    wallet_id*: WalletId
+  BallDataHeight* = ref object of BallData
     wallet_id*: WalletId
   BallDataBsStream* = ref object of BallData
     data*: JsonNode
