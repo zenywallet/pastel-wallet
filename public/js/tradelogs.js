@@ -3,43 +3,95 @@ var TradeLogs = (function() {
   var coin;
   var network;
   var crypto;
+  var _height = 0;
 
-  function get_test_tx() {
-    var data = new Uint8Array(32);
-    crypto.getRandomValues(data);
-    var hash = coin.crypto.sha256(data);
-    var txid = hash.toString('hex');
-
-    const keyPair = coin.ECPair.makeRandom();
-    const { address } = coin.payments.p2pkh({ pubkey: keyPair.publicKey, network: network });
-
-    return {address: address, txid: txid};
+  function conv_coin(uint64_val) {
+    strval = uint64_val.toString();
+    val = parseInt(strval);
+    if(val > Number.MAX_SAFE_INTEGER) {
+      var d = strval.slice(-8).replace(/0+$/, '');
+      var n = strval.substr(0, strval.length - 8);
+      if(d.length > 0) {
+        return n + '.' + d;
+      } else {
+        return n;
+      }
+    }
+    return val / 100000000;
   }
 
-  var test_tx_count = 0;
   function get_txlogs(limit, sequence, cb) {
-    setTimeout(function() {
-      var items = [];
-      for(var i = 0; i < limit; i++) {
-        if(test_tx_count >= 50) {
-          cb(items);
-          return;
-        }
-        test_tx_count++;
-        items.push(get_test_tx());
+    if(sequence == null) {
+      pastel.send({cmd: "txlogs"});
+    } else {
+      pastel.send({cmd: "txlogs", data: sequence});
+    }
+  }
+
+  function conv_time(unix_time) {
+    var dt = new Date(unix_time * 1000)
+    var local_time = dt.getFullYear() + '-'
+      + ('00' + (dt.getMonth() + 1)).slice(-2) + '-'
+      + ('00' + dt.getDate()).slice(-2) + ' '
+      + ('00' + dt.getHours()).slice(-2) + ':'
+      + ('00' + dt.getMinutes()).slice(-2) + ':'
+      + ('00' + dt.getSeconds()).slice(-2);
+    return local_time;
+  }
+
+  var time_elapsed_list = [
+    {key: "week", val: 7 * 24 * 60 * 60},
+    {key: "day", val: 24 * 60 * 60},
+    {key: "hour", val: 60 * 60},
+    {key: "minute", val: 60}
+  ];
+
+  function time_elapsed_string(unix_time) {
+    var dt = new Date(unix_time * 1000)
+    var cur_dt = new Date();
+    var diff_year = cur_dt.getFullYear() - dt.getFullYear();
+    var diff_month = cur_dt.getMonth() - dt.getMonth();
+    if(diff_month < 0) {
+      diff_month += 12;
+      diff_year--;
+    }
+    if(diff_year != 0 || diff_month != 0) {
+      var ret = '';
+      if(diff_year > 0) {
+        ret += diff_year + (diff_year > 1 ? ' years ' : ' year ');
       }
-      cb(items);
-    }, 200);
+      if(diff_month > 0) {
+        ret += diff_month + (diff_month > 1 ? ' months ' : ' month ');
+      }
+      ret += 'ago';
+      return ret;
+    } else {
+      var cur_time = Math.floor(cur_dt.getTime() / 1000);
+      var diff = cur_time - unix_time;
+      for(var i in time_elapsed_list) {
+        var t = time_elapsed_list[i];
+        var d = diff / t.val;
+        if(d >= 1) {
+          d = Math.round(d);
+          return d + ' ' + t.key + (d > 1 ? 's' : '') + ' ago';
+          break;
+        }
+      }
+      return 'just now';
+    }
   }
 
   function txlogs_item(item) {
     var data = item;
     imgsrc = DotMatrix.getImage(cipher.buf2hex(cipher.murmurhash((new TextEncoder).encode(data.address))), 36, 1);
-    var send = Math.round(Math.random()) == 0;
-    var confirm = Math.round(Math.random()) == 0;
+    var send = (data.txtype == 0);
+    var confirm = _height - data.height + 1;
     var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
-    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (12345)' : '<i class="red dont icon"></i> Unconfirmed';
-    var amount = Math.round(Math.random() * 100000 * 100000000) / 100000000;
+    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (<span class="tx-confirm" data-height="' + data.height + '">' + confirm + '</span>)' : '<i class="red dont icon"></i> Unconfirmed';
+    var amount = conv_coin(data.value);
+    var local_time = conv_time(data.time);
+    var trans_time = data.trans_time ? conv_time(data.trans_time) : local_time;
+    var elapsed_time = data.trans_time ? data.trans_time : data.time;
     var h = '<div class="ui centered card metal">'
       + '<div class="content">'
       + '<img class="right floated mini ui image" src="' + imgsrc + '">'
@@ -47,8 +99,8 @@ var TradeLogs = (function() {
       + '<i class="' + (send ? 'counterclockwise rotated sign-out icon send' : 'clockwise rotated sign-in icon receive') + '"></i> ' + (send ? 'SEND' : 'RECEIVE')
       + '</div>'
       + '<div class="meta">'
-      + '0000-00-00 00:00:00<br>'
-      + '2 months ago'
+      + trans_time + '<br>'
+      + '<span class="tx-elapsed" data-time="' + elapsed_time + '">' + time_elapsed_string(elapsed_time) + '</span>'
       + '</div>'
       + '<div class="description">'
       + '<span class="right floated">' + amount + ' ZNY</span>'
@@ -60,7 +112,7 @@ var TradeLogs = (function() {
       + '</div>'
       + extra
       + '<span class="right floated">'
-      + '0000-00-00 00:00:00'
+      + local_time
       + '</span>'
       + '<span>'
       + confirm_msg
@@ -71,9 +123,9 @@ var TradeLogs = (function() {
   }
 
   var itemcache = [];
-  var sequence = 0;
-  var limit = 100;
-  var cachelimit = 100;
+  var last_sequence = null;
+  var limit = 50;
+  var cachelimit = 50;
   var eof = false;
 
   function infinite_additem(item) {
@@ -108,15 +160,7 @@ var TradeLogs = (function() {
   function loadcache() {
     if(itemcache.length < cachelimit && !eof && !loadcache_loading) {
       loadcache_loading = true;
-      get_txlogs(limit, sequence, function(data) {
-        if(data.length <= 0) {
-          eof = true;
-        } else {
-          itemcache = itemcache.concat(data);
-          check_scroll();
-        }
-        loadcache_loading = false;
-      });
+      get_txlogs(limit, last_sequence);
     }
   }
 
@@ -130,6 +174,20 @@ var TradeLogs = (function() {
     }
   }
 
+  var abort = false;
+  var elapsed_update_worker_tval = null;
+  function elapsed_update_worker() {
+    if(abort) {
+      return;
+    }
+    $('.tx-elapsed').each(function() {
+      $(this).text(time_elapsed_string($(this).data('time')));
+    });
+    elapsed_update_worker_tval = setTimeout(function() {
+      elapsed_update_worker();
+    }, 10000);
+  }
+
   var TradeLogs = {};
 
   TradeLogs.start = function() {
@@ -137,22 +195,57 @@ var TradeLogs = (function() {
     coin = coin || coinlibs.coin;
     network = network || coin.networks[pastel.config.network];
     crypto = crypto || window.crypto || window.msCrypto;
-
     if(!$('#tradelogs').length) {
       return;
     }
 
+    abort = false;
     console.log('start');
     test_tx_count = 0;
     eof = false;
+    last_sequence = null;
+    itemcache = [];
     loadcache();
     window.addEventListener('scroll', scroll_listener);
     check_scroll();
+    clearTimeout(elapsed_update_worker_tval);
+    elapsed_update_worker();
   }
 
   TradeLogs.stop = function() {
     console.log('stop');
+    abort = true;
     window.removeEventListener('scroll', scroll_listener);
+    clearTimeout(elapsed_update_worker_tval);
+  }
+
+  TradeLogs.get_txlogs_cb = function(items) {
+    console.log(JSON.stringify(items));
+    var data = items;
+    if(data.length <= 0) {
+      eof = true;
+    } else {
+      var last = data[data.length - 1];
+      if(last) {
+        if(last_sequence == null || last_sequence > last.sequence) {
+          last_sequence = last.sequence;
+        }
+        console.log('last_sequence=', last_sequence);
+      }
+      itemcache = itemcache.concat(data);
+      check_scroll();
+    }
+    loadcache_loading = false;
+  }
+
+  TradeLogs.update_height = function(height) {
+    _height = height;
+    $('.tx-confirm').each(function() {
+      $(this).text(_height - $(this).data('height') + 1);
+    });
+    $('.tx-elapsed').each(function() {
+      $(this).text(time_elapsed_string($(this).data('time')));
+    });
   }
 
   return TradeLogs;

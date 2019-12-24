@@ -682,6 +682,12 @@ pastel.ready = function() {
           showRecvAddressAfterEffect();
         });
       }
+    } else if(type == 'height') {
+      TradeLogs.update_height(json.data);
+    } else if(type == 'txlogs') {
+      if(json.data) {
+        TradeLogs.get_txlogs_cb(json.data);
+      }
     } else if(type == 'ready') {
       console.log('server ready');
       var xpubs = wallet.getXpubs();

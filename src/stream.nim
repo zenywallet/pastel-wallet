@@ -318,7 +318,7 @@ proc stream_main() {.thread.} =
                       txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
                                       value: l.value, txid: l.txid, height: l.height, time: l.time,
                                       change: l.change, index: l.index, xpub_idx: i))
-                      if txlogs.len >= 1000:
+                      if txlogs.len >= 50:
                         break
                 else:
                   for i, wid in client.wallets:
@@ -326,11 +326,11 @@ proc stream_main() {.thread.} =
                       txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
                                       value: l.value, txid: l.txid, height: l.height, time: l.time,
                                       change: l.change, index: l.index, xpub_idx: i))
-                      if txlogs.len >= 1000:
+                      if txlogs.len >= 50:
                         break
                 txlogs.sort(SequenceRevCmp)
-                if txlogs.len > 1000:
-                  txlogs.delete(1000, txlogs.high)
+                if txlogs.len > 50:
+                  txlogs.delete(50, txlogs.high)
                 var json = %*{"type": "txlogs", "data": txlogs}
                 for j in json["data"]:
                   j["value"] = j_uint64(j["value"].getUint64)
