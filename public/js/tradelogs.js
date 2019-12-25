@@ -96,7 +96,7 @@ var TradeLogs = (function() {
     var local_time = conv_time(data.time);
     var trans_time = data.trans_time ? conv_time(data.trans_time) : local_time;
     var elapsed_time = data.trans_time ? data.trans_time : data.time;
-    var h = '<div class="ui centered card metal">'
+    var h = '<div class="ui centered card metal txlog" data-sequence="' + item.sequence + '">'
       + '<div class="content">'
       + '<img class="right floated mini ui image" src="' + imgsrc + '">'
       + '<div class="header">'
@@ -228,6 +228,7 @@ var TradeLogs = (function() {
     clearTimeout(elapsed_update_worker_tval);
   }
 
+  var new_txlogs_worker_tval = null;
   TradeLogs.get_txlogs_cb = function(data) {
     if(!start) {
       return;
@@ -256,6 +257,30 @@ var TradeLogs = (function() {
         itemcache = itemcache.concat(txlogs);
         check_scroll();
       } else {
+        var first = txlogs[0];
+        if(first) {
+          if(first_sequence >= first.sequence) {
+            var remove_list = [];
+            $('.txlog').each(function() {
+              var seq = $(this).data('sequence');
+              if(seq >= first.sequence) {
+                remove_list.push($(this));
+              }
+            });
+            function remove_worker() {
+              var elm = remove_list.shift();
+              if(elm) {
+                elm.animate({opacity: 0}, 600, function() {
+                  elm.animate({height: 'hide'}, 600, function() {
+                    elm.remove();
+                    setTimeout(remove_worker, 10);
+                  });
+                });
+              }
+            }
+            remove_worker();
+          }
+        }
         function worker() {
           var item = txlogs.shift();
           if(item) {
@@ -263,11 +288,9 @@ var TradeLogs = (function() {
             if(first_sequence == null) {
               first_sequence = item.sequence;
             }
-            if(first_sequence < item.sequence) {
-              $(h).hide().prependTo('#tradelogs').css({opacity: 0}).stop(true, true).animate({height: 'show'}, 600).animate({opacity: 1}, 600);
-              first_sequence = item.sequence;
-            }
-            setTimeout(worker, 1000);
+            $(h).hide().prependTo('#tradelogs').css({opacity: 0}).stop(true, true).animate({height: 'show'}, 600).animate({opacity: 1}, 600);
+            first_sequence = item.sequence;
+            new_txlogs_worker_tval = setTimeout(worker, 1000);
           } else {
             var tid = document.getElementById('tradelogs');
             var rect = tid.getBoundingClientRect();
@@ -293,6 +316,11 @@ var TradeLogs = (function() {
       });
       get_txlogs(first_sequence, false);
     }
+  }
+
+  TradeLogs.rollbacked = function(sequence) {
+    clearTimeout(new_txlogs_worker_tval);
+    get_txlogs(sequence, false);
   }
 
   return TradeLogs;

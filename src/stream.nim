@@ -84,6 +84,8 @@ type
     Unspents
     Unused
     Height
+    Rollback
+    Rollbacked
     BsStream
 
   BallData* = ref object of RootObj
@@ -99,6 +101,11 @@ type
     wallet_id*: WalletId
   BallDataHeight* = ref object of BallData
     wallet_id*: WalletId
+  BallDataRollback* = ref object of BallData
+    wallet_id*: WalletId
+    sequence*: uint64
+  BallDataRollbacked* = ref object of BallData
+    sequence*: uint64
   BallDataBsStream* = ref object of BallData
     data*: JsonNode
 

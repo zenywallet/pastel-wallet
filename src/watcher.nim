@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times
+import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times, strutils
 import ../deps/"websocket.nim"/websocket
 import libbtc
 import blockstor, db, events, logs, stream
@@ -326,6 +326,7 @@ proc main() =
     if smarker_update.kind == JNull:
       debug "error: setmarker in rollback is null"
       return
+    BallCommand.Rollbacked.send(BallDataRollbacked(sequence: rollbacked_sequence))
     let smarker_update_err = getBsErrorCode(smarker_update["err"].getInt)
     if smarker_update_err != BsErrorCode.SUCCESS:
       debug "info: setmarker err=", smarker_update_err
@@ -601,6 +602,7 @@ proc ball_main() {.thread.} =
   var active_wids = initHashSet[WalletId]()
   var full_wid_addrs = initHashSet[WidAddressPairs]()
   var height: uint32
+  var prev_stream_height: uint32 = 0
 
   proc sendUnconfs(wid_addrs: HashSet[WidAddressPairs], wids: seq[WalletIds], send_empty: bool = false): WalletIds {.discardable.} =
     var sent_wids: WalletIds
@@ -692,6 +694,21 @@ proc ball_main() {.thread.} =
         if j_bs.hasKey("height"):
           height_flag = true
           height = j_bs["height"].getUint32
+          if prev_stream_height >= height:
+            var min_sequence: uint64
+            var first = true
+            for tx in j_bs["txs"].pairs:
+              if first:
+                min_sequence = cast[uint64](parseBiggestUInt(tx.key))
+                first = false
+              else:
+                var s = cast[uint64](parseBiggestUInt(tx.key))
+                if min_sequence > s:
+                  min_sequence = s
+            if not first:
+              for ids in wallet_ids:
+                BallCommand.Rollback.send(BallDataRollback(wallet_id: ids[0], sequence: min_sequence))
+          prev_stream_height = height
           full_wid_addrs = fullMempoolAddrs()
           sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq, true)
         elif j_bs.hasKey("mempool"):
@@ -784,6 +801,20 @@ proc ball_main() {.thread.} =
       let client_wid: WalletId = data.wallet_id
       var json = %*{"type": "height", "data": height}
       stream.send(client_wid, $json)
+
+    of BallCommand.Rollback:
+      var data = BallDataRollback(ch_data.data)
+      let client_wid: WalletId = data.wallet_id
+      var sequence = data.sequence
+      var json = %*{"type": "rollback", "data": sequence}
+      stream.send(client_wid, $json)
+
+    of BallCommand.Rollbacked:
+      var data = BallDataRollbacked(ch_data.data)
+      var sequence = data.sequence
+      var json = %*{"type": "rollbacked", "data": sequence}
+      for ids in wallet_ids:
+        stream.send(ids[0], $json)
 
     of BallCommand.AddClient:
       var data = BallDataAddClient(ch_data.data)

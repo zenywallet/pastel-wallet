@@ -684,6 +684,10 @@ pastel.ready = function() {
       }
     } else if(type == 'height') {
       TradeLogs.update_height(json.data);
+    } else if(type == 'rollback') {
+      console.log('rollback');
+    } else if(type == 'rollbacked') {
+      TradeLogs.rollbacked(json.data);
     } else if(type == 'txlogs') {
       if(json.data) {
         TradeLogs.get_txlogs_cb(json.data);
