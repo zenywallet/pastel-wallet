@@ -251,16 +251,16 @@ proc stream_main() {.thread.} =
                                 cast[ptr UncheckedArray[byte]](addr dec[0]))
               copyMem(addr rdata[pos], addr dec[0], plen)
             let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
-            let json = parseJson(uncomp)
-            debug json
+            let json_cmd = parseJson(uncomp)
+            debug json_cmd
 
             # set: xpubs, data
             # get: xpubs
-            if json.hasKey("cmd"):
-              let cmd = json["cmd"].getStr
+            if json_cmd.hasKey("cmd"):
+              let cmd = json_cmd["cmd"].getStr
               if cmd == "xpubs":
-                if json.hasKey("data"):
-                  var xpubs = json["data"]
+                if json_cmd.hasKey("data"):
+                  var xpubs = json_cmd["data"]
                   let wmdata = WalletMapData(fd: fd, salt: client.salt)
                   for xpub in xpubs:
                     let xpub_str = xpub.getStr
@@ -311,15 +311,29 @@ proc stream_main() {.thread.} =
 
               elif cmd == "txlogs":
                 var txlogs: TxLogs
-                if json.hasKey("data"):
-                  var sequence = json["data"].getUint64
-                  for i, wid in client.wallets:
-                    for l in db.getAddrlogsReverse_lt(wid, sequence):
-                      txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
-                                      value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                      change: l.change, index: l.index, xpub_idx: i))
-                      if txlogs.len >= 50:
-                        break
+                var rev_flag = true
+                if json_cmd.hasKey("data"):
+                  if json_cmd["data"].hasKey("lt"):
+                    var sequence = json_cmd["data"]["lt"].getUint64
+                    for i, wid in client.wallets:
+                      for l in db.getAddrlogsReverse_lt(wid, sequence):
+                        txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                        value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                        change: l.change, index: l.index, xpub_idx: i))
+                        if txlogs.len >= 50:
+                          break
+                    txlogs.sort(SequenceRevCmp)
+                  elif json_cmd["data"].hasKey("gt"):
+                    var sequence = json_cmd["data"]["gt"].getUint64
+                    for i, wid in client.wallets:
+                      for l in db.getAddrlogs_gt(wid, sequence):
+                        txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                        value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                        change: l.change, index: l.index, xpub_idx: i))
+                        if txlogs.len >= 50:
+                          break
+                    txlogs.sort(SequenceCmp)
+                    rev_flag = false
                 else:
                   for i, wid in client.wallets:
                     for l in db.getAddrlogsReverse(wid):
@@ -328,11 +342,11 @@ proc stream_main() {.thread.} =
                                       change: l.change, index: l.index, xpub_idx: i))
                       if txlogs.len >= 50:
                         break
-                txlogs.sort(SequenceRevCmp)
+                  txlogs.sort(SequenceRevCmp)
                 if txlogs.len > 50:
                   txlogs.delete(50, txlogs.high)
-                var json = %*{"type": "txlogs", "data": txlogs}
-                for j in json["data"]:
+                var json = %*{"type": "txlogs", "data": {"txlogs": txlogs, "rev": rev_flag}}
+                for j in json["data"]["txlogs"]:
                   j["value"] = j_uint64(j["value"].getUint64)
                   var ret_txtime = db.getTxtime(j["txid"].getStr)
                   if ret_txtime.err == DbStatus.Success:

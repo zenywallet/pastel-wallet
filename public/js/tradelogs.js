@@ -20,11 +20,15 @@ var TradeLogs = (function() {
     return val / 100000000;
   }
 
-  function get_txlogs(limit, sequence, cb) {
+  function get_txlogs(sequence, rev_flag) {
     if(sequence == null) {
       pastel.send({cmd: "txlogs"});
     } else {
-      pastel.send({cmd: "txlogs", data: sequence});
+      if(rev_flag) {
+        pastel.send({cmd: "txlogs", data: {lt: sequence}});
+      } else{
+        pastel.send({cmd: "txlogs", data: {gt: sequence}});
+      }
     }
   }
 
@@ -123,6 +127,7 @@ var TradeLogs = (function() {
   }
 
   var itemcache = [];
+  var first_sequence = null;
   var last_sequence = null;
   var limit = 50;
   var cachelimit = 50;
@@ -160,7 +165,7 @@ var TradeLogs = (function() {
   function loadcache() {
     if(itemcache.length < cachelimit && !eof && !loadcache_loading) {
       loadcache_loading = true;
-      get_txlogs(limit, last_sequence);
+      get_txlogs(last_sequence, true);
     }
   }
 
@@ -174,6 +179,7 @@ var TradeLogs = (function() {
     }
   }
 
+  var start = false;
   var abort = false;
   var elapsed_update_worker_tval = null;
   function elapsed_update_worker() {
@@ -199,10 +205,12 @@ var TradeLogs = (function() {
       return;
     }
 
+    start = true;
     abort = false;
     console.log('start');
     test_tx_count = 0;
     eof = false;
+    fist_sequence = null;
     last_sequence = null;
     itemcache = [];
     loadcache();
@@ -214,38 +222,77 @@ var TradeLogs = (function() {
 
   TradeLogs.stop = function() {
     console.log('stop');
+    start = false;
     abort = true;
     window.removeEventListener('scroll', scroll_listener);
     clearTimeout(elapsed_update_worker_tval);
   }
 
-  TradeLogs.get_txlogs_cb = function(items) {
-    console.log(JSON.stringify(items));
-    var data = items;
-    if(data.length <= 0) {
+  TradeLogs.get_txlogs_cb = function(data) {
+    if(!start) {
+      return;
+    }
+    console.log(JSON.stringify(data));
+    var txlogs = data.txlogs;
+    var rev_flag = data.rev;
+    if(txlogs.length <= 0) {
       eof = true;
     } else {
-      var last = data[data.length - 1];
-      if(last) {
-        if(last_sequence == null || last_sequence > last.sequence) {
-          last_sequence = last.sequence;
+      if(rev_flag) {
+        var first = txlogs[0];
+        if(first) {
+          if(first_sequence == null || first_sequence < first.sequence) {
+            first_sequence = first.sequence;
+          }
+          console.log('first_sequence=', first_sequence);
         }
-        console.log('last_sequence=', last_sequence);
+        var last = txlogs[txlogs.length - 1];
+        if(last) {
+          if(last_sequence == null || last_sequence > last.sequence) {
+            last_sequence = last.sequence;
+          }
+          console.log('last_sequence=', last_sequence);
+        }
+        itemcache = itemcache.concat(txlogs);
+        check_scroll();
+      } else {
+        function worker() {
+          var item = txlogs.shift();
+          if(item) {
+            var h = txlogs_item(item);
+            if(first_sequence == null) {
+              first_sequence = item.sequence;
+            }
+            if(first_sequence < item.sequence) {
+              $(h).hide().prependTo('#tradelogs').css({opacity: 0}).stop(true, true).animate({height: 'show'}, 600).animate({opacity: 1}, 600);
+              first_sequence = item.sequence;
+            }
+            setTimeout(worker, 1000);
+          } else {
+            var tid = document.getElementById('tradelogs');
+            var rect = tid.getBoundingClientRect();
+            var offset_top = rect.top - 50 + (window.pageYOffset || document.documentElement.scrollTop);
+            scrollPos(offset_top, 800);
+            get_txlogs(first_sequence, false);
+          }
+        }
+        worker();
       }
-      itemcache = itemcache.concat(data);
-      check_scroll();
     }
     loadcache_loading = false;
   }
 
   TradeLogs.update_height = function(height) {
     _height = height;
-    $('.tx-confirm').each(function() {
-      $(this).text(_height - $(this).data('height') + 1);
-    });
-    $('.tx-elapsed').each(function() {
-      $(this).text(time_elapsed_string($(this).data('time')));
-    });
+    if(start) {
+      $('.tx-confirm').each(function() {
+        $(this).text(_height - $(this).data('height') + 1);
+      });
+      $('.tx-elapsed').each(function() {
+        $(this).text(time_elapsed_string($(this).data('time')));
+      });
+      get_txlogs(first_sequence, false);
+    }
   }
 
   return TradeLogs;
