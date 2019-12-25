@@ -650,8 +650,10 @@ i.receive {
 .ui.cards.tradelogs {
   display: block;
   margin-top: 14px;
-  margin-bottom: 120px;
   min-width: 324px;
+}
+#tradelogs {
+  margin-bottom: 120px;
 }
 .ui.cards.tradelogs > .card {
   width: 600px;

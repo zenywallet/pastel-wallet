@@ -665,6 +665,7 @@ pastel.ready = function() {
       } else {
         $('#wallet-balance .receive').fadeOut(400);
       }
+      TradeLogs.unconfs(data);
     } else if(type == 'balance') {
       console.log('balance: ' + JSON.stringify(json));
       $('#wallet-balance .balance').text(conv_coin(json.data));

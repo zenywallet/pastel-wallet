@@ -89,11 +89,12 @@ var TradeLogs = (function() {
     var data = item;
     imgsrc = DotMatrix.getImage(cipher.buf2hex(cipher.murmurhash((new TextEncoder).encode(data.address))), 36, 1);
     var send = (data.txtype == 0);
-    var confirm = _height - data.height + 1;
+    var confirm = (_height >= data.height);
+    var confirm_count = _height - data.height + 1;
     var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
-    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (<span class="tx-confirm" data-height="' + data.height + '">' + confirm + '</span>)' : '<i class="red dont icon"></i> Unconfirmed';
+    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (<span class="tx-confirm" data-height="' + data.height + '">' + confirm_count + '</span>)' : '<i class="red dont icon"></i> Unconfirmed';
     var amount = conv_coin(data.value);
-    var local_time = conv_time(data.time);
+    var local_time = confirm ? conv_time(data.time) : '';
     var trans_time = data.trans_time ? conv_time(data.trans_time) : local_time;
     var elapsed_time = data.trans_time ? data.trans_time : data.time;
     var h = '<div class="ui centered card metal txlog" data-sequence="' + item.sequence + '">'
@@ -194,6 +195,54 @@ var TradeLogs = (function() {
     }, 10000);
   }
 
+  function show_unconfs() {
+    var unconf_list = [];
+    for(var addr in _unconfs) {
+      var val = _unconfs[addr];
+      if(val.spents) {
+        for(i in val.spents) {
+          var spent = val.spents[i];
+          var item = {txtype: 0, address: addr, txid: spent.txid, value: spent.value,
+            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: spent.trans_time};
+          unconf_list.push(item);
+        }
+      }
+      if(val.txouts) {
+        for(i in val.txouts) {
+          var txout = val.txouts[i];
+          var item = {txtype: 1, address: addr, txid: txout.txid, value: txout.value,
+            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
+          unconf_list.push(item);
+        }
+      }
+    }
+
+    unconf_list.sort(function(a, b) {
+      if(a.trans_time != b.trans_time) {
+        return b.trans_time - a.trans_time;
+      }
+      if(a.txtype != b.txtype) {
+        return b.txtype - a.txtype;
+      }
+      if(a.change != b.change) {
+        return b.change - a.change;
+      }
+      if(a.index != b.index) {
+        return b.index - a.index;
+      }
+      if(a.xpub_idx != b.xpub_idx) {
+        return b.xpub_idx - a.xpub_idx;
+      }
+    });
+
+    console.log(JSON.stringify(unconf_list));
+    $('#tradeunconfs').empty();
+    for(var i in unconf_list) {
+      var h = txlogs_item(unconf_list[i]);
+      $(h).appendTo('#tradeunconfs');
+    }
+  }
+
   var TradeLogs = {};
 
   TradeLogs.start = function() {
@@ -213,6 +262,7 @@ var TradeLogs = (function() {
     fist_sequence = null;
     last_sequence = null;
     itemcache = [];
+    show_unconfs();
     loadcache();
     window.addEventListener('scroll', scroll_listener);
     check_scroll();
@@ -321,6 +371,14 @@ var TradeLogs = (function() {
   TradeLogs.rollbacked = function(sequence) {
     clearTimeout(new_txlogs_worker_tval);
     get_txlogs(sequence, false);
+  }
+
+  var _unconfs = {};
+  TradeLogs.unconfs = function(data) {
+    _unconfs = data;
+    if(start) {
+      show_unconfs();
+    }
   }
 
   return TradeLogs;

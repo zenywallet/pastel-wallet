@@ -745,6 +745,7 @@ proc goSettings(): proc() =
       asm """
         TradeLogs.stop();
         $('.backpage').visibility({silent: true});
+        $('#tradeunconfs').empty();
         $('#tradelogs').empty();
       """
       viewSelector(WalletSettings, false)
@@ -764,6 +765,7 @@ proc goLogs(): proc() =
       asm """
         TradeLogs.stop();
         $('.backpage').visibility({silent: true});
+        $('#tradeunconfs').empty();
         $('#tradelogs').empty();
       """
       viewSelector(WalletLogs, false)
@@ -1282,6 +1284,7 @@ proc appMain(data: RouterData): VNode =
             span: italic(class="chevron up icon")
         if showTradeLogs:
           tdiv(class="ui container"):
+            tdiv(id="tradeunconfs", class="ui cards tradelogs")
             tdiv(id="tradelogs", class="ui cards tradelogs")
         if showSettings:
           settingsPage()
@@ -1429,6 +1432,7 @@ proc afterScript(data: RouterData) =
         page_scroll_done = function() {
           TradeLogs.stop();
           $('.backpage').visibility({silent: true});
+          $('#tradeunconfs').empty();
           $('#tradelogs').empty();
           $('#section4').hide();
           window.scrollTo(0, 0);

@@ -635,6 +635,16 @@ proc ball_main() {.thread.} =
                 json["data"][a].add("change", newJInt(da.change.BiggestInt))
                 json["data"][a].add("index", newJInt(da.index.BiggestInt))
                 json["data"][a].add("xpub_idx", newJInt(idx.BiggestInt))
+                if json["data"][a].hasKey("spents"):
+                  for spent in json["data"][a]["spents"]:
+                    let dt = getTxtime(spent["txid"].getStr)
+                    if dt.err == DbStatus.Success:
+                      spent.add("trans_time", j_uint64(dt.res))
+                if json["data"][a].hasKey("txouts"):
+                  for txout in json["data"][a]["txouts"]:
+                    let dt = getTxtime(txout["txid"].getStr)
+                    if dt.err == DbStatus.Success:
+                      txout.add("trans_time", j_uint64(dt.res))
                 break
           let client_wid: WalletId = wallets[0]
           stream.send(client_wid, $json)
