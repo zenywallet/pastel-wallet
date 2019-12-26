@@ -1,7 +1,8 @@
 # Copyright (c) 2019 zenywallet
 
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
-import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils, json, algorithm, hashes
+import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils
+import json, algorithm, hashes, times
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
@@ -396,6 +397,10 @@ proc stream_main() {.thread.} =
                   j["value"] = j_uint64(j["value"].getUint64)
                   if j["trans_time"].getUint64 == 0:
                     j.delete("trans_time")
+                sendClient(client, $json)
+
+              elif cmd == "time":
+                var json = %*{"type": "time", "data": j_uint64(cast[uint64](getTime().toUnix))}
                 sendClient(client, $json)
 
               elif cmd == "ready":

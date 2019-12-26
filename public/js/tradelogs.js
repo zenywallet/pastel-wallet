@@ -50,6 +50,18 @@ var TradeLogs = (function() {
     {key: "minute", val: 60}
   ];
 
+  var server_time_diff = 0;
+  function set_expected_server_time(unix_time) {
+    var local_dt = new Date();
+    server_time_diff = unix_time - Math.floor(local_dt.getTime() / 1000);
+    console.log('server_time_diff=', server_time_diff);
+  }
+
+  function expected_server_time(local_dt) {
+    var cur_time = Math.floor(local_dt.getTime() / 1000) + server_time_diff;
+    return cur_time;
+  }
+
   function time_elapsed_string(unix_time) {
     var dt = new Date(unix_time * 1000)
     var cur_dt = new Date();
@@ -70,8 +82,11 @@ var TradeLogs = (function() {
       ret += 'ago';
       return ret;
     } else {
-      var cur_time = Math.floor(cur_dt.getTime() / 1000);
+      var cur_time = expected_server_time(cur_dt);
       var diff = cur_time - unix_time;
+      if(diff < 0) {
+        diff = 0;
+      }
       for(var i in time_elapsed_list) {
         var t = time_elapsed_list[i];
         var d = diff / t.val;
@@ -262,6 +277,7 @@ var TradeLogs = (function() {
     first_sequence = null;
     last_sequence = null;
     itemcache = [];
+    pastel.send({cmd: "time"});
     show_unconfs();
     loadcache();
     window.addEventListener('scroll', scroll_listener);
@@ -399,5 +415,8 @@ var TradeLogs = (function() {
     }
   }
 
+  TradeLogs.server_time = function(unix_time) {
+    set_expected_server_time(unix_time);
+  }
   return TradeLogs;
 })();

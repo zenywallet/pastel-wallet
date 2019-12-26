@@ -693,6 +693,11 @@ pastel.ready = function() {
       if(json.data) {
         TradeLogs.get_txlogs_cb(json.data);
       }
+    } else if(type == 'time') {
+      if(json.data) {
+        TradeLogs.server_time(json.data);
+        console.log('server time=', json.data);
+      }
     } else if(type == 'ready') {
       console.log('server ready');
       var xpubs = wallet.getXpubs();
