@@ -259,7 +259,7 @@ var TradeLogs = (function() {
     console.log('start');
     test_tx_count = 0;
     eof = false;
-    fist_sequence = null;
+    first_sequence = null;
     last_sequence = null;
     itemcache = [];
     show_unconfs();
@@ -292,28 +292,48 @@ var TradeLogs = (function() {
       if(rev_flag) {
         var first = txlogs[0];
         if(first) {
-          if(first_sequence == null || first_sequence < first.sequence) {
-            first_sequence = first.sequence;
+          var max = first.sequence;
+          var min = first.sequence;
+          for(var i = 1; i < txlogs.length; i++) {
+            var t = txlogs[i];
+            if(max < t.sequence) {
+              max = t.sequence;
+            } else if(min > t.sequence) {
+              min = t.sequence;
+            }
           }
-          console.log('first_sequence=', first_sequence);
-        }
-        var last = txlogs[txlogs.length - 1];
-        if(last) {
-          if(last_sequence == null || last_sequence > last.sequence) {
-            last_sequence = last.sequence;
+          if(first_sequence == null) {
+            first_sequence = max;
+          } else {
+            first_sequence = first_sequence > max ? first_sequence : max;
           }
-          console.log('last_sequence=', last_sequence);
+          if(last_sequence == null) {
+            last_sequence = min;
+          } else {
+            last_sequence = last_sequence < min ? last_sequence : min;
+          }
         }
         itemcache = itemcache.concat(txlogs);
         check_scroll();
       } else {
         var first = txlogs[0];
         if(first) {
-          if(first_sequence >= first.sequence) {
+          var max = first.sequence;
+          var min = first.sequence;
+          for(var i = 1; i < txlogs.length; i++) {
+            var t = txlogs[i];
+            if(max < t.sequence) {
+              max = t.sequence;
+            } else if(min > t.sequence) {
+              min = t.sequence;
+            }
+          }
+
+          if(first_sequence >= min) {
             var remove_list = [];
             $('.txlog').each(function() {
               var seq = $(this).data('sequence');
-              if(seq >= first.sequence) {
+              if(seq >= min) {
                 remove_list.push($(this));
               }
             });
@@ -330,26 +350,24 @@ var TradeLogs = (function() {
             }
             remove_worker();
           }
-        }
-        function worker() {
-          var item = txlogs.shift();
-          if(item) {
-            var h = txlogs_item(item);
-            if(first_sequence == null) {
-              first_sequence = item.sequence;
+
+          function worker() {
+            var item = txlogs.shift();
+            if(item) {
+              var h = txlogs_item(item);
+              $(h).hide().prependTo('#tradelogs').css({opacity: 0}).stop(true, true).animate({height: 'show'}, 600).animate({opacity: 1}, 600);
+              new_txlogs_worker_tval = setTimeout(worker, 1000);
+            } else {
+              first_sequence = max;
+              var tid = document.getElementById('tradelogs');
+              var rect = tid.getBoundingClientRect();
+              var offset_top = rect.top - 50 + (window.pageYOffset || document.documentElement.scrollTop);
+              scrollPos(offset_top, 800);
+              get_txlogs(first_sequence, false);
             }
-            $(h).hide().prependTo('#tradelogs').css({opacity: 0}).stop(true, true).animate({height: 'show'}, 600).animate({opacity: 1}, 600);
-            first_sequence = item.sequence;
-            new_txlogs_worker_tval = setTimeout(worker, 1000);
-          } else {
-            var tid = document.getElementById('tradelogs');
-            var rect = tid.getBoundingClientRect();
-            var offset_top = rect.top - 50 + (window.pageYOffset || document.documentElement.scrollTop);
-            scrollPos(offset_top, 800);
-            get_txlogs(first_sequence, false);
           }
+          worker();
         }
-        worker();
       }
     }
     loadcache_loading = false;

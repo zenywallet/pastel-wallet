@@ -127,6 +127,7 @@ type
     change: uint32
     index: uint32
     xpub_idx: int
+    trans_time: uint64
   TxLogs = seq[Txlog]
 
 proc SequenceCmp[T](x, y: T): int =
@@ -142,6 +143,32 @@ proc SequenceRevCmp[T](x, y: T): int =
     result = cmp(y.change, x.change)
     if result == 0:
       result = cmp(y.index, x.index)
+
+proc TxLogCmp[T](x, y: T): int =
+  result = cmp(x.height, y.height)
+  if result == 0:
+    result = cmp(x.time, y.time)
+    if result == 0:
+      result = cmp(x.trans_time, y.trans_time)
+      if result == 0:
+        result = cmp(x.change, y.change)
+        if result == 0:
+          result = cmp(x.index, y.index)
+          if result == 0:
+            result = cmp(x.xpub_idx, y.xpub_idx)
+
+proc TxLogRevCmp[T](x, y: T): int =
+  result = cmp(y.height, x.height)
+  if result == 0:
+    result = cmp(y.time, x.time)
+    if result == 0:
+      result = cmp(y.trans_time, x.trans_time)
+      if result == 0:
+        result = cmp(y.change, x.change)
+        if result == 0:
+          result = cmp(y.index, x.index)
+          if result == 0:
+            result = cmp(y.xpub_idx, x.xpub_idx)
 
 proc j_uint64*(val: uint64): JsonNode =
   if val > 9007199254740991'u64:
@@ -324,9 +351,13 @@ proc stream_main() {.thread.} =
                     var sequence = json_cmd["data"]["lt"].getUint64
                     for i, wid in client.wallets:
                       for l in db.getAddrlogsReverse_lt(wid, sequence):
+                        var trans_time: uint64 = 0
+                        var txtime = db.getTxtime(l.txid)
+                        if txtime.err == DbStatus.Success:
+                          trans_time = txtime.res
                         txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
                                         value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                        change: l.change, index: l.index, xpub_idx: i))
+                                        change: l.change, index: l.index, xpub_idx: i, trans_time: trans_time))
                         if txlogs.len >= 50:
                           break
                     txlogs.sort(SequenceRevCmp)
@@ -334,30 +365,37 @@ proc stream_main() {.thread.} =
                     var sequence = json_cmd["data"]["gt"].getUint64
                     for i, wid in client.wallets:
                       for l in db.getAddrlogs_gt(wid, sequence):
+                        var trans_time: uint64 = 0
+                        var txtime = db.getTxtime(l.txid)
+                        if txtime.err == DbStatus.Success:
+                          trans_time = txtime.res
                         txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
                                         value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                        change: l.change, index: l.index, xpub_idx: i))
+                                        change: l.change, index: l.index, xpub_idx: i, trans_time: trans_time))
                         if txlogs.len >= 50:
                           break
-                    txlogs.sort(SequenceCmp)
+                    txlogs.sort(TxLogCmp)
                     rev_flag = false
                 else:
                   for i, wid in client.wallets:
                     for l in db.getAddrlogsReverse(wid):
+                      var trans_time: uint64 = 0
+                      var txtime = db.getTxtime(l.txid)
+                      if txtime.err == DbStatus.Success:
+                        trans_time = txtime.res
                       txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
                                       value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                      change: l.change, index: l.index, xpub_idx: i))
+                                      change: l.change, index: l.index, xpub_idx: i, trans_time: trans_time))
                       if txlogs.len >= 50:
                         break
-                  txlogs.sort(SequenceRevCmp)
+                  txlogs.sort(TxLogRevCmp)
                 if txlogs.len > 50:
                   txlogs.delete(50, txlogs.high)
                 var json = %*{"type": "txlogs", "data": {"txlogs": txlogs, "rev": rev_flag}}
                 for j in json["data"]["txlogs"]:
                   j["value"] = j_uint64(j["value"].getUint64)
-                  var ret_txtime = db.getTxtime(j["txid"].getStr)
-                  if ret_txtime.err == DbStatus.Success:
-                    j.add("trans_time", j_uint64(ret_txtime.res))
+                  if j["trans_time"].getUint64 == 0:
+                    j.delete("trans_time")
                 sendClient(client, $json)
 
               elif cmd == "ready":
