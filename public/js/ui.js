@@ -384,7 +384,9 @@ function showRecvAddress(cb) {
     $('#receive-address .used').css({width: 0, 'margin-right': 0});
     $('#receive-address .used .ball').removeClass('active');
     $('#receive-address .address').css("visibility", "hidden").css("opacity", 0).text(modal_recv_addrs[0]);
-    pastel.utxoballs.click(utxoballs_click);
+    if(pastel.utxoballs) {
+      pastel.utxoballs.click(utxoballs_click);
+    }
 
     if(!recv_moval_init_flag) {
       initRecvModal();

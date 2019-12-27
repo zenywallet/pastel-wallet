@@ -610,16 +610,7 @@ pastel.ready = function() {
       wallet.setUtxos(utxos);
 
       pastel.utxoballs = UtxoBalls.simple();
-      var resize_tval;
-      window.addEventListener("resize", function() {
-        pastel.utxoballs.stop();
-        clearTimeout(resize_tval);
-        resize_tval = setTimeout(function() {
-          var click_cb = pastel.utxoballs.click_cb();
-          pastel.utxoballs = UtxoBalls.simple();
-          pastel.utxoballs.click(click_cb);
-        }, 1400);
-      });
+      pastel.utxoballs.update_balls(utxos);
     } else if(type == 'unconfs') {
       console.log('unconfs: ' + JSON.stringify(json));
       var data = json.data;
