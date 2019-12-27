@@ -321,28 +321,7 @@ proc stream_main() {.thread.} =
                 StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
 
               elif cmd == "unspents":
-                var unspents: seq[UnspentsData]
-                var xpub_idx = 0
-                for wid in client.wallets:
-                  var count = 0
-                  for u in getUnspents(wid):
-                    for a in getAddresses(u.address):
-                      var ud = UnspentsData(sequence: u.sequence,
-                                            txid: u.txid, n: u.n,
-                                            address: u.address, value: u.value,
-                                            change: a.change, index: a.index,
-                                            xpub_idx: xpub_idx)
-                      unspents.add(ud)
-                      break
-                    inc(count)
-                    if count >= 1000:
-                      break
-                  inc(xpub_idx)
-                unspents.sort(SequenceCmp)
-                if unspents.len > 1000:
-                  unspents.delete(1000, unspents.high)
-                var json = %*{"type": "unspents", "data": unspents}
-                sendClient(client, $json)
+                BallCommand.Unspents.send(BallDataUnspents(client: client))
 
               elif cmd == "txlogs":
                 var txlogs: TxLogs
