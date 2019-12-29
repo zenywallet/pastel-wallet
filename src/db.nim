@@ -216,7 +216,7 @@ iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
     yield (xpubkey, wid, sequence, next_0_index, next_1_index)
 
 proc delWallets*() =
-  let key = concat(Prefix.wallets.toByte)
+  let key = Prefix.wallets.toByte
   for d in db.gets(key):
     db.del(d.key)
 
@@ -257,7 +257,7 @@ proc setAddress*(address: string, change: uint32, index: uint32,
                   change.toByte,
                   index.toByte,
                   wid.toByte)
-  let val = concat(sequence.toByte)
+  let val = sequence.toByte
   db.put(key, val)
 
 iterator getAddresses*(address: string): tuple[change: uint32,
@@ -272,7 +272,7 @@ iterator getAddresses*(address: string): tuple[change: uint32,
 
 iterator getAddresses*(): tuple[address: string, change: uint32,
                       index: uint32, wid: uint64, sequence: uint64] =
-  let key = concat(Prefix.addresses.toByte)
+  let key = Prefix.addresses.toByte
   for d in db.gets(key):
     let address = d.key[1..^17].toString
     let change = d.key[^16..^13].toUint32
@@ -555,7 +555,7 @@ when isMainModule:
     echo d
 
   let key1 = concat(Prefix.rewards.toByte, 10'u64.toByte)
-  let val1 = concat(5'u64.toByte)
+  let val1 = 5'u64.toByte
   db.put(key1, val1)
   echo db.get(key1)
   db.del(key1)
@@ -564,7 +564,7 @@ when isMainModule:
 
   for i in 1..10:
     let k = concat(Prefix.rewards.toByte, cast[uint64](i * 10).toByte)
-    let v = concat(cast[uint64](i * 10).toByte)
+    let v = cast[uint64](i * 10).toByte
     db.put(k, v)
 
   var i = 0
@@ -574,7 +574,7 @@ when isMainModule:
     if i > 3:
       break
 
-  let key2 = concat(Prefix.rewards.toByte)
+  let key2 = Prefix.rewards.toByte
   echo db.gets(key2)
   db.dels(key2)
   echo db.gets(key2)
