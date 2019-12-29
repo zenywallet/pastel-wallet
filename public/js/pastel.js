@@ -603,7 +603,6 @@ pastel.ready = function() {
         throw new Error('check xpubs');
       }
       console.log('xpubs: ' + JSON.stringify(xpubs));
-      pastel.send({cmd: 'unspents'});
     } else if(type == 'unspents') {
       var utxos = json['data'];
       console.log('unspents: ' + JSON.stringify(utxos));
