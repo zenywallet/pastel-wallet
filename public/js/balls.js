@@ -160,7 +160,6 @@ UtxoBalls.simple = function() {
         Ball.create_balls_task.push({type: 1, utxo: utxos[i]});
         ss += utxo.s;
       }
-      console.log('ss1=', ss, (w * h));
       Ball.balls_r = Math.sqrt(((w * h) / 2.5) / ss);
       create_balls_worker();
       Ball.too_much_balls_enable = false;
@@ -174,7 +173,6 @@ UtxoBalls.simple = function() {
           utxo.s = parseFloat(utxo.value);
           ss += utxo.s;
         }
-        console.log('ss2=', ss, (w * h));
         Ball.balls_r = Math.sqrt(((w * h) / 2.5) / ss);
       } else {
         for(var i in utxos) {
@@ -244,7 +242,6 @@ UtxoBalls.simple = function() {
       var s = body.circleRadius * 2;
       ss += s * s;
     }
-    console.log('total_circle_area=', ss, Ball.bodies.length);
     return ss;
   }
 
