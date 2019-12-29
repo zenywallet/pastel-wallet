@@ -229,7 +229,7 @@ UtxoBalls.simple = function() {
     for(var i in addlist) {
       Ball.create_balls_task.push({type: 1, utxo: addlist[i]});
     }
-    create_balls_worker();
+    create_balls_worker_tval = setTimeout(create_balls_worker, 3000);
   }
 
   var scale_dec = 0.98;
