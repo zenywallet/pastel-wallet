@@ -608,8 +608,9 @@ pastel.ready = function() {
       var utxos = json['data'];
       console.log('unspents: ' + JSON.stringify(utxos));
       wallet.setUtxos(utxos);
-
-      pastel.utxoballs = UtxoBalls.simple();
+      if(!pastel.utxoballs) {
+        pastel.utxoballs = UtxoBalls.simple();
+      }
       pastel.utxoballs.update_balls(utxos);
     } else if(type == 'unconfs') {
       console.log('unconfs: ' + JSON.stringify(json));
