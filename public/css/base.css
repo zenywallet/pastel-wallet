@@ -774,7 +774,9 @@ i.receive {
   border-bottom: 6px solid transparent;
   border-left: 6px solid transparent;
   position: relative;
-  top: -32px;
+  top: -44px;
+  left: -8px;
+  float: right;
 }
 #receive-address .ball:hover:after {
   content: '';
@@ -784,7 +786,9 @@ i.receive {
   border-bottom: 6px solid transparent;
   border-left: 6px solid transparent;
   position: relative;
-  top: -32px;
+  top: -44px;
+  left: -8px;
+  float: right;
 }
 #receive-address .ball.active:after {
   border-top: 10.3923px solid rgba(255, 120, 120, 1);
