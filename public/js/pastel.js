@@ -624,12 +624,12 @@ pastel.ready = function() {
             if(data[addr].change == 0) {
               for(var i in txouts) {
                 var txout = txouts[i];
-                recv.add(UINT64(txout.value));
+                recv.add(UINT64(String(txout.value)));
               }
             } else {
               for(var i in txouts) {
                 var txout = txouts[i];
-                recv_change.add(UINT64(txout.value));
+                recv_change.add(UINT64(String(txout.value)));
               }
             }
             recv.subtract(recv_change)
@@ -638,7 +638,7 @@ pastel.ready = function() {
           if(spents) {
             for(var i in spents) {
               var spent = spents[i];
-              send.add(UINT64(spent.value));
+              send.add(UINT64(String(spent.value)));
             }
             send.subtract(recv_change)
           }
