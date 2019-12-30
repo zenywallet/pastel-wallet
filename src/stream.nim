@@ -311,12 +311,6 @@ proc stream_main() {.thread.} =
                 BallCommand.AddClient.send(BallDataAddClient(client: client))
                 sendClient(client, $json)
 
-                if client.wallets.len > 0:
-                  #StreamCommand.Unconfs.send(StreamDataUnconfs(wallets: client.wallets))
-                  StreamCommand.Balance.send(StreamDataBalance(wallets: client.wallets))
-                  StreamCommand.Addresses.send(StreamDataAddresses(wallets: client.wallets))
-                  #StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
-
               elif cmd == "unused":
                 StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
 

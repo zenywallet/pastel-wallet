@@ -833,8 +833,10 @@ proc ball_main() {.thread.} =
       active_wids.incl(data.client.wallets.toHashSet())
       BallCommand.Unspents.send(BallDataUnspents(client: data.client))
       BallCommand.MemPool.send(BallDataMemPool(client: data.client))
-      BallCommand.Unused.send(BallDataUnused(wallet_id: data.client.wallets[0]))
       BallCommand.Height.send(BallDataHeight(wallet_id: data.client.wallets[0]))
+      BallCommand.Unused.send(BallDataUnused(wallet_id: data.client.wallets[0]))
+      StreamCommand.Balance.send(StreamDataBalance(wallets: data.client.wallets))
+      StreamCommand.Addresses.send(StreamDataAddresses(wallets: data.client.wallets))
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
