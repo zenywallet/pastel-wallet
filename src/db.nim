@@ -16,6 +16,8 @@ type Prefix {.pure.} = enum
   unspents    # wallet_id, sequence, txid, n = address, value
   balances    # wallet_id = value, utxo_count, address_count
   txtimes     # txid = transmission_time
+  xpubs       # wallet_id = xpubkey
+  hdaddrs     # wallet_id, change, index, address = sequence
   rawtxs      # txid = rawtx, transmission_time
   hashcash    # hashcash_id = header_block(80bytes)
               #               version(4), previous_block(32), merkle_root(32),
@@ -178,6 +180,28 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
   else:
     (DbStatus.NotFound, cast[string](nil))
 
+proc setXpub(wid: uint64, xpub: string) =
+  let key = concat(Prefix.xpubs.toByte, wid.toByte)
+  let val = xpub.toByte
+  db.put(key, val)
+
+proc getXpub*(wid: uint64): tuple[err: DbStatus, res: string] =
+  let key = concat(Prefix.xpubs.toByte, wid.toByte)
+  var d = db.get(key)
+  if d.len > 0:
+    result = (DbStatus.Success, d.toString)
+  else:
+    result = (DbStatus.NotFound, cast[string](nil))
+
+proc delXpub(wid: uint64) =
+  let key = concat(Prefix.xpubs.toByte, wid.toByte)
+  db.del(key)
+
+proc delXpubs() =
+  let key = Prefix.xpubs.toByte
+  for d in db.gets(key):
+    db.del(d.key)
+
 proc setWallet*(xpubkey: string, wid: uint64, sequence: uint64,
                 next_0_index: uint32, next_1_index: uint32) =
   let key = concat(Prefix.wallets.toByte,
@@ -187,6 +211,7 @@ proc setWallet*(xpubkey: string, wid: uint64, sequence: uint64,
                   next_0_index.toByte,
                   next_1_index.toByte)
   db.put(key, val)
+  setXpub(wid, xpubkey)
 
 proc getWallet*(xpubkey: string): tuple[err: DbStatus,
                 res: tuple[wallet_id: uint64, sequence: uint64,
@@ -202,6 +227,25 @@ proc getWallet*(xpubkey: string): tuple[err: DbStatus,
   else:
     result = (DbStatus.NotFound, (cast[uint64](nil), cast[uint64](nil),
               cast[uint32](nil), cast[uint32](nil)))
+
+proc getWallet*(wid: uint64): tuple[err: DbStatus,
+                res: tuple[xpubkey: string, sequence: uint64,
+                next_0_index: uint32, next_1_index: uint32]] =
+  let ret_xpub = getXpub(wid)
+  if ret_xpub.err == DbStatus.Success:
+    let xpubkey = ret_xpub.res
+    let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
+    var d = db.gets(key)
+    if d.len > 0:
+      let chk_wid = d[0].key[^8..^1].toUint64
+      if chk_wid == wid:
+        let sequence = d[0].value[0..7].toUint64
+        let next_0_index = d[0].value[8..11].toUint32
+        let next_1_index = d[0].value[12..15].toUint32
+        result = (DbStatus.Success, (xpubkey, sequence, next_0_index, next_1_index))
+        return
+  result = (DbStatus.NotFound, (cast[string](nil), cast[uint64](nil),
+            cast[uint32](nil), cast[uint32](nil)))
 
 iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
                     wallet_id: uint64, sequence: uint64,
@@ -219,6 +263,7 @@ proc delWallets*() =
   let key = Prefix.wallets.toByte
   for d in db.gets(key):
     db.del(d.key)
+  delXpubs()
 
 var createWalletLock: Lock
 initLock(createWalletLock)
@@ -250,6 +295,26 @@ proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
       let d2 = getWallet(xpubkey)
       result = d2.res
 
+proc setHdaddr(wid: uint64, change: uint32, index: uint32,
+              address: string, sequence: uint64) =
+  let key = concat(Prefix.hdaddrs.toByte,
+                  wid.toByte,
+                  change.toByte,
+                  index.toByte,
+                  address.toByte)
+  let val = sequence.toByte
+  db.put(key, val)
+
+iterator getHdaddrs*(wid: uint64): tuple[change: uint32,
+                    index: uint32, address: string, sequence: uint64] =
+  let key = concat(Prefix.hdaddrs.toByte, wid.toByte)
+  for d in db.gets(key):
+    let change = d.key[9..12].toUint32
+    let index = d.key[13..16].toUint32
+    let address = d.key[17..^1].toString
+    let sequence = d.value.toUint64
+    yield (change, index, address, sequence)
+
 proc setAddress*(address: string, change: uint32, index: uint32,
                 wid: uint64, sequence: uint64) =
   let key = concat(Prefix.addresses.toByte,
@@ -259,6 +324,7 @@ proc setAddress*(address: string, change: uint32, index: uint32,
                   wid.toByte)
   let val = sequence.toByte
   db.put(key, val)
+  setHdaddr(wid, change, index, address, sequence)
 
 iterator getAddresses*(address: string): tuple[change: uint32,
                       index: uint32, wid: uint64, sequence: uint64] =
@@ -269,6 +335,16 @@ iterator getAddresses*(address: string): tuple[change: uint32,
     let wid = d.key[^8..^1].toUint64
     let sequence = d.value.toUint64
     yield (change, index, wid, sequence)
+
+iterator getAddresses*(wid: uint64): tuple[change: uint32,
+                      index: uint32, address: string, sequence: uint64] =
+  let key = concat(Prefix.hdaddrs.toByte, wid.toByte)
+  for d in db.gets(key):
+    let change = d.key[9..12].toUint32
+    let index = d.key[13..16].toUint32
+    let address = d.key[17..^1].toString
+    let sequence = d.value.toUint64
+    yield (change, index, address, sequence)
 
 iterator getAddresses*(): tuple[address: string, change: uint32,
                       index: uint32, wid: uint64, sequence: uint64] =
