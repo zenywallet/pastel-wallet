@@ -961,7 +961,6 @@ proc recvAddressSelector(): VNode =
     tdiv(class="ui top attached label recvaddress"):
       text "Receive Address "
       span:
-        italic(class="window maximize outline icon btn-maximize")
         italic(class="close icon btn-close", onclick=btnRecvClose())
     tdiv(class="ui mini basic icon buttons"):
       button(id="btn-recv-copy", class="ui button", title="Copy"):
@@ -1019,7 +1018,6 @@ proc sendForm(): VNode =
     tdiv(class="ui top attached label sendcoins"):
       text "Send Coins "
       span:
-        italic(class="window maximize outline icon btn-maximize")
         italic(class="close icon btn-close", onclick=btnSendClose())
     tdiv(class="ui mini basic icon buttons"):
       button(id="btn-send-clear", class="ui button", title="Clear"):
