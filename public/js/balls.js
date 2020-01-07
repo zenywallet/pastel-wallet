@@ -24,6 +24,7 @@ UtxoBalls.click_cb = function(address) {}
 var create_balls_worker_tval = null;
 var scale_checker_tval = null;
 var check_too_much_balls_tval = null;
+var check_out_balls_tval = null;
 
 UtxoBalls.simple = function() {
   var target_elm = document.getElementById('wallet-seg');
@@ -105,6 +106,7 @@ UtxoBalls.simple = function() {
   function create_balls_worker() {
     clearTimeout(check_too_much_balls_tval);
     clearTimeout(scale_checker_tval);
+    clearTimeout(check_out_balls_tval);
     var task = Ball.create_balls_task.shift();
     if(task) {
       if(task.type == 0) {
@@ -141,6 +143,7 @@ UtxoBalls.simple = function() {
       create_balls_worker_tval = setTimeout(create_balls_worker, 10);
     } else {
       check_too_much_balls_tval = setTimeout(check_too_much_balls, 3000);
+      check_out_balls_tval = setTimeout(check_out_balls, 5000);
     }
   }
 
@@ -339,6 +342,28 @@ UtxoBalls.simple = function() {
     }
 
     scale_checker_tval = setTimeout(scale_checker, 3000);
+  }
+
+  function check_out_balls() {
+    var find = false;
+    for(var i in Ball.bodies) {
+      var b = Ball.bodies[i];
+      if(b.position.y > h + 200 + 25) {
+        find = true;
+        if(b.position.y > 10000) {
+          var s = b.circleRadius * 2;
+          var x = Math.round(Math.random() * (w - s) + s / 2);
+          var y = Math.round(Math.random() * (200 - s) + s / 2);
+          Matter.Body.setPosition(b, {x: x, y: y});
+          break;
+        }
+      }
+    }
+    if(find) {
+      check_out_balls_tval = setTimeout(check_out_balls, 100);
+    } else {
+      check_out_balls_tval = setTimeout(check_out_balls, 5000);
+    }
   }
 
   var wall_options = { isStatic: true, render: {
