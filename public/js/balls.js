@@ -39,6 +39,7 @@ UtxoBalls.simple = function() {
     Mouse = Matter.Mouse,
     World = Matter.World,
     Bodies = Matter.Bodies,
+    Body = Matter.Body,
     Events = Matter.Events,
     Query = Matter.Query;
 
@@ -47,6 +48,7 @@ UtxoBalls.simple = function() {
 
   var w = target_elm.clientWidth - 14 * 2;
   var h = target_elm.clientHeight - 14 * 2;
+  var rect = target_elm.getBoundingClientRect();
 
   $('#wallet-seg').empty();
   var render = Render.create({
@@ -467,6 +469,45 @@ UtxoBalls.simple = function() {
         $('#ball-info').fadeOut(800);
       }
     }, 5000);
+  });
+
+  Events.on(engine, 'beforeUpdate', function(event) {
+    var time = engine.timing.timestamp;
+    for(var i in Ball.bodies) {
+      var b = Ball.bodies[i];
+      if(!b.rnd) {
+        b.rnd = Math.random();
+      }
+      if(b.rnd > 0.5) {
+        b.fluffy = 1;
+      } else {
+        b.fluffy = 2;
+      }
+      if(b.fluffy) {
+        switch(b.fluffy) {
+          case 1:
+            var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
+            if(vy < -10) {
+              vy = -10;
+            } else if (vy > 10) {
+              vy = 10;
+            }
+            Body.setVelocity(b, {x: 0, y: vy});
+            Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 30);
+            break;
+          case 2:
+            var vy = (rect.y + 264 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 3 / 1000));
+            if(vy < -10) {
+              vy = -10;
+            } else if (vy > 10) {
+              vy = 10;
+            }
+            Body.setVelocity(b, {x: 0, y: vy});
+            Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 20);
+            break;
+        }
+      }
+    }
   });
 
   World.add(world, mouseConstraint);
