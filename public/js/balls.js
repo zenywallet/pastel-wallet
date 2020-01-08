@@ -114,7 +114,7 @@ UtxoBalls.simple = function() {
       } else if(task.type == 1) {
         var utxo = task.utxo;
         var address = sanitize(utxo.address);
-        var s = Math.ceil(Ball.balls_r * Math.sqrt(utxo.s));
+        var s = Math.ceil(Ball.balls_r * utxo.cr);
         var s_max = w > h ? h / 6 : w / 6;
         if(s > s_max) {
           s = s_max;
@@ -163,7 +163,7 @@ UtxoBalls.simple = function() {
         Ball.create_balls_task.push({type: 1, utxo: utxos[i]});
         ss += utxo.s;
       }
-      Ball.balls_r = Math.sqrt(((w * h) / 2.5) / ss);
+      Ball.balls_r = Math.sqrt(((w * h) / 7) / ss);
       create_balls_worker();
       Ball.too_much_balls_enable = false;
     } else {
@@ -174,14 +174,50 @@ UtxoBalls.simple = function() {
           var utxo = utxos[i];
           utxo.value = conv_coin(sanitize(utxo.value))
           utxo.s = parseFloat(utxo.value);
+          utxo.r = Math.sqrt(utxo.s);
           ss += utxo.s;
         }
-        Ball.balls_r = Math.sqrt(((w * h) / 2.5) / ss);
+        Ball.balls_r = Math.sqrt(((w * h) / 7) / ss);
       } else {
         for(var i in utxos) {
           var utxo = utxos[i];
           utxo.value = conv_coin(sanitize(utxo.value))
           utxo.s = parseFloat(utxo.value);
+          utxo.r = Math.sqrt(utxo.s);
+        }
+      }
+
+      var ave = 0.0;
+      var sd = 0.0;
+      var len = utxos.length;
+      if(len > 1) {
+        for(var i in utxos) {
+          ave += utxos[i].r;
+        }
+        ave /= len;
+        for(var i in utxos) {
+          var d = utxos[i].r - ave;
+          sd += d * d;
+        }
+        sd = Math.sqrt(sd / (len - 1));
+        if(sd > 0) {
+          for(var i in utxos) {
+            var cr = 36 + 28 * (utxos[i].r - ave) / (1.5 * sd);
+            if(cr > 64) {
+              cr = 64;
+            } else if(cr < 8) {
+              cr = 8;
+            }
+            utxos[i].cr = cr;
+          }
+        } else {
+          for(var i in utxos) {
+            utxos[i].cr = 32;
+          }
+        }
+      } else {
+        for(var i in utxos) {
+          utxos[i].cr = 32;
         }
       }
 
