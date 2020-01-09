@@ -71,6 +71,12 @@ var TradeLogs = (function() {
       diff_month += 12;
       diff_year--;
     }
+    if(diff_month > 0) {
+      var diff_date = cur_dt.getDate() - dt.getDate();
+      if(diff_date < 0) {
+        diff_month--;
+      }
+    }
     if(diff_year != 0 || diff_month != 0) {
       var ret = '';
       if(diff_year > 0) {
