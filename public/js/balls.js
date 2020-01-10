@@ -159,27 +159,21 @@ UtxoBalls.simple = function() {
       utxos = Ball.utxos;
       Ball.bodies = [];
       Ball.create_balls_task = [];
-      var ss = 0;
       for(var i in utxos) {
         var utxo = utxos[i];
         Ball.create_balls_task.push({type: 1, utxo: utxos[i]});
-        ss += utxo.s;
       }
-      Ball.balls_r = Math.sqrt(((w * h) / 7) / ss);
       create_balls_worker();
       Ball.too_much_balls_enable = false;
     } else {
       utxos = utxos.slice(0, 140);
       if(Ball.utxos.length == 0) {
-        var ss = 0;
         for(var i in utxos) {
           var utxo = utxos[i];
           utxo.value = conv_coin(sanitize(utxo.value))
           utxo.s = parseFloat(utxo.value);
           utxo.r = Math.sqrt(utxo.s);
-          ss += utxo.s;
         }
-        Ball.balls_r = Math.sqrt(((w * h) / 7) / ss);
       } else {
         for(var i in utxos) {
           var utxo = utxos[i];
@@ -214,14 +208,20 @@ UtxoBalls.simple = function() {
           }
         } else {
           for(var i in utxos) {
-            utxos[i].cr = 32;
+            utxos[i].cr = 36;
           }
         }
       } else {
         for(var i in utxos) {
-          utxos[i].cr = 32;
+          utxos[i].cr = 36;
         }
       }
+      var ss = 0;
+      for(var i in utxos) {
+        var cr = utxos[i].cr;
+        ss += cr * cr;
+      }
+      Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
 
       for(var i in utxos) {
         var find = false;
