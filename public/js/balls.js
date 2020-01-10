@@ -471,6 +471,17 @@ UtxoBalls.simple = function() {
     }, 5000);
   });
 
+  var defaultCategory = 0x0001;
+  var fluffy1 = 0x0002;
+  var fluffy2 = 0x0004;
+  var fluffy3 = 0x0008;
+
+  function setFluffy(ball, fluffy) {
+    ball.fluffy = fluffy;
+    ball.collisionFilter.category = fluffy;
+    ball.collisionFilter.mask = defaultCategory | fluffy;
+  }
+
   Events.on(engine, 'beforeUpdate', function(event) {
     var time = engine.timing.timestamp;
     for(var i in Ball.bodies) {
@@ -478,14 +489,16 @@ UtxoBalls.simple = function() {
       if(!b.rnd) {
         b.rnd = Math.random();
       }
-      if(b.rnd > 0.5) {
-        b.fluffy = 1;
+      if(b.rnd > 0.7) {
+        setFluffy(b, fluffy1);
+      } else if(b.rnd > 0.4) {
+        setFluffy(b, fluffy2);
       } else {
-        b.fluffy = 2;
+        setFluffy(b, fluffy3);
       }
       if(b.fluffy) {
         switch(b.fluffy) {
-          case 1:
+          case fluffy1:
             var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
             if(vy < -10) {
               vy = -10;
@@ -495,7 +508,7 @@ UtxoBalls.simple = function() {
             Body.setVelocity(b, {x: 0, y: vy});
             Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 30);
             break;
-          case 2:
+          case fluffy2:
             var vy = (rect.y + 264 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 3 / 1000));
             if(vy < -10) {
               vy = -10;
