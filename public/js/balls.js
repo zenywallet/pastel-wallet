@@ -382,6 +382,14 @@ UtxoBalls.simple = function() {
     scale_checker_tval = setTimeout(scale_checker, 3000);
   }
 
+
+  function resetPosition(ball) {
+    var s = ball.circleRadius * 2;
+    var x = Math.round(Math.random() * (w - s) + s / 2);
+    var y = Math.round(Math.random() * (200 - s) + s / 2);
+    Body.setPosition(ball, {x: x, y: y});
+  }
+
   function check_out_balls() {
     var find = false;
     for(var i in Ball.bodies) {
@@ -389,10 +397,7 @@ UtxoBalls.simple = function() {
       if(b.position.y > h + 200 + 25) {
         find = true;
         if(b.position.y > 10000) {
-          var s = b.circleRadius * 2;
-          var x = Math.round(Math.random() * (w - s) + s / 2);
-          var y = Math.round(Math.random() * (200 - s) + s / 2);
-          Matter.Body.setPosition(b, {x: x, y: y});
+          resetPosition(b);
           break;
         }
       }
