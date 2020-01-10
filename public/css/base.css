@@ -528,6 +528,10 @@ i.receive {
 }
 #wallet-balance {
   display: none;
+  pointer-events: none;
+}
+#wallet-balance .balance, #wallet-balance .ui.label {
+  pointer-events: auto;
 }
 #wallet-balance .ui.attached.label.send {
   background-color: rgba(213, 113, 113, 0.5);
@@ -615,6 +619,10 @@ i.receive {
   font: normal 400 13px/1 'arial', sans-serif;
   padding: 7px 0;
   display: none;
+  pointer-events: none;
+}
+#receive-address .ui.label, #receive-address .ui.buttons, #address-text, #receive-address .ui.ball img {
+  pointer-events: auto;
 }
 #receive-address .btn-close {
   position: absolute;
@@ -888,6 +896,10 @@ i.receive {
   height: auto;
   max-height: calc(100vh - 288px);
   display: none;
+  pointer-events: none;
+}
+#send-coins .ui.label, #send-coins .ui.buttons, #send-coins .ui.input {
+  pointer-events: auto;
 }
 #send-coins input::selection {
   background-color: rgba(100,100,100,.4);
