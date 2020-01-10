@@ -350,6 +350,10 @@ UtxoBalls.simple = function() {
           value: null,
           restitution: 0.3,
           frictionAir: 0.03,
+          collisionFilter: {
+            category: fluffy3,
+            mask: fluffy3
+          },
           render: {
             sprite: {
               texture: Ball.get(String(200), 160, 'Too Much Balls', true),
