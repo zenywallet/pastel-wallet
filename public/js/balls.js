@@ -556,9 +556,9 @@ UtxoBalls.simple = function() {
   }
   UtxoBalls.resize_tval = null;
   UtxoBalls.resize_func = function() {
-    stop();
     clearTimeout(UtxoBalls.resize_tval);
     UtxoBalls.resize_tval = setTimeout(function() {
+      stop();
       var simple = UtxoBalls.simple();
       simple.update_balls();
     }, 1400);
