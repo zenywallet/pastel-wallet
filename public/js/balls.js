@@ -564,6 +564,19 @@ UtxoBalls.simple = function() {
   window.removeEventListener("resize", UtxoBalls.resize_func);
   window.addEventListener("resize", UtxoBalls.resize_func);
 
+  if(UtxoBalls.visibility_func) {
+    window.removeEventListener("visibilitychange", UtxoBalls.visibility_func, false);
+  }
+  UtxoBalls.visibility_func = function() {
+    console.log(document.hidden, document.visibilityState);
+    if(document.hidden) {
+      stop();
+    } else {
+      start();
+    }
+  }
+  window.addEventListener("visibilitychange", UtxoBalls.visibility_func, false);
+
   if(!UtxoBalls.result_obj) {
     UtxoBalls.result_obj = {
       engine: engine,
