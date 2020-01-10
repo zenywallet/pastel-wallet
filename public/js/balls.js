@@ -404,6 +404,14 @@ UtxoBalls.simple = function() {
     }
   }
 
+  function check_out(ball) {
+    if(ball.position.x < - 25 || ball.position.x > w + 25
+      || ball.position.y < -25 || ball.position.y > h + 200 + 25) {
+      return true;
+    }
+    return false;
+  }
+
   var wall_options = { isStatic: true, render: {
     fillStyle: 'transparent'
   }};
