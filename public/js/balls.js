@@ -551,17 +551,18 @@ UtxoBalls.simple = function() {
   }
 
   if(!UtxoBalls.resize_func) {
-    UtxoBalls.resize_tval = null;
-    UtxoBalls.resize_func = function() {
-      stop();
-      clearTimeout(UtxoBalls.resize_tval);
-      UtxoBalls.resize_tval = setTimeout(function() {
-        var simple = UtxoBalls.simple();
-        simple.update_balls();
-      }, 1400);
-    }
+    clearTimeout(UtxoBalls.resize_tval);
+    window.removeEventListener("resize", UtxoBalls.resize_func);
   }
-  window.removeEventListener("resize", UtxoBalls.resize_func);
+  UtxoBalls.resize_tval = null;
+  UtxoBalls.resize_func = function() {
+    stop();
+    clearTimeout(UtxoBalls.resize_tval);
+    UtxoBalls.resize_tval = setTimeout(function() {
+      var simple = UtxoBalls.simple();
+      simple.update_balls();
+    }, 1400);
+  }
   window.addEventListener("resize", UtxoBalls.resize_func);
 
   if(UtxoBalls.visibility_func) {
