@@ -354,7 +354,7 @@ function showRecvAddress(cb) {
       console.log('address=' + addr);
       if(modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
         modal_recv_addrs[5] = addr;
-        $('#receive-address .used .ball').animate({opacity: 0}, 200, function() {
+        $('#receive-address .used .ball').stop(true, true).animate({opacity: 0}, 200, function() {
           $('#receive-address .used').animate({width: 0, 'margin-right': 0}, 100, function() {
             $('#receive-address .used .ball img').replaceWith('<img src="' + Ball.get(addr, 28) + '">');
             $('#receive-address .used').animate({width: 42, 'margin-right': 7}, 100, function() {
