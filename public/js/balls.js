@@ -463,7 +463,7 @@ UtxoBalls.simple = function() {
   $('#wallet-seg').mouseout(function() {
     $('#ball-info').fadeOut(800);
   });
-  Events.on(mouseConstraint, 'mousemove', function (e) {
+  Events.on(mouseConstraint, 'mousemove', function(e) {
     var foundPhysics = Matter.Query.point(Ball.bodies, e.mouse.position);
     if(foundPhysics.length == 1 && !dragging) {
       var ball = foundPhysics[0];
@@ -486,6 +486,17 @@ UtxoBalls.simple = function() {
         $('#ball-info').fadeOut(800);
       }
     }, 5000);
+  });
+
+  Events.on(mouseConstraint, 'mousedown', function(e) {
+    console.log('mousedown');
+    if(window.getSelection) {
+      if(window.getSelection().empty) {
+        window.getSelection().empty();
+      } else if(window.getSelection().removeAllRanges) {
+        window.getSelection().removeAllRanges();
+      }
+    }
   });
 
   var defaultCategory = 0x0001;
