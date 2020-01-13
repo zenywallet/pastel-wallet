@@ -517,9 +517,9 @@ UtxoBalls.simple = function() {
       if(!b.rnd) {
         b.rnd = Math.random();
       }
-      if(b.rnd > 0.7) {
+      if(i > Ball.bodies.length * 0.7) {
         setFluffy(b, fluffy1);
-      } else if(b.rnd > 0.4) {
+      } else if(i > Ball.bodies.length * 0.4) {
         setFluffy(b, fluffy2);
       } else {
         setFluffy(b, fluffy3);
