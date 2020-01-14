@@ -1246,9 +1246,9 @@ proc appMain(data: RouterData): VNode =
                 italic(class="clockwise rotated sign-in icon")
                 span:
                   text "0"
-              tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
-              span(class="balance"):
+              tdiv(class="balance"):
                 text "0"
+              tdiv(class="ui bottom right attached tiny label symbol"): text "ZNY"
             if showRecvAddressSelector:
               recvAddressSelector()
             if showRecvAddressModal:
