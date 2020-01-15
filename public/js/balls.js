@@ -469,6 +469,7 @@ UtxoBalls.simple = function() {
       UtxoBalls.click_cb(e.body.address);
     }
     if(e.body.fluffy) {
+      clearTimeout(e.body.fluffyback_tval);
       setFluffyCollisionAll(e.body);
     }
     dragging = true;
@@ -476,9 +477,9 @@ UtxoBalls.simple = function() {
 
   Events.on(mouseConstraint, 'enddrag', function(e) {
     if(e.body.fluffy) {
-      setTimeout(function() {
+      e.body.fluffyback_tval = setTimeout(function() {
         setFluffyCollisionBack(e.body);
-      }, 3000);
+      }, 4000);
     }
     dragging = false;
   });
@@ -560,13 +561,15 @@ UtxoBalls.simple = function() {
       if(!b.rnd) {
         b.rnd = Math.random();
       }
-      if(b.address && !b.fluffy_all) {
-        if(i > Ball.bodies.length * 0.7) {
-          setFluffy(b, fluffy1);
-        } else if(i > Ball.bodies.length * 0.4) {
-          setFluffy(b, fluffy2);
-        } else {
-          setFluffy(b, fluffy3);
+      if(b.address) {
+        if(!b.fluffy_all) {
+          if(i > Ball.bodies.length * 0.7) {
+            setFluffy(b, fluffy1);
+          } else if(i > Ball.bodies.length * 0.4) {
+            setFluffy(b, fluffy2);
+          } else {
+            setFluffy(b, fluffy3);
+          }
         }
         switch(b.fluffy) {
           case fluffy1:
