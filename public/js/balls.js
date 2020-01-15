@@ -130,6 +130,11 @@ UtxoBalls.simple = function() {
           utxo: utxo,
           restitution: 0.3,
           frictionAir: 0.03,
+          fluffy: fluffy3,
+          collisionFilter: {
+            category: fluffy3,
+            mask: defaultCategory | fluffy3
+          },
           render: {
             sprite: {
               texture: Ball.get(address, 64),
@@ -350,6 +355,7 @@ UtxoBalls.simple = function() {
           value: null,
           restitution: 0.3,
           frictionAir: 0.03,
+          fluffy: fluffy3,
           collisionFilter: {
             category: fluffy3,
             mask: defaultCategory | fluffy3
@@ -451,10 +457,16 @@ UtxoBalls.simple = function() {
     if(e.body.address) {
       UtxoBalls.click_cb(e.body.address);
     }
+    if(e.body.fluffy) {
+      setFluffyCollisionAll(e.body);
+    }
     dragging = true;
   });
 
   Events.on(mouseConstraint, "enddrag", function(e) {
+    if(e.body.fluffy) {
+      setFluffyCollisionBack(e.body);
+    }
     dragging = false;
   });
 
@@ -510,6 +522,18 @@ UtxoBalls.simple = function() {
     ball.collisionFilter.mask = defaultCategory | fluffy;
   }
 
+  function setFluffyCollisionAll(ball) {
+    ball.fluffy_all = true;
+    ball.collisionFilter.category = fluffy1 | fluffy2 | fluffy3;
+    ball.collisionFilter.mask = defaultCategory | fluffy1 | fluffy2 | fluffy3;
+  }
+
+  function setFluffyCollisionBack(ball) {
+    ball.fluffy_all = false;
+    ball.collisionFilter.category = ball.fluffy;
+    ball.collisionFilter.mask = defaultCategory | ball.fluffy;
+  }
+
   Events.on(engine, 'beforeUpdate', function(event) {
     var time = engine.timing.timestamp;
     for(var i in Ball.bodies) {
@@ -517,7 +541,7 @@ UtxoBalls.simple = function() {
       if(!b.rnd) {
         b.rnd = Math.random();
       }
-      if(b.address) {
+      if(b.address && !b.fluffy_all) {
         if(i > Ball.bodies.length * 0.7) {
           setFluffy(b, fluffy1);
         } else if(i > Ball.bodies.length * 0.4) {
@@ -525,8 +549,6 @@ UtxoBalls.simple = function() {
         } else {
           setFluffy(b, fluffy3);
         }
-      }
-      if(b.fluffy) {
         switch(b.fluffy) {
           case fluffy1:
             var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
