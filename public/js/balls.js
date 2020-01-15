@@ -460,11 +460,11 @@ UtxoBalls.simple = function() {
     }
   });
 
-  mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
-  mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
+  mouse.element.removeEventListener('mousewheel', mouse.mousewheel);
+  mouse.element.removeEventListener('DOMMouseScroll', mouse.mousewheel);
 
   var dragging = false;
-  Events.on(mouseConstraint, "startdrag", function(e) {
+  Events.on(mouseConstraint, 'startdrag', function(e) {
     if(e.body.address) {
       UtxoBalls.click_cb(e.body.address);
     }
@@ -474,7 +474,7 @@ UtxoBalls.simple = function() {
     dragging = true;
   });
 
-  Events.on(mouseConstraint, "enddrag", function(e) {
+  Events.on(mouseConstraint, 'enddrag', function(e) {
     if(e.body.fluffy) {
       setTimeout(function() {
         setFluffyCollisionBack(e.body);
@@ -623,7 +623,7 @@ UtxoBalls.simple = function() {
 
   if(!UtxoBalls.resize_func) {
     clearTimeout(UtxoBalls.resize_tval);
-    window.removeEventListener("resize", UtxoBalls.resize_func);
+    window.removeEventListener('resize', UtxoBalls.resize_func);
   }
   UtxoBalls.resize_tval = null;
   UtxoBalls.resize_func = function() {
@@ -634,10 +634,10 @@ UtxoBalls.simple = function() {
       simple.update_balls();
     }, 1400);
   }
-  window.addEventListener("resize", UtxoBalls.resize_func);
+  window.addEventListener('resize', UtxoBalls.resize_func);
 
   if(UtxoBalls.visibility_func) {
-    window.removeEventListener("visibilitychange", UtxoBalls.visibility_func, false);
+    window.removeEventListener('visibilitychange', UtxoBalls.visibility_func, false);
   }
   UtxoBalls.visibility_func = function() {
     console.log(document.hidden, document.visibilityState);
@@ -647,7 +647,7 @@ UtxoBalls.simple = function() {
       start();
     }
   }
-  window.addEventListener("visibilitychange", UtxoBalls.visibility_func, false);
+  window.addEventListener('visibilitychange', UtxoBalls.visibility_func, false);
 
   if(!UtxoBalls.result_obj) {
     UtxoBalls.result_obj = {
