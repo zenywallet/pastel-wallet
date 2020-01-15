@@ -352,7 +352,7 @@ UtxoBalls.simple = function() {
           frictionAir: 0.03,
           collisionFilter: {
             category: fluffy3,
-            mask: fluffy3
+            mask: defaultCategory | fluffy3
           },
           render: {
             sprite: {
@@ -517,12 +517,14 @@ UtxoBalls.simple = function() {
       if(!b.rnd) {
         b.rnd = Math.random();
       }
-      if(i > Ball.bodies.length * 0.7) {
-        setFluffy(b, fluffy1);
-      } else if(i > Ball.bodies.length * 0.4) {
-        setFluffy(b, fluffy2);
-      } else {
-        setFluffy(b, fluffy3);
+      if(b.address) {
+        if(i > Ball.bodies.length * 0.7) {
+          setFluffy(b, fluffy1);
+        } else if(i > Ball.bodies.length * 0.4) {
+          setFluffy(b, fluffy2);
+        } else {
+          setFluffy(b, fluffy3);
+        }
       }
       if(b.fluffy) {
         switch(b.fluffy) {
