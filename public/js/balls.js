@@ -475,7 +475,9 @@ UtxoBalls.simple = function() {
 
   Events.on(mouseConstraint, "enddrag", function(e) {
     if(e.body.fluffy) {
-      setFluffyCollisionBack(e.body);
+      setTimeout(function() {
+        setFluffyCollisionBack(e.body);
+      }, 3000);
     }
     dragging = false;
   });
