@@ -411,6 +411,13 @@ UtxoBalls.simple = function() {
     var find = false;
     for(var i in Ball.bodies) {
       var b = Ball.bodies[i];
+      if(b.fluffy != fluffy3) {
+        if(check_out(b)) {
+          find = true;
+          resetPosition(b);
+          break;
+        }
+      }
       if(b.position.y > h + 200 + 25) {
         find = true;
         if(b.position.y > 10000) {
