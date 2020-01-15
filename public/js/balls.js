@@ -21,6 +21,7 @@ var Ball = Ball || {
 
 var UtxoBalls = UtxoBalls || {};
 UtxoBalls.click_cb = function(address) {}
+UtxoBalls.mouseup = function(evt) {}
 var create_balls_worker_tval = null;
 var scale_checker_tval = null;
 var check_too_much_balls_tval = null;
@@ -481,6 +482,12 @@ UtxoBalls.simple = function() {
     }
     dragging = false;
   });
+
+  document.removeEventListener('mouseup', UtxoBalls.mouseup, false);
+  UtxoBalls.mouseup = function(evt) {
+    mouseConstraint.mouse.button = -1;
+  }
+  document.addEventListener('mouseup', UtxoBalls.mouseup, false);
 
   var cur_id = -1;
   var tval = null;
