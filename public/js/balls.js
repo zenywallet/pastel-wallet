@@ -168,6 +168,12 @@ UtxoBalls.simple = function() {
         var utxo = utxos[i];
         Ball.create_balls_task.push({type: 1, utxo: utxos[i]});
       }
+      var ss = 0;
+      for(var i in utxos) {
+        var cr = utxos[i].cr;
+        ss += cr * cr;
+      }
+      Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
       create_balls_worker();
       Ball.too_much_balls_enable = false;
     } else {
