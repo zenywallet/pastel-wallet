@@ -499,6 +499,9 @@ UtxoBalls.simple = function() {
   var fluffy_free_active = false;
   function fluffy_free_worker() {
     var b = fluffy_frees.shift();
+    while(b && !b.fluffy_free) {
+      b = fluffy_frees.shift();
+    }
     if(b) {
       b.fluffy_free = false;
       setFluffyCollisionBack(b);
