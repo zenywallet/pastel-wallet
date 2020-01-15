@@ -657,6 +657,10 @@ pastel.ready = function() {
         $('#wallet-balance .receive').fadeOut(400);
       }
       TradeLogs.unconfs(data);
+      if(!pastel.utxoballs) {
+        pastel.utxoballs = UtxoBalls.simple();
+      }
+      pastel.utxoballs.unconfs(data);
     } else if(type == 'balance') {
       console.log('balance: ' + JSON.stringify(json));
       $('#wallet-balance .balance').text(conv_coin(json.data));

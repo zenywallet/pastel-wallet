@@ -433,6 +433,10 @@ UtxoBalls.simple = function() {
     return false;
   }
 
+  function unconfs(data) {
+    console.log('unconfs=', JSON.stringify(data));
+  }
+
   var wall_options = { isStatic: true, render: {
     fillStyle: 'transparent'
   }};
@@ -650,7 +654,8 @@ UtxoBalls.simple = function() {
       click_cb: function() {
         return UtxoBalls.click_cb;
       },
-      update_balls: update_balls
+      update_balls: update_balls,
+      unconfs: unconfs
     };
   } else {
     var obj = UtxoBalls.result_obj;
@@ -660,6 +665,7 @@ UtxoBalls.simple = function() {
     obj.canvas = render.canvas;
     obj.stop = stop;
     obj.update_balls = update_balls;
+    obj.unconfs = unconfs;
   }
   return UtxoBalls.result_obj;
 }
