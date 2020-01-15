@@ -464,6 +464,7 @@ UtxoBalls.simple = function() {
   mouse.element.removeEventListener('DOMMouseScroll', mouse.mousewheel);
 
   var dragging = false;
+  var dragging_body = null;
   Events.on(mouseConstraint, 'startdrag', function(e) {
     if(e.body.address) {
       UtxoBalls.click_cb(e.body.address);
@@ -472,6 +473,7 @@ UtxoBalls.simple = function() {
       clearTimeout(e.body.fluffyback_tval);
       setFluffyCollisionAll(e.body);
     }
+    dragging_body = e.body;
     dragging = true;
   });
 
@@ -482,6 +484,51 @@ UtxoBalls.simple = function() {
       }, 4000);
     }
     dragging = false;
+    dragging_body = null;
+  });
+
+  var fluffy_frees = [];
+  var fluffy_free_tval = null;
+  var fluffy_free_active = false;
+  function fluffy_free_worker() {
+    var b = fluffy_frees.shift();
+    if(b) {
+      b.fluffy_free = false;
+      setFluffyCollisionBack(b);
+      setTimeout(fluffy_free_worker, 100);
+    } else {
+      fluffy_free_active = false;
+    }
+  }
+
+  function fluffy_free_worker_start() {
+    if(!fluffy_free_active) {
+      fluffy_free_active = true;
+      setTimeout(fluffy_free_worker, 100);
+    }
+    clearTimeout(fluffy_free_tval);
+    fluffy_free_tval = setTimeout(function() {
+      fluffy_free_worker();
+    }, 1000);
+  }
+
+  Events.on(engine, 'collisionStart', function(event) {
+    if(dragging_body) {
+      for(var i in event.pairs) {
+        var pair = event.pairs[i];
+        if(pair.bodyA == dragging_body && pair.bodyB.fluffy) {
+          pair.bodyB.fluffy_free = true;
+          setFluffyCollisionAll(pair.bodyB);
+          fluffy_frees.push(pair.bodyB);
+          fluffy_free_worker_start();
+        } else if(pair.bodyB == dragging_body && pair.bodyA.fluffy) {
+          pair.bodyA.fluffy_free = true;
+          setFluffyCollisionAll(pair.bodyA);
+          fluffy_frees.push(pair.bodyA);
+          fluffy_free_worker_start();
+        }
+      }
+    }
   });
 
   document.removeEventListener('mouseup', UtxoBalls.mouseup, false);
@@ -571,27 +618,29 @@ UtxoBalls.simple = function() {
             setFluffy(b, fluffy3);
           }
         }
-        switch(b.fluffy) {
-          case fluffy1:
-            var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
-            if(vy < -10) {
-              vy = -10;
-            } else if (vy > 10) {
-              vy = 10;
-            }
-            Body.setVelocity(b, {x: 0, y: vy});
-            Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 30);
-            break;
-          case fluffy2:
-            var vy = (rect.y + 264 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 3 / 1000));
-            if(vy < -10) {
-              vy = -10;
-            } else if (vy > 10) {
-              vy = 10;
-            }
-            Body.setVelocity(b, {x: 0, y: vy});
-            Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 20);
-            break;
+        if(!b.fluffy_free) {
+          switch(b.fluffy) {
+            case fluffy1:
+              var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
+              if(vy < -10) {
+                vy = -10;
+              } else if (vy > 10) {
+                vy = 10;
+              }
+              Body.setVelocity(b, {x: 0, y: vy});
+              Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 30);
+              break;
+            case fluffy2:
+              var vy = (rect.y + 264 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 3 / 1000));
+              if(vy < -10) {
+                vy = -10;
+              } else if (vy > 10) {
+                vy = 10;
+              }
+              Body.setVelocity(b, {x: 0, y: vy});
+              Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 20);
+              break;
+          }
         }
       }
     }
