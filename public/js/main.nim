@@ -1099,7 +1099,7 @@ proc settingsPage(): VNode =
       text """
         Delete all your wallet data in your web browser, including your encrypted secret keys.
          If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards
-         or mnemonics before deleting it. Otherwise you will lost your coins forever.
+         or mnemonics before deleting it. Otherwise you may lost your coins forever.
       """
     tdiv(class="ui checkbox"):
       input(type="checkbox", name="confirm")
