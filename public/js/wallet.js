@@ -356,6 +356,7 @@ function Wallet() {
   }
 
   this.setSeedCard = function(cardInfos) {
+    var cipher = pastel.cipher;
     this.initShieldedKeys();
     var mix;
     for(var i in cardInfos) {
@@ -367,8 +368,11 @@ function Wallet() {
       }
       if(s.sv && s.sv.length > 0) {
         var sv = cipher.yespower_n4r32(sha256d(s.sv), 32);
-        xc(sbuf, sv);
-        sbuf = cipher.yespower_n4r32(sha256d(sbuf), 32);
+        var sbuf_sv = new Uint8Array(64);
+        sbuf_sv.set(sbuf);
+        sbuf_sv.set(sv, 32);
+        var sv2 = cipher.yespower_n4r32(sha256d(sbuf_sv), 32);
+        xc(sbuf, sv2);
       }
       if(mix) {
         xc(mix, sbuf);
