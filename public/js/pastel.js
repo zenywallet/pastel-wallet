@@ -583,7 +583,7 @@ pastel.ready = function() {
 
   function fadeIn(el, speed) {
     el.style.opacity = 0;
-    el.style.display = "block";
+    el.style.display = 'block';
     var start = null;
     requestAnimationFrame(function fade(timestamp) {
       if (!start) start = timestamp;
@@ -664,7 +664,7 @@ pastel.ready = function() {
     } else if(type == 'balance') {
       console.log('balance: ' + JSON.stringify(json));
       $('#wallet-balance .balance').text(conv_coin(json.data));
-      var el = document.getElementById("wallet-balance");
+      var el = document.getElementById('wallet-balance');
       if(!el.style.display) {
         fadeIn(el, 800);
       }
