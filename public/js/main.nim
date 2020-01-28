@@ -1113,7 +1113,7 @@ proc appMain(data: RouterData): VNode =
           tdiv(class="intro-head"):
             tdiv(class="caption"): text "Pastel Wallet"
             tdiv(class="ui container method-selector"):
-              tdiv(class="title"): text "Import the master seed to start your wallet."
+              tdiv(class="title"): text "Scan your seed cards or mnemonic to start."
               tdiv(class="ui buttons"):
                 button(id="seedselector", class="ui olive button", onclick=importSelector(ImportType.SeedCard)):
                   italic(class="qrcode icon")
