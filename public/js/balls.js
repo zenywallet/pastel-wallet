@@ -15,6 +15,7 @@ var Ball = Ball || {
   create_balls_task: [],
   balls_r: 0,
   bodies: [],
+  bodies_idx: {},
   too_much_balls_enable: false,
   too_much_balls: null
 };
@@ -106,6 +107,35 @@ UtxoBalls.simple = function() {
     return false;
   }
 
+  function create_bodies_idx(body) {
+    switch(body.ballType) {
+      case 0:
+        var utxo = body.utxo;
+        var idx = body.ballType + '-' + utxo.sequence + '-' + utxo.txid + '-' + utxo.n + '-' + utxo.address + '-' + utxo.value;
+        return idx;
+      case 1:
+        var unconf = body.unconf;
+        var idx = body.ballType + '-' + unconf.txid + '-' + unconf.n + '-' + unconf.address + '-' + unconf.value;
+        return idx;
+      case 2:
+        var idx = body.ballType;
+        return idx;
+      default:
+        return 'unknown';
+    }
+  }
+  function add_bodies_idx(body) {
+    var idx = create_bodies_idx(body);
+    Ball.bodies_idx[idx] = body;
+  }
+  function remove_bodies_idx(body) {
+    var idx = create_bodies_idx(body);
+    delete Ball.bodies_idx[idx];
+  }
+  function remove_all_bodies_idx() {
+    Ball.bodies_idx = {};
+  }
+
   function create_balls_worker() {
     clearTimeout(check_too_much_balls_tval);
     clearTimeout(scale_checker_tval);
@@ -125,6 +155,7 @@ UtxoBalls.simple = function() {
         var x = Math.round(Math.random() * (w - s) + s / 2);
         var y = Math.round(Math.random() * (200 - s) + s / 2);
         var ball = Bodies.circle(x, y, s / 2, {
+          ballType: 0,
           label: 'ball',
           address: address,
           value: utxo.value,
@@ -146,6 +177,7 @@ UtxoBalls.simple = function() {
           }
         });
         Ball.bodies.push(ball);
+        add_bodies_idx(ball);
         World.add(world, ball);
       }
       create_balls_worker_tval = setTimeout(create_balls_worker, 10);
@@ -163,7 +195,9 @@ UtxoBalls.simple = function() {
 
     if(utxos == null) {
       utxos = Ball.utxos;
+      remove_all_bodies_idx();
       Ball.bodies = [];
+
       Ball.create_balls_task = [];
       for(var i in utxos) {
         var utxo = utxos[i];
@@ -273,6 +307,7 @@ UtxoBalls.simple = function() {
         if(body.utxo) {
           if(utxo_cmp(r, body.utxo)) {
             Ball.create_balls_task.push({type: 0, ball: body});
+            remove_bodies_idx(body);
             Ball.bodies.splice(j, 1);
           }
         }
@@ -357,6 +392,7 @@ UtxoBalls.simple = function() {
         var x = Math.round(Math.random() * (w - s2) + s2 / 2);
 
         var ball = Bodies.circle(x, 140, s2 / 2, {
+          ballType: 2,
           label: 'ball',
           address: null,
           value: null,
@@ -377,6 +413,7 @@ UtxoBalls.simple = function() {
           }
         });
         Ball.bodies.push(ball);
+        add_bodies_idx(ball);
         Ball.too_much_balls = ball;
         World.add(world, ball);
       }
