@@ -111,7 +111,7 @@ UtxoBalls.simple = function() {
     switch(body.ballType) {
       case 0:
         var utxo = body.utxo;
-        var idx = body.ballType + '-' + utxo.sequence + '-' + utxo.txid + '-' + utxo.n + '-' + utxo.address + '-' + utxo.value;
+        var idx = body.ballType + '-' + utxo.txid + '-' + utxo.n + '-' + utxo.address + '-' + utxo.value;
         return idx;
       case 1:
         var unconf = body.unconf;
