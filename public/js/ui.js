@@ -582,12 +582,13 @@ var camDevice = (function() {
     set_current: function(deviceId) {
       var new_cam_index = 0;
       for(var i in cam_ids) {
-        if(deviceId == cam_ids[i]) {
+        if(deviceId == cam_ids[i].deviceId) {
           new_cam_index = i;
           break;
         }
       }
       sel_cam_index = new_cam_index;
+      sel_cam = cam_ids[sel_cam_index].deviceId;
     },
     next: function() {
       if(cam_ids.length > 0) {
