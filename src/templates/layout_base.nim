@@ -1,6 +1,8 @@
 import templates, strutils
 proc layout_base*(debug: bool): string =
   const debug_script = """
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <script type="text/javascript" src="/js/cipher.js"></script>
 <script type="text/javascript" src="/js/base58.js"></script>
 <script type="text/javascript" src="/js/uint64.min.js"></script>
