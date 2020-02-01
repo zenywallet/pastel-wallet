@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-var debugMode = true
+var debugMode = false
 
 proc debugEnable*() =
   debugMode = true
