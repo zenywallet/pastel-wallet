@@ -640,15 +640,6 @@ UtxoBalls.simple = function() {
         b.rnd = Math.random();
       }
       if(b.address) {
-        if(!b.fluffy_all) {
-          if(i > Ball.bodies.length * 0.7) {
-            setFluffy(b, fluffy1);
-          } else if(i > Ball.bodies.length * 0.4) {
-            setFluffy(b, fluffy2);
-          } else {
-            setFluffy(b, fluffy3);
-          }
-        }
         if(!b.fluffy_free) {
           switch(b.fluffy) {
             case fluffy1:
