@@ -136,6 +136,40 @@ UtxoBalls.simple = function() {
     Ball.bodies_idx = {};
   }
 
+  function create_utxo_ball(utxo) {
+    var address = sanitize(utxo.address);
+    var s = Math.ceil(Ball.balls_r * utxo.cr);
+    var s_max = w > h ? h / 6 : w / 6;
+    if(s > s_max) {
+      s = s_max;
+    }
+    var x = Math.round(Math.random() * (w - s) + s / 2);
+    var y = Math.round(Math.random() * (200 - s) + s / 2);
+    var ball = Bodies.circle(x, y, s / 2, {
+      ballType: 0,
+      label: 'ball',
+      address: address,
+      value: utxo.value,
+      utxo: utxo,
+      restitution: 0.3,
+      frictionAir: 0.03,
+      fluffy: fluffy3,
+      collisionFilter: {
+        category: fluffy3,
+        mask: defaultCategory | fluffy3
+      },
+      render: {
+        sprite: {
+          texture: Ball.get(address, 64),
+          xScale: s / 64,
+          yScale: s / 64,
+          imgsize: 64
+        }
+      }
+    });
+    return ball;
+  }
+
   function create_balls_worker() {
     clearTimeout(check_too_much_balls_tval);
     clearTimeout(scale_checker_tval);
@@ -144,99 +178,94 @@ UtxoBalls.simple = function() {
     if(task) {
       if(task.type == 11) {
         for(var i in Ball.bodies) {
-          var b = Ball.bodies[i];
-          b.ballMark = 1;
+          var ball = Ball.bodies[i];
+          if(ball.ballType == 0) {
+            ball.ballMark = 1;
+          }
         }
       } else if(task.type == 12) {
         for(var i in Ball.bodies) {
           var ball = Ball.bodies[i];
-          if(ball.ballMark == 1) {
+          if(ball.ballType == 0 && ball.ballMark == 1) {
             Matter.Composite.remove(world, ball);
             remove_bodies_idx(ball);
-            delete Ball.bodies[i];
+            Ball.bodies.splice(i, 1);
           }
         }
       } else if(task.type == 13) {
         var idx = create_bodies_idx({ballType: 0, utxo: task.utxo});
         if(!Ball.bodies_idx[idx]) {
-          var utxo = task.utxo;
-          var address = sanitize(utxo.address);
-          var s = Math.ceil(Ball.balls_r * utxo.cr);
-          var s_max = w > h ? h / 6 : w / 6;
-          if(s > s_max) {
-            s = s_max;
-          }
-          var x = Math.round(Math.random() * (w - s) + s / 2);
-          var y = Math.round(Math.random() * (200 - s) + s / 2);
-          var ball = Bodies.circle(x, y, s / 2, {
-            ballType: 0,
-            label: 'ball',
-            address: address,
-            value: utxo.value,
-            utxo: utxo,
-            restitution: 0.3,
-            frictionAir: 0.03,
-            fluffy: fluffy3,
-            collisionFilter: {
-              category: fluffy3,
-              mask: defaultCategory | fluffy3
-            },
-            render: {
-              sprite: {
-                texture: Ball.get(address, 64),
-                xScale: s / 64,
-                yScale: s / 64,
-                imgsize: 64
-              }
-            }
-          });
+          var ball = create_utxo_ball(task.utxo);
           Ball.bodies.push(ball);
           add_bodies_idx(ball);
           World.add(world, ball);
         }
-      }
-      /*if(task.type == 0) {
-        Matter.Composite.remove(world, task.ball);
-      } else if(task.type == 1) {
-        var utxo = task.utxo;
-        var address = sanitize(utxo.address);
-        var s = Math.ceil(Ball.balls_r * utxo.cr);
-        var s_max = w > h ? h / 6 : w / 6;
-        if(s > s_max) {
-          s = s_max;
-        }
-        var x = Math.round(Math.random() * (w - s) + s / 2);
-        var y = Math.round(Math.random() * (200 - s) + s / 2);
-        var ball = Bodies.circle(x, y, s / 2, {
-          ballType: 0,
-          label: 'ball',
-          address: address,
-          value: utxo.value,
-          utxo: utxo,
-          restitution: 0.3,
-          frictionAir: 0.03,
-          fluffy: fluffy3,
-          collisionFilter: {
-            category: fluffy3,
-            mask: defaultCategory | fluffy3
-          },
-          render: {
-            sprite: {
-              texture: Ball.get(address, 64),
-              xScale: s / 64,
-              yScale: s / 64,
-              imgsize: 64
+      } else if(task.type == 15) {
+        var idx = create_bodies_idx({ballType: 0, utxo: task.utxo});
+        var ball = Ball.bodies_idx[idx];
+        if(ball) {
+          remove_bodies_idx(ball);
+          for(var i in Ball.bodies) {
+            if(Ball.bodies[i] == ball) {
+              Ball.bodies.splice(i, 1);
+              break;
             }
           }
-        });
+        }
+        ball = create_utxo_ball(task.utxo);
         Ball.bodies.push(ball);
         add_bodies_idx(ball);
         World.add(world, ball);
-      }*/
+      }
       create_balls_worker_tval = setTimeout(create_balls_worker, 10);
     } else {
       check_too_much_balls_tval = setTimeout(check_too_much_balls, 3000);
       check_out_balls_tval = setTimeout(check_out_balls, 5000);
+    }
+  }
+
+  function update_balls_r() {
+    var utxos = Ball.utxos;
+    if(utxos.length > 0) {
+      var ave = 0.0;
+      var sd = 0.0;
+      var len = utxos.length;
+      if(len > 1) {
+        for(var i in utxos) {
+          ave += utxos[i].r;
+        }
+        ave /= len;
+        for(var i in utxos) {
+          var d = utxos[i].r - ave;
+          sd += d * d;
+        }
+        sd = Math.sqrt(sd / (len - 1));
+        if(sd > 0) {
+          for(var i in utxos) {
+            var cr = 36 + 28 * (utxos[i].r - ave) / (1.5 * sd);
+            if(cr > 64) {
+              cr = 64;
+            } else if(cr < 8) {
+              cr = 8;
+            }
+            utxos[i].cr = cr;
+          }
+        } else {
+          for(var i in utxos) {
+            utxos[i].cr = 36;
+          }
+        }
+      } else {
+        for(var i in utxos) {
+          utxos[i].cr = 36;
+        }
+      }
+      var ss = 0;
+      for(var i in utxos) {
+        var cr = utxos[i].cr;
+        ss += cr * cr;
+      }
+      Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
     }
   }
 
@@ -245,10 +274,18 @@ UtxoBalls.simple = function() {
   // 12 - remove marked
   // 13 - add ball
   // 14 - remove ball
+  // 15 - reset location
   function update_balls(utxos, cb) {
     clearTimeout(create_balls_worker_tval);
-    Ball.create_balls_task.push({type: 11});
-    if(utxos != null) {
+    if(utxos == null) {
+      utxos = Ball.utxos;
+      Ball.too_much_balls_enable = false;
+      update_balls_r();
+      for(var i in utxos) {
+        Ball.create_balls_task.push({type: 15, utxo: utxos[i]});
+      }
+    } else {
+      Ball.create_balls_task.push({type: 11});
       utxos = utxos.slice(0, 140);
       for(var i in utxos) {
         var utxo = utxos[i];
@@ -256,186 +293,15 @@ UtxoBalls.simple = function() {
         utxo.s = parseFloat(utxo.value);
         utxo.r = Math.sqrt(utxo.s);
       }
-      var ave = 0.0;
-      var sd = 0.0;
-      var len = utxos.length;
-      if(len > 1) {
-        for(var i in utxos) {
-          ave += utxos[i].r;
-        }
-        ave /= len;
-        for(var i in utxos) {
-          var d = utxos[i].r - ave;
-          sd += d * d;
-        }
-        sd = Math.sqrt(sd / (len - 1));
-        if(sd > 0) {
-          for(var i in utxos) {
-            var cr = 36 + 28 * (utxos[i].r - ave) / (1.5 * sd);
-            if(cr > 64) {
-              cr = 64;
-            } else if(cr < 8) {
-              cr = 8;
-            }
-            utxos[i].cr = cr;
-          }
-        } else {
-          for(var i in utxos) {
-            utxos[i].cr = 36;
-          }
-        }
-      } else {
-        for(var i in utxos) {
-          utxos[i].cr = 36;
-        }
-      }
-      var ss = 0;
-      for(var i in utxos) {
-        var cr = utxos[i].cr;
-        ss += cr * cr;
-      }
-      Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
-
+      Ball.utxos = utxos;
+      update_balls_r();
       for(var i in utxos) {
         Ball.create_balls_task.push({type: 13, utxo: utxos[i]});
       }
+      Ball.create_balls_task.push({type: 12});
     }
-    Ball.create_balls_task.push({type: 12});
     create_balls_worker();
     create_balls_worker_tval = setTimeout(create_balls_worker, 3000);
-
-    /*
-    clearTimeout(create_balls_worker_tval);
-    create_balls_worker_tval = null;
-    var addlist = [];
-    var removelist = [];
-
-    if(utxos == null) {
-      utxos = Ball.utxos;
-      remove_all_bodies_idx();
-      Ball.bodies = [];
-
-      Ball.create_balls_task = [];
-      for(var i in utxos) {
-        var utxo = utxos[i];
-        Ball.create_balls_task.push({type: 1, utxo: utxos[i]});
-      }
-      var ss = 0;
-      for(var i in utxos) {
-        var cr = utxos[i].cr;
-        ss += cr * cr;
-      }
-      Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
-      create_balls_worker();
-      Ball.too_much_balls_enable = false;
-    } else {
-      utxos = utxos.slice(0, 140);
-      if(Ball.utxos.length == 0) {
-        for(var i in utxos) {
-          var utxo = utxos[i];
-          utxo.value = conv_coin(sanitize(utxo.value))
-          utxo.s = parseFloat(utxo.value);
-          utxo.r = Math.sqrt(utxo.s);
-        }
-      } else {
-        for(var i in utxos) {
-          var utxo = utxos[i];
-          utxo.value = conv_coin(sanitize(utxo.value))
-          utxo.s = parseFloat(utxo.value);
-          utxo.r = Math.sqrt(utxo.s);
-        }
-      }
-
-      var ave = 0.0;
-      var sd = 0.0;
-      var len = utxos.length;
-      if(len > 1) {
-        for(var i in utxos) {
-          ave += utxos[i].r;
-        }
-        ave /= len;
-        for(var i in utxos) {
-          var d = utxos[i].r - ave;
-          sd += d * d;
-        }
-        sd = Math.sqrt(sd / (len - 1));
-        if(sd > 0) {
-          for(var i in utxos) {
-            var cr = 36 + 28 * (utxos[i].r - ave) / (1.5 * sd);
-            if(cr > 64) {
-              cr = 64;
-            } else if(cr < 8) {
-              cr = 8;
-            }
-            utxos[i].cr = cr;
-          }
-        } else {
-          for(var i in utxos) {
-            utxos[i].cr = 36;
-          }
-        }
-      } else {
-        for(var i in utxos) {
-          utxos[i].cr = 36;
-        }
-      }
-      var ss = 0;
-      for(var i in utxos) {
-        var cr = utxos[i].cr;
-        ss += cr * cr;
-      }
-      Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
-
-      for(var i in utxos) {
-        var find = false;
-        var a = utxos[i];
-        for(var j in Ball.utxos) {
-          var b = Ball.utxos[j];
-          if(utxo_cmp(a, b)) {
-            find = true;
-            break;
-          }
-        }
-        if(!find) {
-          addlist.push(a);
-        }
-      }
-      for(var i in Ball.utxos) {
-        var find = false;
-        var a = Ball.utxos[i];
-        for(var j in utxos) {
-          var b = utxos[j];
-          if(utxo_cmp(a, b)) {
-            find = true;
-            break;
-          }
-        }
-        if(!find) {
-          removelist.push(a);
-        }
-      }
-      Ball.utxos = utxos;
-    }
-
-    for(var i in removelist) {
-      var r = removelist[i];
-      for(var j = Ball.bodies.length - 1; j >= 0; j--) {
-        var body = Ball.bodies[j];
-        if(body.utxo) {
-          if(utxo_cmp(r, body.utxo)) {
-            Ball.create_balls_task.push({type: 0, ball: body});
-            remove_bodies_idx(body);
-            Ball.bodies.splice(j, 1);
-          }
-        }
-      }
-    }
-
-    for(var i in addlist) {
-      Ball.create_balls_task.push({type: 1, utxo: addlist[i]});
-    }
-    create_balls_worker_tval = setTimeout(create_balls_worker, 3000);
-    */
   }
 
   var scale_dec = 0.98;
