@@ -12,6 +12,7 @@ var Ball = Ball || {
     return this.cache[id];
   },
   utxos: [],
+  unconfs: [],
   create_balls_task: [],
   balls_r: 0,
   bodies: [],
@@ -107,18 +108,18 @@ UtxoBalls.simple = function() {
     return false;
   }
 
-  function create_bodies_idx(body) {
+  function create_bodies_idx(body, forcetype) {
     switch(body.ballType) {
       case 0:
         var utxo = body.utxo;
-        var idx = body.ballType + '-' + utxo.txid + '-' + utxo.n + '-' + utxo.address + '-' + utxo.value;
+        var idx = (forcetype || body.ballType) + '-' + utxo.txid + '-' + utxo.n + '-' + utxo.address + '-' + utxo.value;
         return idx;
       case 1:
         var unconf = body.unconf;
-        var idx = body.ballType + '-' + unconf.txid + '-' + unconf.n + '-' + unconf.address + '-' + unconf.value;
+        var idx = (forcetype || body.ballType) + '-' + unconf.txid + '-' + unconf.n + '-' + unconf.address + '-' + unconf.value;
         return idx;
       case 2:
-        var idx = body.ballType;
+        var idx = (forcetype || body.ballType);
         return idx;
       default:
         return 'unknown';
@@ -170,7 +171,42 @@ UtxoBalls.simple = function() {
     return ball;
   }
 
+  function create_unconf_ball(unconf) {
+    var address = sanitize(unconf.address);
+    var s = Math.ceil(Ball.balls_r * unconf.cr);
+    var s_max = w > h ? h / 6 : w / 6;
+    if(s > s_max) {
+      s = s_max;
+    }
+    var x = Math.round(Math.random() * (w - s) + s / 2);
+    var y = Math.round(Math.random() * (200 - s) + s / 2);
+    var ball = Bodies.circle(x, y, s / 2, {
+      ballType: 1,
+      label: 'ball',
+      address: address,
+      value: unconf.value,
+      unconf: unconf,
+      restitution: 0.3,
+      frictionAir: 0.03,
+      fluffy: fluffy1,
+      collisionFilter: {
+        category: fluffy1,
+        mask: defaultCategory | fluffy1
+      },
+      render: {
+        sprite: {
+          texture: Ball.get(address, 64),
+          xScale: s / 64,
+          yScale: s / 64,
+          imgsize: 64
+        }
+      }
+    });
+    return ball;
+  }
+
   function create_balls_worker() {
+    clearTimeout(create_balls_worker_tval);
     clearTimeout(check_too_much_balls_tval);
     clearTimeout(scale_checker_tval);
     clearTimeout(check_out_balls_tval);
@@ -193,12 +229,26 @@ UtxoBalls.simple = function() {
           }
         }
       } else if(task.type == 13) {
-        var idx = create_bodies_idx({ballType: 0, utxo: task.utxo});
-        if(!Ball.bodies_idx[idx]) {
-          var ball = create_utxo_ball(task.utxo);
-          Ball.bodies.push(ball);
+        var idx1 = create_bodies_idx({ballType: 1, unconf: task.utxo});
+        var ball = Ball.bodies_idx[idx1];
+        if(ball) {
+          remove_bodies_idx(ball);
+          ball.ballType = 0;
+          ball.ballMark = 0;
+          ball.utxo = task.utxo;
           add_bodies_idx(ball);
-          World.add(world, ball);
+          setFluffy(ball, fluffy3);
+        } else {
+          var idx = create_bodies_idx({ballType: 0, utxo: task.utxo});
+          var ball = Ball.bodies_idx[idx];
+          if(ball) {
+            ball.ballMark = 0;
+          } else {
+            var ball = create_utxo_ball(task.utxo);
+            Ball.bodies.push(ball);
+            add_bodies_idx(ball);
+            World.add(world, ball);
+          }
         }
       } else if(task.type == 15) {
         var idx = create_bodies_idx({ballType: 0, utxo: task.utxo});
@@ -216,6 +266,69 @@ UtxoBalls.simple = function() {
         Ball.bodies.push(ball);
         add_bodies_idx(ball);
         World.add(world, ball);
+      } else if(task.type == 19) {
+        var idx = create_bodies_idx({ballType: 1, unconf: task.unconf});
+        ball = Ball.bodies_idx[idx];
+        if(ball) {
+          remove_bodies_idx(ball);
+          for(var i in Ball.bodies) {
+            if(Ball.bodies[i] == ball) {
+              Ball.bodies.splice(i, 1);
+              break;
+            }
+          }
+        }
+        ball = create_unconf_ball(task.unconf);
+        Ball.bodies.push(ball);
+        add_bodies_idx(ball);
+        World.add(world, ball);
+      } else if(task.type == 16) {
+        for(var i in Ball.bodies) {
+          var ball = Ball.bodies[i];
+          if(ball.ballType == 1) {
+            ball.ballMark = 1;
+          }
+        }
+      } else if(task.type == 17) {
+        for(var i in Ball.bodies) {
+          var ball = Ball.bodies[i];
+          if(ball.ballType == 1 && ball.ballMark == 1) {
+            if(ball.unconf.txtype == 1) {
+              remove_bodies_idx(ball);
+              ball.ballType = 0;
+              ball.ballMark = 0;
+              ball.utxo = ball.unconf;
+              add_bodies_idx(ball);
+              setFluffy(ball, fluffy3);
+            } else {
+              Matter.Composite.remove(world, ball);
+              remove_bodies_idx(ball);
+              Ball.bodies.splice(i, 1);
+            }
+          }
+        }
+      } else if(task.type == 18) {
+        var idx0 = create_bodies_idx({ballType: 0, utxo: task.unconf});
+        var ball = Ball.bodies_idx[idx0];
+        if(ball) {
+          remove_bodies_idx(ball);
+          ball.ballType = 1;
+          ball.ballMark = 0;
+          ball.unconf = task.unconf;
+          add_bodies_idx(ball);
+          setFluffy(ball, fluffy1);
+        } else {
+          var idx = create_bodies_idx({ballType: 1, unconf: task.unconf});
+          var ball = Ball.bodies_idx[idx];
+          if(ball) {
+            ball.ballMark = 0;
+          } else {
+            var ball = create_unconf_ball(task.unconf);
+            Ball.bodies.push(ball);
+            add_bodies_idx(ball);
+            World.add(world, ball);
+          }
+        }
       }
       create_balls_worker_tval = setTimeout(create_balls_worker, 10);
     } else {
@@ -226,17 +339,25 @@ UtxoBalls.simple = function() {
 
   function update_balls_r() {
     var utxos = Ball.utxos;
-    if(utxos.length > 0) {
+    var unconfs = Ball.unconfs;
+    if(utxos.length > 0 || unconfs.length > 0) {
       var ave = 0.0;
       var sd = 0.0;
-      var len = utxos.length;
+      var len = utxos.length + unconfs.length;
       if(len > 1) {
         for(var i in utxos) {
           ave += utxos[i].r;
         }
+        for(var i in unconfs) {
+          ave += unconfs[i].r;
+        }
         ave /= len;
         for(var i in utxos) {
           var d = utxos[i].r - ave;
+          sd += d * d;
+        }
+        for(var i in unconfs) {
+          var d = unconfs[i].r - ave;
           sd += d * d;
         }
         sd = Math.sqrt(sd / (len - 1));
@@ -250,19 +371,38 @@ UtxoBalls.simple = function() {
             }
             utxos[i].cr = cr;
           }
+          for(var i in unconfs) {
+            var cr = 36 + 28 * (unconfs[i].r - ave) / (1.5 * sd);
+            if(cr > 64) {
+              cr = 64;
+            } else if(cr < 8) {
+              cr = 8;
+            }
+            unconfs[i].cr = cr;
+          }
         } else {
           for(var i in utxos) {
             utxos[i].cr = 36;
+          }
+          for(var i in unconfs) {
+            unconfs[i].cr = 36;
           }
         }
       } else {
         for(var i in utxos) {
           utxos[i].cr = 36;
         }
+        for(var i in unconfs) {
+          unconfs[i].cr = 36;
+        }
       }
       var ss = 0;
       for(var i in utxos) {
         var cr = utxos[i].cr;
+        ss += cr * cr;
+      }
+      for(var i in unconfs) {
+        var cr = unconfs[i].cr;
         ss += cr * cr;
       }
       Ball.balls_r = Math.sqrt(((w * h) / 3) / ss);
@@ -274,15 +414,22 @@ UtxoBalls.simple = function() {
   // 12 - remove marked
   // 13 - add ball
   // 14 - remove ball
-  // 15 - reset location
+  // 15 - reset utxo location
+  // 16 - mark unconf all
+  // 17 - remove unconf marked
+  // 18 - add unconf ball
+  // 19 - reset unconf location
   function update_balls(utxos, cb) {
-    clearTimeout(create_balls_worker_tval);
     if(utxos == null) {
-      utxos = Ball.utxos;
+      var utxos = Ball.utxos;
+      var unconfs = Ball.unconfs;
       Ball.too_much_balls_enable = false;
       update_balls_r();
       for(var i in utxos) {
         Ball.create_balls_task.push({type: 15, utxo: utxos[i]});
+      }
+      for(var i in unconfs) {
+        Ball.create_balls_task.push({type: 19, unconf: unconfs[i]});
       }
     } else {
       Ball.create_balls_task.push({type: 11});
@@ -301,7 +448,6 @@ UtxoBalls.simple = function() {
       Ball.create_balls_task.push({type: 12});
     }
     create_balls_worker();
-    create_balls_worker_tval = setTimeout(create_balls_worker, 3000);
   }
 
   var scale_dec = 0.98;
@@ -464,6 +610,34 @@ UtxoBalls.simple = function() {
 
   function unconfs(data) {
     console.log('unconfs=', JSON.stringify(data));
+    var unconf_list = [];
+    Ball.create_balls_task.push({type: 16});
+    for(var addr in data) {
+      var val = data[addr];
+      if(val.spents) {
+        for(i in val.spents) {
+          var spent = val.spents[i];
+          var item = {txtype: 0, address: addr, txid: spent.txid, n: spent.n, value: conv_coin(sanitize(spent.value)),
+            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: spent.trans_time};
+          unconf_list.push(item);
+        }
+      }
+      if(val.txouts) {
+        for(i in val.txouts) {
+          var txout = val.txouts[i];
+          var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n, value: conv_coin(sanitize(txout.value)),
+            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
+          unconf_list.push(item);
+        }
+      }
+    }
+    Ball.unconfs = unconf_list;
+    update_balls_r();
+    for(var i in unconf_list) {
+      Ball.create_balls_task.push({type: 18, unconf: unconf_list[i]});
+    }
+    Ball.create_balls_task.push({type: 17});
+    create_balls_worker();
   }
 
   var wall_options = { isStatic: true, render: {
