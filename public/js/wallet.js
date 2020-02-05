@@ -171,7 +171,7 @@ function Wallet() {
     return false;
   }
 
-  this.getUtxos = function(utxos) {
+  this.getUtxos = function() {
     return _utxos;
   }
 
