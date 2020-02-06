@@ -806,6 +806,27 @@ UtxoBalls.simple = function() {
     ball.collisionFilter.mask = defaultCategory | ball.fluffy;
   }
 
+  function setsend(count) {
+    console.log('setsend', count);
+    var cnt = 0;
+    var valid_cnt = 0;
+    var utxos = Ball.utxos;
+    for(var i in utxos) {
+      var idx = create_bodies_idx({ballType: 0, utxo: utxos[i]});
+      var ball = Ball.bodies_idx[idx];
+      if(ball) {
+        if(cnt < count) {
+          setFluffy(ball, fluffy2);
+          valid_cnt++;
+        } else {
+          setFluffy(ball, fluffy3);
+        }
+        cnt++;
+      }
+    }
+    return valid_cnt;
+  }
+
   Events.on(engine, 'beforeUpdate', function(event) {
     var time = engine.timing.timestamp;
     for(var i in Ball.bodies) {
@@ -912,7 +933,8 @@ UtxoBalls.simple = function() {
         return UtxoBalls.click_cb;
       },
       update_balls: update_balls,
-      unconfs: unconfs
+      unconfs: unconfs,
+      setsend: setsend
     };
   } else {
     var obj = UtxoBalls.result_obj;
@@ -923,6 +945,7 @@ UtxoBalls.simple = function() {
     obj.stop = stop;
     obj.update_balls = update_balls;
     obj.unconfs = unconfs;
+    obj.setsend = setsend;
   }
   return UtxoBalls.result_obj;
 }

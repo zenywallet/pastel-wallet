@@ -781,6 +781,7 @@ proc backWallet(): proc() =
     """
 
 asm """
+  var send_ball_count = 0;
   function initSendForm() {
     $('#btn-send-clear').off('click').click(function() {
       $('#send-coins input[name="address"]').val('');
@@ -806,6 +807,25 @@ asm """
         }
         jsViewSelector(12);
       });
+      $(this).blur();
+    });
+    send_ball_count = pastel.utxoballs.setsend(send_ball_count);
+    $('#btn-utxo-plus').off('click').click(function() {
+      send_ball_count++;
+      if(send_ball_count >= 1000) {
+        send_ball_count = 999;
+      }
+      send_ball_count = pastel.utxoballs.setsend(send_ball_count);
+      $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
+      $(this).blur();
+    });
+    $('#btn-utxo-minus').off('click').click(function() {
+      send_ball_count--;
+      if(send_ball_count < 0) {
+        send_ball_count = 0;
+      }
+      send_ball_count = pastel.utxoballs.setsend(send_ball_count);
+      $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
       $(this).blur();
     });
   }
@@ -920,6 +940,9 @@ asm """
   }
   function sendrecv_select(val) {
     clearTimeout(sendrecv_switch_tval);
+    if(val != 1) {
+      pastel.utxoballs.setsend(0);
+    }
     sendrecv_switch = val;
     sendrecv_switch_worker();
   }
@@ -928,6 +951,9 @@ asm """
 proc btnSend: proc() =
   result = proc() =
     asm """
+      if(!pastel.wallet || !pastel.utxoballs) {
+        return;
+      }
       sendrecv_select((sendrecv_switch == 1) ? 0 : 1);
     """
 
@@ -1034,11 +1060,11 @@ proc sendForm(): VNode =
         tdiv(class="ui small input"):
           input(class="center", type="text", name="amount", placeholder="Amount")
           tdiv(class="ui mini basic icon buttons utxoctrl"):
-            button(id="btn-utxo-plus", class="ui button", title="-1 Ball"):
+            button(id="btn-utxo-minus", class="ui button", title="-1 Ball"):
               italic(class="minus circle icon")
             button(id="btn-utxo-count", class="ui button sendutxos"):
-              text "≤24"
-            button(id="btn-utxo-minus", class="ui button", title="+1 Ball"):
+              text "..."
+            button(id="btn-utxo-plus", class="ui button", title="+1 Ball"):
               italic(class="plus circle icon")
       tdiv(class="ui list uri-options"):
         for d in uriOptions:

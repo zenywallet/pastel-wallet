@@ -977,6 +977,7 @@ i.receive {
 }
 #send-coins .ui.buttons.utxoctrl .ui.button.sendutxos {
   pointer-events: none;
+  width: 60px;
 }
 #qrcanvas-modal {
   position: absolute;
