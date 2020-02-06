@@ -622,30 +622,31 @@ proc ball_main() {.thread.} =
           json.add("data", newJObject())
           for i, a in addrs_array:
             var j = j_unconfs["res"][i]
-            if j.hasKey("spents"):
-              for v in j["spents"]:
-                v["value"] = j_uint64(v["value"].getUint64)
-            if j.hasKey("txouts"):
-              for v in j["txouts"]:
-                v["value"] = j_uint64(v["value"].getUint64)
+            if j.hasKey("spents") or j.hasKey("txouts"):
+              if j.hasKey("spents"):
+                for v in j["spents"]:
+                  v["value"] = j_uint64(v["value"].getUint64)
+              if j.hasKey("txouts"):
+                for v in j["txouts"]:
+                  v["value"] = j_uint64(v["value"].getUint64)
               json["data"][a] = j
-            for da in db.getAddresses(a):
-              var idx = wallets.find(da.wid)
-              if idx >= 0:
-                json["data"][a].add("change", newJInt(da.change.BiggestInt))
-                json["data"][a].add("index", newJInt(da.index.BiggestInt))
-                json["data"][a].add("xpub_idx", newJInt(idx.BiggestInt))
-                if json["data"][a].hasKey("spents"):
-                  for spent in json["data"][a]["spents"]:
-                    let dt = getTxtime(spent["txid"].getStr)
-                    if dt.err == DbStatus.Success:
-                      spent.add("trans_time", j_uint64(dt.res))
-                if json["data"][a].hasKey("txouts"):
-                  for txout in json["data"][a]["txouts"]:
-                    let dt = getTxtime(txout["txid"].getStr)
-                    if dt.err == DbStatus.Success:
-                      txout.add("trans_time", j_uint64(dt.res))
-                break
+              for da in db.getAddresses(a):
+                var idx = wallets.find(da.wid)
+                if idx >= 0:
+                  json["data"][a].add("change", newJInt(da.change.BiggestInt))
+                  json["data"][a].add("index", newJInt(da.index.BiggestInt))
+                  json["data"][a].add("xpub_idx", newJInt(idx.BiggestInt))
+                  if json["data"][a].hasKey("spents"):
+                    for spent in json["data"][a]["spents"]:
+                      let dt = getTxtime(spent["txid"].getStr)
+                      if dt.err == DbStatus.Success:
+                        spent.add("trans_time", j_uint64(dt.res))
+                  if json["data"][a].hasKey("txouts"):
+                    for txout in json["data"][a]["txouts"]:
+                      let dt = getTxtime(txout["txid"].getStr)
+                      if dt.err == DbStatus.Success:
+                        txout.add("trans_time", j_uint64(dt.res))
+                  break
           let client_wid: WalletId = wallets[0]
           stream.send(client_wid, $json)
           sent_wids.add(client_wid)
