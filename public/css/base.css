@@ -597,7 +597,7 @@ i.receive {
   font-weight: 400;
   background: rgba(170,170,170,0.6) !important;
 }
-.ui.basic.buttons > .ui.button.send:hover, .ui.basic.buttons > .ui.button.receive:hover {
+.ui.basic.buttons > .ui.button.send:hover, .ui.basic.buttons > .ui.button.receive:hover, .ui.basic.buttons > .ui.button:hover {
   background: rgba(190,190,190,0.6) !important;
 }
 .ui.buttons.settings > .ui.button {
