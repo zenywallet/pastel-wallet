@@ -809,6 +809,17 @@ asm """
       });
       $(this).blur();
     });
+    $('#btn-send-lock').off('click').click(function() {
+      var icon = $(this).find('i');
+      if(icon.hasClass('open')) {
+        icon.removeClass('open');
+        $(this).attr('title', 'Locked');
+      } else {
+        icon.addClass('open');
+        $(this).attr('title', 'Unlocked');
+      }
+      $(this).blur();
+    });
     send_ball_count = pastel.utxoballs.setsend(send_ball_count);
     $('#btn-utxo-plus').off('click').click(function() {
       send_ball_count++;
@@ -1045,7 +1056,10 @@ proc sendForm(): VNode =
       text "Send Coins "
       span:
         italic(class="close icon btn-close", onclick=btnSendClose())
-    tdiv(class="ui mini basic icon buttons"):
+    tdiv(class="ui right floated mini basic icon buttons"):
+      button(id="btn-send-lock", class="ui button", title="Locked"):
+        italic(class="lock icon")
+    tdiv(class="ui mini basic icon buttons btn-send-tools"):
       button(id="btn-send-clear", class="ui button", title="Clear"):
         italic(class="eraser icon")
       button(id="btn-send-qrcode", class="ui button", title="Scan QR Code"):

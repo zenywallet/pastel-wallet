@@ -979,6 +979,9 @@ i.receive {
   pointer-events: none;
   width: 60px;
 }
+#send-coins .btn-send-tools {
+  margin-left: 33px;
+}
 #qrcanvas-modal {
   position: absolute;
   top: 0;
