@@ -839,6 +839,10 @@ asm """
       $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
       $(this).blur();
     });
+    $('#btn-tx-send').off('click').click(function() {
+      PhraseLock.notify_locked();
+      $(this).blur();
+    });
   }
   var sendrecv_switch = 0;
   var sendrecv_switch_busy = false;
@@ -1087,7 +1091,7 @@ proc sendForm(): VNode =
               tdiv(class="header"): text cast[cstring](d.key)
               tdiv(class="description"): text cast[cstring](d.value)
       tdiv(class="fluid ui buttons"):
-        button(id="btn-send", class="ui inverted olive button center btn-send"):
+        button(id="btn-tx-send", class="ui inverted olive button center btn-tx-send"):
           text "Send"
 
 #[

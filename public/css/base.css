@@ -919,10 +919,10 @@ i.receive {
   background: rgba(128, 128, 128, 0.6);
   color: #f0f0f0;
 }
-#send-coins .btn-send {
+#send-coins .btn-tx-send {
   background: rgba(113, 120, 54, 0.5);
 }
-#send-coins .btn-send:hover, #send-coins .btn-send:focus {
+#send-coins .btn-tx-send:hover, #send-coins .btn-tx-send:focus {
  background: rgba(217, 231, 120, 0.8);
 }
 #send-coins .btn-close {

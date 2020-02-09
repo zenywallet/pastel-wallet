@@ -1293,6 +1293,34 @@ var Notify = (function() {
   return Module;
 })();
 
+var PhraseLock = (function() {
+  var Module = {};
+  var btn_lock_popup_tval;
+
+  Module.notify_locked = function() {
+    var locked = !($('#btn-send-lock i').hasClass('open'));
+    if(locked) {
+      var btn_lock = $('#btn-send-lock');
+      clearTimeout(btn_lock_popup_tval);
+      btn_lock.popup({
+        title: '',
+        content: 'Please unlock your wallet before sending coins.',
+        on: 'manual',
+        variation: 'inverted',
+        position: 'top right',
+        distanceAway: 0,
+        exclusive: true
+      }).popup('show');
+      btn_lock_popup_tval = setTimeout(function() {
+        btn_lock.popup('hide');
+        $('#btn-tx-send').blur();
+      }, 10000);
+    }
+  }
+
+  return Module;
+})();
+
 var registerEventList = [];
 ready(function() {
   var elms = document.querySelectorAll('a');
