@@ -1005,7 +1005,7 @@ proc recvAddressSelector(): VNode =
         italic(class="close icon btn-close", onclick=btnRecvClose())
     tdiv(class="ui mini basic icon buttons"):
       button(id="btn-recv-copy", class="ui button", title="Copy"):
-        italic(class="copy outline icon")
+        italic(class="paperclip icon")
       button(id="btn-recv-qrcode", class="ui button", title="QR Code"):
         italic(class="qrcode icon")
     tdiv(id="address-text", class="address"): text ""
