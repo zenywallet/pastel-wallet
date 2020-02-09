@@ -150,7 +150,7 @@ UtxoBalls.simple = function() {
       ballType: 0,
       label: 'ball',
       address: address,
-      value: utxo.value,
+      value: utxo.value_d,
       utxo: utxo,
       restitution: 0.3,
       frictionAir: 0.03,
@@ -184,7 +184,7 @@ UtxoBalls.simple = function() {
       ballType: 1,
       label: 'ball',
       address: address,
-      value: unconf.value,
+      value: unconf.value_d,
       unconf: unconf,
       restitution: 0.3,
       frictionAir: 0.03,
@@ -436,7 +436,7 @@ UtxoBalls.simple = function() {
       utxos = utxos.slice(0, 140);
       for(var i in utxos) {
         var utxo = utxos[i];
-        utxo.value = conv_coin(sanitize(utxo.value))
+        utxo.value_d = conv_coin(sanitize(utxo.value))
         utxo.s = parseFloat(utxo.value);
         utxo.r = Math.sqrt(utxo.s);
       }
@@ -617,16 +617,18 @@ UtxoBalls.simple = function() {
       if(val.spents) {
         for(i in val.spents) {
           var spent = val.spents[i];
-          var item = {txtype: 0, address: addr, txid: spent.txid, n: spent.n, value: conv_coin(sanitize(spent.value)),
-            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: spent.trans_time};
+          var item = {txtype: 0, address: addr, txid: spent.txid, n: spent.n, value: spent.value,
+            value_d: conv_coin(sanitize(spent.value)), change: val.change, index: val.index,
+            xpub_idx: val.xpub_idx, trans_time: spent.trans_time};
           unconf_list.push(item);
         }
       }
       if(val.txouts) {
         for(i in val.txouts) {
           var txout = val.txouts[i];
-          var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n, value: conv_coin(sanitize(txout.value)),
-            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
+          var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n, value: txout.value,
+            value_d: conv_coin(sanitize(txout.value)), change: val.change, index: val.index,
+            xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
           unconf_list.push(item);
         }
       }
