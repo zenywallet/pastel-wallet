@@ -345,14 +345,22 @@ function Wallet() {
     var p = cipher.yespower_n4r32(sha256d(phrase), 32);
     xc(p, salt);
     p = cipher.yespower_n4r32(sha256d(p), 32);
-    var dec = cipher.dec_json(p, stor.get_shield());
-    shieldedKeys.priv = dec;
-    if(shieldedKeys.priv.length != shieldedKeys.pub.length) {
+    try {
+      var dec = cipher.dec_json(p, stor.get_shield());
+      for(var i in dec) {
+        bip32.fromBase58(dec[i], network);
+      }
+      shieldedKeys.priv = dec;
+      if(shieldedKeys.priv.length != shieldedKeys.pub.length) {
+        return false;
+      }
+      shieldedKeys.unlock = true;
+      console.log('after unlock: ' + JSON.stringify(shieldedKeys));
+      return true;
+    } catch(ex) {
+      console.log(ex);
       return false;
     }
-    shieldedKeys.unlock = true;
-    console.log('after unlock: ' + JSON.stringify(shieldedKeys));
-    return true;
   }
 
   this.setSeedCard = function(cardInfos) {
