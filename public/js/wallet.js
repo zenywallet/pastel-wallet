@@ -351,6 +351,7 @@ function Wallet() {
         bip32.fromBase58(dec[i], network);
       }
       shieldedKeys.priv = dec;
+      shieldedKeys.pub = stor.get_xpubs();
       if(shieldedKeys.priv.length != shieldedKeys.pub.length) {
         return false;
       }
