@@ -998,14 +998,14 @@ i.receive {
   height: calc(100vh - 252px);
   margin: 16px 0;
   bottom: 30px;
-  min-width: 352px;
+  min-width: 296px;
   min-height: 393px;
   object-fit: cover;
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
 }
 #qrcode-modal.ui.modal {
   min-height: 550px;
-  min-width: 352px;
+  min-width: 324px;
 }
 #qrcode-modal.ui.modal .scrolling.content {
   width: 100%;
@@ -1013,13 +1013,34 @@ i.receive {
   min-height: 400px;
   overflow: hidden;
 }
-#qrcode-modal.ui.modal .ui.header, #qrcode-modal.ui.modal .content, #qrcode-modal.ui.modal .actions {
-  min-width: 352px;
+#qrcode-modal.ui.modal .ui.header, #qrcode-modal.ui.modal .content, #qrcode-modal.ui.modal .actions,
+#passphrase-modal.ui.modal .ui.header, #passphrase-modal.ui.modal .content, #passphrase-modal.ui.modal .actions {
+  min-width: 324px;
 }
 @media only screen and (max-width:767px) {
 .ui.modal>.header {
   padding:.75rem 1rem!important;
 }
+}
+#passphrase-modal-seg {
+  margin: 16px 0;
+  bottom: 30px;
+  min-width: 296px;
+  object-fit: cover;
+  background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
+}
+#passphrase-modal-seg .ui.form input[type="text"] {
+    background: rgba(43, 51, 45, 0.6);
+    color: #f0f0f0;
+}
+#passphrase-modal.ui.modal {
+  min-width: 324px;
+}
+#passphrase-modal.ui.modal .scrolling.content {
+  width: 100%;
+  max-height: 80px;
+  min-height: 80px;
+  overflow: hidden;
 }
 #send-coins .ui.list {
   text-align: left;

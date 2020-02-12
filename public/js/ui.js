@@ -1089,11 +1089,12 @@ var qrReaderModal = (function() {
     }
   }
 
-  function show(cb) {
+  function show(cb, title) {
     $('#qrcode-modal').closest('.ui.dimmer.modals').remove();
     $('body').removeClass('dimmable dimmed scrolling');
     $('body').css('height', '');
-    $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">Scan QR Code</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">Preparing Camera</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
+    $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">'
+      + (title || 'Scan QR code') + '</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">Preparing Camera</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
 
     $('#qrcode-modal').modal("setting", {
       closable: false,
@@ -1276,6 +1277,12 @@ var Notify = (function() {
     });
   }
 
+  function hide_all() {
+    $('#tools .notify-container .message').each(function() {
+      hide($(this));
+    });
+  }
+
   $(function() {
     var tools = document.getElementById('tools');
     if(!tools) {
@@ -1288,6 +1295,7 @@ var Notify = (function() {
 
   var Module = {
     show: show,
+    hide_all: hide_all,
     msgtype: _msgtype
   }
   return Module;
@@ -1296,28 +1304,110 @@ var Notify = (function() {
 var PhraseLock = (function() {
   var Module = {};
   var btn_lock_popup_tval;
+  Module.PLOCK_SUCCESS = 0;
+  Module.PLOCK_FAILED_QR = 1;
+  Module.PLOCK_FAILED_PHRASE = 2;
+  Module.PLOCK_CANCEL = 3;
 
-  Module.notify_locked = function() {
-    var locked = !($('#btn-send-lock i').hasClass('open'));
-    if(locked) {
-      var btn_lock = $('#btn-send-lock');
-      clearTimeout(btn_lock_popup_tval);
-      btn_lock.popup({
-        title: '',
-        content: 'Please unlock your wallet before sending coins.',
-        on: 'manual',
-        variation: 'inverted',
-        position: 'top right',
-        distanceAway: 0,
-        exclusive: true
-      }).popup('show');
-      btn_lock_popup_tval = setTimeout(function() {
-        btn_lock.popup('hide');
-        $('#btn-tx-send').blur();
-      }, 10000);
-    }
+  function notify(msg, timeout) {
+    var btn_lock = $('#btn-send-lock');
+    clearTimeout(btn_lock_popup_tval);
+    btn_lock.popup({
+      title: '',
+      content: msg,
+      on: 'manual',
+      variation: 'inverted',
+      position: 'top right',
+      distanceAway: 0,
+      exclusive: true
+    }).popup('show');
+    btn_lock_popup_tval = setTimeout(function() {
+      btn_lock.popup('hide');
+      $('#btn-tx-send').blur();
+    }, timeout || 5000);
   }
 
+  Module.notify_if_need_unlock = function() {
+    var locked = !($('#btn-send-lock i').hasClass('open'));
+    if(locked) {
+      notify('Please unlock your wallet before sending coins.');
+      return true;
+    }
+    return false;
+  }
+
+  Module.notify_locked = function() {
+    notify('Locked', 2000);
+  }
+
+  Module.notify_unlocked = function() {
+    notify('Unlocked', 2000);
+  }
+
+  Module.showPhraseInput = function(cb) {
+    var wallet = pastel.wallet;
+    var lock_type = wallet.getLockShieldedType();
+    if(lock_type == 1) {
+      qrReaderModal.show(function(phrase) {
+        if(pastel.wallet.unlockShieldedKeys(phrase)) {
+          cb(Module.PLOCK_SUCCESS);
+        } else {
+          cb(Module.PLOCK_FAILED_QR);
+        }
+      }, 'Scan your key card');
+    } else if(lock_type == 2) {
+      function hide() {
+        $('#passphrase-modal').closest('.ui.dimmer.modals').remove();
+        $('body').removeClass('dimmable dimmed scrolling');
+        $('body').css('height', '');
+      }
+      $.fn.transition.settings.silent = true;
+      $('#passphrase-modal').closest('.ui.dimmer.modals').remove();
+      $('body').removeClass('dimmable dimmed scrolling');
+      $('body').css('height', '');
+      $('body').append(
+        '<div id="passphrase-modal" class="ui basic modal"><i class="close icon def-close"></i>' +
+          '<div class="ui icon header">Input your passphrase</div>' +
+          '<div class="scrolling content">' +
+            '<div id="passphrase-modal-seg" class="ui center aligned segment">' +
+                '<div class="ui form">' +
+                  '<div class="field"><input class="center" type="text" name="input-passphrase" placeholder="Passphrase"></div>' +
+                '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="actions">' +
+            '<div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div>' +
+            '<div class="ui basic ok inverted button"><i class="check icon"></i>OK</div>' +
+          '</div>' +
+        '</div>');
+      $('#passphrase-modal').modal("setting", {
+        closable: false,
+        autofocus: true,
+        onShow: function() {
+          $('#passphrase-modal-seg input[name="input-passphrase"]').off('keydown').on('keydown', function(evt) {
+            if(evt.which == 13 || evt.keyCode == 13) {
+              $('#passphrase-modal .ui.ok.button').click();
+            }
+          });
+        },
+        onApprove: function() {
+          console.log('approve');
+          var phrase = $('#passphrase-modal-seg input[name="input-passphrase"]').val();
+          if(pastel.wallet.unlockShieldedKeys(phrase)) {
+            hide();
+            cb(Module.PLOCK_SUCCESS);
+          } else {
+            cb(Module.PLOCK_FAILED_PHRASE);
+          }
+        },
+        onDeny: function() {
+          console.log('deny');
+          hide();
+          cb(Module.PLOCK_CANCEL);
+        }
+      }).modal('show');
+    }
+  }
   return Module;
 })();
 

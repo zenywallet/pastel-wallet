@@ -810,15 +810,29 @@ asm """
       $(this).blur();
     });
     $('#btn-send-lock').off('click').click(function() {
-      var icon = $(this).find('i');
+      var elm = $(this);
+      var icon = elm.find('i');
       if(icon.hasClass('open')) {
-        icon.removeClass('open');
-        $(this).attr('title', 'Locked');
+        if(pastel.wallet && pastel.wallet.lockShieldedKeys()) {
+          icon.removeClass('open');
+          elm.attr('title', 'Locked');
+          PhraseLock.notify_locked();
+        }
       } else {
-        icon.addClass('open');
-        $(this).attr('title', 'Unlocked');
+        Notify.hide_all();
+        PhraseLock.showPhraseInput(function(status) {
+          if(status == PhraseLock.PLOCK_SUCCESS) {
+            icon.addClass('open');
+            elm.attr('title', 'Unlocked');
+            PhraseLock.notify_unlocked();
+          } else if(status == PhraseLock.PLOCK_FAILED_QR) {
+            Notify.show("Error", "Failed to unlock. Wrong key card was scanned.", Notify.msgtype.error);
+          } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
+            Notify.show("Error", "Failed to unlock. Passphrase is incorrect.", Notify.msgtype.error);
+          }
+        });
       }
-      $(this).blur();
+      elm.blur();
     });
     send_ball_count = pastel.utxoballs.setsend(send_ball_count);
     $('#btn-utxo-plus').off('click').click(function() {
@@ -840,7 +854,7 @@ asm """
       $(this).blur();
     });
     $('#btn-tx-send').off('click').click(function() {
-      PhraseLock.notify_locked();
+      var locked = PhraseLock.notify_if_need_unlock();
       $(this).blur();
     });
   }
