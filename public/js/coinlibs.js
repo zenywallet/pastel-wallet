@@ -14649,6 +14649,7 @@ function TransactionBuilder (network, maximumFeeRate) {
   this.maximumFeeRate = maximumFeeRate || 2500
 
   this.__inputs = []
+  this.__vinTxOut = {}
   this.__tx = new Transaction()
   this.__tx.version = 2
 }
@@ -14783,8 +14784,17 @@ TransactionBuilder.prototype.__addInputUnsafe = function (txHash, vout, options)
 
   const vin = this.__tx.addInput(txHash, vout, options.sequence, options.scriptSig)
   this.__inputs[vin] = input
+  this.__vinTxOut[vin] = prevTxOut
   this.__prevTxSet[prevTxOut] = true
   return vin
+}
+
+TransactionBuilder.prototype.removeInput = function (index) {
+  for(var i = index; i < this.__tx.ins.length; i++) {
+    delete this.__prevTxSet[this.__vinTxOut[index]]
+  }
+  this.__tx.ins.splice(index)
+  this.__inputs.splice(index)
 }
 
 TransactionBuilder.prototype.addOutput = function (scriptPubKey, value) {
@@ -14798,6 +14808,10 @@ TransactionBuilder.prototype.addOutput = function (scriptPubKey, value) {
   }
 
   return this.__tx.addOutput(scriptPubKey, value)
+}
+
+TransactionBuilder.prototype.removeOutput = function (index) {
+  this.__tx.outs.splice(index)
 }
 
 TransactionBuilder.prototype.build = function () {
@@ -14912,6 +14926,12 @@ TransactionBuilder.prototype.sign = function (vin, keyPair, redeemScript, hashTy
   })
 
   if (!signed) throw new Error('Key pair cannot sign for this input')
+}
+
+TransactionBuilder.prototype.removeSign = function() {
+  for(var i in this.__inputs) {
+    delete this.__inputs[i].signatures
+  }
 }
 
 function signatureHashType (buffer) {
