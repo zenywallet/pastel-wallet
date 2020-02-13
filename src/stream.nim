@@ -84,6 +84,7 @@ type
     MemPool
     Unspents
     Unused
+    Change
     Height
     Rollback
     Rollbacked
@@ -99,6 +100,8 @@ type
   BallDataUnspents* = ref object of BallData
     client*: ClientData
   BallDataUnused* = ref object of BallData
+    wallet_id*: WalletId
+  BallDataChange* = ref object of BallData
     wallet_id*: WalletId
   BallDataHeight* = ref object of BallData
     wallet_id*: WalletId
@@ -313,6 +316,9 @@ proc stream_main() {.thread.} =
 
               elif cmd == "unused":
                 StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
+
+              elif cmd == "change":
+                BallCommand.Change.send(BallDataChange(wallet_id: client.wallets[0]))
 
               elif cmd == "unspents":
                 BallCommand.Unspents.send(BallDataUnspents(client: client))

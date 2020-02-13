@@ -807,6 +807,55 @@ proc ball_main() {.thread.} =
       echo json
       stream.send(client_wid, $json)
 
+    of BallCommand.Change:
+      const ChangeMax = 1
+      var data = BallDataChange(ch_data.data)
+      let client_wid: WalletId = data.wallet_id
+      var unconf_addrs: seq[string] = @[]
+      for f in full_wid_addrs:
+        if f.wid == client_wid:
+          unconf_addrs.add(f.address)
+      var unconf_idxs: seq[uint32] = @[]
+      for a in unconf_addrs:
+        for da in db.getAddresses(a):
+          if da.change == 1:
+            unconf_idxs.add(da.index)
+      var json = %*{"type": "change", "data": []}
+      var count = 0
+      var index: uint32 = 0
+      var unused_index: uint32 = 0
+      var used_1 = db.getLastUsedAddrIndex(client_wid, 1)
+      if used_1.err == DbStatus.Success:
+        unused_index = used_1.res + 1
+      if unconf_idxs.len > 0:
+        unconf_idxs.sort()
+        echo "unconf_idxs=", unconf_idxs
+        var last_unconf_idx = unconf_idxs[unconf_idxs.high]
+        if last_unconf_idx >= unused_index:
+          unused_index = last_unconf_idx + 1
+      block searchBallUnused:
+        for addrval in db.getAddrvals(client_wid):
+          if addrval.change == 0:
+            continue
+          for i in index..<addrval.index:
+            if not unconf_idxs.contains(i.uint32):
+              json["data"].add(newJInt(i.BiggestInt))
+              inc(count)
+              if count >= ChangeMax:
+                break searchBallUnused
+            if i >= unused_index:
+              break searchBallUnused
+          index = addrval.index + 1'u32
+        while count < ChangeMax:
+          if not unconf_idxs.contains(index.uint32):
+            json["data"].add(newJInt(index.BiggestInt))
+            inc(count)
+          if index >= unused_index:
+            break
+          inc(index)
+      echo json
+      stream.send(client_wid, $json)
+
     of BallCommand.Height:
       var data = BallDataHeight(ch_data.data)
       let client_wid: WalletId = data.wallet_id
