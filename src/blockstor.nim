@@ -232,7 +232,7 @@ proc getHeight*(): JsonNode {.inline.} =
   get("height")
 
 proc send*(rawtx: string): JsonNode {.inline.} =
-  post("addrs", %*{"rawtx": rawtx})
+  post("send", %*{"rawtx": rawtx})
 
 proc getTx*(tx: string): JsonNode {.inline.} =
   get("tx/" & tx)
