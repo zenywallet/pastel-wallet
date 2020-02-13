@@ -855,6 +855,68 @@ asm """
     });
     $('#btn-tx-send').off('click').click(function() {
       var locked = PhraseLock.notify_if_need_unlock();
+      if(!locked && pastel.wallet) {
+        var address = String($('#send-coins input[name="address"]').val()).trim();
+        var amount = String($('#send-coins input[name="amount"]').val()).trim();
+        if(address.length == 0 || amount.length == 0) {
+          return;
+        }
+        amount = amount.replace(/,/g, '');
+        var amounts = amount.split('.');
+        if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+          if(amounts.length == 1) {
+            value = amounts[0] + '00000000';
+          } else if(amounts.length == 2) {
+            value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
+          }
+          Notify.hide_all();
+          pastel.wallet.send(address, value, function(result) {
+            console.log('send result', result);
+            var ErrSend = pastel.wallet.ERR_SEND;
+            switch(result.err) {
+            case ErrSend.SUCCESS:
+              Notify.show('', 'Coins sent successfully.', Notify.msgtype.info);
+              break;
+            case ErrSend.FAILED:
+              Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
+              break;
+            case ErrSend.INVALID_ADDRESS:
+              Notify.show('Error', 'Address is invalid.', Notify.msgtype.error);
+              break;
+            case ErrSend.DUST_VALUE:
+              Notify.show('Error', 'Amount is too small.', Notify.msgtype.error);
+              break;
+            case ErrSend.BUSY:
+              Notify.show('Error', 'Failed to send coins. Busy.', Notify.msgtype.error);
+              break;
+            case ErrSend.TX_FAILED:
+              var msg = '';
+              if(result.res && result.res.message) {
+                msg = '<br> [' + result.res.message + ']';
+              }
+              Notify.show('Error', 'Failed to send coins.' + msg, Notify.msgtype.error);
+              break;
+            case ErrSend.TX_TIMEOUT:
+              Notify.show('Error', 'Server is not responding. Coins may have been sent.', Notify.msgtype.warning);
+              break;
+            case ErrSend.SERVER_ERROR:
+              Notify.show('Error', 'Failed to send coins. Server error.', Notify.msgtype.error);
+              break;
+            case ErrSend.SERVER_TIMEOUT:
+              Notify.show('Error', 'Failed to send coins. Server is not responding.', Notify.msgtype.error);
+              break;
+            default:
+              Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
+            }
+          });
+        } else {
+          if(amounts.length > 1 && amounts[1].length > 8) {
+            Notify.show('Error', 'Amount is invalid. The decimal places is too long. Please set it 8 or less.', Notify.msgtype.error);
+          } else {
+            Notify.show('Error', 'Amount is invalid.', Notify.msgtype.error);
+          }
+        }
+      }
       $(this).blur();
     });
   }

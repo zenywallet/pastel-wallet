@@ -405,4 +405,226 @@ function Wallet() {
       this.addShieldedKey(kp);
     }
   }
+
+  var stime, etime;
+  function time_start(label) {
+    stime = new Date();
+    console.log('start time ' + label, stime);
+  }
+  function time_end() {
+    etime = new Date();
+    console.log('end time', etime, etime - stime);
+  }
+
+  var cb_set_change = function(data) {}
+  this.setChange = function(data) {
+    console.log('wallet change', data);
+    cb_set_change(data);
+  }
+
+  var ErrSend = {
+    SUCCESS: 0,
+    FAILED: 1,
+    INVALID_ADDRESS: 2,
+    INSUFFICIENT_VALUE: 3,
+    DUST_VALUE: 4,
+    BUSY: 5,
+    TX_FAILED: 6,
+    TX_TIMEOUT: 7,
+    SERVER_ERROR: 8,
+    SERVER_TIMEOUT: 9
+  }
+  this.ERR_SEND = ErrSend;
+
+  function send_tx(rawtx, cb) {
+    var tval = null;
+    var result_cb = cb;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState != 4 || xhr.status != 200) return;
+        clearTimeout(tval);
+        console.log(JSON.stringify(xhr.response, null, '  '));
+      if(xhr.response && !xhr.response.err && xhr.response.res) {
+        result_cb({err: ErrSend.SUCCESS, res: xhr.response.res});
+      } else {
+        if(xhr.response && xhr.response.res) {
+          result_cb({err: ErrSend.TX_FAILED, res: xhr.response.res});
+        } else {
+          result_cb({err: ErrSend.TX_FAILED, res: null});
+        }
+      }
+    };
+    xhr.open('POST', 'http://localhost:8000/api/send', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.send(JSON.stringify({rawtx: rawtx}));
+    tval = setTimeout(function() {
+      result_cb = function(ignore) {};
+      cb({err: ErrSend.TX_TIMEOUT, res: null});
+    }, 30000);
+  }
+
+  function send_internal(send_address, change_address, value, cb) {
+    var tx = new coin.TransactionBuilder(network);
+    var in_value = UINT64(0);
+    var sign_utxos = [];
+    var utxo_count = 0;
+    var result_out = 0;
+
+    for(var i in _utxos) {
+      var utxo = _utxos[i];
+      console.log('addInput', tx.addInput(utxo.txid, utxo.n));
+      console.log(utxo.address, utxo.value.toString());
+      in_value.add(UINT64(String(utxo.value)));
+      sign_utxos.push(utxo);
+      utxo_count++;
+      console.log(in_value.toString(), value.toString());
+
+      if(in_value.gt(value)) {
+        var sub = UINT64(in_value);
+        sub.subtract(value);
+        var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
+        if(sub.gt(fee1) || sub.eq(fee1)) {
+          result_out = 2;
+          break;
+        } else {
+          var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
+          if(sub.gt(fee2) || sub.eq(fee2)) {
+            result_out = 1;
+            var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
+            if(sub.lt(fee3)) {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    var priv_nodes = {};
+    var keys = {};
+    for(var i in sign_utxos) {
+      var s = sign_utxos[i];
+      if(!priv_nodes[s.xpub_idx]) {
+        priv_nodes[s.xpub_idx] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx], network);
+      }
+      var child = priv_nodes[s.xpub_idx].derive(s.change).derive(s.index);
+      keys[s.xpub_idx + '-' + s.change + '-' + s.index] = child;
+    }
+
+    try {
+      tx.addOutput(send_address, value);
+    } catch(ex) {
+      console.log(ex);
+      cb({err: ErrSend.INVALID_ADDRESS});
+      return;
+    }
+    if(result_out == 1) {
+      for(var i in sign_utxos) {
+        var s = sign_utxos[i];
+        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
+        tx.sign(Number(i), key);
+      }
+      var rawtx = tx.build().toHex();
+      var total_bytes = rawtx.length / 2;
+      var fee = UINT64(in_value);
+      fee.subtract(value);
+      console.log('tx1', fee.toString(), total_bytes, rawtx);
+      send_tx(rawtx, function(result) {
+        cb(result);
+      });
+      return;
+    }
+
+    var change_value = UINT64(in_value);
+    change_value.subtract(value);
+    var fee_low = 147 * utxo_count + 34 * 2 + 10;
+    var fee_high = 148 * utxo_count + 34 * 2 + 10;
+    var fee_mid = Math.round(147.5 * utxo_count + 34 * 2 + 10);
+    var fee_start = fee_mid - Math.ceil(1000 / utxo_count);
+    if(fee_start < fee_low) {
+      fee_start = fee_low;
+    }
+
+    var better_tx = null;
+    var better_size = 0;
+    var better_fee = fee;
+    for(var fee = fee_start; fee <= fee_high; fee++) {
+      var change_sub = UINT64(change_value);
+      change_sub.subtract(UINT64(String(fee)));
+      tx.addOutput(change_address, change_sub);
+      for(var i in sign_utxos) {
+        var s = sign_utxos[i];
+        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
+        tx.sign(Number(i), key);
+      }
+      var rawtx = tx.build().toHex();
+      var total_bytes = rawtx.length / 2;
+      console.log('tx2', fee, total_bytes, rawtx);
+
+      if(fee >= total_bytes) {
+        better_tx = rawtx;
+        better_size = total_bytes;
+        better_fee = fee;
+        break;
+      }
+      tx.removeOutput(1);
+      tx.removeSign();
+    }
+    if(better_tx != null) {
+      console.log('tx2 best', better_fee, better_size, better_tx);
+      send_tx(better_tx, function(result) {
+        cb(result);
+      });
+      return;
+    }
+
+    cb({err: ErrSend.FAILED});
+  }
+
+  var send_busy = false;
+  this.send = function(address, value_str, cb) {
+    if(send_busy) {
+      cb({err: ErrSend.BUSY});
+      return;
+    }
+    send_busy = true;
+    console.log('send', address, value_str);
+    var value = UINT64(String(value_str));
+    if(value.lt(UINT64(String(546)))) {
+      send_busy = false;
+      cb({err: ErrSend.DUST_VALUE});
+      return;
+    }
+    var cb_set_change_called = false;
+    cb_set_change = function(data) {
+      cb_set_change_called = true;
+      cb_set_change = function(data) {}
+      if(data.length > 0) {
+        var index = data[0];
+        var xpub = _xpubs[0];
+        if(xpub && !_nodes[xpub]) {
+          _nodes[xpub] = bip32.fromBase58(xpub, network);
+        }
+        var child = _nodes[xpub].derive(1).derive(index);
+        var change_address = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
+        send_internal(address, change_address, value, function(ret) {
+          send_busy = false;
+          cb(ret);
+        });
+      } else {
+        send_busy = false;
+        cb({err: ErrSend.SERVER_ERROR});
+      }
+    }
+    pastel.send({cmd: 'change'});
+    setTimeout(function() {
+      cb_set_change = function(data) {}
+      setTimeout(function() {
+        if(!cb_set_change_called) {
+          send_busy = false;
+          cb({err: ErrSend.SERVER_TIMEOUT});
+        }
+      }, 1000);
+    }, 30000);
+  }
 }

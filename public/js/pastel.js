@@ -678,6 +678,9 @@ pastel.ready = function() {
           showRecvAddressAfterEffect();
         });
       }
+    } else if(type == 'change') {
+      console.log('change: ' + JSON.stringify(json));
+      wallet.setChange(json.data);
     } else if(type == 'height') {
       TradeLogs.update_height(json.data);
     } else if(type == 'rollback') {
