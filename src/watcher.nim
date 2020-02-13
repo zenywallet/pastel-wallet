@@ -499,6 +499,13 @@ proc cmd_main() {.thread.} =
           if index >= unused_index.ord:
             break
       stream.send(client.wallet_id, $json)
+    of StreamCommand.RawTx:
+      var client = StreamDataRawTx(cdata.data)
+      echo "RawTx ", client.rawtx
+      let ret_rawtx = blockstor.send(client.rawtx)
+      echo "RawTx ret=", ret_rawtx
+      var json = %*{"type": "rawtx", "data": ret_rawtx}
+      stream.send(client.wallet_id, $json)
     of StreamCommand.BsStream:
       echo "StreamCommand.BsStream"
       try:

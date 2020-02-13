@@ -436,28 +436,29 @@ function Wallet() {
   }
   this.ERR_SEND = ErrSend;
 
+  var cb_rawtx = function(result_rawtx) {}
+
+  this.rawtxResult = function(result_rawtx) {
+    cb_rawtx(result_rawtx);
+  }
+
   function send_tx(rawtx, cb) {
     var tval = null;
     var result_cb = cb;
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if(xhr.readyState != 4 || xhr.status != 200) return;
-        clearTimeout(tval);
-        console.log(JSON.stringify(xhr.response, null, '  '));
-      if(xhr.response && !xhr.response.err && xhr.response.res) {
-        result_cb({err: ErrSend.SUCCESS, res: xhr.response.res});
+    cb_rawtx = function(result) {
+      clearTimeout(tval);
+      if(!result.err && result.res) {
+        result_cb({err: ErrSend.SUCCESS, res: result.res});
       } else {
-        if(xhr.response && xhr.response.res) {
-          result_cb({err: ErrSend.TX_FAILED, res: xhr.response.res});
+        if(result.res) {
+          result_cb({err: ErrSend.TX_FAILED, res: result.res});
         } else {
           result_cb({err: ErrSend.TX_FAILED, res: null});
         }
       }
-    };
-    xhr.open('POST', 'http://localhost:8000/api/send', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.responseType = 'json';
-    xhr.send(JSON.stringify({rawtx: rawtx}));
+      cb_rawtx = function(result_rawtx) {}
+    }
+    pastel.send({cmd: 'rawtx', data: rawtx});
     tval = setTimeout(function() {
       result_cb = function(ignore) {};
       cb({err: ErrSend.TX_TIMEOUT, res: null});

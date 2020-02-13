@@ -50,6 +50,7 @@ type StreamCommand* {.pure.} = enum
   Unused
   BsStream
   BsStreamInit
+  RawTx
 
 type
   StreamData* = ref object of RootObj
@@ -63,6 +64,9 @@ type
     wallet_id*: WalletId
   StreamDataBsStream* = ref object of StreamData
     data*: JsonNode
+  StreamDataRawTx* = ref object of StreamData
+    wallet_id*: WalletId
+    rawtx*: string
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
@@ -322,6 +326,12 @@ proc stream_main() {.thread.} =
 
               elif cmd == "unspents":
                 BallCommand.Unspents.send(BallDataUnspents(client: client))
+
+              elif cmd == "rawtx":
+                var rawtx = "";
+                if json_cmd.hasKey("data"):
+                  rawtx = json_cmd["data"].getStr
+                StreamCommand.RawTx.send(StreamDataRawTx(wallet_id: client.wallets[0], rawtx: rawtx))
 
               elif cmd == "txlogs":
                 var txlogs: TxLogs

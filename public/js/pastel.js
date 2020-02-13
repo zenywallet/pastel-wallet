@@ -691,6 +691,9 @@ pastel.ready = function() {
       if(json.data) {
         TradeLogs.get_txlogs_cb(json.data);
       }
+    } else if(type == 'rawtx') {
+      console.log('rawtx=', json.data);
+      pastel.wallet.rawtxResult(json.data);
     } else if(type == 'time') {
       if(json.data) {
         TradeLogs.server_time(json.data);
