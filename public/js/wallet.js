@@ -123,53 +123,50 @@ function Wallet() {
     return true;
   }
 
-  function checkUtxos(utxos) {
-    var caches = {};
-    for(var i in utxos) {
-      var utxo = utxos[i];
-      var xpub = _xpubs[utxo.xpub_idx];
-      if(!xpub) {
-        error('xpub not found');
-        return false;
-      }
-      if(!_nodes[xpub]) {
-        _nodes[xpub] = bip32.fromBase58(xpub, network);
-      }
-      var idx = utxo.xpub_idx + '-' + utxo.change + '-' + utxo.index;
-      var cache = caches[idx];
-      if(cache) {
-        if(utxo.address != cache.p2pkh) {
-          var p2wpkh = caches[idx]['p2wpkh'];
-          if(!p2wpkh) {
-            p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
-            caches[idx]['p2wpkh'] = p2wpkh;
+  var address_caches = {};
+  function checkUtxo(utxo) {
+    var xpub = _xpubs[utxo.xpub_idx];
+    if(!xpub) {
+      error('xpub not found');
+      return false;
+    }
+    if(!_nodes[xpub]) {
+      _nodes[xpub] = bip32.fromBase58(xpub, network);
+    }
+    var idx = utxo.xpub_idx + '-' + utxo.change + '-' + utxo.index;
+    var cache = address_caches[idx];
+    if(cache) {
+      if(utxo.address != cache.p2pkh) {
+        var p2wpkh = address_caches[idx]['p2wpkh'];
+        if(!p2wpkh) {
+          p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
+          address_caches[idx]['p2wpkh'] = p2wpkh;
+        }
+        if(utxo.address != p2wpkh) {
+          var p2sh = address_caches[idx]['p2sh'];
+          if(!p2sh) {
+            p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
+            address_caches[idx]['p2sh'] = p2sh;
           }
-          if(utxo.address != p2wpkh) {
-            var p2sh = caches[idx]['p2sh'];
-            if(!p2sh) {
-              p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
-              caches[idx]['p2sh'] = p2sh;
-            }
-            if(utxo.address != p2sh) {
-              error('invalid utxo address');
-              return false;
-            }
+          if(utxo.address != p2sh) {
+            error('invalid utxo address');
+            return false;
           }
         }
-      } else {
-        var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
-        var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
-        caches[idx] = {child: child, p2pkh: p2pkh};
-        if(utxo.address != p2pkh) {
-          var p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
-          caches[idx]['p2wpkh'] = p2wpkh;
-          if(utxo.address != p2wpkh) {
-            var p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
-            caches[idx]['p2sh'] = p2sh;
-            if(utxo.address != p2sh) {
-              error('invalid utxo address');
-              return false;
-            }
+      }
+    } else {
+      var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
+      var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
+      address_caches[idx] = {child: child, p2pkh: p2pkh};
+      if(utxo.address != p2pkh) {
+        var p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
+        address_caches[idx]['p2wpkh'] = p2wpkh;
+        if(utxo.address != p2wpkh) {
+          var p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
+          address_caches[idx]['p2sh'] = p2sh;
+          if(utxo.address != p2sh) {
+            error('invalid utxo address');
+            return false;
           }
         }
       }
@@ -177,12 +174,28 @@ function Wallet() {
     return true;
   }
 
-  this.setUtxos = function(utxos) {
-    if(checkUtxos(utxos)) {
-      _utxos = utxos;
-      return true;
+  function checkUtxos(utxos) {
+    var tmp_utxos = [];
+    for(var i in utxos) {
+      tmp_utxos.push(utxos[i]);
     }
-    return false;
+
+    function worker() {
+      var utxo = tmp_utxos.shift();
+      if(utxo) {
+        if(checkUtxo(utxo)) {
+          setTimeout(worker, 10);
+        } else {
+          Notify.show('Error', 'Server is invalid and unreliable. Stop using this wallet.', Notify.msgtype.error);
+        }
+      }
+    }
+    worker();
+  }
+
+  this.setUtxos = function(utxos) {
+    _utxos = utxos;
+    checkUtxos(utxos);
   }
 
   this.addUtxos = function(utxos, deduplicate) {
