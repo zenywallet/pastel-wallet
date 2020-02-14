@@ -124,6 +124,7 @@ function Wallet() {
   }
 
   function checkUtxos(utxos) {
+    var caches = {};
     for(var i in utxos) {
       var utxo = utxos[i];
       var xpub = _xpubs[utxo.xpub_idx];
@@ -134,17 +135,43 @@ function Wallet() {
       if(!_nodes[xpub]) {
         _nodes[xpub] = bip32.fromBase58(xpub, network);
       }
-      var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
-      if(utxo.address == coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address) {
-        continue;
-      } else {
-        var p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network});
-        if(utxo.address == p2wpkh.address
-          || utxo.address == coin.payments.p2sh({redeem: p2wpkh, network: network}).address) {
-          continue;
+      var idx = utxo.xpub_idx + '-' + utxo.change + '-' + utxo.index;
+      var cache = caches[idx];
+      if(cache) {
+        if(utxo.address != cache.p2pkh) {
+          var p2wpkh = caches[idx]['p2wpkh'];
+          if(!p2wpkh) {
+            p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
+            caches[idx]['p2wpkh'] = p2wpkh;
+          }
+          if(utxo.address != p2wpkh) {
+            var p2sh = caches[idx]['p2sh'];
+            if(!p2sh) {
+              p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
+              caches[idx]['p2sh'] = p2sh;
+            }
+            if(utxo.address != p2sh) {
+              error('invalid utxo address');
+              return false;
+            }
+          }
         }
-        error('invalid utxo address');
-        return false;
+      } else {
+        var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
+        var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
+        caches[idx] = {child: child, p2pkh: p2pkh};
+        if(utxo.address != p2pkh) {
+          var p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
+          caches[idx]['p2wpkh'] = p2wpkh;
+          if(utxo.address != p2wpkh) {
+            var p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
+            caches[idx]['p2sh'] = p2sh;
+            if(utxo.address != p2sh) {
+              error('invalid utxo address');
+              return false;
+            }
+          }
+        }
       }
     }
     return true;
