@@ -632,15 +632,16 @@ pastel.ready = function() {
                 recv_change.add(UINT64(String(txout.value)));
               }
             }
-            recv.subtract(recv_change)
           }
+        }
+        for(var addr in data) {
           var spents = data[addr].spents;
           if(spents) {
             for(var i in spents) {
               var spent = spents[i];
               send.add(UINT64(String(spent.value)));
             }
-            send.subtract(recv_change)
+            send.subtract(recv_change);
           }
         }
       }
