@@ -617,11 +617,12 @@ pastel.ready = function() {
       var send = UINT64(0);
       var recv = UINT64(0);
       var recv_change = UINT64(0);
+      var fee = UINT64(0);
       if(data) {
-        for(var addr in data) {
-          var txouts = data[addr].txouts;
+        for(var addr in data.addrs) {
+          var txouts = data.addrs[addr].txouts;
           if(txouts) {
-            if(data[addr].change == 0) {
+            if(data.addrs[addr].change == 0) {
               for(var i in txouts) {
                 var txout = txouts[i];
                 recv.add(UINT64(String(txout.value)));
@@ -634,8 +635,10 @@ pastel.ready = function() {
             }
           }
         }
-        for(var addr in data) {
-          var spents = data[addr].spents;
+        var chk_addrs = {};
+        for(var addr in data.addrs) {
+          chk_addrs[addr] = 1;
+          var spents = data.addrs[addr].spents;
           if(spents) {
             for(var i in spents) {
               var spent = spents[i];
@@ -644,9 +647,39 @@ pastel.ready = function() {
             send.subtract(recv_change);
           }
         }
+        for(var txid in data.txs) {
+          var tx = data.txs[txid];
+          var find = false;
+          var find_else = 0;
+          var s0 = UINT64(0);
+          var s1 = UINT64(0);
+          for(var txa in tx) {
+            var v = tx[txa]
+            for(var i in v) {
+              if(i == 0) {
+                if(chk_addrs[txa]) {
+                  find = true;
+                } else {
+                  find_else++;
+                }
+                s0.add(UINT64(String(v[i])));
+              } else if(i == 1) {
+                s1.add(UINT64(String(v[i])));
+              }
+            }
+          }
+          if(find && find_else == 0) {
+            fee.add(s0.subtract(s1));
+          }
+        }
       }
       if(send.greaterThan(UINT64(0))) {
-        $('#wallet-balance .send span').text(conv_coin(send));
+        if(fee.eq(0)) {
+          $('#wallet-balance .send span').text(conv_coin(send));
+        } else {
+          send.subtract(fee);
+          $('#wallet-balance .send span').text(conv_coin(send) + ' / ' + conv_coin(fee));
+        }
         $('#wallet-balance .send').fadeIn(400);
       } else {
         $('#wallet-balance .send').fadeOut(400);
