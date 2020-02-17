@@ -557,6 +557,12 @@ type
     wid: WalletId
     address: string
 
+  WidTxPairs = object
+    wid: WalletId
+    txid: string
+
+  TWidInfos = tuple[addrs: HashSet[WidAddressPairs], txs: HashSet[WidTxPairs]]
+
 proc UserUtxoCmp(x, y: UserUtxo): int =
   result = cmp(x.sequence, y.sequence)
   if result == 0:
@@ -570,6 +576,10 @@ proc hash*(x: UserUtxo): Hash =
 
 proc hash*(x: WidAddressPairs): Hash =
   var s: string = $x.wid & "-" & x.address
+  result = s.hash
+
+proc hash*(x: WidTxPairs): Hash =
+  var s: string = $x.wid & "-" & x.txid
   result = s.hash
 
 proc clientUnspents(wallets: seq[uint64]): seq[UserUtxo] =
@@ -608,25 +618,31 @@ proc ball_main() {.thread.} =
   var client_unspents = initTable[WalletId, HashSet[UserUtxo]]()
   var active_wids = initHashSet[WalletId]()
   var full_wid_addrs = initHashSet[WidAddressPairs]()
+  var full_wid_txs = initHashSet[WidTxPairs]()
   var height: uint32
   var prev_stream_height: uint32 = 0
 
-  proc sendUnconfs(wid_addrs: HashSet[WidAddressPairs], wids: seq[WalletIds], send_empty: bool = false): WalletIds {.discardable.} =
+  proc sendUnconfs(wid_addrs: HashSet[WidAddressPairs], wid_txs: HashSet[WidTxPairs], mempool: JsonNode, wids: seq[WalletIds], send_empty: bool = false): WalletIds {.discardable.} =
     var sent_wids: WalletIds
     for wallets in wids:
       var sent = false
       var addrs_array: seq[string] = @[]
+      var txs_array: seq[string] = @[]
       for wid_addr in wid_addrs:
         if wallets.contains(wid_addr.wid):
           addrs_array.add(wid_addr.address)
+      for wid_tx in wid_txs:
+        if wallets.contains(wid_tx.wid):
+          txs_array.add(wid_tx.txid)
       echo "addrs_array.len=", addrs_array.len, " ", addrs_array
       if addrs_array.len > 0:
         echo blockstor.getAddress(addrs_array)
         var j_unconfs = blockstor.getUnconf(addrs_array)
         echo "j_unconfs=", j_unconfs
         if j_unconfs.kind != JNull:
-          var json = %*{"type": "unconfs"}
-          json.add("data", newJObject())
+          var json = %*{"type": "unconfs", "data": {"addrs": {}, "txs": {}}}
+          let j_addrs = json["data"]["addrs"]
+          let j_txs = json["data"]["txs"]
           for i, a in addrs_array:
             var j = j_unconfs["res"][i]
             if j.hasKey("spents") or j.hasKey("txouts"):
@@ -636,24 +652,29 @@ proc ball_main() {.thread.} =
               if j.hasKey("txouts"):
                 for v in j["txouts"]:
                   v["value"] = j_uint64(v["value"].getUint64)
-              json["data"][a] = j
+              j_addrs[a] = j
               for da in db.getAddresses(a):
                 var idx = wallets.find(da.wid)
                 if idx >= 0:
-                  json["data"][a].add("change", newJInt(da.change.BiggestInt))
-                  json["data"][a].add("index", newJInt(da.index.BiggestInt))
-                  json["data"][a].add("xpub_idx", newJInt(idx.BiggestInt))
-                  if json["data"][a].hasKey("spents"):
-                    for spent in json["data"][a]["spents"]:
+                  j_addrs[a].add("change", newJInt(da.change.BiggestInt))
+                  j_addrs[a].add("index", newJInt(da.index.BiggestInt))
+                  j_addrs[a].add("xpub_idx", newJInt(idx.BiggestInt))
+                  if j_addrs[a].hasKey("spents"):
+                    for spent in j_addrs[a]["spents"]:
                       let dt = getTxtime(spent["txid"].getStr)
                       if dt.err == DbStatus.Success:
                         spent.add("trans_time", j_uint64(dt.res))
-                  if json["data"][a].hasKey("txouts"):
-                    for txout in json["data"][a]["txouts"]:
+                  if j_addrs[a].hasKey("txouts"):
+                    for txout in j_addrs[a]["txouts"]:
                       let dt = getTxtime(txout["txid"].getStr)
                       if dt.err == DbStatus.Success:
                         txout.add("trans_time", j_uint64(dt.res))
                   break
+          for t in txs_array:
+            for m in mempool:
+              if m["txid"].getStr == t:
+                j_txs[t] = m["addrs"]
+
           let client_wid: WalletId = wallets[0]
           stream.send(client_wid, $json)
           sent_wids.add(client_wid)
@@ -671,29 +692,33 @@ proc ball_main() {.thread.} =
     if d.err == DbStatus.NotFound:
       db.setTxtime(txid, cast[uint64](getTime().toUnix))
 
-  proc fullMempoolAddrs(): HashSet[WidAddressPairs] =
+  proc fullMempoolAddrsAndTxs(mempool: JsonNode): TWidInfos =
     var wid_addrs = initHashSet[WidAddressPairs]()
-    let j_mempool = blockstor.getMempool()
-    if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
-      for m in j_mempool["res"]:
-        setTransimissionTime(m["txid"].getStr)
-        for a in m["addrs"].pairs:
-          for da in db.getAddresses(a.key):
-            if active_wids.contains(da.wid):
-              wid_addrs.incl([WidAddressPairs(wid: da.wid, address: a.key)].toHashSet())
-    wid_addrs
-
-  proc mempoolAddrs(mempool: JsonNode): HashSet[WidAddressPairs] =
-    var wid_addrs = initHashSet[WidAddressPairs]()
+    var wid_txs = initHashSet[WidTxPairs]()
     for m in mempool:
-      setTransimissionTime(m["txid"].getStr)
+      let txid = m["txid"].getStr
+      setTransimissionTime(txid)
       for a in m["addrs"].pairs:
         for da in db.getAddresses(a.key):
           if active_wids.contains(da.wid):
             wid_addrs.incl([WidAddressPairs(wid: da.wid, address: a.key)].toHashSet())
+            wid_txs.incl([WidTxPairs(wid: da.wid, txid: txid)].toHashSet())
+    (addrs: wid_addrs, txs: wid_txs)
+
+  proc mempoolAddrsAndTxs(mempool: JsonNode): TWidInfos =
+    var wid_addrs = initHashSet[WidAddressPairs]()
+    var wid_txs = initHashSet[WidTxPairs]()
+    for m in mempool:
+      let txid = m["txid"].getStr
+      setTransimissionTime(txid)
+      for a in m["addrs"].pairs:
+        for da in db.getAddresses(a.key):
+          if active_wids.contains(da.wid):
+            wid_addrs.incl([WidAddressPairs(wid: da.wid, address: a.key)].toHashSet())
+            wid_txs.incl([WidTxPairs(wid: da.wid, txid: txid)].toHashSet())
     for w in wid_addrs:
       echo w.wid, " ", w.address
-    wid_addrs
+    (addrs: wid_addrs, txs: wid_txs)
 
   let j_height = blockstor.getHeight()
   if j_height.kind != JNull:
@@ -727,12 +752,17 @@ proc ball_main() {.thread.} =
               for ids in wallet_ids:
                 BallCommand.Rollback.send(BallDataRollback(wallet_id: ids[0], sequence: min_sequence))
           prev_stream_height = height
-          full_wid_addrs = fullMempoolAddrs()
-          sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq, true)
+          let j_mempool = blockstor.getMempool()
+          if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+            var twidinfos: TWidInfos = fullMempoolAddrsAndTxs(j_mempool["res"])
+            full_wid_addrs = twidinfos.addrs
+            full_wid_txs = twidinfos.txs
+            sent_wids = sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], wallet_ids.toSeq, true)
         elif j_bs.hasKey("mempool"):
-          var wid_addrs = mempoolAddrs(j_bs["mempool"])
-          full_wid_addrs = full_wid_addrs + wid_addrs
-          sent_wids = sendUnconfs(full_wid_addrs, wallet_ids.toSeq)
+          var twidinfos: TWidInfos = mempoolAddrsAndTxs(j_bs["mempool"])
+          full_wid_addrs = full_wid_addrs + twidinfos.addrs
+          full_wid_txs = full_wid_txs + twidinfos.txs
+          sent_wids = sendUnconfs(full_wid_addrs, full_wid_txs, j_bs["mempool"], wallet_ids.toSeq)
         updateAddresses(active_wids)
         for w in sent_wids:
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
@@ -748,8 +778,12 @@ proc ball_main() {.thread.} =
     of BallCommand.MemPool:
       var data = BallDataMemPool(ch_data.data)
       echo data.client.wallets
-      full_wid_addrs = fullMempoolAddrs()
-      sendUnconfs(full_wid_addrs, @[data.client.wallets], true)
+      let j_mempool = blockstor.getMempool()
+      if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+        var widinfos: TWidInfos = fullMempoolAddrsAndTxs(j_mempool["res"])
+        full_wid_addrs = widinfos.addrs
+        full_wid_txs = widinfos.txs
+        sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], @[data.client.wallets], true)
 
     of BallCommand.Unspents:
       var data = BallDataUnspents(ch_data.data)
