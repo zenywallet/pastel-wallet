@@ -612,8 +612,8 @@ UtxoBalls.simple = function() {
     console.log('unconfs=', JSON.stringify(data));
     var unconf_list = [];
     Ball.create_balls_task.push({type: 16});
-    for(var addr in data) {
-      var val = data[addr];
+    for(var addr in data.addrs) {
+      var val = data.addrs[addr];
       if(val.spents) {
         for(i in val.spents) {
           var spent = val.spents[i];
