@@ -653,8 +653,8 @@ pastel.ready = function() {
           var find_else = 0;
           var s0 = UINT64(0);
           var s1 = UINT64(0);
-          for(var txa in tx) {
-            var v = tx[txa]
+          for(var txa in tx.data) {
+            var v = tx.data[txa]
             for(var i in v) {
               if(i == 0) {
                 if(chk_addrs[txa]) {
