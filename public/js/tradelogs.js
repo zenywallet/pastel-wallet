@@ -218,23 +218,71 @@ var TradeLogs = (function() {
 
   function show_unconfs() {
     var unconf_list = [];
-    for(var addr in _unconfs) {
-      var val = _unconfs[addr];
+    var spent_addrs = {};
+    var change_addrs = {};
+    for(var addr in _unconfs.addrs) {
+      var val = _unconfs.addrs[addr];
       if(val.spents) {
         for(i in val.spents) {
           var spent = val.spents[i];
-          var item = {txtype: 0, address: addr, txid: spent.txid, value: spent.value,
-            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: spent.trans_time};
-          unconf_list.push(item);
+          spent_addrs[addr] = 1;
+          break;
         }
       }
       if(val.txouts) {
-        for(i in val.txouts) {
-          var txout = val.txouts[i];
-          var item = {txtype: 1, address: addr, txid: txout.txid, value: txout.value,
-            change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
-          unconf_list.push(item);
+        if(val.change != 1) {
+          for(i in val.txouts) {
+            var txout = val.txouts[i];
+            var item = {txtype: 1, address: addr, txid: txout.txid, value: txout.value,
+              change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
+            unconf_list.push(item);
+          }
+        } else {
+          change_addrs[addr] = 1;
         }
+      }
+    }
+    for(var txid in _unconfs.txs) {
+      var tx = _unconfs.txs[txid];
+      var find = false;
+      var find_else = 0;
+      var s0 = UINT64(0);
+      var s1 = UINT64(0);
+      var fs0 = UINT64(0);
+      var fs1 = UINT64(0);
+      var out_addr = null;
+      for(var txa in tx.data) {
+        var v = tx.data[txa]
+        for(var i in v) {
+          if(i == 0) {
+            if(spent_addrs[txa]) {
+              find = true;
+              s0.add(UINT64(String(v[i])));
+            } else {
+              find_else++;
+            }
+            fs0.add(UINT64(String(v[i])));
+          } else if(i == 1) {
+            if(change_addrs[txa]) {
+              s1.add(UINT64(String(v[i])));
+            } else if(out_addr == null) {
+              out_addr = txa;
+            }
+            fs1.add(UINT64(String(v[i])));
+          }
+        }
+      }
+      if(find && out_addr) {
+        var val = s0.subtract(s1);
+        if(find_else == 0) {
+          var fee = fs0.subtract(fs1);
+          val.subtract(fee);
+        }
+        var item = {txtype: 0, address: out_addr, txid: txid, value: val};
+        if(tx.trans_time) {
+          item['trans_time'] = tx.trans_time;
+        }
+        unconf_list.push(item);
       }
     }
 
