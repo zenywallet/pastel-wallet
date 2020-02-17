@@ -673,7 +673,10 @@ proc ball_main() {.thread.} =
           for t in txs_array:
             for m in mempool:
               if m["txid"].getStr == t:
-                j_txs[t] = m["addrs"]
+                j_txs[t] = %*{"data": m["addrs"]}
+                let dt = getTxtime(t)
+                if dt.err == DbStatus.Success:
+                  j_txs[t].add("trans_time", j_uint64(dt.res))
 
           let client_wid: WalletId = wallets[0]
           stream.send(client_wid, $json)
