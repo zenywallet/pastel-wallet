@@ -382,7 +382,6 @@ proc stream_main() {.thread.} =
       if opcode == Opcode.Text:
         try:
           var json = parseJson(data)
-          echo json.pretty
           block_reader(json)
           BallCommand.BsStream.send(BallDataBsStream(data: json))
 
@@ -510,7 +509,6 @@ proc cmd_main() {.thread.} =
       echo "StreamCommand.BsStream"
       try:
         var json = StreamDataBsStream(cdata.data).data
-        echo json.pretty
         if json.hasKey("height"):
           echo "height"
           var mempool_tmp: JsonNode = newJArray()
@@ -634,11 +632,8 @@ proc ball_main() {.thread.} =
       for wid_tx in wid_txs:
         if wallets.contains(wid_tx.wid):
           txs_array.add(wid_tx.txid)
-      echo "addrs_array.len=", addrs_array.len, " ", addrs_array
       if addrs_array.len > 0:
-        echo blockstor.getAddress(addrs_array)
         var j_unconfs = blockstor.getUnconf(addrs_array)
-        echo "j_unconfs=", j_unconfs
         if j_unconfs.kind != JNull:
           var json = %*{"type": "unconfs", "data": {"addrs": {}, "txs": {}}}
           let j_addrs = json["data"]["addrs"]
@@ -682,7 +677,6 @@ proc ball_main() {.thread.} =
           stream.send(client_wid, $json)
           sent_wids.add(client_wid)
           sent = true
-          echo "BallCommand.BsStream=", json
       if send_empty and not sent:
         var json = %*{"type": "unconfs"}
         json.add("data", newJObject())
@@ -719,8 +713,6 @@ proc ball_main() {.thread.} =
           if active_wids.contains(da.wid):
             wid_addrs.incl([WidAddressPairs(wid: da.wid, address: a.key)].toHashSet())
             wid_txs.incl([WidTxPairs(wid: da.wid, txid: txid)].toHashSet())
-    for w in wid_addrs:
-      echo w.wid, " ", w.address
     (addrs: wid_addrs, txs: wid_txs)
 
   let j_height = blockstor.getHeight()
@@ -734,7 +726,6 @@ proc ball_main() {.thread.} =
     of BallCommand.BsStream:
       try:
         var j_bs = BallDataBsStream(ch_data.data).data
-        echo j_bs.pretty
         var sent_wids: WalletIds
         var height_flag = false
         if j_bs.hasKey("height"):
@@ -786,7 +777,6 @@ proc ball_main() {.thread.} =
 
     of BallCommand.MemPool:
       var data = BallDataMemPool(ch_data.data)
-      echo data.client.wallets
       let j_mempool = blockstor.getMempool()
       if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
         var widinfos: TWidInfos = fullMempoolAddrsAndTxs(j_mempool["res"])
@@ -804,7 +794,6 @@ proc ball_main() {.thread.} =
       var json = %*{"type": "unspents", "data": unspents}
       for j in json["data"]:
         j["value"] = j_uint64(j["value"].getUint64)
-      echo json
       stream.send(client_wid, $json)
 
     of BallCommand.Unused:
@@ -829,7 +818,6 @@ proc ball_main() {.thread.} =
         unused_index = used_0.res + 1
       if unconf_idxs.len > 0:
         unconf_idxs.sort()
-        echo "unconf_idxs=", unconf_idxs
         var last_unconf_idx = unconf_idxs[unconf_idxs.high]
         if last_unconf_idx >= unused_index:
           unused_index = last_unconf_idx + 1
@@ -853,7 +841,6 @@ proc ball_main() {.thread.} =
           if index >= unused_index:
             break
           inc(index)
-      echo json
       stream.send(client_wid, $json)
 
     of BallCommand.Change:
@@ -878,7 +865,6 @@ proc ball_main() {.thread.} =
         unused_index = used_1.res + 1
       if unconf_idxs.len > 0:
         unconf_idxs.sort()
-        echo "unconf_idxs=", unconf_idxs
         var last_unconf_idx = unconf_idxs[unconf_idxs.high]
         if last_unconf_idx >= unused_index:
           unused_index = last_unconf_idx + 1
@@ -902,7 +888,6 @@ proc ball_main() {.thread.} =
           if index >= unused_index:
             break
           inc(index)
-      echo json
       stream.send(client_wid, $json)
 
     of BallCommand.Height:
