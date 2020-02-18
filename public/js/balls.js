@@ -220,7 +220,7 @@ UtxoBalls.simple = function() {
           }
         }
       } else if(task.type == 12) {
-        for(var i in Ball.bodies) {
+        for(var i = Ball.bodies.length - 1; i >= 0; i--) {
           var ball = Ball.bodies[i];
           if(ball.ballType == 0 && ball.ballMark == 1) {
             Matter.Composite.remove(world, ball);
@@ -255,7 +255,7 @@ UtxoBalls.simple = function() {
         var ball = Ball.bodies_idx[idx];
         if(ball) {
           remove_bodies_idx(ball);
-          for(var i in Ball.bodies) {
+          for(var i = Ball.bodies.length - 1; i >= 0; i--) {
             if(Ball.bodies[i] == ball) {
               Ball.bodies.splice(i, 1);
               break;
@@ -271,7 +271,7 @@ UtxoBalls.simple = function() {
         ball = Ball.bodies_idx[idx];
         if(ball) {
           remove_bodies_idx(ball);
-          for(var i in Ball.bodies) {
+          for(var i = Ball.bodies.length - 1; i >= 0; i--) {
             if(Ball.bodies[i] == ball) {
               Ball.bodies.splice(i, 1);
               break;
@@ -290,7 +290,7 @@ UtxoBalls.simple = function() {
           }
         }
       } else if(task.type == 17) {
-        for(var i in Ball.bodies) {
+        for(var i = Ball.bodies.length - 1; i >= 0; i--) {
           var ball = Ball.bodies[i];
           if(ball.ballType == 1 && ball.ballMark == 1) {
             if(ball.unconf.txtype == 1) {
@@ -550,7 +550,7 @@ UtxoBalls.simple = function() {
     } else {
       if(Ball.too_much_balls_enable) {
         if(Ball.too_much_balls) {
-          for(var i in Ball.bodies) {
+          for(var i = Ball.bodies.length - 1; i >= 0; i--) {
             if(Ball.too_much_balls == Ball.bodies[i]) {
               Ball.bodies.splice(i, 1);
               break;
