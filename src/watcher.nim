@@ -766,6 +766,10 @@ proc ball_main() {.thread.} =
           full_wid_addrs = full_wid_addrs + twidinfos.addrs
           full_wid_txs = full_wid_txs + twidinfos.txs
           sent_wids = sendUnconfs(full_wid_addrs, full_wid_txs, j_bs["mempool"], wallet_ids.toSeq)
+          for sent_wid in sent_wids:
+            for ids in wallet_ids:
+              if ids[0] == sent_wid:
+                BallCommand.Unspents.send(BallDataUnspents(wallets: ids))
         updateAddresses(active_wids)
         for w in sent_wids:
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
@@ -790,11 +794,10 @@ proc ball_main() {.thread.} =
 
     of BallCommand.Unspents:
       var data = BallDataUnspents(ch_data.data)
-      echo data.client.wallets
       var unspents: seq[UserUtxo] = @[]
-      let client_wid: WalletId = data.client.wallets[0]
-      if data.client.wallets.len > 0:
-        unspents = clientUnspents(data.client.wallets)
+      let client_wid: WalletId = data.wallets[0]
+      if data.wallets.len > 0:
+        unspents = clientUnspents(data.wallets)
         client_unspents[client_wid] = unspents.toHashSet()
       var json = %*{"type": "unspents", "data": unspents}
       for j in json["data"]:
@@ -925,7 +928,7 @@ proc ball_main() {.thread.} =
       echo data.client.wallets
       wallet_ids.incl(data.client.wallets)
       active_wids.incl(data.client.wallets.toHashSet())
-      BallCommand.Unspents.send(BallDataUnspents(client: data.client))
+      BallCommand.Unspents.send(BallDataUnspents(wallets: data.client.wallets))
       BallCommand.MemPool.send(BallDataMemPool(client: data.client))
       BallCommand.Height.send(BallDataHeight(wallet_id: data.client.wallets[0]))
       BallCommand.Unused.send(BallDataUnused(wallet_id: data.client.wallets[0]))

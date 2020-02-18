@@ -102,7 +102,7 @@ type
   BallDataMemPool* = ref object of BallData
     client*: ClientData
   BallDataUnspents* = ref object of BallData
-    client*: ClientData
+    wallets*: WalletIds
   BallDataUnused* = ref object of BallData
     wallet_id*: WalletId
   BallDataChange* = ref object of BallData
@@ -325,7 +325,7 @@ proc stream_main() {.thread.} =
                 BallCommand.Change.send(BallDataChange(wallet_id: client.wallets[0]))
 
               elif cmd == "unspents":
-                BallCommand.Unspents.send(BallDataUnspents(client: client))
+                BallCommand.Unspents.send(BallDataUnspents(wallets: client.wallets))
 
               elif cmd == "rawtx":
                 var rawtx = "";
