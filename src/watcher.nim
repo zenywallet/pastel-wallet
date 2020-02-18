@@ -765,11 +765,13 @@ proc ball_main() {.thread.} =
           var twidinfos: TWidInfos = mempoolAddrsAndTxs(j_bs["mempool"])
           full_wid_addrs = full_wid_addrs + twidinfos.addrs
           full_wid_txs = full_wid_txs + twidinfos.txs
-          sent_wids = sendUnconfs(full_wid_addrs, full_wid_txs, j_bs["mempool"], wallet_ids.toSeq)
-          for sent_wid in sent_wids:
-            for ids in wallet_ids:
-              if ids[0] == sent_wid:
-                BallCommand.Unspents.send(BallDataUnspents(wallets: ids))
+          let j_mempool = blockstor.getMempool()
+          if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
+            sent_wids = sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], wallet_ids.toSeq)
+            for sent_wid in sent_wids:
+              for ids in wallet_ids:
+                if ids[0] == sent_wid:
+                  BallCommand.Unspents.send(BallDataUnspents(wallets: ids))
         updateAddresses(active_wids)
         for w in sent_wids:
           BallCommand.Unused.send(BallDataUnused(wallet_id: w))
