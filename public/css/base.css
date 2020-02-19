@@ -249,7 +249,7 @@ html::-webkit-scrollbar {
   background: linear-gradient(-90deg, rgba(136,136,136,.6), rgba(221,221,221,.6));
   width: calc(100% - 28px);
 }
-.intro-body .passphrase-seg .center {
+.intro-body .passphrase-seg .center, #passphrase-modal-seg .center {
   text-align: center;
 }
 .intro-body .passphrase-seg .ui.inverted.segment p {
