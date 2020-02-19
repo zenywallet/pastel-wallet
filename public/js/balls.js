@@ -671,7 +671,16 @@ UtxoBalls.simple = function() {
   var dragging_body = null;
   Events.on(mouseConstraint, 'startdrag', function(e) {
     if(e.body.address) {
-      UtxoBalls.click_cb(e.body.address);
+      var bc = e.body.utxo || e.body.unconf;
+      if(bc.change == 0) {
+        UtxoBalls.click_cb(e.body.address);
+      } else {
+        e.body.fluffy_free = true;
+        setFluffyCollisionAll(e.body);
+        fluffy_frees.push(e.body);
+        fluffy_free_worker_start();
+        Body.setAngularVelocity(e.body, 1.0);
+      }
     }
     if(e.body.fluffy) {
       clearTimeout(e.body.fluffyback_tval);
@@ -755,7 +764,14 @@ UtxoBalls.simple = function() {
       var ball = foundPhysics[0];
       if(cur_id != ball.id && ball.address && ball.value) {
         cur_id = ball.id;
-        $('#ball-info').html(ball.address + '<br>' + ball.value).css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3}).stop(true, true).fadeIn(400);
+        var bc = ball.utxo || ball.unconf;
+        var text = '';
+        if(bc && bc.change == 1) {
+          text = 'Change-' + Number(bc.index) + '<br>' + ball.value;
+        } else {
+          text = ball.address + '<br>' + ball.value;
+        }
+        $('#ball-info').html(text).css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3}).stop(true, true).fadeIn(400);
       } else if(cur_id == ball.id) {
         $('#ball-info').css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3});
       }
