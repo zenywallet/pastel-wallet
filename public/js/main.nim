@@ -916,8 +916,10 @@ asm """
             Notify.show('Error', 'Amount is invalid.', Notify.msgtype.error);
           }
         }
+        $(this).blur();
+      } else {
+        $('#btn-send-lock').focus();
       }
-      $(this).blur();
     });
   }
   var sendrecv_switch = 0;
