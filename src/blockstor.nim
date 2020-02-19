@@ -237,6 +237,12 @@ proc send*(rawtx: string): JsonNode {.inline.} =
 proc getTx*(tx: string): JsonNode {.inline.} =
   get("tx/" & tx)
 
+proc getTxout*(tx: string): JsonNode {.inline.} =
+  get("txout/" & tx)
+
+proc getTxout*(txs: openarray[string]): JsonNode {.inline.} =
+  post("txouts", %*{"txids": txs})
+
 proc search*(keyword: string): JsonNode {.inline.} =
   get("search/" & keyword)
 
@@ -294,6 +300,12 @@ proc send*(rawtx: string, cb: proc(data: JsonNode)) {.inline.} =
 
 proc getTx*(tx: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("tx/" & tx, cb)
+
+proc getTxout*(tx: string, cb: proc(data: JsonNode)) {.inline.} =
+  asyncCheck getAsync("txout/" & tx, cb)
+
+proc getTxout*(txs: openarray[string], cb: proc(data: JsonNode)) {.inline.} =
+  asyncCheck postAsync("txouts", %*{"txids": txs}, cb)
 
 proc search*(keyword: string, cb: proc(data: JsonNode)) {.inline.} =
   asyncCheck getAsync("search/" & keyword, cb)
