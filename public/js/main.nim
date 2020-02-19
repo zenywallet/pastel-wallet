@@ -355,7 +355,6 @@ proc showKeyQr(): proc() =
 proc confirmKeyCard(ev: Event; n: VNode) =
   var ret_lock: bool = false
   asm """
-    console.log('confirmKeyCard');
     var wallet = pastel.wallet;
     `ret_lock` = wallet.lockShieldedKeys(`keyCardVal`, 1, true);
   """

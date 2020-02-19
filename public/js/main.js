@@ -4959,8 +4959,7 @@ function protect_selector_258381(protect_type_258383) {
 
 function confirm_key_card_259935(ev_259937, n_259938) {
     var ret_lock_259939 = false;
-        console.log('confirmKeyCard');
-    var wallet = pastel.wallet;
+        var wallet = pastel.wallet;
     ret_lock_259939 = wallet.lockShieldedKeys(key_card_val_259835[0], 1, true);
   
     if (ret_lock_259939) {
@@ -5017,7 +5016,8 @@ function change_passphrase_261745(ev_261747, n_261748) {
 
 function confirm_passphrase_261762(ev_261764, n_261765) {
     var ret_lock_261766 = false;
-        var wallet = pastel.wallet;
+        $('input[name="input-passphrase"]').blur();
+    var wallet = pastel.wallet;
     ret_lock_261766 = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
   
     if (ret_lock_261766) {
@@ -5057,6 +5057,7 @@ function passphrase_editor_261780() {
     valueHEX3D_210884(tmp_261789, pass_phrase_258467[0]);
     set_attr_211568(tmp_261789, "placeholder", "Passphrase");
     add_event_handler_242793(tmp_261789, 3, change_passphrase_261745, kxi_232324[0]);
+    add_event_handler_242793(tmp_261789, 29, confirm_passphrase_261762, kxi_232324[0]);
     add_211771(tmp_261788, tmp_261789);
     add_211771(tmp_261787, tmp_261788);
     add_211771(tmp_261785, tmp_261787);
@@ -5073,9 +5074,9 @@ function passphrase_editor_261780() {
 
 }
 
-function btn_send_261952() {
+function btn_send_261953() {
 
-    function HEX3Aanonymous_261957() {
+    function HEX3Aanonymous_261958() {
               if(!pastel.wallet || !pastel.utxoballs) {
         return;
       }
@@ -5085,17 +5086,17 @@ function btn_send_261952() {
       
     }
 
-  var result_261956 = null;
+  var result_261957 = null;
 
-    result_261956 = HEX3Aanonymous_261957;
+    result_261957 = HEX3Aanonymous_261958;
 
-  return result_261956;
+  return result_261957;
 
 }
 
-function btn_receive_261985() {
+function btn_receive_261986() {
 
-    function HEX3Aanonymous_261990() {
+    function HEX3Aanonymous_261991() {
               if(!pastel.wallet || !pastel.utxoballs) {
         return;
       }
@@ -5105,17 +5106,17 @@ function btn_receive_261985() {
       
     }
 
-  var result_261989 = null;
+  var result_261990 = null;
 
-    result_261989 = HEX3Aanonymous_261990;
+    result_261990 = HEX3Aanonymous_261991;
 
-  return result_261989;
+  return result_261990;
 
 }
 
-function btn_recv_close_262051() {
+function btn_recv_close_262052() {
 
-    function HEX3Aanonymous_262056() {
+    function HEX3Aanonymous_262057() {
               clearTimeout(sendrecv_switch_tval);
       sendrecv_switch = 0;
       reset_switch(2);
@@ -5124,221 +5125,221 @@ function btn_recv_close_262051() {
       
     }
 
-  var result_262055 = null;
+  var result_262056 = null;
 
-    result_262055 = HEX3Aanonymous_262056;
+    result_262056 = HEX3Aanonymous_262057;
 
-  return result_262055;
+  return result_262056;
 
 }
 
-function recv_address_selector_262084() {
-  var result_262086 = null;
+function recv_address_selector_262085() {
+  var result_262087 = null;
 
-    var tmp_262087 = tree_213045(43, []);
-    tmp_262087.id = "receive-address";
-    tmp_262087.class = "ui center aligned segment hidden";
     var tmp_262088 = tree_213045(43, []);
-    tmp_262088.class = "ui top attached label recvaddress";
-    add_211771(tmp_262088, text_213148(makeNimstrLit("Receive Address ")));
-    var tmp_262089 = tree_213045(70, []);
-    var tmp_262090 = tree_213045(61, []);
-    tmp_262090.class = "close icon btn-close";
-    add_event_handler_242829(tmp_262090, 0, btn_recv_close_262051(), kxi_232324[0]);
+    tmp_262088.id = "receive-address";
+    tmp_262088.class = "ui center aligned segment hidden";
+    var tmp_262089 = tree_213045(43, []);
+    tmp_262089.class = "ui top attached label recvaddress";
+    add_211771(tmp_262089, text_213148(makeNimstrLit("Receive Address ")));
+    var tmp_262090 = tree_213045(70, []);
+    var tmp_262091 = tree_213045(61, []);
+    tmp_262091.class = "close icon btn-close";
+    add_event_handler_242829(tmp_262091, 0, btn_recv_close_262052(), kxi_232324[0]);
+    add_211771(tmp_262090, tmp_262091);
     add_211771(tmp_262089, tmp_262090);
     add_211771(tmp_262088, tmp_262089);
-    add_211771(tmp_262087, tmp_262088);
-    var tmp_262091 = tree_213045(43, []);
-    tmp_262091.class = "ui mini basic icon buttons";
-    var tmp_262092 = tree_213045(104, []);
-    tmp_262092.id = "btn-recv-copy";
-    tmp_262092.class = "ui button";
-    set_attr_211568(tmp_262092, "title", "Copy");
-    var tmp_262093 = tree_213045(61, []);
-    tmp_262093.class = "paperclip icon";
+    var tmp_262092 = tree_213045(43, []);
+    tmp_262092.class = "ui mini basic icon buttons";
+    var tmp_262093 = tree_213045(104, []);
+    tmp_262093.id = "btn-recv-copy";
+    tmp_262093.class = "ui button";
+    set_attr_211568(tmp_262093, "title", "Copy");
+    var tmp_262094 = tree_213045(61, []);
+    tmp_262094.class = "paperclip icon";
+    add_211771(tmp_262093, tmp_262094);
     add_211771(tmp_262092, tmp_262093);
-    add_211771(tmp_262091, tmp_262092);
-    var tmp_262094 = tree_213045(104, []);
-    tmp_262094.id = "btn-recv-qrcode";
-    tmp_262094.class = "ui button";
-    set_attr_211568(tmp_262094, "title", "QR Code");
-    var tmp_262095 = tree_213045(61, []);
-    tmp_262095.class = "qrcode icon";
-    add_211771(tmp_262094, tmp_262095);
-    add_211771(tmp_262091, tmp_262094);
-    add_211771(tmp_262087, tmp_262091);
-    var tmp_262096 = tree_213045(43, []);
-    tmp_262096.id = "address-text";
-    tmp_262096.class = "address";
-    add_211771(tmp_262096, text_213148([]));
-    add_211771(tmp_262087, tmp_262096);
+    var tmp_262095 = tree_213045(104, []);
+    tmp_262095.id = "btn-recv-qrcode";
+    tmp_262095.class = "ui button";
+    set_attr_211568(tmp_262095, "title", "QR Code");
+    var tmp_262096 = tree_213045(61, []);
+    tmp_262096.class = "qrcode icon";
+    add_211771(tmp_262095, tmp_262096);
+    add_211771(tmp_262092, tmp_262095);
+    add_211771(tmp_262088, tmp_262092);
     var tmp_262097 = tree_213045(43, []);
-    tmp_262097.class = "balls";
+    tmp_262097.id = "address-text";
+    tmp_262097.class = "address";
+    add_211771(tmp_262097, text_213148([]));
+    add_211771(tmp_262088, tmp_262097);
     var tmp_262098 = tree_213045(43, []);
-    tmp_262098.class = "used";
+    tmp_262098.class = "balls";
     var tmp_262099 = tree_213045(43, []);
-    tmp_262099.class = "circular ui icon mini button ball";
-    var tmp_262100 = tree_213045(75, []);
-    set_attr_211568(tmp_262100, "src", "");
+    tmp_262099.class = "used";
+    var tmp_262100 = tree_213045(43, []);
+    tmp_262100.class = "circular ui icon mini button ball";
+    var tmp_262101 = tree_213045(75, []);
+    set_attr_211568(tmp_262101, "src", "");
+    add_211771(tmp_262100, tmp_262101);
     add_211771(tmp_262099, tmp_262100);
     add_211771(tmp_262098, tmp_262099);
-    add_211771(tmp_262097, tmp_262098);
-    var tmp_262101 = tree_213045(43, []);
-    tmp_262101.class = "new";
     var tmp_262102 = tree_213045(43, []);
-    tmp_262102.class = "circular ui icon mini button ball";
-    var tmp_262103 = tree_213045(75, []);
-    set_attr_211568(tmp_262103, "src", "");
+    tmp_262102.class = "new";
+    var tmp_262103 = tree_213045(43, []);
+    tmp_262103.class = "circular ui icon mini button ball";
+    var tmp_262104 = tree_213045(75, []);
+    set_attr_211568(tmp_262104, "src", "");
+    add_211771(tmp_262103, tmp_262104);
     add_211771(tmp_262102, tmp_262103);
-    add_211771(tmp_262101, tmp_262102);
-    var tmp_262104 = tree_213045(43, []);
-    tmp_262104.class = "circular ui icon mini button ball";
-    var tmp_262105 = tree_213045(75, []);
-    set_attr_211568(tmp_262105, "src", "");
-    add_211771(tmp_262104, tmp_262105);
-    add_211771(tmp_262101, tmp_262104);
-    var tmp_262106 = tree_213045(43, []);
-    tmp_262106.class = "circular ui icon mini button ball";
-    var tmp_262107 = tree_213045(75, []);
-    set_attr_211568(tmp_262107, "src", "");
-    add_211771(tmp_262106, tmp_262107);
-    add_211771(tmp_262101, tmp_262106);
-    var tmp_262108 = tree_213045(43, []);
-    tmp_262108.class = "circular ui icon mini button ball";
-    var tmp_262109 = tree_213045(75, []);
-    set_attr_211568(tmp_262109, "src", "");
-    add_211771(tmp_262108, tmp_262109);
-    add_211771(tmp_262101, tmp_262108);
-    var tmp_262110 = tree_213045(43, []);
-    tmp_262110.class = "circular ui icon mini button ball";
-    var tmp_262111 = tree_213045(75, []);
-    set_attr_211568(tmp_262111, "src", "");
-    add_211771(tmp_262110, tmp_262111);
-    add_211771(tmp_262101, tmp_262110);
-    add_211771(tmp_262097, tmp_262101);
-    add_211771(tmp_262087, tmp_262097);
-    result_262086 = tmp_262087;
+    var tmp_262105 = tree_213045(43, []);
+    tmp_262105.class = "circular ui icon mini button ball";
+    var tmp_262106 = tree_213045(75, []);
+    set_attr_211568(tmp_262106, "src", "");
+    add_211771(tmp_262105, tmp_262106);
+    add_211771(tmp_262102, tmp_262105);
+    var tmp_262107 = tree_213045(43, []);
+    tmp_262107.class = "circular ui icon mini button ball";
+    var tmp_262108 = tree_213045(75, []);
+    set_attr_211568(tmp_262108, "src", "");
+    add_211771(tmp_262107, tmp_262108);
+    add_211771(tmp_262102, tmp_262107);
+    var tmp_262109 = tree_213045(43, []);
+    tmp_262109.class = "circular ui icon mini button ball";
+    var tmp_262110 = tree_213045(75, []);
+    set_attr_211568(tmp_262110, "src", "");
+    add_211771(tmp_262109, tmp_262110);
+    add_211771(tmp_262102, tmp_262109);
+    var tmp_262111 = tree_213045(43, []);
+    tmp_262111.class = "circular ui icon mini button ball";
+    var tmp_262112 = tree_213045(75, []);
+    set_attr_211568(tmp_262112, "src", "");
+    add_211771(tmp_262111, tmp_262112);
+    add_211771(tmp_262102, tmp_262111);
+    add_211771(tmp_262098, tmp_262102);
+    add_211771(tmp_262088, tmp_262098);
+    result_262087 = tmp_262088;
 
-  return result_262086;
+  return result_262087;
 
 }
 
-function recv_address_modal_262227() {
-  var result_262229 = null;
+function recv_address_modal_262228() {
+  var result_262230 = null;
 
-    var tmp_262230 = tree_213045(43, []);
-    tmp_262230.id = "recv-modal";
-    tmp_262230.class = "ui";
-    var tmp_262231 = tree_213045(61, []);
-    tmp_262231.class = "close icon btn-close-arc";
-    add_211771(tmp_262230, tmp_262231);
-    var tmp_262232 = tree_213045(43, []);
-    tmp_262232.class = "close-arc";
-    add_211771(tmp_262230, tmp_262232);
+    var tmp_262231 = tree_213045(43, []);
+    tmp_262231.id = "recv-modal";
+    tmp_262231.class = "ui";
+    var tmp_262232 = tree_213045(61, []);
+    tmp_262232.class = "close icon btn-close-arc";
+    add_211771(tmp_262231, tmp_262232);
     var tmp_262233 = tree_213045(43, []);
-    tmp_262233.id = "recv-qrcode";
-    tmp_262233.class = "qrcode";
-    set_attr_211568(tmp_262233, "title", "");
-    var tmp_262234 = tree_213045(84, []);
-    set_attr_211568(tmp_262234, "width", "0");
-    set_attr_211568(tmp_262234, "height", "0");
-    add_211771(tmp_262233, tmp_262234);
-    add_211771(tmp_262230, tmp_262233);
-    var tmp_262235 = tree_213045(43, []);
-    tmp_262235.id = "recvaddr-form";
-    tmp_262235.class = "ui container";
+    tmp_262233.class = "close-arc";
+    add_211771(tmp_262231, tmp_262233);
+    var tmp_262234 = tree_213045(43, []);
+    tmp_262234.id = "recv-qrcode";
+    tmp_262234.class = "qrcode";
+    set_attr_211568(tmp_262234, "title", "");
+    var tmp_262235 = tree_213045(84, []);
+    set_attr_211568(tmp_262235, "width", "0");
+    set_attr_211568(tmp_262235, "height", "0");
+    add_211771(tmp_262234, tmp_262235);
+    add_211771(tmp_262231, tmp_262234);
     var tmp_262236 = tree_213045(43, []);
-    tmp_262236.class = "ui form";
+    tmp_262236.id = "recvaddr-form";
+    tmp_262236.class = "ui container";
     var tmp_262237 = tree_213045(43, []);
-    tmp_262237.class = "two fields";
+    tmp_262237.class = "ui form";
     var tmp_262238 = tree_213045(43, []);
-    tmp_262238.class = "field";
-    var tmp_262239 = tree_213045(102, []);
-    add_211771(tmp_262239, text_213148(makeNimstrLit("Receive Address")));
-    add_211771(tmp_262238, tmp_262239);
-    var tmp_262240 = tree_213045(43, []);
-    tmp_262240.class = "ui selection dropdown addr-selection";
-    set_attr_211568(tmp_262240, "tabindex", "0");
-    var tmp_262241 = tree_213045(103, []);
-    set_attr_211568(tmp_262241, "type", "hidden");
-    set_attr_211568(tmp_262241, "name", "address");
-    valueHEX3D_210884(tmp_262241, "");
-    add_211771(tmp_262240, tmp_262241);
-    var tmp_262242 = tree_213045(61, []);
-    tmp_262242.class = "dropdown icon";
-    add_211771(tmp_262240, tmp_262242);
-    var tmp_262243 = tree_213045(43, []);
-    tmp_262243.class = "text";
-    var tmp_262244 = tree_213045(75, []);
-    set_attr_211568(tmp_262244, "clsss", "ui mini avatar image");
-    set_attr_211568(tmp_262244, "src", "");
-    add_211771(tmp_262243, tmp_262244);
-    add_211771(tmp_262243, text_213148([]));
-    add_211771(tmp_262240, tmp_262243);
-    var tmp_262245 = tree_213045(43, []);
-    tmp_262245.class = "menu";
-    set_attr_211568(tmp_262245, "tabindex", "-1");
-    add_211771(tmp_262240, tmp_262245);
-    add_211771(tmp_262238, tmp_262240);
-    add_211771(tmp_262237, tmp_262238);
+    tmp_262238.class = "two fields";
+    var tmp_262239 = tree_213045(43, []);
+    tmp_262239.class = "field";
+    var tmp_262240 = tree_213045(102, []);
+    add_211771(tmp_262240, text_213148(makeNimstrLit("Receive Address")));
+    add_211771(tmp_262239, tmp_262240);
+    var tmp_262241 = tree_213045(43, []);
+    tmp_262241.class = "ui selection dropdown addr-selection";
+    set_attr_211568(tmp_262241, "tabindex", "0");
+    var tmp_262242 = tree_213045(103, []);
+    set_attr_211568(tmp_262242, "type", "hidden");
+    set_attr_211568(tmp_262242, "name", "address");
+    valueHEX3D_210884(tmp_262242, "");
+    add_211771(tmp_262241, tmp_262242);
+    var tmp_262243 = tree_213045(61, []);
+    tmp_262243.class = "dropdown icon";
+    add_211771(tmp_262241, tmp_262243);
+    var tmp_262244 = tree_213045(43, []);
+    tmp_262244.class = "text";
+    var tmp_262245 = tree_213045(75, []);
+    set_attr_211568(tmp_262245, "clsss", "ui mini avatar image");
+    set_attr_211568(tmp_262245, "src", "");
+    add_211771(tmp_262244, tmp_262245);
+    add_211771(tmp_262244, text_213148([]));
+    add_211771(tmp_262241, tmp_262244);
     var tmp_262246 = tree_213045(43, []);
-    tmp_262246.class = "field";
-    var tmp_262247 = tree_213045(102, []);
-    add_211771(tmp_262247, text_213148(makeNimstrLit("Amount")));
-    add_211771(tmp_262246, tmp_262247);
-    var tmp_262248 = tree_213045(43, []);
-    tmp_262248.class = "ui right labeled input";
-    var tmp_262249 = tree_213045(103, []);
-    tmp_262249.class = "right";
-    set_attr_211568(tmp_262249, "type", "text");
-    set_attr_211568(tmp_262249, "name", "amount");
-    set_attr_211568(tmp_262249, "placeholder", "Amount");
-    add_211771(tmp_262248, tmp_262249);
-    var tmp_262250 = tree_213045(43, []);
-    tmp_262250.class = "ui basic label";
-    add_211771(tmp_262250, text_213148(makeNimstrLit("ZNY")));
-    add_211771(tmp_262248, tmp_262250);
-    add_211771(tmp_262246, tmp_262248);
-    add_211771(tmp_262237, tmp_262246);
-    add_211771(tmp_262236, tmp_262237);
+    tmp_262246.class = "menu";
+    set_attr_211568(tmp_262246, "tabindex", "-1");
+    add_211771(tmp_262241, tmp_262246);
+    add_211771(tmp_262239, tmp_262241);
+    add_211771(tmp_262238, tmp_262239);
+    var tmp_262247 = tree_213045(43, []);
+    tmp_262247.class = "field";
+    var tmp_262248 = tree_213045(102, []);
+    add_211771(tmp_262248, text_213148(makeNimstrLit("Amount")));
+    add_211771(tmp_262247, tmp_262248);
+    var tmp_262249 = tree_213045(43, []);
+    tmp_262249.class = "ui right labeled input";
+    var tmp_262250 = tree_213045(103, []);
+    tmp_262250.class = "right";
+    set_attr_211568(tmp_262250, "type", "text");
+    set_attr_211568(tmp_262250, "name", "amount");
+    set_attr_211568(tmp_262250, "placeholder", "Amount");
+    add_211771(tmp_262249, tmp_262250);
     var tmp_262251 = tree_213045(43, []);
-    tmp_262251.class = "two fields";
+    tmp_262251.class = "ui basic label";
+    add_211771(tmp_262251, text_213148(makeNimstrLit("ZNY")));
+    add_211771(tmp_262249, tmp_262251);
+    add_211771(tmp_262247, tmp_262249);
+    add_211771(tmp_262238, tmp_262247);
+    add_211771(tmp_262237, tmp_262238);
     var tmp_262252 = tree_213045(43, []);
-    tmp_262252.class = "field";
-    var tmp_262253 = tree_213045(102, []);
-    add_211771(tmp_262253, text_213148(makeNimstrLit("Label")));
+    tmp_262252.class = "two fields";
+    var tmp_262253 = tree_213045(43, []);
+    tmp_262253.class = "field";
+    var tmp_262254 = tree_213045(102, []);
+    add_211771(tmp_262254, text_213148(makeNimstrLit("Label")));
+    add_211771(tmp_262253, tmp_262254);
+    var tmp_262255 = tree_213045(103, []);
+    tmp_262255.class = "ui input";
+    set_attr_211568(tmp_262255, "type", "text");
+    set_attr_211568(tmp_262255, "name", "label");
+    set_attr_211568(tmp_262255, "placeholder", "Label");
+    add_211771(tmp_262253, tmp_262255);
     add_211771(tmp_262252, tmp_262253);
-    var tmp_262254 = tree_213045(103, []);
-    tmp_262254.class = "ui input";
-    set_attr_211568(tmp_262254, "type", "text");
-    set_attr_211568(tmp_262254, "name", "label");
-    set_attr_211568(tmp_262254, "placeholder", "Label");
-    add_211771(tmp_262252, tmp_262254);
-    add_211771(tmp_262251, tmp_262252);
-    var tmp_262255 = tree_213045(43, []);
-    tmp_262255.class = "field";
-    var tmp_262256 = tree_213045(102, []);
-    add_211771(tmp_262256, text_213148(makeNimstrLit("Message")));
-    add_211771(tmp_262255, tmp_262256);
-    var tmp_262257 = tree_213045(109, []);
-    tmp_262257.class = "ui textarea";
-    set_attr_211568(tmp_262257, "rows", "2");
-    set_attr_211568(tmp_262257, "name", "message");
-    set_attr_211568(tmp_262257, "placeholder", "Message");
-    add_211771(tmp_262255, tmp_262257);
-    add_211771(tmp_262251, tmp_262255);
-    add_211771(tmp_262236, tmp_262251);
-    add_211771(tmp_262235, tmp_262236);
-    add_211771(tmp_262230, tmp_262235);
-    result_262229 = tmp_262230;
+    var tmp_262256 = tree_213045(43, []);
+    tmp_262256.class = "field";
+    var tmp_262257 = tree_213045(102, []);
+    add_211771(tmp_262257, text_213148(makeNimstrLit("Message")));
+    add_211771(tmp_262256, tmp_262257);
+    var tmp_262258 = tree_213045(109, []);
+    tmp_262258.class = "ui textarea";
+    set_attr_211568(tmp_262258, "rows", "2");
+    set_attr_211568(tmp_262258, "name", "message");
+    set_attr_211568(tmp_262258, "placeholder", "Message");
+    add_211771(tmp_262256, tmp_262258);
+    add_211771(tmp_262252, tmp_262256);
+    add_211771(tmp_262237, tmp_262252);
+    add_211771(tmp_262236, tmp_262237);
+    add_211771(tmp_262231, tmp_262236);
+    result_262230 = tmp_262231;
 
-  return result_262229;
+  return result_262230;
 
 }
 
-function btn_send_close_262018() {
+function btn_send_close_262019() {
 
-    function HEX3Aanonymous_262023() {
+    function HEX3Aanonymous_262024() {
               clearTimeout(sendrecv_switch_tval);
       sendrecv_switch = 0;
       reset_switch(1);
@@ -5347,160 +5348,160 @@ function btn_send_close_262018() {
       
     }
 
-  var result_262022 = null;
+  var result_262023 = null;
 
-    result_262022 = HEX3Aanonymous_262023;
+    result_262023 = HEX3Aanonymous_262024;
 
-  return result_262022;
+  return result_262023;
 
 }
 
-function send_form_262397() {
-  var result_262399 = null;
+function send_form_262398() {
+  var result_262400 = null;
 
-    var tmp_262400 = tree_213045(43, []);
-    tmp_262400.id = "send-coins";
-    tmp_262400.class = "ui center aligned segment hidden";
     var tmp_262401 = tree_213045(43, []);
-    tmp_262401.class = "ui top attached label sendcoins";
-    add_211771(tmp_262401, text_213148(makeNimstrLit("Send Coins ")));
-    var tmp_262402 = tree_213045(70, []);
-    var tmp_262403 = tree_213045(61, []);
-    tmp_262403.class = "close icon btn-close";
-    add_event_handler_242829(tmp_262403, 0, btn_send_close_262018(), kxi_232324[0]);
+    tmp_262401.id = "send-coins";
+    tmp_262401.class = "ui center aligned segment hidden";
+    var tmp_262402 = tree_213045(43, []);
+    tmp_262402.class = "ui top attached label sendcoins";
+    add_211771(tmp_262402, text_213148(makeNimstrLit("Send Coins ")));
+    var tmp_262403 = tree_213045(70, []);
+    var tmp_262404 = tree_213045(61, []);
+    tmp_262404.class = "close icon btn-close";
+    add_event_handler_242829(tmp_262404, 0, btn_send_close_262019(), kxi_232324[0]);
+    add_211771(tmp_262403, tmp_262404);
     add_211771(tmp_262402, tmp_262403);
     add_211771(tmp_262401, tmp_262402);
-    add_211771(tmp_262400, tmp_262401);
-    var tmp_262404 = tree_213045(43, []);
-    tmp_262404.class = "ui right floated mini basic icon buttons";
-    var tmp_262405 = tree_213045(104, []);
-    tmp_262405.id = "btn-send-lock";
-    tmp_262405.class = "ui button";
-    set_attr_211568(tmp_262405, "title", "Locked");
-    var tmp_262406 = tree_213045(61, []);
-    tmp_262406.class = "lock icon";
+    var tmp_262405 = tree_213045(43, []);
+    tmp_262405.class = "ui right floated mini basic icon buttons";
+    var tmp_262406 = tree_213045(104, []);
+    tmp_262406.id = "btn-send-lock";
+    tmp_262406.class = "ui button";
+    set_attr_211568(tmp_262406, "title", "Locked");
+    var tmp_262407 = tree_213045(61, []);
+    tmp_262407.class = "lock icon";
+    add_211771(tmp_262406, tmp_262407);
     add_211771(tmp_262405, tmp_262406);
-    add_211771(tmp_262404, tmp_262405);
-    add_211771(tmp_262400, tmp_262404);
-    var tmp_262407 = tree_213045(43, []);
-    tmp_262407.class = "ui mini basic icon buttons btn-send-tools";
-    var tmp_262408 = tree_213045(104, []);
-    tmp_262408.id = "btn-send-clear";
-    tmp_262408.class = "ui button";
-    set_attr_211568(tmp_262408, "title", "Clear");
-    var tmp_262409 = tree_213045(61, []);
-    tmp_262409.class = "eraser icon";
+    add_211771(tmp_262401, tmp_262405);
+    var tmp_262408 = tree_213045(43, []);
+    tmp_262408.class = "ui mini basic icon buttons btn-send-tools";
+    var tmp_262409 = tree_213045(104, []);
+    tmp_262409.id = "btn-send-clear";
+    tmp_262409.class = "ui button";
+    set_attr_211568(tmp_262409, "title", "Clear");
+    var tmp_262410 = tree_213045(61, []);
+    tmp_262410.class = "eraser icon";
+    add_211771(tmp_262409, tmp_262410);
     add_211771(tmp_262408, tmp_262409);
-    add_211771(tmp_262407, tmp_262408);
-    var tmp_262410 = tree_213045(104, []);
-    tmp_262410.id = "btn-send-qrcode";
-    tmp_262410.class = "ui button";
-    set_attr_211568(tmp_262410, "title", "Scan QR Code");
-    var tmp_262411 = tree_213045(61, []);
-    tmp_262411.class = "camera icon";
-    add_211771(tmp_262410, tmp_262411);
-    add_211771(tmp_262407, tmp_262410);
-    add_211771(tmp_262400, tmp_262407);
-    var tmp_262412 = tree_213045(43, []);
-    tmp_262412.class = "ui form";
+    var tmp_262411 = tree_213045(104, []);
+    tmp_262411.id = "btn-send-qrcode";
+    tmp_262411.class = "ui button";
+    set_attr_211568(tmp_262411, "title", "Scan QR Code");
+    var tmp_262412 = tree_213045(61, []);
+    tmp_262412.class = "camera icon";
+    add_211771(tmp_262411, tmp_262412);
+    add_211771(tmp_262408, tmp_262411);
+    add_211771(tmp_262401, tmp_262408);
     var tmp_262413 = tree_213045(43, []);
-    tmp_262413.class = "field";
-    var tmp_262414 = tree_213045(102, []);
-    add_211771(tmp_262414, text_213148(makeNimstrLit("Send Address")));
+    tmp_262413.class = "ui form";
+    var tmp_262414 = tree_213045(43, []);
+    tmp_262414.class = "field";
+    var tmp_262415 = tree_213045(102, []);
+    add_211771(tmp_262415, text_213148(makeNimstrLit("Send Address")));
+    add_211771(tmp_262414, tmp_262415);
+    var tmp_262416 = tree_213045(43, []);
+    tmp_262416.class = "ui small input";
+    var tmp_262417 = tree_213045(103, []);
+    tmp_262417.class = "center";
+    set_attr_211568(tmp_262417, "type", "text");
+    set_attr_211568(tmp_262417, "name", "address");
+    set_attr_211568(tmp_262417, "placeholder", "Address");
+    add_211771(tmp_262416, tmp_262417);
+    add_211771(tmp_262414, tmp_262416);
     add_211771(tmp_262413, tmp_262414);
-    var tmp_262415 = tree_213045(43, []);
-    tmp_262415.class = "ui small input";
-    var tmp_262416 = tree_213045(103, []);
-    tmp_262416.class = "center";
-    set_attr_211568(tmp_262416, "type", "text");
-    set_attr_211568(tmp_262416, "name", "address");
-    set_attr_211568(tmp_262416, "placeholder", "Address");
-    add_211771(tmp_262415, tmp_262416);
-    add_211771(tmp_262413, tmp_262415);
-    add_211771(tmp_262412, tmp_262413);
-    var tmp_262417 = tree_213045(43, []);
-    tmp_262417.class = "field";
-    var tmp_262418 = tree_213045(102, []);
-    add_211771(tmp_262418, text_213148(makeNimstrLit("Amount")));
-    add_211771(tmp_262417, tmp_262418);
-    var tmp_262419 = tree_213045(43, []);
-    tmp_262419.class = "ui small input";
-    var tmp_262420 = tree_213045(103, []);
-    tmp_262420.class = "center";
-    set_attr_211568(tmp_262420, "type", "text");
-    set_attr_211568(tmp_262420, "name", "amount");
-    set_attr_211568(tmp_262420, "placeholder", "Amount");
-    add_211771(tmp_262419, tmp_262420);
-    var tmp_262421 = tree_213045(43, []);
-    tmp_262421.class = "ui mini basic icon buttons utxoctrl";
-    var tmp_262422 = tree_213045(104, []);
-    tmp_262422.id = "btn-utxo-minus";
-    tmp_262422.class = "ui button";
-    set_attr_211568(tmp_262422, "title", "-1 Ball");
-    var tmp_262423 = tree_213045(61, []);
-    tmp_262423.class = "minus circle icon";
+    var tmp_262418 = tree_213045(43, []);
+    tmp_262418.class = "field";
+    var tmp_262419 = tree_213045(102, []);
+    add_211771(tmp_262419, text_213148(makeNimstrLit("Amount")));
+    add_211771(tmp_262418, tmp_262419);
+    var tmp_262420 = tree_213045(43, []);
+    tmp_262420.class = "ui small input";
+    var tmp_262421 = tree_213045(103, []);
+    tmp_262421.class = "center";
+    set_attr_211568(tmp_262421, "type", "text");
+    set_attr_211568(tmp_262421, "name", "amount");
+    set_attr_211568(tmp_262421, "placeholder", "Amount");
+    add_211771(tmp_262420, tmp_262421);
+    var tmp_262422 = tree_213045(43, []);
+    tmp_262422.class = "ui mini basic icon buttons utxoctrl";
+    var tmp_262423 = tree_213045(104, []);
+    tmp_262423.id = "btn-utxo-minus";
+    tmp_262423.class = "ui button";
+    set_attr_211568(tmp_262423, "title", "-1 Ball");
+    var tmp_262424 = tree_213045(61, []);
+    tmp_262424.class = "minus circle icon";
+    add_211771(tmp_262423, tmp_262424);
     add_211771(tmp_262422, tmp_262423);
-    add_211771(tmp_262421, tmp_262422);
-    var tmp_262424 = tree_213045(104, []);
-    tmp_262424.id = "btn-utxo-count";
-    tmp_262424.class = "ui button sendutxos";
-    add_211771(tmp_262424, text_213148(makeNimstrLit("...")));
-    add_211771(tmp_262421, tmp_262424);
     var tmp_262425 = tree_213045(104, []);
-    tmp_262425.id = "btn-utxo-plus";
-    tmp_262425.class = "ui button";
-    set_attr_211568(tmp_262425, "title", "+1 Ball");
-    var tmp_262426 = tree_213045(61, []);
-    tmp_262426.class = "plus circle icon";
-    add_211771(tmp_262425, tmp_262426);
-    add_211771(tmp_262421, tmp_262425);
-    add_211771(tmp_262419, tmp_262421);
-    add_211771(tmp_262417, tmp_262419);
-    add_211771(tmp_262412, tmp_262417);
-    var tmp_262427 = tree_213045(43, []);
-    tmp_262427.class = "ui list uri-options";
+    tmp_262425.id = "btn-utxo-count";
+    tmp_262425.class = "ui button sendutxos";
+    add_211771(tmp_262425, text_213148(makeNimstrLit("...")));
+    add_211771(tmp_262422, tmp_262425);
+    var tmp_262426 = tree_213045(104, []);
+    tmp_262426.id = "btn-utxo-plus";
+    tmp_262426.class = "ui button";
+    set_attr_211568(tmp_262426, "title", "+1 Ball");
+    var tmp_262427 = tree_213045(61, []);
+    tmp_262427.class = "plus circle icon";
+    add_211771(tmp_262426, tmp_262427);
+    add_211771(tmp_262422, tmp_262426);
+    add_211771(tmp_262420, tmp_262422);
+    add_211771(tmp_262418, tmp_262420);
+    add_211771(tmp_262413, tmp_262418);
+    var tmp_262428 = tree_213045(43, []);
+    tmp_262428.class = "ui list uri-options";
     L1: do {
-      var d_262547 = null;
+      var d_262548 = null;
       var v_263989 = null;
       for (var k in uriOptions) {
         if (!uriOptions.hasOwnProperty(k)) continue;
         v_263989=uriOptions[k];
-      d_262547 = v_263989;
-      var tmp_262428 = tree_213045(43, []);
-      tmp_262428.class = "item";
+      d_262548 = v_263989;
       var tmp_262429 = tree_213045(43, []);
-      tmp_262429.class = "content";
+      tmp_262429.class = "item";
       var tmp_262430 = tree_213045(43, []);
-      tmp_262430.class = "header";
-      add_211771(tmp_262430, text_213201(d_262547.key));
-      add_211771(tmp_262429, tmp_262430);
+      tmp_262430.class = "content";
       var tmp_262431 = tree_213045(43, []);
-      tmp_262431.class = "description";
-      add_211771(tmp_262431, text_213201(d_262547.value));
-      add_211771(tmp_262429, tmp_262431);
+      tmp_262431.class = "header";
+      add_211771(tmp_262431, text_213201(d_262548.key));
+      add_211771(tmp_262430, tmp_262431);
+      var tmp_262432 = tree_213045(43, []);
+      tmp_262432.class = "description";
+      add_211771(tmp_262432, text_213201(d_262548.value));
+      add_211771(tmp_262430, tmp_262432);
+      add_211771(tmp_262429, tmp_262430);
       add_211771(tmp_262428, tmp_262429);
-      add_211771(tmp_262427, tmp_262428);
       }
     } while(false);
-    add_211771(tmp_262412, tmp_262427);
-    var tmp_262432 = tree_213045(43, []);
-    tmp_262432.class = "fluid ui buttons";
-    var tmp_262433 = tree_213045(104, []);
-    tmp_262433.id = "btn-tx-send";
-    tmp_262433.class = "ui inverted olive button center btn-tx-send";
-    add_211771(tmp_262433, text_213148(makeNimstrLit("Send")));
-    add_211771(tmp_262432, tmp_262433);
-    add_211771(tmp_262412, tmp_262432);
-    add_211771(tmp_262400, tmp_262412);
-    result_262399 = tmp_262400;
+    add_211771(tmp_262413, tmp_262428);
+    var tmp_262433 = tree_213045(43, []);
+    tmp_262433.class = "fluid ui buttons";
+    var tmp_262434 = tree_213045(104, []);
+    tmp_262434.id = "btn-tx-send";
+    tmp_262434.class = "ui inverted olive button center btn-tx-send";
+    add_211771(tmp_262434, text_213148(makeNimstrLit("Send")));
+    add_211771(tmp_262433, tmp_262434);
+    add_211771(tmp_262413, tmp_262433);
+    add_211771(tmp_262401, tmp_262413);
+    result_262400 = tmp_262401;
 
-  return result_262399;
+  return result_262400;
 
 }
 
-function go_settings_261838() {
+function go_settings_261839() {
 
-    function HEX3Aanonymous_261843() {
+    function HEX3Aanonymous_261844() {
         rawEcho(nimBoolToStr(show_page4_258072[0]));
         if (!(show_page4_258072[0])) {
         view_selector_258124(14, false);
@@ -5523,17 +5524,17 @@ function go_settings_261838() {
       
     }
 
-  var result_261842 = null;
+  var result_261843 = null;
 
-    result_261842 = HEX3Aanonymous_261843;
+    result_261843 = HEX3Aanonymous_261844;
 
-  return result_261842;
+  return result_261843;
 
 }
 
-function go_logs_261873() {
+function go_logs_261874() {
 
-    function HEX3Aanonymous_261878() {
+    function HEX3Aanonymous_261879() {
         if (!(show_page4_258072[0])) {
         view_selector_258124(13, false);
         supress_redraw_258076[0] = true;
@@ -5555,17 +5556,17 @@ function go_logs_261873() {
       
     }
 
-  var result_261877 = null;
+  var result_261878 = null;
 
-    result_261877 = HEX3Aanonymous_261878;
+    result_261878 = HEX3Aanonymous_261879;
 
-  return result_261877;
+  return result_261878;
 
 }
 
-function back_wallet_261906() {
+function back_wallet_261907() {
 
-    function HEX3Aanonymous_261911() {
+    function HEX3Aanonymous_261912() {
         view_selector_258124(12, true);
               goSection('#section3', page_scroll_done);
     
@@ -5573,149 +5574,149 @@ function back_wallet_261906() {
       
     }
 
-  var result_261910 = null;
+  var result_261911 = null;
 
-    result_261910 = HEX3Aanonymous_261911;
+    result_261911 = HEX3Aanonymous_261912;
 
-  return result_261910;
+  return result_261911;
 
 }
 
-function settings_page_262662() {
-  var result_262664 = null;
+function settings_page_262663() {
+  var result_262665 = null;
 
-    var tmp_262665 = tree_213045(43, []);
-    tmp_262665.id = "settings";
-    tmp_262665.class = "ui container";
-    var tmp_262666 = tree_213045(23, []);
-    tmp_262666.class = "ui dividing header";
-    add_211771(tmp_262666, text_213148(makeNimstrLit("Settings")));
-    add_211771(tmp_262665, tmp_262666);
-    var tmp_262667 = tree_213045(104, []);
-    tmp_262667.id = "btn-reset";
-    tmp_262667.class = "ui inverted red button";
-    add_211771(tmp_262667, text_213148(makeNimstrLit("Reset Wallet")));
-    add_211771(tmp_262665, tmp_262667);
-    var tmp_262668 = tree_213045(43, []);
-    tmp_262668.class = "ui pink inverted segment";
-    add_211771(tmp_262668, text_213148(makeNimstrLit("        Delete all your wallet data in your web browser, including your encrypted secret keys.\x0A         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards\x0A         or mnemonics before deleting it. Otherwise you may lost your coins forever.\x0A      ")));
-    add_211771(tmp_262665, tmp_262668);
+    var tmp_262666 = tree_213045(43, []);
+    tmp_262666.id = "settings";
+    tmp_262666.class = "ui container";
+    var tmp_262667 = tree_213045(23, []);
+    tmp_262667.class = "ui dividing header";
+    add_211771(tmp_262667, text_213148(makeNimstrLit("Settings")));
+    add_211771(tmp_262666, tmp_262667);
+    var tmp_262668 = tree_213045(104, []);
+    tmp_262668.id = "btn-reset";
+    tmp_262668.class = "ui inverted red button";
+    add_211771(tmp_262668, text_213148(makeNimstrLit("Reset Wallet")));
+    add_211771(tmp_262666, tmp_262668);
     var tmp_262669 = tree_213045(43, []);
-    tmp_262669.class = "ui checkbox";
-    var tmp_262670 = tree_213045(103, []);
-    set_attr_211568(tmp_262670, "type", "checkbox");
-    set_attr_211568(tmp_262670, "name", "confirm");
-    add_211771(tmp_262669, tmp_262670);
-    var tmp_262671 = tree_213045(102, []);
-    add_211771(tmp_262671, text_213148(makeNimstrLit("I confirmed that I have the seed cards or mnemonics or no coins in my wallet.")));
-    add_211771(tmp_262669, tmp_262671);
-    add_211771(tmp_262665, tmp_262669);
-    result_262664 = tmp_262665;
+    tmp_262669.class = "ui pink inverted segment";
+    add_211771(tmp_262669, text_213148(makeNimstrLit("        Delete all your wallet data in your web browser, including your encrypted secret keys.\x0A         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards\x0A         or mnemonics before deleting it. Otherwise you may lost your coins forever.\x0A      ")));
+    add_211771(tmp_262666, tmp_262669);
+    var tmp_262670 = tree_213045(43, []);
+    tmp_262670.class = "ui checkbox";
+    var tmp_262671 = tree_213045(103, []);
+    set_attr_211568(tmp_262671, "type", "checkbox");
+    set_attr_211568(tmp_262671, "name", "confirm");
+    add_211771(tmp_262670, tmp_262671);
+    var tmp_262672 = tree_213045(102, []);
+    add_211771(tmp_262672, text_213148(makeNimstrLit("I confirmed that I have the seed cards or mnemonics or no coins in my wallet.")));
+    add_211771(tmp_262670, tmp_262672);
+    add_211771(tmp_262666, tmp_262670);
+    result_262665 = tmp_262666;
 
-  return result_262664;
+  return result_262665;
 
 }
 
-function settings_modal_262596() {
-  var result_262598 = null;
+function settings_modal_262597() {
+  var result_262599 = null;
 
-    var tmp_262599 = tree_213045(43, []);
-    tmp_262599.id = "settings-modal";
-    tmp_262599.class = "ui basic modal";
     var tmp_262600 = tree_213045(43, []);
-    tmp_262600.class = "ui icon header";
-    var tmp_262601 = tree_213045(61, []);
-    tmp_262601.class = "trash icon";
+    tmp_262600.id = "settings-modal";
+    tmp_262600.class = "ui basic modal";
+    var tmp_262601 = tree_213045(43, []);
+    tmp_262601.class = "ui icon header";
+    var tmp_262602 = tree_213045(61, []);
+    tmp_262602.class = "trash icon";
+    add_211771(tmp_262601, tmp_262602);
+    add_211771(tmp_262601, text_213148(makeNimstrLit("Reset Wallet")));
     add_211771(tmp_262600, tmp_262601);
-    add_211771(tmp_262600, text_213148(makeNimstrLit("Reset Wallet")));
-    add_211771(tmp_262599, tmp_262600);
-    var tmp_262602 = tree_213045(43, []);
-    tmp_262602.class = "content";
-    var tmp_262603 = tree_213045(31, []);
-    add_211771(tmp_262603, text_213148(makeNimstrLit("Are you sure to reset your wallet?")));
-    add_211771(tmp_262602, tmp_262603);
-    add_211771(tmp_262599, tmp_262602);
-    var tmp_262604 = tree_213045(43, []);
-    tmp_262604.class = "actions";
+    var tmp_262603 = tree_213045(43, []);
+    tmp_262603.class = "content";
+    var tmp_262604 = tree_213045(31, []);
+    add_211771(tmp_262604, text_213148(makeNimstrLit("Are you sure to reset your wallet?")));
+    add_211771(tmp_262603, tmp_262604);
+    add_211771(tmp_262600, tmp_262603);
     var tmp_262605 = tree_213045(43, []);
-    tmp_262605.class = "ui basic cancel inverted button";
-    var tmp_262606 = tree_213045(61, []);
-    tmp_262606.class = "remove icon";
+    tmp_262605.class = "actions";
+    var tmp_262606 = tree_213045(43, []);
+    tmp_262606.class = "ui basic cancel inverted button";
+    var tmp_262607 = tree_213045(61, []);
+    tmp_262607.class = "remove icon";
+    add_211771(tmp_262606, tmp_262607);
+    add_211771(tmp_262606, text_213148(makeNimstrLit("Cancel")));
     add_211771(tmp_262605, tmp_262606);
-    add_211771(tmp_262605, text_213148(makeNimstrLit("Cancel")));
-    add_211771(tmp_262604, tmp_262605);
-    var tmp_262607 = tree_213045(43, []);
-    tmp_262607.class = "ui red ok inverted button";
-    var tmp_262608 = tree_213045(61, []);
-    tmp_262608.class = "checkmark icon";
-    add_211771(tmp_262607, tmp_262608);
-    add_211771(tmp_262607, text_213148(makeNimstrLit("Reset")));
-    add_211771(tmp_262604, tmp_262607);
-    add_211771(tmp_262599, tmp_262604);
-    result_262598 = tmp_262599;
+    var tmp_262608 = tree_213045(43, []);
+    tmp_262608.class = "ui red ok inverted button";
+    var tmp_262609 = tree_213045(61, []);
+    tmp_262609.class = "checkmark icon";
+    add_211771(tmp_262608, tmp_262609);
+    add_211771(tmp_262608, text_213148(makeNimstrLit("Reset")));
+    add_211771(tmp_262605, tmp_262608);
+    add_211771(tmp_262600, tmp_262605);
+    result_262599 = tmp_262600;
 
-  return result_262598;
+  return result_262599;
 
 }
 
-function app_main_262713(data_262715) {
-  var result_262716 = null;
+function app_main_262714(data_262716) {
+  var result_262717 = null;
 
-    var tmp_262717 = tree_213045(43, []);
+    var tmp_262718 = tree_213045(43, []);
     if (show_page1_258069[0]) {
-    var tmp_262718 = tree_213045(17, []);
-    tmp_262718.id = "section1";
-    tmp_262718.class = "section";
-    var tmp_262719 = tree_213045(43, []);
-    tmp_262719.class = "intro";
+    var tmp_262719 = tree_213045(17, []);
+    tmp_262719.id = "section1";
+    tmp_262719.class = "section";
     var tmp_262720 = tree_213045(43, []);
-    tmp_262720.class = "intro-head";
+    tmp_262720.class = "intro";
     var tmp_262721 = tree_213045(43, []);
-    tmp_262721.class = "caption";
-    add_211771(tmp_262721, text_213148(makeNimstrLit("Pastel Wallet")));
-    add_211771(tmp_262720, tmp_262721);
+    tmp_262721.class = "intro-head";
     var tmp_262722 = tree_213045(43, []);
-    tmp_262722.class = "ui container method-selector";
+    tmp_262722.class = "caption";
+    add_211771(tmp_262722, text_213148(makeNimstrLit("Pastel Wallet")));
+    add_211771(tmp_262721, tmp_262722);
     var tmp_262723 = tree_213045(43, []);
-    tmp_262723.class = "title";
-    add_211771(tmp_262723, text_213148(makeNimstrLit("Scan your seed cards or mnemonic to start.")));
-    add_211771(tmp_262722, tmp_262723);
+    tmp_262723.class = "ui container method-selector";
     var tmp_262724 = tree_213045(43, []);
-    tmp_262724.class = "ui buttons";
-    var tmp_262725 = tree_213045(104, []);
-    tmp_262725.id = "seedselector";
-    tmp_262725.class = "ui olive button";
-    add_event_handler_242829(tmp_262725, 0, import_selector_258329(0), kxi_232324[0]);
-    var tmp_262726 = tree_213045(61, []);
-    tmp_262726.class = "qrcode icon";
+    tmp_262724.class = "title";
+    add_211771(tmp_262724, text_213148(makeNimstrLit("Scan your seed cards or mnemonic to start.")));
+    add_211771(tmp_262723, tmp_262724);
+    var tmp_262725 = tree_213045(43, []);
+    tmp_262725.class = "ui buttons";
+    var tmp_262726 = tree_213045(104, []);
+    tmp_262726.id = "seedselector";
+    tmp_262726.class = "ui olive button";
+    add_event_handler_242829(tmp_262726, 0, import_selector_258329(0), kxi_232324[0]);
+    var tmp_262727 = tree_213045(61, []);
+    tmp_262727.class = "qrcode icon";
+    add_211771(tmp_262726, tmp_262727);
+    add_211771(tmp_262726, text_213148(makeNimstrLit("Seed card")));
     add_211771(tmp_262725, tmp_262726);
-    add_211771(tmp_262725, text_213148(makeNimstrLit("Seed card")));
-    add_211771(tmp_262724, tmp_262725);
-    var tmp_262727 = tree_213045(43, []);
-    tmp_262727.class = "or";
-    add_211771(tmp_262724, tmp_262727);
-    var tmp_262728 = tree_213045(104, []);
-    tmp_262728.id = "mnemonicselector";
-    tmp_262728.class = "ui grey button";
-    add_event_handler_242829(tmp_262728, 0, import_selector_258329(1), kxi_232324[0]);
-    var tmp_262729 = tree_213045(61, []);
-    tmp_262729.class = "list alternate icon";
-    add_211771(tmp_262728, tmp_262729);
-    add_211771(tmp_262728, text_213148(makeNimstrLit("Mnemonic")));
-    add_211771(tmp_262724, tmp_262728);
-    add_211771(tmp_262722, tmp_262724);
-    add_211771(tmp_262720, tmp_262722);
-    add_211771(tmp_262719, tmp_262720);
-    var tmp_262730 = tree_213045(43, []);
-    tmp_262730.class = "intro-body";
-    if ((current_import_type_258037[0] == 0)) {
+    var tmp_262728 = tree_213045(43, []);
+    tmp_262728.class = "or";
+    add_211771(tmp_262725, tmp_262728);
+    var tmp_262729 = tree_213045(104, []);
+    tmp_262729.id = "mnemonicselector";
+    tmp_262729.class = "ui grey button";
+    add_event_handler_242829(tmp_262729, 0, import_selector_258329(1), kxi_232324[0]);
+    var tmp_262730 = tree_213045(61, []);
+    tmp_262730.class = "list alternate icon";
+    add_211771(tmp_262729, tmp_262730);
+    add_211771(tmp_262729, text_213148(makeNimstrLit("Mnemonic")));
+    add_211771(tmp_262725, tmp_262729);
+    add_211771(tmp_262723, tmp_262725);
+    add_211771(tmp_262721, tmp_262723);
+    add_211771(tmp_262720, tmp_262721);
     var tmp_262731 = tree_213045(43, []);
-    tmp_262731.id = "seed-seg";
-    tmp_262731.class = "ui left aligned segment seed-seg";
-    if (show_scan_result_258064[0]) {
+    tmp_262731.class = "intro-body";
+    if ((current_import_type_258037[0] == 0)) {
     var tmp_262732 = tree_213045(43, []);
-    tmp_262732.class = "ui link cards seed-card-holder";
-    tmp_262732.id = "seed-card-holder";
+    tmp_262732.id = "seed-seg";
+    tmp_262732.class = "ui left aligned segment seed-seg";
+    if (show_scan_result_258064[0]) {
+    var tmp_262733 = tree_213045(43, []);
+    tmp_262733.class = "ui link cards seed-card-holder";
+    tmp_262733.id = "seed-card-holder";
     L1: do {
       var idx_263029 = 0;
       var seed_card_info_263030 = null;
@@ -5726,7 +5727,7 @@ function app_main_262713(data_262715) {
           if (!(i_263600 < l_263601)) break L3;
             idx_263029 = i_263600;
             seed_card_info_263030 = seed_card_infos_258438[0][chckIndx(i_263600, 0, (seed_card_infos_258438[0] != null ? seed_card_infos_258438[0].length : 0)+0-1)-0];
-            add_211771(tmp_262732, seed_card_260915(seed_card_info_263030, idx_263029));
+            add_211771(tmp_262733, seed_card_260915(seed_card_info_263030, idx_263029));
             i_263600 = addInt(i_263600, 1);
             if (!(((seed_card_infos_258438[0] != null ? seed_card_infos_258438[0].length : 0) == l_263601))) {
             failed_assert_impl_60866(makeNimstrLit("iterators.nim(122, 11) `len(a) == L` the length of the seq changed while iterating over it"));
@@ -5735,451 +5736,451 @@ function app_main_262713(data_262715) {
           }
       } while(false);
     } while(false);
-    var tmp_262733 = tree_213045(43, []);
-    tmp_262733.class = "seed-add-container";
-    var tmp_262734 = tree_213045(104, []);
-    tmp_262734.class = "circular ui icon button bt-add-seed";
-    add_event_handler_242829(tmp_262734, 0, show_seed_qr_259869(), kxi_232324[0]);
-    var tmp_262735 = tree_213045(61, []);
-    tmp_262735.class = "plus icon";
+    var tmp_262734 = tree_213045(43, []);
+    tmp_262734.class = "seed-add-container";
+    var tmp_262735 = tree_213045(104, []);
+    tmp_262735.class = "circular ui icon button bt-add-seed";
+    add_event_handler_242829(tmp_262735, 0, show_seed_qr_259869(), kxi_232324[0]);
+    var tmp_262736 = tree_213045(61, []);
+    tmp_262736.class = "plus icon";
+    add_211771(tmp_262735, tmp_262736);
     add_211771(tmp_262734, tmp_262735);
     add_211771(tmp_262733, tmp_262734);
     add_211771(tmp_262732, tmp_262733);
-    add_211771(tmp_262731, tmp_262732);
-    var tmp_262736 = tree_213045(44, []);
-    tmp_262736.class = "pagenext";
-    set_attr_211568(tmp_262736, "href", "#section2");
-    var tmp_262737 = tree_213045(70, []);
-    add_211771(tmp_262736, tmp_262737);
-    add_211771(tmp_262736, text_213148(makeNimstrLit("Next")));
-    add_211771(tmp_262731, tmp_262736);
+    var tmp_262737 = tree_213045(44, []);
+    tmp_262737.class = "pagenext";
+    set_attr_211568(tmp_262737, "href", "#section2");
+    var tmp_262738 = tree_213045(70, []);
+    add_211771(tmp_262737, tmp_262738);
+    add_211771(tmp_262737, text_213148(makeNimstrLit("Next")));
+    add_211771(tmp_262732, tmp_262737);
     }
     
     if (show_scanning_258062[0]) {
-    var tmp_262738 = tree_213045(43, []);
-    tmp_262738.class = "qr-scanning";
     var tmp_262739 = tree_213045(43, []);
-    add_211771(tmp_262738, tmp_262739);
+    tmp_262739.class = "qr-scanning";
     var tmp_262740 = tree_213045(43, []);
-    add_211771(tmp_262738, tmp_262740);
-    add_211771(tmp_262731, tmp_262738);
+    add_211771(tmp_262739, tmp_262740);
+    var tmp_262741 = tree_213045(43, []);
+    add_211771(tmp_262739, tmp_262741);
+    add_211771(tmp_262732, tmp_262739);
     }
     
     if (show_scan_seed_btn_258061[0]) {
-    var tmp_262741 = tree_213045(43, []);
-    tmp_262741.class = "ui teal labeled icon button bt-scan-seed";
-    add_event_handler_242829(tmp_262741, 0, show_seed_qr_259869(), kxi_232324[0]);
-    add_211771(tmp_262741, text_213148(makeNimstrLit("Scan seed card with camera")));
-    var tmp_262742 = tree_213045(61, []);
-    tmp_262742.class = "camera icon";
-    add_211771(tmp_262741, tmp_262742);
-    add_211771(tmp_262731, tmp_262741);
+    var tmp_262742 = tree_213045(43, []);
+    tmp_262742.class = "ui teal labeled icon button bt-scan-seed";
+    add_event_handler_242829(tmp_262742, 0, show_seed_qr_259869(), kxi_232324[0]);
+    add_211771(tmp_262742, text_213148(makeNimstrLit("Scan seed card with camera")));
+    var tmp_262743 = tree_213045(61, []);
+    tmp_262743.class = "camera icon";
+    add_211771(tmp_262742, tmp_262743);
+    add_211771(tmp_262732, tmp_262742);
     }
     
     if (show_cam_tools_258063[0]) {
-    var tmp_262743 = tree_213045(43, []);
-    tmp_262743.class = "ui small basic icon buttons camtools";
-    var tmp_262744 = tree_213045(104, []);
-    tmp_262744.class = "ui button";
-    add_event_handler_242829(tmp_262744, 0, cam_change_259953(), kxi_232324[0]);
-    var tmp_262745 = tree_213045(61, []);
-    tmp_262745.class = "camera icon";
+    var tmp_262744 = tree_213045(43, []);
+    tmp_262744.class = "ui small basic icon buttons camtools";
+    var tmp_262745 = tree_213045(104, []);
+    tmp_262745.class = "ui button";
+    add_event_handler_242829(tmp_262745, 0, cam_change_259953(), kxi_232324[0]);
+    var tmp_262746 = tree_213045(61, []);
+    tmp_262746.class = "camera icon";
+    add_211771(tmp_262745, tmp_262746);
     add_211771(tmp_262744, tmp_262745);
-    add_211771(tmp_262743, tmp_262744);
-    var tmp_262746 = tree_213045(104, []);
-    tmp_262746.class = "ui button";
-    add_event_handler_242829(tmp_262746, 0, cam_close_259986(), kxi_232324[0]);
-    var tmp_262747 = tree_213045(61, []);
-    tmp_262747.class = "window close icon";
-    add_211771(tmp_262746, tmp_262747);
-    add_211771(tmp_262743, tmp_262746);
-    add_211771(tmp_262731, tmp_262743);
+    var tmp_262747 = tree_213045(104, []);
+    tmp_262747.class = "ui button";
+    add_event_handler_242829(tmp_262747, 0, cam_close_259986(), kxi_232324[0]);
+    var tmp_262748 = tree_213045(61, []);
+    tmp_262748.class = "window close icon";
+    add_211771(tmp_262747, tmp_262748);
+    add_211771(tmp_262744, tmp_262747);
+    add_211771(tmp_262732, tmp_262744);
     }
     
-    var tmp_262748 = tree_213045(84, []);
-    tmp_262748.id = "qrcanvas";
-    add_211771(tmp_262731, tmp_262748);
-    var tmp_262749 = tree_213045(43, []);
-    tmp_262749.class = "ui dimmer qrcamera-loader";
+    var tmp_262749 = tree_213045(84, []);
+    tmp_262749.id = "qrcanvas";
+    add_211771(tmp_262732, tmp_262749);
     var tmp_262750 = tree_213045(43, []);
-    tmp_262750.class = "ui indeterminate text loader";
-    add_211771(tmp_262750, text_213148(makeNimstrLit("Preparing Camera")));
-    add_211771(tmp_262749, tmp_262750);
-    add_211771(tmp_262731, tmp_262749);
+    tmp_262750.class = "ui dimmer qrcamera-loader";
     var tmp_262751 = tree_213045(43, []);
-    tmp_262751.class = "ui dimmer qrcamera-shutter";
-    add_211771(tmp_262731, tmp_262751);
-    add_211771(tmp_262730, tmp_262731);
+    tmp_262751.class = "ui indeterminate text loader";
+    add_211771(tmp_262751, text_213148(makeNimstrLit("Preparing Camera")));
+    add_211771(tmp_262750, tmp_262751);
+    add_211771(tmp_262732, tmp_262750);
+    var tmp_262752 = tree_213045(43, []);
+    tmp_262752.class = "ui dimmer qrcamera-shutter";
+    add_211771(tmp_262732, tmp_262752);
+    add_211771(tmp_262731, tmp_262732);
     }
     else {
-      var tmp_262752 = tree_213045(43, []);
-      tmp_262752.class = "ui left aligned segment mnemonic-seg";
-      add_211771(tmp_262752, mnemonic_editor_260635());
+      var tmp_262753 = tree_213045(43, []);
+      tmp_262753.class = "ui left aligned segment mnemonic-seg";
+      add_211771(tmp_262753, mnemonic_editor_260635());
       if (mnemonic_fulfill_258073[0]) {
-      var tmp_262753 = tree_213045(44, []);
-      tmp_262753.class = "pagenext";
-      set_attr_211568(tmp_262753, "href", "#section2");
-      var tmp_262754 = tree_213045(70, []);
+      var tmp_262754 = tree_213045(44, []);
+      tmp_262754.class = "pagenext";
+      set_attr_211568(tmp_262754, "href", "#section2");
+      var tmp_262755 = tree_213045(70, []);
+      add_211771(tmp_262754, tmp_262755);
+      add_211771(tmp_262754, text_213148(makeNimstrLit("Next")));
       add_211771(tmp_262753, tmp_262754);
-      add_211771(tmp_262753, text_213148(makeNimstrLit("Next")));
-      add_211771(tmp_262752, tmp_262753);
       }
       
-      add_211771(tmp_262730, tmp_262752);
+      add_211771(tmp_262731, tmp_262753);
     }
     
-    add_211771(tmp_262719, tmp_262730);
+    add_211771(tmp_262720, tmp_262731);
+    add_211771(tmp_262719, tmp_262720);
     add_211771(tmp_262718, tmp_262719);
-    add_211771(tmp_262717, tmp_262718);
     }
     
     if (show_page2_258070[0]) {
-    var tmp_262755 = tree_213045(17, []);
-    tmp_262755.id = "section2";
-    tmp_262755.class = "section";
-    var tmp_262756 = tree_213045(43, []);
-    tmp_262756.class = "intro";
+    var tmp_262756 = tree_213045(17, []);
+    tmp_262756.id = "section2";
+    tmp_262756.class = "section";
     var tmp_262757 = tree_213045(43, []);
-    tmp_262757.class = "intro-head";
+    tmp_262757.class = "intro";
     var tmp_262758 = tree_213045(43, []);
-    tmp_262758.class = "caption";
-    add_211771(tmp_262758, text_213148(makeNimstrLit("Pastel Wallet")));
-    add_211771(tmp_262757, tmp_262758);
+    tmp_262758.class = "intro-head";
     var tmp_262759 = tree_213045(43, []);
-    tmp_262759.class = "ui container method-selector";
+    tmp_262759.class = "caption";
+    add_211771(tmp_262759, text_213148(makeNimstrLit("Pastel Wallet")));
+    add_211771(tmp_262758, tmp_262759);
     var tmp_262760 = tree_213045(43, []);
-    tmp_262760.class = "title";
-    add_211771(tmp_262760, text_213148(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
-    add_211771(tmp_262759, tmp_262760);
+    tmp_262760.class = "ui container method-selector";
     var tmp_262761 = tree_213045(43, []);
-    tmp_262761.class = "ui buttons";
-    var tmp_262762 = tree_213045(104, []);
-    tmp_262762.id = "keyselector";
-    tmp_262762.class = "ui olive button";
-    add_event_handler_242829(tmp_262762, 0, protect_selector_258381(0), kxi_232324[0]);
-    var tmp_262763 = tree_213045(61, []);
-    tmp_262763.class = "qrcode icon";
+    tmp_262761.class = "title";
+    add_211771(tmp_262761, text_213148(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
+    add_211771(tmp_262760, tmp_262761);
+    var tmp_262762 = tree_213045(43, []);
+    tmp_262762.class = "ui buttons";
+    var tmp_262763 = tree_213045(104, []);
+    tmp_262763.id = "keyselector";
+    tmp_262763.class = "ui olive button";
+    add_event_handler_242829(tmp_262763, 0, protect_selector_258381(0), kxi_232324[0]);
+    var tmp_262764 = tree_213045(61, []);
+    tmp_262764.class = "qrcode icon";
+    add_211771(tmp_262763, tmp_262764);
+    add_211771(tmp_262763, text_213148(makeNimstrLit("Key card")));
     add_211771(tmp_262762, tmp_262763);
-    add_211771(tmp_262762, text_213148(makeNimstrLit("Key card")));
-    add_211771(tmp_262761, tmp_262762);
-    var tmp_262764 = tree_213045(43, []);
-    tmp_262764.class = "or";
-    add_211771(tmp_262761, tmp_262764);
-    var tmp_262765 = tree_213045(104, []);
-    tmp_262765.id = "passselector";
-    tmp_262765.class = "ui grey button";
-    add_event_handler_242829(tmp_262765, 0, protect_selector_258381(1), kxi_232324[0]);
-    var tmp_262766 = tree_213045(61, []);
-    tmp_262766.class = "list alternate icon";
-    add_211771(tmp_262765, tmp_262766);
-    add_211771(tmp_262765, text_213148(makeNimstrLit("Passphrase")));
-    add_211771(tmp_262761, tmp_262765);
-    add_211771(tmp_262759, tmp_262761);
-    add_211771(tmp_262757, tmp_262759);
-    add_211771(tmp_262756, tmp_262757);
-    var tmp_262767 = tree_213045(43, []);
-    tmp_262767.class = "intro-body";
-    if ((current_protect_type_258043[0] == 0)) {
+    var tmp_262765 = tree_213045(43, []);
+    tmp_262765.class = "or";
+    add_211771(tmp_262762, tmp_262765);
+    var tmp_262766 = tree_213045(104, []);
+    tmp_262766.id = "passselector";
+    tmp_262766.class = "ui grey button";
+    add_event_handler_242829(tmp_262766, 0, protect_selector_258381(1), kxi_232324[0]);
+    var tmp_262767 = tree_213045(61, []);
+    tmp_262767.class = "list alternate icon";
+    add_211771(tmp_262766, tmp_262767);
+    add_211771(tmp_262766, text_213148(makeNimstrLit("Passphrase")));
+    add_211771(tmp_262762, tmp_262766);
+    add_211771(tmp_262760, tmp_262762);
+    add_211771(tmp_262758, tmp_262760);
+    add_211771(tmp_262757, tmp_262758);
     var tmp_262768 = tree_213045(43, []);
-    tmp_262768.id = "seed-seg";
-    tmp_262768.class = "ui left aligned segment seed-seg";
-    if (show_scan_result2_258068[0]) {
+    tmp_262768.class = "intro-body";
+    if ((current_protect_type_258043[0] == 0)) {
     var tmp_262769 = tree_213045(43, []);
-    tmp_262769.class = "ui clearing segment keycard-seg";
+    tmp_262769.id = "seed-seg";
+    tmp_262769.class = "ui left aligned segment seed-seg";
+    if (show_scan_result2_258068[0]) {
     var tmp_262770 = tree_213045(43, []);
-    tmp_262770.class = "ui inverted segment";
-    var tmp_262771 = tree_213045(24, []);
-    tmp_262771.class = "ui grey inverted header center";
-    add_211771(tmp_262771, text_213148(makeNimstrLit("Scanned key card")));
+    tmp_262770.class = "ui clearing segment keycard-seg";
+    var tmp_262771 = tree_213045(43, []);
+    tmp_262771.class = "ui inverted segment";
+    var tmp_262772 = tree_213045(24, []);
+    tmp_262772.class = "ui grey inverted header center";
+    add_211771(tmp_262772, text_213148(makeNimstrLit("Scanned key card")));
+    add_211771(tmp_262771, tmp_262772);
+    var tmp_262773 = tree_213045(31, []);
+    tmp_262773.class = "center";
+    add_211771(tmp_262773, text_213201(key_card_val_259835[0]));
+    add_211771(tmp_262771, tmp_262773);
     add_211771(tmp_262770, tmp_262771);
-    var tmp_262772 = tree_213045(31, []);
-    tmp_262772.class = "center";
-    add_211771(tmp_262772, text_213201(key_card_val_259835[0]));
-    add_211771(tmp_262770, tmp_262772);
-    add_211771(tmp_262769, tmp_262770);
-    var tmp_262773 = tree_213045(104, []);
-    tmp_262773.class = "ui right floated olive button";
-    add_event_handler_242793(tmp_262773, 0, confirm_key_card_259935, kxi_232324[0]);
-    add_211771(tmp_262773, text_213148(makeNimstrLit("Save")));
-    add_211771(tmp_262769, tmp_262773);
     var tmp_262774 = tree_213045(104, []);
-    tmp_262774.class = "ui right floated grey button";
-    add_event_handler_242829(tmp_262774, 0, show_key_qr_259902(), kxi_232324[0]);
-    add_211771(tmp_262774, text_213148(makeNimstrLit("Rescan")));
-    add_211771(tmp_262769, tmp_262774);
-    add_211771(tmp_262768, tmp_262769);
+    tmp_262774.class = "ui right floated olive button";
+    add_event_handler_242793(tmp_262774, 0, confirm_key_card_259935, kxi_232324[0]);
+    add_211771(tmp_262774, text_213148(makeNimstrLit("Save")));
+    add_211771(tmp_262770, tmp_262774);
+    var tmp_262775 = tree_213045(104, []);
+    tmp_262775.class = "ui right floated grey button";
+    add_event_handler_242829(tmp_262775, 0, show_key_qr_259902(), kxi_232324[0]);
+    add_211771(tmp_262775, text_213148(makeNimstrLit("Rescan")));
+    add_211771(tmp_262770, tmp_262775);
+    add_211771(tmp_262769, tmp_262770);
     }
     
     if (key_card_fulfill_258074[0]) {
-    var tmp_262775 = tree_213045(44, []);
-    tmp_262775.class = "pagenext";
-    set_attr_211568(tmp_262775, "href", "#section3");
-    var tmp_262776 = tree_213045(70, []);
-    add_211771(tmp_262775, tmp_262776);
-    add_211771(tmp_262775, text_213148(makeNimstrLit("Next")));
-    add_211771(tmp_262768, tmp_262775);
+    var tmp_262776 = tree_213045(44, []);
+    tmp_262776.class = "pagenext";
+    set_attr_211568(tmp_262776, "href", "#section3");
+    var tmp_262777 = tree_213045(70, []);
+    add_211771(tmp_262776, tmp_262777);
+    add_211771(tmp_262776, text_213148(makeNimstrLit("Next")));
+    add_211771(tmp_262769, tmp_262776);
     }
     
     if (show_scanning2_258066[0]) {
-    var tmp_262777 = tree_213045(43, []);
-    tmp_262777.class = "qr-scanning";
     var tmp_262778 = tree_213045(43, []);
-    add_211771(tmp_262777, tmp_262778);
+    tmp_262778.class = "qr-scanning";
     var tmp_262779 = tree_213045(43, []);
-    add_211771(tmp_262777, tmp_262779);
-    add_211771(tmp_262768, tmp_262777);
+    add_211771(tmp_262778, tmp_262779);
+    var tmp_262780 = tree_213045(43, []);
+    add_211771(tmp_262778, tmp_262780);
+    add_211771(tmp_262769, tmp_262778);
     }
     
     if (show_scan_seed_btn2_258065[0]) {
-    var tmp_262780 = tree_213045(43, []);
-    tmp_262780.class = "ui teal labeled icon button bt-scan-seed";
-    add_event_handler_242829(tmp_262780, 0, show_key_qr_259902(), kxi_232324[0]);
-    add_211771(tmp_262780, text_213148(makeNimstrLit("Scan key card with camera")));
-    var tmp_262781 = tree_213045(61, []);
-    tmp_262781.class = "camera icon";
-    add_211771(tmp_262780, tmp_262781);
-    add_211771(tmp_262768, tmp_262780);
+    var tmp_262781 = tree_213045(43, []);
+    tmp_262781.class = "ui teal labeled icon button bt-scan-seed";
+    add_event_handler_242829(tmp_262781, 0, show_key_qr_259902(), kxi_232324[0]);
+    add_211771(tmp_262781, text_213148(makeNimstrLit("Scan key card with camera")));
+    var tmp_262782 = tree_213045(61, []);
+    tmp_262782.class = "camera icon";
+    add_211771(tmp_262781, tmp_262782);
+    add_211771(tmp_262769, tmp_262781);
     }
     
     if (show_cam_tools2_258067[0]) {
-    var tmp_262782 = tree_213045(43, []);
-    tmp_262782.class = "ui small basic icon buttons camtools";
-    var tmp_262783 = tree_213045(104, []);
-    tmp_262783.class = "ui button";
-    add_event_handler_242829(tmp_262783, 0, cam_change_259953(), kxi_232324[0]);
-    var tmp_262784 = tree_213045(61, []);
-    tmp_262784.class = "camera icon";
+    var tmp_262783 = tree_213045(43, []);
+    tmp_262783.class = "ui small basic icon buttons camtools";
+    var tmp_262784 = tree_213045(104, []);
+    tmp_262784.class = "ui button";
+    add_event_handler_242829(tmp_262784, 0, cam_change_259953(), kxi_232324[0]);
+    var tmp_262785 = tree_213045(61, []);
+    tmp_262785.class = "camera icon";
+    add_211771(tmp_262784, tmp_262785);
     add_211771(tmp_262783, tmp_262784);
-    add_211771(tmp_262782, tmp_262783);
-    var tmp_262785 = tree_213045(104, []);
-    tmp_262785.class = "ui button";
-    add_event_handler_242829(tmp_262785, 0, cam_close_259986(), kxi_232324[0]);
-    var tmp_262786 = tree_213045(61, []);
-    tmp_262786.class = "window close icon";
-    add_211771(tmp_262785, tmp_262786);
-    add_211771(tmp_262782, tmp_262785);
-    add_211771(tmp_262768, tmp_262782);
+    var tmp_262786 = tree_213045(104, []);
+    tmp_262786.class = "ui button";
+    add_event_handler_242829(tmp_262786, 0, cam_close_259986(), kxi_232324[0]);
+    var tmp_262787 = tree_213045(61, []);
+    tmp_262787.class = "window close icon";
+    add_211771(tmp_262786, tmp_262787);
+    add_211771(tmp_262783, tmp_262786);
+    add_211771(tmp_262769, tmp_262783);
     }
     
-    var tmp_262787 = tree_213045(84, []);
-    tmp_262787.id = "qrcanvas";
-    add_211771(tmp_262768, tmp_262787);
-    var tmp_262788 = tree_213045(43, []);
-    tmp_262788.class = "ui dimmer qrcamera-loader";
+    var tmp_262788 = tree_213045(84, []);
+    tmp_262788.id = "qrcanvas";
+    add_211771(tmp_262769, tmp_262788);
     var tmp_262789 = tree_213045(43, []);
-    tmp_262789.class = "ui indeterminate text loader";
-    add_211771(tmp_262789, text_213148(makeNimstrLit("Preparing Camera")));
-    add_211771(tmp_262788, tmp_262789);
-    add_211771(tmp_262768, tmp_262788);
+    tmp_262789.class = "ui dimmer qrcamera-loader";
     var tmp_262790 = tree_213045(43, []);
-    tmp_262790.class = "ui dimmer qrcamera-shutter";
-    add_211771(tmp_262768, tmp_262790);
-    add_211771(tmp_262767, tmp_262768);
+    tmp_262790.class = "ui indeterminate text loader";
+    add_211771(tmp_262790, text_213148(makeNimstrLit("Preparing Camera")));
+    add_211771(tmp_262789, tmp_262790);
+    add_211771(tmp_262769, tmp_262789);
+    var tmp_262791 = tree_213045(43, []);
+    tmp_262791.class = "ui dimmer qrcamera-shutter";
+    add_211771(tmp_262769, tmp_262791);
+    add_211771(tmp_262768, tmp_262769);
     }
     else {
-      var tmp_262791 = tree_213045(43, []);
-      tmp_262791.class = "ui left aligned segment mnemonic-seg";
-      add_211771(tmp_262791, passphrase_editor_261780());
+      var tmp_262792 = tree_213045(43, []);
+      tmp_262792.class = "ui left aligned segment mnemonic-seg";
+      add_211771(tmp_262792, passphrase_editor_261780());
       if (passphrase_fulfill_258075[0]) {
-      var tmp_262792 = tree_213045(44, []);
-      tmp_262792.class = "pagenext";
-      set_attr_211568(tmp_262792, "href", "#section3");
-      var tmp_262793 = tree_213045(70, []);
+      var tmp_262793 = tree_213045(44, []);
+      tmp_262793.class = "pagenext";
+      set_attr_211568(tmp_262793, "href", "#section3");
+      var tmp_262794 = tree_213045(70, []);
+      add_211771(tmp_262793, tmp_262794);
+      add_211771(tmp_262793, text_213148(makeNimstrLit("Next")));
       add_211771(tmp_262792, tmp_262793);
-      add_211771(tmp_262792, text_213148(makeNimstrLit("Next")));
-      add_211771(tmp_262791, tmp_262792);
       }
       
-      add_211771(tmp_262767, tmp_262791);
+      add_211771(tmp_262768, tmp_262792);
     }
     
-    add_211771(tmp_262756, tmp_262767);
-    add_211771(tmp_262755, tmp_262756);
-    add_211771(tmp_262717, tmp_262755);
+    add_211771(tmp_262757, tmp_262768);
+    add_211771(tmp_262756, tmp_262757);
+    add_211771(tmp_262718, tmp_262756);
     }
     
     if (show_page3_258071[0]) {
-    var tmp_262794 = tree_213045(17, []);
-    tmp_262794.id = "section3";
-    tmp_262794.class = "section";
-    var tmp_262795 = tree_213045(43, []);
-    tmp_262795.class = "intro";
+    var tmp_262795 = tree_213045(17, []);
+    tmp_262795.id = "section3";
+    tmp_262795.class = "section";
     var tmp_262796 = tree_213045(43, []);
-    tmp_262796.class = "intro-head  wallet-head";
+    tmp_262796.class = "intro";
     var tmp_262797 = tree_213045(43, []);
-    tmp_262797.class = "caption";
-    add_211771(tmp_262797, text_213148(makeNimstrLit("Pastel Wallet")));
-    add_211771(tmp_262796, tmp_262797);
+    tmp_262797.class = "intro-head  wallet-head";
     var tmp_262798 = tree_213045(43, []);
-    tmp_262798.class = "ui container wallet-btns";
+    tmp_262798.class = "caption";
+    add_211771(tmp_262798, text_213148(makeNimstrLit("Pastel Wallet")));
+    add_211771(tmp_262797, tmp_262798);
     var tmp_262799 = tree_213045(43, []);
-    tmp_262799.class = "two ui basic buttons sendrecv";
-    var tmp_262800 = tree_213045(104, []);
-    tmp_262800.id = "btn-send";
-    tmp_262800.class = "ui small button send";
-    add_event_handler_242829(tmp_262800, 0, btn_send_261952(), kxi_232324[0]);
-    var tmp_262801 = tree_213045(61, []);
-    tmp_262801.class = "counterclockwise rotated sign-out icon send";
+    tmp_262799.class = "ui container wallet-btns";
+    var tmp_262800 = tree_213045(43, []);
+    tmp_262800.class = "two ui basic buttons sendrecv";
+    var tmp_262801 = tree_213045(104, []);
+    tmp_262801.id = "btn-send";
+    tmp_262801.class = "ui small button send";
+    add_event_handler_242829(tmp_262801, 0, btn_send_261953(), kxi_232324[0]);
+    var tmp_262802 = tree_213045(61, []);
+    tmp_262802.class = "counterclockwise rotated sign-out icon send";
+    add_211771(tmp_262801, tmp_262802);
+    add_211771(tmp_262801, text_213148(makeNimstrLit(" Send")));
     add_211771(tmp_262800, tmp_262801);
-    add_211771(tmp_262800, text_213148(makeNimstrLit(" Send")));
+    var tmp_262803 = tree_213045(104, []);
+    tmp_262803.id = "btn-receive";
+    tmp_262803.class = "ui small button receive";
+    add_event_handler_242829(tmp_262803, 0, btn_receive_261986(), kxi_232324[0]);
+    var tmp_262804 = tree_213045(61, []);
+    tmp_262804.class = "clockwise rotated sign-in icon receive";
+    add_211771(tmp_262803, tmp_262804);
+    add_211771(tmp_262803, text_213148(makeNimstrLit(" Receive")));
+    add_211771(tmp_262800, tmp_262803);
     add_211771(tmp_262799, tmp_262800);
-    var tmp_262802 = tree_213045(104, []);
-    tmp_262802.id = "btn-receive";
-    tmp_262802.class = "ui small button receive";
-    add_event_handler_242829(tmp_262802, 0, btn_receive_261985(), kxi_232324[0]);
-    var tmp_262803 = tree_213045(61, []);
-    tmp_262803.class = "clockwise rotated sign-in icon receive";
-    add_211771(tmp_262802, tmp_262803);
-    add_211771(tmp_262802, text_213148(makeNimstrLit(" Receive")));
-    add_211771(tmp_262799, tmp_262802);
-    add_211771(tmp_262798, tmp_262799);
-    add_211771(tmp_262796, tmp_262798);
-    add_211771(tmp_262795, tmp_262796);
-    var tmp_262804 = tree_213045(43, []);
-    tmp_262804.class = "intro-body wallet-body";
+    add_211771(tmp_262797, tmp_262799);
+    add_211771(tmp_262796, tmp_262797);
     var tmp_262805 = tree_213045(43, []);
-    tmp_262805.id = "wallet-balance";
-    tmp_262805.class = "ui center aligned segment";
+    tmp_262805.class = "intro-body wallet-body";
     var tmp_262806 = tree_213045(43, []);
-    tmp_262806.class = "ui top left attached tiny label send";
-    var tmp_262807 = tree_213045(70, []);
-    add_211771(tmp_262807, text_213148(makeNimstrLit("0")));
+    tmp_262806.id = "wallet-balance";
+    tmp_262806.class = "ui center aligned segment";
+    var tmp_262807 = tree_213045(43, []);
+    tmp_262807.class = "ui top left attached tiny label send";
+    var tmp_262808 = tree_213045(70, []);
+    add_211771(tmp_262808, text_213148(makeNimstrLit("0")));
+    add_211771(tmp_262807, tmp_262808);
+    add_211771(tmp_262807, text_213148(makeNimstrLit(" ")));
+    var tmp_262809 = tree_213045(61, []);
+    tmp_262809.class = "counterclockwise rotated sign-out icon";
+    add_211771(tmp_262807, tmp_262809);
     add_211771(tmp_262806, tmp_262807);
-    add_211771(tmp_262806, text_213148(makeNimstrLit(" ")));
-    var tmp_262808 = tree_213045(61, []);
-    tmp_262808.class = "counterclockwise rotated sign-out icon";
-    add_211771(tmp_262806, tmp_262808);
-    add_211771(tmp_262805, tmp_262806);
-    var tmp_262809 = tree_213045(43, []);
-    tmp_262809.class = "ui top right attached tiny label receive";
-    var tmp_262810 = tree_213045(61, []);
-    tmp_262810.class = "clockwise rotated sign-in icon";
-    add_211771(tmp_262809, tmp_262810);
-    var tmp_262811 = tree_213045(70, []);
-    add_211771(tmp_262811, text_213148(makeNimstrLit("0")));
-    add_211771(tmp_262809, tmp_262811);
-    add_211771(tmp_262805, tmp_262809);
-    var tmp_262812 = tree_213045(43, []);
-    tmp_262812.class = "balance";
+    var tmp_262810 = tree_213045(43, []);
+    tmp_262810.class = "ui top right attached tiny label receive";
+    var tmp_262811 = tree_213045(61, []);
+    tmp_262811.class = "clockwise rotated sign-in icon";
+    add_211771(tmp_262810, tmp_262811);
+    var tmp_262812 = tree_213045(70, []);
     add_211771(tmp_262812, text_213148(makeNimstrLit("0")));
-    add_211771(tmp_262805, tmp_262812);
+    add_211771(tmp_262810, tmp_262812);
+    add_211771(tmp_262806, tmp_262810);
     var tmp_262813 = tree_213045(43, []);
-    tmp_262813.class = "ui bottom right attached tiny label symbol";
-    add_211771(tmp_262813, text_213148(makeNimstrLit("ZNY")));
-    add_211771(tmp_262805, tmp_262813);
-    add_211771(tmp_262804, tmp_262805);
+    tmp_262813.class = "balance";
+    add_211771(tmp_262813, text_213148(makeNimstrLit("0")));
+    add_211771(tmp_262806, tmp_262813);
+    var tmp_262814 = tree_213045(43, []);
+    tmp_262814.class = "ui bottom right attached tiny label symbol";
+    add_211771(tmp_262814, text_213148(makeNimstrLit("ZNY")));
+    add_211771(tmp_262806, tmp_262814);
+    add_211771(tmp_262805, tmp_262806);
     if (show_recv_address_selector_258077[0]) {
-    add_211771(tmp_262804, recv_address_selector_262084());
+    add_211771(tmp_262805, recv_address_selector_262085());
     }
     
     if (show_recv_address_modal_258078[0]) {
-    add_211771(tmp_262804, recv_address_modal_262227());
+    add_211771(tmp_262805, recv_address_modal_262228());
     }
     
-    add_211771(tmp_262804, send_form_262397());
-    var tmp_262814 = tree_213045(43, []);
-    tmp_262814.id = "ball-info";
-    tmp_262814.class = "ui center aligned segment";
-    add_211771(tmp_262814, text_213148([]));
-    var tmp_262815 = tree_213045(71, []);
-    add_211771(tmp_262814, tmp_262815);
-    add_211771(tmp_262814, text_213148([]));
-    add_211771(tmp_262804, tmp_262814);
-    var tmp_262816 = tree_213045(43, []);
-    tmp_262816.id = "wallet-seg";
-    tmp_262816.class = "ui center aligned segment seed-seg";
-    var tmp_262817 = tree_213045(84, []);
-    set_attr_211568(tmp_262817, "width", "0");
-    set_attr_211568(tmp_262817, "height", "0");
-    add_211771(tmp_262816, tmp_262817);
-    add_211771(tmp_262804, tmp_262816);
-    add_211771(tmp_262795, tmp_262804);
-    var tmp_262818 = tree_213045(43, []);
-    tmp_262818.class = "ui two bottom attached buttons settings";
+    add_211771(tmp_262805, send_form_262398());
+    var tmp_262815 = tree_213045(43, []);
+    tmp_262815.id = "ball-info";
+    tmp_262815.class = "ui center aligned segment";
+    add_211771(tmp_262815, text_213148([]));
+    var tmp_262816 = tree_213045(71, []);
+    add_211771(tmp_262815, tmp_262816);
+    add_211771(tmp_262815, text_213148([]));
+    add_211771(tmp_262805, tmp_262815);
+    var tmp_262817 = tree_213045(43, []);
+    tmp_262817.id = "wallet-seg";
+    tmp_262817.class = "ui center aligned segment seed-seg";
+    var tmp_262818 = tree_213045(84, []);
+    set_attr_211568(tmp_262818, "width", "0");
+    set_attr_211568(tmp_262818, "height", "0");
+    add_211771(tmp_262817, tmp_262818);
+    add_211771(tmp_262805, tmp_262817);
+    add_211771(tmp_262796, tmp_262805);
     var tmp_262819 = tree_213045(43, []);
-    tmp_262819.class = "ui button";
-    add_event_handler_242829(tmp_262819, 0, go_settings_261838(), kxi_232324[0]);
-    var tmp_262820 = tree_213045(61, []);
-    tmp_262820.class = "cog icon";
+    tmp_262819.class = "ui two bottom attached buttons settings";
+    var tmp_262820 = tree_213045(43, []);
+    tmp_262820.class = "ui button";
+    add_event_handler_242829(tmp_262820, 0, go_settings_261839(), kxi_232324[0]);
+    var tmp_262821 = tree_213045(61, []);
+    tmp_262821.class = "cog icon";
+    add_211771(tmp_262820, tmp_262821);
+    add_211771(tmp_262820, text_213148(makeNimstrLit("Settings")));
+    var tmp_262822 = tree_213045(70, []);
+    var tmp_262823 = tree_213045(61, []);
+    tmp_262823.class = "chevron down icon";
+    add_211771(tmp_262822, tmp_262823);
+    add_211771(tmp_262820, tmp_262822);
     add_211771(tmp_262819, tmp_262820);
-    add_211771(tmp_262819, text_213148(makeNimstrLit("Settings")));
-    var tmp_262821 = tree_213045(70, []);
-    var tmp_262822 = tree_213045(61, []);
-    tmp_262822.class = "chevron down icon";
-    add_211771(tmp_262821, tmp_262822);
-    add_211771(tmp_262819, tmp_262821);
-    add_211771(tmp_262818, tmp_262819);
-    var tmp_262823 = tree_213045(43, []);
-    tmp_262823.class = "ui button";
-    add_event_handler_242829(tmp_262823, 0, go_logs_261873(), kxi_232324[0]);
-    var tmp_262824 = tree_213045(61, []);
-    tmp_262824.class = "list alternate outline icon";
-    add_211771(tmp_262823, tmp_262824);
-    add_211771(tmp_262823, text_213148(makeNimstrLit("Logs")));
-    var tmp_262825 = tree_213045(70, []);
-    var tmp_262826 = tree_213045(61, []);
-    tmp_262826.class = "chevron down icon";
-    add_211771(tmp_262825, tmp_262826);
-    add_211771(tmp_262823, tmp_262825);
-    add_211771(tmp_262818, tmp_262823);
-    var tmp_262827 = tree_213045(43, []);
-    tmp_262827.id = "bottom-blink";
-    add_211771(tmp_262818, tmp_262827);
-    add_211771(tmp_262795, tmp_262818);
-    add_211771(tmp_262794, tmp_262795);
-    var tmp_262828 = tree_213045(109, []);
-    tmp_262828.id = "clipboard";
-    set_attr_211568(tmp_262828, "rows", "1");
-    set_attr_211568(tmp_262828, "tabindex", "-1");
-    add_211771(tmp_262794, tmp_262828);
-    add_211771(tmp_262717, tmp_262794);
+    var tmp_262824 = tree_213045(43, []);
+    tmp_262824.class = "ui button";
+    add_event_handler_242829(tmp_262824, 0, go_logs_261874(), kxi_232324[0]);
+    var tmp_262825 = tree_213045(61, []);
+    tmp_262825.class = "list alternate outline icon";
+    add_211771(tmp_262824, tmp_262825);
+    add_211771(tmp_262824, text_213148(makeNimstrLit("Logs")));
+    var tmp_262826 = tree_213045(70, []);
+    var tmp_262827 = tree_213045(61, []);
+    tmp_262827.class = "chevron down icon";
+    add_211771(tmp_262826, tmp_262827);
+    add_211771(tmp_262824, tmp_262826);
+    add_211771(tmp_262819, tmp_262824);
+    var tmp_262828 = tree_213045(43, []);
+    tmp_262828.id = "bottom-blink";
+    add_211771(tmp_262819, tmp_262828);
+    add_211771(tmp_262796, tmp_262819);
+    add_211771(tmp_262795, tmp_262796);
+    var tmp_262829 = tree_213045(109, []);
+    tmp_262829.id = "clipboard";
+    set_attr_211568(tmp_262829, "rows", "1");
+    set_attr_211568(tmp_262829, "tabindex", "-1");
+    add_211771(tmp_262795, tmp_262829);
+    add_211771(tmp_262718, tmp_262795);
     }
     
     if ((show_page3_258071[0] || show_page4_258072[0])) {
-    var tmp_262829 = tree_213045(17, []);
-    tmp_262829.id = "section4";
-    tmp_262829.class = "tradelogs-section";
-    var tmp_262830 = tree_213045(43, []);
-    tmp_262830.class = "ui buttons settings backpage";
+    var tmp_262830 = tree_213045(17, []);
+    tmp_262830.id = "section4";
+    tmp_262830.class = "tradelogs-section";
     var tmp_262831 = tree_213045(43, []);
-    tmp_262831.class = "ui button backwallet";
-    add_event_handler_242829(tmp_262831, 0, back_wallet_261906(), kxi_232324[0]);
-    var tmp_262832 = tree_213045(61, []);
-    tmp_262832.class = "dot circle icon";
+    tmp_262831.class = "ui buttons settings backpage";
+    var tmp_262832 = tree_213045(43, []);
+    tmp_262832.class = "ui button backwallet";
+    add_event_handler_242829(tmp_262832, 0, back_wallet_261907(), kxi_232324[0]);
+    var tmp_262833 = tree_213045(61, []);
+    tmp_262833.class = "dot circle icon";
+    add_211771(tmp_262832, tmp_262833);
+    add_211771(tmp_262832, text_213148(makeNimstrLit("Back")));
+    var tmp_262834 = tree_213045(70, []);
+    var tmp_262835 = tree_213045(61, []);
+    tmp_262835.class = "chevron up icon";
+    add_211771(tmp_262834, tmp_262835);
+    add_211771(tmp_262832, tmp_262834);
     add_211771(tmp_262831, tmp_262832);
-    add_211771(tmp_262831, text_213148(makeNimstrLit("Back")));
-    var tmp_262833 = tree_213045(70, []);
-    var tmp_262834 = tree_213045(61, []);
-    tmp_262834.class = "chevron up icon";
-    add_211771(tmp_262833, tmp_262834);
-    add_211771(tmp_262831, tmp_262833);
     add_211771(tmp_262830, tmp_262831);
-    add_211771(tmp_262829, tmp_262830);
     if (show_trade_logs_258079[0]) {
-    var tmp_262835 = tree_213045(43, []);
-    tmp_262835.class = "ui container";
     var tmp_262836 = tree_213045(43, []);
-    tmp_262836.id = "tradeunconfs";
-    tmp_262836.class = "ui cards tradelogs";
-    add_211771(tmp_262835, tmp_262836);
+    tmp_262836.class = "ui container";
     var tmp_262837 = tree_213045(43, []);
-    tmp_262837.id = "tradelogs";
+    tmp_262837.id = "tradeunconfs";
     tmp_262837.class = "ui cards tradelogs";
-    add_211771(tmp_262835, tmp_262837);
-    add_211771(tmp_262829, tmp_262835);
+    add_211771(tmp_262836, tmp_262837);
+    var tmp_262838 = tree_213045(43, []);
+    tmp_262838.id = "tradelogs";
+    tmp_262838.class = "ui cards tradelogs";
+    add_211771(tmp_262836, tmp_262838);
+    add_211771(tmp_262830, tmp_262836);
     }
     
     if (show_settings_258080[0]) {
-    add_211771(tmp_262829, settings_page_262662());
-    add_211771(tmp_262829, settings_modal_262596());
+    add_211771(tmp_262830, settings_page_262663());
+    add_211771(tmp_262830, settings_modal_262597());
     }
     
-    add_211771(tmp_262717, tmp_262829);
+    add_211771(tmp_262718, tmp_262830);
     }
     
-    result_262716 = tmp_262717;
+    result_262717 = tmp_262718;
 
-  return result_262716;
+  return result_262717;
 
 }
 
@@ -6305,6 +6306,11 @@ function after_script_263505(data_263507) {
     
     }
     
+    if ((show_page2_258070[0] && !(passphrase_fulfill_258075[0]))) {
+          $('input[name="input-passphrase"]').focus();
+    
+    }
+    
     if (show_page4_258072[0]) {
           //$.fn.visibility.settings.silent = true;
       $('.backpage').visibility({
@@ -6375,4 +6381,4 @@ if (wallet_setup_263537[0]) {
 view_selector_258124(12, true);
 }
 
-app_inst_258014[0] = set_initializer_242707(app_main_262713, "main", after_script_263505);
+app_inst_258014[0] = set_initializer_242707(app_main_262714, "main", after_script_263505);
