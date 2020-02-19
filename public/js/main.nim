@@ -709,6 +709,7 @@ proc changePassphrase(ev: Event; n: VNode) =
 proc confirmPassphrase(ev: Event; n: VNode) =
   var ret_lock: bool = false
   asm """
+    $('input[name="input-passphrase"]').blur();
     var wallet = pastel.wallet;
     `ret_lock` = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
   """
@@ -728,7 +729,7 @@ proc passphraseEditor(): VNode =
         h4(class="ui grey inverted header center"): text "Input passphrase"
         tdiv(class="ui form"):
           tdiv(class="field"):
-            input(class="center", type="text", name="input-passphrase", value=passPhrase, placeholder="Passphrase", onkeyup=changePassphrase)
+            input(class="center", type="text", name="input-passphrase", value=passPhrase, placeholder="Passphrase", onkeyup=changePassphrase, onkeyupenter=confirmPassphrase)
       button(class="ui right floated olive button", onclick=confirmPassphrase):
         text "Save"
 
@@ -1528,6 +1529,11 @@ proc afterScript(data: RouterData) =
           elm.addEventListener('click', cb);
         }
       });
+    """
+
+  if showPage2 and not passphraseFulfill:
+    asm """
+      $('input[name="input-passphrase"]').focus();
     """
 
   if showPage4:
