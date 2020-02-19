@@ -1068,7 +1068,7 @@ i.receive {
   position: absolute;
   visibility: hidden;
   bottom: 0;
-  right: -100px;
+  right: 0;
   z-index: 0;
   background-color: rgba(100, 100, 100, .2);
   border: none;
