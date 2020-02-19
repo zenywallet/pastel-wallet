@@ -600,6 +600,12 @@ i.receive {
 .ui.basic.buttons > .ui.button.send:hover, .ui.basic.buttons > .ui.button.receive:hover, .ui.basic.buttons > .ui.button:hover {
   background: rgba(190,190,190,0.6) !important;
 }
+.ui.basic.button:active, .ui.basic.buttons .button:active {
+  background: rgba(190,190,190,0.6) !important;
+}
+.ui.basic.button:focus, .ui.basic.buttons .button:focus, .ui.basic.buttons > .ui.button.send:focus, .ui.basic.buttons > .ui.button.receive:focus {
+  background: rgba(190,190,190,0.6) !important;
+}
 .ui.buttons.settings > .ui.button {
   padding-left: 30px;
 }
