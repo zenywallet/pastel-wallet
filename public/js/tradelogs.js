@@ -151,8 +151,7 @@ var TradeLogs = (function() {
   var itemcache = [];
   var first_sequence = null;
   var last_sequence = null;
-  var limit = 50;
-  var cachelimit = 50;
+  var cachelimit = 200;
   var eof = false;
 
   function infinite_additem(item) {

@@ -132,9 +132,6 @@ type
     txid: string
     height: uint32
     time: uint32
-    change: uint32
-    index: uint32
-    xpub_idx: int
     trans_time: uint64
   TxLogs = seq[Txlog]
 
@@ -155,28 +152,31 @@ proc SequenceRevCmp[T](x, y: T): int =
 proc TxLogCmp[T](x, y: T): int =
   result = cmp(x.height, y.height)
   if result == 0:
-    result = cmp(x.time, y.time)
+    result = cmp(x.trans_time, y.trans_time)
     if result == 0:
-      result = cmp(x.trans_time, y.trans_time)
+      result = cmp(x.txtype, y.txtype)
       if result == 0:
-        result = cmp(x.change, y.change)
-        if result == 0:
-          result = cmp(x.index, y.index)
-          if result == 0:
-            result = cmp(x.xpub_idx, y.xpub_idx)
+        result = cmp(x.sequence, y.sequence)
 
 proc TxLogRevCmp[T](x, y: T): int =
   result = cmp(y.height, x.height)
   if result == 0:
-    result = cmp(y.time, x.time)
+    result = cmp(y.trans_time, x.trans_time)
     if result == 0:
-      result = cmp(y.trans_time, x.trans_time)
+      result = cmp(y.txtype, x.txtype)
       if result == 0:
-        result = cmp(y.change, x.change)
-        if result == 0:
-          result = cmp(y.index, x.index)
-          if result == 0:
-            result = cmp(y.xpub_idx, x.xpub_idx)
+        result = cmp(y.sequence, x.sequence)
+
+type
+  TxSequenceType = uint64
+
+proc combineSequenceType(sequence: uint64, txtype: uint8): TxSequenceType =
+  result = (sequence shl 8) or txtype
+
+proc separateSequenceType(sectype: TxSequenceType): tuple[sequence: uint64, txtype: uint8] =
+  var txtype = cast[uint8](sectype and 0xff)
+  var sequence = sectype shr 8
+  (sequence, txtype)
 
 proc j_uint64*(val: uint64): JsonNode =
   if val > 9007199254740991'u64:
@@ -335,52 +335,119 @@ proc stream_main() {.thread.} =
 
               elif cmd == "txlogs":
                 var txlogs: TxLogs
+                var txIns = initTable[string, uint64]()
+                var txInsInfo = initTable[string, tuple[sequence: uint64, height: uint32, time: uint32]]()
                 var rev_flag = true
                 if json_cmd.hasKey("data"):
                   if json_cmd["data"].hasKey("lt"):
                     var sequence = json_cmd["data"]["lt"].getUint64
+                    var countTx = initTable[TxSequenceType, int]()
                     for i, wid in client.wallets:
                       for l in db.getAddrlogsReverse_lt(wid, sequence):
-                        var trans_time: uint64 = 0
-                        var txtime = db.getTxtime(l.txid)
-                        if txtime.err == DbStatus.Success:
-                          trans_time = txtime.res
-                        txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
-                                        value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                        change: l.change, index: l.index, xpub_idx: i, trans_time: trans_time))
-                        if txlogs.len >= 50:
-                          break
-                    txlogs.sort(SequenceRevCmp)
+                        if l.txtype == 1 and l.change == 0:
+                          var trans_time: uint64 = 0
+                          var txtime = db.getTxtime(l.txid)
+                          if txtime.err == DbStatus.Success:
+                            trans_time = txtime.res
+                          txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                          value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                          trans_time: trans_time))
+                          countTx[combineSequenceType(l.sequence, l.txtype)] = 1
+                        elif l.txtype == 0:
+                          txIns[l.txid] = txIns.getOrDefault(l.txid) + l.value
+                          txInsInfo[l.txid] = (sequence: l.sequence, height: l.height, time: l.time)
+                          countTx[combineSequenceType(l.sequence, l.txtype)] = 1
+                      if countTx.len >= 200:
+                        break
                   elif json_cmd["data"].hasKey("gt"):
                     var sequence = json_cmd["data"]["gt"].getUint64
+                    var countTx = initTable[TxSequenceType, int]()
                     for i, wid in client.wallets:
                       for l in db.getAddrlogs_gt(wid, sequence):
-                        var trans_time: uint64 = 0
-                        var txtime = db.getTxtime(l.txid)
-                        if txtime.err == DbStatus.Success:
-                          trans_time = txtime.res
-                        txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
-                                        value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                        change: l.change, index: l.index, xpub_idx: i, trans_time: trans_time))
-                        if txlogs.len >= 50:
-                          break
-                    txlogs.sort(TxLogCmp)
+                        if l.txtype == 1 and l.change == 0:
+                          var trans_time: uint64 = 0
+                          var txtime = db.getTxtime(l.txid)
+                          if txtime.err == DbStatus.Success:
+                            trans_time = txtime.res
+                          txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                          value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                          trans_time: trans_time))
+                          countTx[combineSequenceType(l.sequence, l.txtype)] = 1
+                        elif l.txtype == 0:
+                          txIns[l.txid] = txIns.getOrDefault(l.txid) + l.value
+                          txInsInfo[l.txid] = (sequence: l.sequence, height: l.height, time: l.time)
+                          countTx[combineSequenceType(l.sequence, l.txtype)] = 1
+                      if countTx.len >= 200:
+                        break
                     rev_flag = false
                 else:
                   for i, wid in client.wallets:
+                    var countTx = initTable[TxSequenceType, int]()
                     for l in db.getAddrlogsReverse(wid):
+                      if l.txtype == 1 and l.change == 0:
+                        var trans_time: uint64 = 0
+                        var txtime = db.getTxtime(l.txid)
+                        if txtime.err == DbStatus.Success:
+                          trans_time = txtime.res
+                        txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
+                                        value: l.value, txid: l.txid, height: l.height, time: l.time,
+                                        trans_time: trans_time))
+                        countTx[combineSequenceType(l.sequence, l.txtype)] = 1
+                      elif l.txtype == 0:
+                        txIns[l.txid] = txIns.getOrDefault(l.txid) + l.value
+                        txInsInfo[l.txid] = (sequence: l.sequence, height: l.height, time: l.time)
+                        countTx[combineSequenceType(l.sequence, l.txtype)] = 1
+                    if countTx.len >= 200:
+                      break
+                var txids: seq[string] = @[]
+                for txid in txIns.keys:
+                  txids.add(txid)
+                var txouts = blockstor.getTxout(txids)
+                if txouts.hasKey("res"):
+                  var txouts_res = txouts["res"]
+                  var idx: int = 0
+                  for txid, value in txIns:
+                    var txout = txouts_res[idx]
+                    inc(idx)
+                    var change_value: uint64 = 0'u64
+                    var out_value: uint64 = 0'u64
+                    var fee: uint64 = 0'u64
+                    var addrs_array: seq[string]
+                    for t_array in txout:
+                      var cur_value = t_array["value"].getUint64
+                      var find = false
+                      for a in t_array["addresses"]:
+                        var a_str = a.getStr
+                        for ainfo in db.getAddresses(a_str):
+                          if client.wallets.contains(ainfo.wid) and ainfo.change == 1:
+                            find = true
+                        if find:
+                          change_value += cur_value
+                        else:
+                          addrs_array.add(a_str)
+                        break
+                      out_value += cur_value
+                    var send_value: uint64
+                    if change_value > 0'u64:
+                      var fee = value - out_value
+                      send_value = value - change_value - fee
+                    else:
+                      send_value = value
+                    if addrs_array.len > 0:
                       var trans_time: uint64 = 0
-                      var txtime = db.getTxtime(l.txid)
+                      var txtime = db.getTxtime(txid)
                       if txtime.err == DbStatus.Success:
                         trans_time = txtime.res
-                      txlogs.add(TxLog(sequence: l.sequence, txtype: l.txtype, address: l.address,
-                                      value: l.value, txid: l.txid, height: l.height, time: l.time,
-                                      change: l.change, index: l.index, xpub_idx: i, trans_time: trans_time))
-                      if txlogs.len >= 50:
-                        break
+                      var info = txInsInfo[txid]
+                      txlogs.add(TxLog(sequence: info.sequence, txtype: 0, address: addrs_array[0],
+                                      value: send_value, txid: txid, height: info.height,
+                                      time: info.time, trans_time: trans_time))
+                if rev_flag:
                   txlogs.sort(TxLogRevCmp)
-                if txlogs.len > 50:
-                  txlogs.delete(50, txlogs.high)
+                else:
+                  txlogs.sort(TxLogCmp)
+                if txlogs.len > 200:
+                  txlogs.delete(200, txlogs.high)
                 var json = %*{"type": "txlogs", "data": {"txlogs": txlogs, "rev": rev_flag}}
                 for j in json["data"]["txlogs"]:
                   j["value"] = j_uint64(j["value"].getUint64)
