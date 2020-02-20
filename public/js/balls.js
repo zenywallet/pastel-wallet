@@ -787,6 +787,7 @@ UtxoBalls.simple = function() {
       setFluffyCollisionBack(b);
       setTimeout(fluffy_free_worker, 100);
     } else {
+      engine.world.gravity.y = 1;
       fluffy_free_active = false;
     }
   }
@@ -794,6 +795,7 @@ UtxoBalls.simple = function() {
   function fluffy_free_worker_start() {
     if(!fluffy_free_active) {
       fluffy_free_active = true;
+      engine.world.gravity.y = 0.5;
       setTimeout(fluffy_free_worker, 200);
     }
     clearTimeout(fluffy_free_tval);
