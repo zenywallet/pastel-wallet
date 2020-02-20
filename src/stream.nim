@@ -411,7 +411,6 @@ proc stream_main() {.thread.} =
                     inc(idx)
                     var change_value: uint64 = 0'u64
                     var out_value: uint64 = 0'u64
-                    var fee: uint64 = 0'u64
                     var addrs_array: seq[string]
                     for t_array in txout:
                       var cur_value = t_array["value"].getUint64
@@ -428,11 +427,11 @@ proc stream_main() {.thread.} =
                         break
                       out_value += cur_value
                     var send_value: uint64
+                    var fee: uint64 = value - out_value
                     if change_value > 0'u64:
-                      var fee = value - out_value
                       send_value = value - change_value - fee
                     else:
-                      send_value = value
+                      send_value = value - fee
                     if addrs_array.len > 0:
                       var trans_time: uint64 = 0
                       var txtime = db.getTxtime(txid)
