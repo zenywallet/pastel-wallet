@@ -331,6 +331,22 @@ UtxoBalls.simple = function() {
             ball.ballMark = 0;
           } else {
             var ball = create_unconf_ball(task.unconf);
+            if(task.unconf.ref) {
+              var ref = task.unconf.ref;
+              var idx_ref = create_bodies_idx({ballType: 1, unconf: ref});
+              var ball_ref = Ball.bodies_idx[idx_ref];
+              if(ball_ref) {
+                var rx = 5 * (Math.random() - 0.5);
+                var ry = 5 * (Math.random() - 0.5);
+                ball.fluffy_free = true;
+                setFluffyCollisionAll(ball);
+                fluffy_frees.push(ball);
+                fluffy_free_worker_start();
+                Body.setPosition(ball, {x: ball_ref.position.x, y: ball_ref.position.y});
+                Body.setVelocity(ball, {x: rx, y: ry});
+                Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
+              }
+            }
             Ball.bodies.push(ball);
             add_bodies_idx(ball);
             World.add(world, ball);
@@ -617,7 +633,24 @@ UtxoBalls.simple = function() {
 
   function unconfs(data) {
     console.log('unconfs=', JSON.stringify(data));
+    var mytxs = {};
+    for(var txid in data.txs) {
+      var tx = data.txs[txid];
+      var send_addrs = {};
+      for(var txa in tx.data) {
+        var v = tx.data[txa]
+        for(var i in v) {
+          if(i == 0) {
+            send_addrs[txa] = 1;
+          }
+        }
+      }
+      if(Object.keys(send_addrs).length > 0) {
+        mytxs[txid] = send_addrs;
+      }
+    }
     var unconf_list = [];
+    var unconf_pop_list = [];
     Ball.create_balls_task.push({type: 16});
     for(var addr in data.addrs) {
       var val = data.addrs[addr];
@@ -626,7 +659,7 @@ UtxoBalls.simple = function() {
           var spent = val.spents[i];
           var item = {txtype: 0, address: addr, txid: spent.txid, n: spent.n, value: spent.value,
             value_d: conv_coin(sanitize(spent.value)), change: val.change, index: val.index,
-            xpub_idx: val.xpub_idx, trans_time: spent.trans_time};
+            xpub_idx: val.xpub_idx, trans_time: spent.trans_time, txid_out: spent.txid_out};
           unconf_list.push(item);
         }
       }
@@ -636,10 +669,44 @@ UtxoBalls.simple = function() {
           var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n, value: txout.value,
             value_d: conv_coin(sanitize(txout.value)), change: val.change, index: val.index,
             xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
-          unconf_list.push(item);
+          if(mytxs[txout.txid]) {
+            unconf_pop_list.push(item);
+          } else {
+            unconf_list.push(item);
+          }
         }
       }
     }
+    var mark = {};
+    for(var i in unconf_pop_list) {
+      var itemp = unconf_pop_list[i];
+      var send_addrs = mytxs[itemp.txid];
+      for(var j in unconf_list) {
+        var item = unconf_list[j];
+        if(mark[j]) {
+          continue;
+        }
+        if(item.txtype == 0 && send_addrs[item.address] && item.txid_out == itemp.txid) {
+          mark[j] = 1;
+          itemp.ref = item;
+          break;
+        }
+      }
+    }
+    for(var i in unconf_pop_list) {
+      var itemp = unconf_pop_list[i];
+      if(!itemp.ref) {
+        var send_addrs = mytxs[itemp.txid];
+        for(var j in unconf_list) {
+          var item = unconf_list[j];
+          if(item.txtype == 0 && send_addrs[item.address] && item.txid_out == itemp.txid) {
+            itemp.ref = item;
+            break;
+          }
+        }
+      }
+    }
+    unconf_list = unconf_list.concat(unconf_pop_list);
     Ball.unconfs = unconf_list;
     update_balls_r();
     for(var i in unconf_list) {
@@ -727,7 +794,7 @@ UtxoBalls.simple = function() {
   function fluffy_free_worker_start() {
     if(!fluffy_free_active) {
       fluffy_free_active = true;
-      setTimeout(fluffy_free_worker, 100);
+      setTimeout(fluffy_free_worker, 200);
     }
     clearTimeout(fluffy_free_tval);
     fluffy_free_tval = setTimeout(function() {
