@@ -782,6 +782,38 @@ proc backWallet(): proc() =
 
 asm """
   var send_ball_count = 0;
+  var send_ball_count_less = false;
+
+  function conv_coin(uint64_val) {
+    strval = uint64_val.toString();
+    val = parseInt(strval);
+    if(val > Number.MAX_SAFE_INTEGER) {
+      var d = strval.slice(-8).replace(/0+$/, '');
+      var n = strval.substr(0, strval.length - 8);
+      if(d.length > 0) {
+        return n + '.' + d;
+      } else {
+        return n;
+      }
+    }
+    return val / 100000000;
+  }
+
+  function setSendUtxo(value) {
+    pastel.wallet.calcSendUtxo(value, function(result) {
+      if(result.err) {
+        $('#btn-utxo-count').text('>' + String(result.safe_count));
+        pastel.utxoballs.setsend(result.safe_count);
+        send_ball_count = result.safe_count;
+      } else {
+        send_ball_count_less = !result.eq;
+        $('#btn-utxo-count').text((result.eq ? '' : '≤') + String(result.utxo_count));
+        pastel.utxoballs.setsend(result.utxo_count);
+        send_ball_count = result.utxo_count;
+      }
+    });
+  }
+
   function initSendForm() {
     $('#btn-send-clear').off('click').click(function() {
       $('#send-coins input[name="address"]').val('');
@@ -834,23 +866,33 @@ asm """
       }
       elm.blur();
     });
-    send_ball_count = pastel.utxoballs.setsend(send_ball_count);
+    pastel.utxoballs.setsend(send_ball_count);
+
     $('#btn-utxo-plus').off('click').click(function() {
-      send_ball_count++;
+      if(send_ball_count_less) {
+        send_ball_count_less = false;
+      } else {
+        send_ball_count++;
+      }
       if(send_ball_count >= 1000) {
         send_ball_count = 999;
       }
-      send_ball_count = pastel.utxoballs.setsend(send_ball_count);
-      $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
+      pastel.utxoballs.setsend(send_ball_count);
+      var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
+      $('#btn-utxo-count').text(String(sendval.count));
       $(this).blur();
     });
     $('#btn-utxo-minus').off('click').click(function() {
       send_ball_count--;
+      send_ball_count_less = false;
       if(send_ball_count < 0) {
         send_ball_count = 0;
       }
-      send_ball_count = pastel.utxoballs.setsend(send_ball_count);
-      $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
+      pastel.utxoballs.setsend(send_ball_count);
+      var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
+      $('#btn-utxo-count').text(String(sendval.count));
       $(this).blur();
     });
     $('#btn-tx-send').off('click').click(function() {
@@ -923,6 +965,7 @@ asm """
       }
     });
   }
+
   var sendrecv_switch = 0;
   var sendrecv_switch_busy = false;
   var sendrecv_switch_tval;
@@ -1131,6 +1174,28 @@ proc recvAddressModal(): VNode =
             label: text "Message"
             textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
 
+proc checkSendAmount(ev: Event; n: VNode) =
+  var s = n.value
+  asm """
+    var amount = String(`s`).trim();
+    if(amount.length > 0) {
+      amount = amount.replace(/,/g, '');
+      var amounts = amount.split('.');
+      if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+        var value = '';
+        if(amounts.length == 1) {
+          value = amounts[0] + '00000000';
+        } else if(amounts.length == 2) {
+          value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
+        }
+        if(value.length > 0) {
+          console.log(value);
+          setSendUtxo(value);
+        }
+      }
+    }
+  """
+
 asm """
   var uriOptions = [];
 """
@@ -1157,7 +1222,7 @@ proc sendForm(): VNode =
       tdiv(class="field"):
         label: text "Amount"
         tdiv(class="ui small input"):
-          input(class="center", type="text", name="amount", placeholder="Amount")
+          input(class="center", type="text", name="amount", placeholder="Amount", onkeyup=checkSendAmount)
           tdiv(class="ui mini basic icon buttons utxoctrl"):
             button(id="btn-utxo-minus", class="ui button", title="-1 Ball"):
               italic(class="minus circle icon")

@@ -668,4 +668,77 @@ function Wallet() {
       }, 1000);
     }, 30000);
   }
+
+  this.calcSendValue = function(utxo_count) {
+    var in_value = UINT64(0);
+    var count = 0;
+    for(var i = 0; i < utxo_count; i++) {
+      var utxo = _utxos[i];
+      if(utxo) {
+        in_value.add(UINT64(String(utxo.value)));
+        count++;
+      } else {
+        break;
+      }
+    }
+    if(in_value.gt(UINT64(0))) {
+      var fee = UINT64(String(148 * count + 34 + 10));
+      return {err: 0, value: in_value.subtract(fee).toString(), count: count};
+    } else {
+      return {err: 0, value: "0", count: count};
+    }
+  }
+
+  this.calcSendUtxo = function(value_str, cb) {
+    var value = UINT64(String(value_str));
+    var in_value = UINT64(0);
+    var sign_utxos = [];
+    var utxo_count = 0;
+    var result_out = 0;
+    var eq = false;
+    var safe_size = UINT64(String("100000"));
+    var safe_utxo_count = 0;
+    var size = UINT64(34 + 10);
+    while(true) {
+      size.add(UINT64(148));
+      if(safe_size.gt(size)) {
+        safe_utxo_count++;
+      } else {
+        break;
+      }
+    }
+    for(var i in _utxos) {
+      var utxo = _utxos[i];
+      in_value.add(UINT64(String(utxo.value)));
+      utxo_count++;
+      if(in_value.gt(value)) {
+        var sub = UINT64(in_value);
+        sub.subtract(value);
+        var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
+        var chk_eq = sub.eq(fee1);
+        if(sub.gt(fee1) || chk_eq) {
+          result_out = 2;
+          eq = chk_eq;
+          break;
+        } else {
+          var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
+
+          var chk_eq = sub.eq(fee2);
+          if(sub.gt(fee2) || chk_eq) {
+            result_out = 1;
+            eq = chk_eq;
+            var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
+            if(sub.lt(fee3)) {
+              break;
+            }
+          }
+        }
+      }
+    }
+    if(result_out == 1 || result_out == 2) {
+      cb({err: 0, utxo_count: utxo_count, eq: eq, max_count: _utxos.length, safe_count: safe_utxo_count, out: result_out});
+    } else {
+      cb({err: 1, max_count: _utxos.length, safe_count: safe_utxo_count});
+    }
+  }
 }

@@ -2644,6 +2644,38 @@ function levens_one(word, wordlist) {
 
 var confirm_mnemonic_advanced_260300 = [false];
   var send_ball_count = 0;
+  var send_ball_count_less = false;
+
+  function conv_coin(uint64_val) {
+    strval = uint64_val.toString();
+    val = parseInt(strval);
+    if(val > Number.MAX_SAFE_INTEGER) {
+      var d = strval.slice(-8).replace(/0+$/, '');
+      var n = strval.substr(0, strval.length - 8);
+      if(d.length > 0) {
+        return n + '.' + d;
+      } else {
+        return n;
+      }
+    }
+    return val / 100000000;
+  }
+
+  function setSendUtxo(value) {
+    pastel.wallet.calcSendUtxo(value, function(result) {
+      if(result.err) {
+        $('#btn-utxo-count').text('>' + String(result.safe_count));
+        pastel.utxoballs.setsend(result.safe_count);
+        send_ball_count = result.safe_count;
+      } else {
+        send_ball_count_less = !result.eq;
+        $('#btn-utxo-count').text((result.eq ? '' : '≤') + String(result.utxo_count));
+        pastel.utxoballs.setsend(result.utxo_count);
+        send_ball_count = result.utxo_count;
+      }
+    });
+  }
+
   function initSendForm() {
     $('#btn-send-clear').off('click').click(function() {
       $('#send-coins input[name="address"]').val('');
@@ -2696,23 +2728,33 @@ var confirm_mnemonic_advanced_260300 = [false];
       }
       elm.blur();
     });
-    send_ball_count = pastel.utxoballs.setsend(send_ball_count);
+    pastel.utxoballs.setsend(send_ball_count);
+
     $('#btn-utxo-plus').off('click').click(function() {
-      send_ball_count++;
+      if(send_ball_count_less) {
+        send_ball_count_less = false;
+      } else {
+        send_ball_count++;
+      }
       if(send_ball_count >= 1000) {
         send_ball_count = 999;
       }
-      send_ball_count = pastel.utxoballs.setsend(send_ball_count);
-      $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
+      pastel.utxoballs.setsend(send_ball_count);
+      var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
+      $('#btn-utxo-count').text(String(sendval.count));
       $(this).blur();
     });
     $('#btn-utxo-minus').off('click').click(function() {
       send_ball_count--;
+      send_ball_count_less = false;
       if(send_ball_count < 0) {
         send_ball_count = 0;
       }
-      send_ball_count = pastel.utxoballs.setsend(send_ball_count);
-      $('#btn-utxo-count').text(String(send_ball_count) + ' ≤max');
+      pastel.utxoballs.setsend(send_ball_count);
+      var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
+      $('#btn-utxo-count').text(String(sendval.count));
       $(this).blur();
     });
     $('#btn-tx-send').off('click').click(function() {
@@ -2726,6 +2768,7 @@ var confirm_mnemonic_advanced_260300 = [false];
         amount = amount.replace(/,/g, '');
         var amounts = amount.split('.');
         if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+          var value = '';
           if(amounts.length == 1) {
             value = amounts[0] + '00000000';
           } else if(amounts.length == 2) {
@@ -2784,6 +2827,7 @@ var confirm_mnemonic_advanced_260300 = [false];
       }
     });
   }
+
   var sendrecv_switch = 0;
   var sendrecv_switch_busy = false;
   var sendrecv_switch_tval;
@@ -5081,6 +5125,7 @@ function btn_send_261953() {
         return;
       }
       sendrecv_select((sendrecv_switch == 1) ? 0 : 1);
+      document.getElementById('btn-send').blur();
     
 
       
@@ -5101,6 +5146,7 @@ function btn_receive_261986() {
         return;
       }
       sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
+      document.getElementById('btn-receive').blur();
     
 
       
@@ -5356,146 +5402,171 @@ function btn_send_close_262019() {
 
 }
 
-function send_form_262398() {
-  var result_262400 = null;
+function check_send_amount_262384(ev_262386, n_262387) {
+    var s_262388 = value_210867(n_262387);
+        var amount = String(s_262388).trim();
+    if(amount.length > 0) {
+      amount = amount.replace(/,/g, '');
+      var amounts = amount.split('.');
+      if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+        var value = '';
+        if(amounts.length == 1) {
+          value = amounts[0] + '00000000';
+        } else if(amounts.length == 2) {
+          value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
+        }
+        if(value.length > 0) {
+          console.log(value);
+          setSendUtxo(value);
+        }
+      }
+    }
+  
 
-    var tmp_262401 = tree_213045(43, []);
-    tmp_262401.id = "send-coins";
-    tmp_262401.class = "ui center aligned segment hidden";
-    var tmp_262402 = tree_213045(43, []);
-    tmp_262402.class = "ui top attached label sendcoins";
-    add_211771(tmp_262402, text_213148(makeNimstrLit("Send Coins ")));
-    var tmp_262403 = tree_213045(70, []);
-    var tmp_262404 = tree_213045(61, []);
-    tmp_262404.class = "close icon btn-close";
-    add_event_handler_242829(tmp_262404, 0, btn_send_close_262019(), kxi_232324[0]);
-    add_211771(tmp_262403, tmp_262404);
-    add_211771(tmp_262402, tmp_262403);
-    add_211771(tmp_262401, tmp_262402);
-    var tmp_262405 = tree_213045(43, []);
-    tmp_262405.class = "ui right floated mini basic icon buttons";
-    var tmp_262406 = tree_213045(104, []);
-    tmp_262406.id = "btn-send-lock";
-    tmp_262406.class = "ui button";
-    set_attr_211568(tmp_262406, "title", "Locked");
-    var tmp_262407 = tree_213045(61, []);
-    tmp_262407.class = "lock icon";
-    add_211771(tmp_262406, tmp_262407);
-    add_211771(tmp_262405, tmp_262406);
-    add_211771(tmp_262401, tmp_262405);
-    var tmp_262408 = tree_213045(43, []);
-    tmp_262408.class = "ui mini basic icon buttons btn-send-tools";
-    var tmp_262409 = tree_213045(104, []);
-    tmp_262409.id = "btn-send-clear";
-    tmp_262409.class = "ui button";
-    set_attr_211568(tmp_262409, "title", "Clear");
-    var tmp_262410 = tree_213045(61, []);
-    tmp_262410.class = "eraser icon";
-    add_211771(tmp_262409, tmp_262410);
-    add_211771(tmp_262408, tmp_262409);
-    var tmp_262411 = tree_213045(104, []);
-    tmp_262411.id = "btn-send-qrcode";
-    tmp_262411.class = "ui button";
-    set_attr_211568(tmp_262411, "title", "Scan QR Code");
-    var tmp_262412 = tree_213045(61, []);
-    tmp_262412.class = "camera icon";
-    add_211771(tmp_262411, tmp_262412);
-    add_211771(tmp_262408, tmp_262411);
-    add_211771(tmp_262401, tmp_262408);
-    var tmp_262413 = tree_213045(43, []);
-    tmp_262413.class = "ui form";
-    var tmp_262414 = tree_213045(43, []);
-    tmp_262414.class = "field";
-    var tmp_262415 = tree_213045(102, []);
-    add_211771(tmp_262415, text_213148(makeNimstrLit("Send Address")));
-    add_211771(tmp_262414, tmp_262415);
-    var tmp_262416 = tree_213045(43, []);
-    tmp_262416.class = "ui small input";
-    var tmp_262417 = tree_213045(103, []);
-    tmp_262417.class = "center";
-    set_attr_211568(tmp_262417, "type", "text");
-    set_attr_211568(tmp_262417, "name", "address");
-    set_attr_211568(tmp_262417, "placeholder", "Address");
-    add_211771(tmp_262416, tmp_262417);
-    add_211771(tmp_262414, tmp_262416);
-    add_211771(tmp_262413, tmp_262414);
-    var tmp_262418 = tree_213045(43, []);
-    tmp_262418.class = "field";
-    var tmp_262419 = tree_213045(102, []);
-    add_211771(tmp_262419, text_213148(makeNimstrLit("Amount")));
-    add_211771(tmp_262418, tmp_262419);
+  
+}
+
+function send_form_262416() {
+  var result_262418 = null;
+
+    var tmp_262419 = tree_213045(43, []);
+    tmp_262419.id = "send-coins";
+    tmp_262419.class = "ui center aligned segment hidden";
     var tmp_262420 = tree_213045(43, []);
-    tmp_262420.class = "ui small input";
-    var tmp_262421 = tree_213045(103, []);
-    tmp_262421.class = "center";
-    set_attr_211568(tmp_262421, "type", "text");
-    set_attr_211568(tmp_262421, "name", "amount");
-    set_attr_211568(tmp_262421, "placeholder", "Amount");
+    tmp_262420.class = "ui top attached label sendcoins";
+    add_211771(tmp_262420, text_213148(makeNimstrLit("Send Coins ")));
+    var tmp_262421 = tree_213045(70, []);
+    var tmp_262422 = tree_213045(61, []);
+    tmp_262422.class = "close icon btn-close";
+    add_event_handler_242829(tmp_262422, 0, btn_send_close_262019(), kxi_232324[0]);
+    add_211771(tmp_262421, tmp_262422);
     add_211771(tmp_262420, tmp_262421);
-    var tmp_262422 = tree_213045(43, []);
-    tmp_262422.class = "ui mini basic icon buttons utxoctrl";
-    var tmp_262423 = tree_213045(104, []);
-    tmp_262423.id = "btn-utxo-minus";
-    tmp_262423.class = "ui button";
-    set_attr_211568(tmp_262423, "title", "-1 Ball");
-    var tmp_262424 = tree_213045(61, []);
-    tmp_262424.class = "minus circle icon";
+    add_211771(tmp_262419, tmp_262420);
+    var tmp_262423 = tree_213045(43, []);
+    tmp_262423.class = "ui right floated mini basic icon buttons";
+    var tmp_262424 = tree_213045(104, []);
+    tmp_262424.id = "btn-send-lock";
+    tmp_262424.class = "ui button";
+    set_attr_211568(tmp_262424, "title", "Locked");
+    var tmp_262425 = tree_213045(61, []);
+    tmp_262425.class = "lock icon";
+    add_211771(tmp_262424, tmp_262425);
     add_211771(tmp_262423, tmp_262424);
-    add_211771(tmp_262422, tmp_262423);
-    var tmp_262425 = tree_213045(104, []);
-    tmp_262425.id = "btn-utxo-count";
-    tmp_262425.class = "ui button sendutxos";
-    add_211771(tmp_262425, text_213148(makeNimstrLit("...")));
-    add_211771(tmp_262422, tmp_262425);
-    var tmp_262426 = tree_213045(104, []);
-    tmp_262426.id = "btn-utxo-plus";
-    tmp_262426.class = "ui button";
-    set_attr_211568(tmp_262426, "title", "+1 Ball");
-    var tmp_262427 = tree_213045(61, []);
-    tmp_262427.class = "plus circle icon";
+    add_211771(tmp_262419, tmp_262423);
+    var tmp_262426 = tree_213045(43, []);
+    tmp_262426.class = "ui mini basic icon buttons btn-send-tools";
+    var tmp_262427 = tree_213045(104, []);
+    tmp_262427.id = "btn-send-clear";
+    tmp_262427.class = "ui button";
+    set_attr_211568(tmp_262427, "title", "Clear");
+    var tmp_262428 = tree_213045(61, []);
+    tmp_262428.class = "eraser icon";
+    add_211771(tmp_262427, tmp_262428);
     add_211771(tmp_262426, tmp_262427);
-    add_211771(tmp_262422, tmp_262426);
-    add_211771(tmp_262420, tmp_262422);
-    add_211771(tmp_262418, tmp_262420);
-    add_211771(tmp_262413, tmp_262418);
-    var tmp_262428 = tree_213045(43, []);
-    tmp_262428.class = "ui list uri-options";
+    var tmp_262429 = tree_213045(104, []);
+    tmp_262429.id = "btn-send-qrcode";
+    tmp_262429.class = "ui button";
+    set_attr_211568(tmp_262429, "title", "Scan QR Code");
+    var tmp_262430 = tree_213045(61, []);
+    tmp_262430.class = "camera icon";
+    add_211771(tmp_262429, tmp_262430);
+    add_211771(tmp_262426, tmp_262429);
+    add_211771(tmp_262419, tmp_262426);
+    var tmp_262431 = tree_213045(43, []);
+    tmp_262431.class = "ui form";
+    var tmp_262432 = tree_213045(43, []);
+    tmp_262432.class = "field";
+    var tmp_262433 = tree_213045(102, []);
+    add_211771(tmp_262433, text_213148(makeNimstrLit("Send Address")));
+    add_211771(tmp_262432, tmp_262433);
+    var tmp_262434 = tree_213045(43, []);
+    tmp_262434.class = "ui small input";
+    var tmp_262435 = tree_213045(103, []);
+    tmp_262435.class = "center";
+    set_attr_211568(tmp_262435, "type", "text");
+    set_attr_211568(tmp_262435, "name", "address");
+    set_attr_211568(tmp_262435, "placeholder", "Address");
+    add_211771(tmp_262434, tmp_262435);
+    add_211771(tmp_262432, tmp_262434);
+    add_211771(tmp_262431, tmp_262432);
+    var tmp_262436 = tree_213045(43, []);
+    tmp_262436.class = "field";
+    var tmp_262437 = tree_213045(102, []);
+    add_211771(tmp_262437, text_213148(makeNimstrLit("Amount")));
+    add_211771(tmp_262436, tmp_262437);
+    var tmp_262438 = tree_213045(43, []);
+    tmp_262438.class = "ui small input";
+    var tmp_262439 = tree_213045(103, []);
+    tmp_262439.class = "center";
+    set_attr_211568(tmp_262439, "type", "text");
+    set_attr_211568(tmp_262439, "name", "amount");
+    set_attr_211568(tmp_262439, "placeholder", "Amount");
+    add_event_handler_242793(tmp_262439, 3, check_send_amount_262384, kxi_232324[0]);
+    add_211771(tmp_262438, tmp_262439);
+    var tmp_262440 = tree_213045(43, []);
+    tmp_262440.class = "ui mini basic icon buttons utxoctrl";
+    var tmp_262441 = tree_213045(104, []);
+    tmp_262441.id = "btn-utxo-minus";
+    tmp_262441.class = "ui button";
+    set_attr_211568(tmp_262441, "title", "-1 Ball");
+    var tmp_262442 = tree_213045(61, []);
+    tmp_262442.class = "minus circle icon";
+    add_211771(tmp_262441, tmp_262442);
+    add_211771(tmp_262440, tmp_262441);
+    var tmp_262443 = tree_213045(104, []);
+    tmp_262443.id = "btn-utxo-count";
+    tmp_262443.class = "ui button sendutxos";
+    add_211771(tmp_262443, text_213148(makeNimstrLit("...")));
+    add_211771(tmp_262440, tmp_262443);
+    var tmp_262444 = tree_213045(104, []);
+    tmp_262444.id = "btn-utxo-plus";
+    tmp_262444.class = "ui button";
+    set_attr_211568(tmp_262444, "title", "+1 Ball");
+    var tmp_262445 = tree_213045(61, []);
+    tmp_262445.class = "plus circle icon";
+    add_211771(tmp_262444, tmp_262445);
+    add_211771(tmp_262440, tmp_262444);
+    add_211771(tmp_262438, tmp_262440);
+    add_211771(tmp_262436, tmp_262438);
+    add_211771(tmp_262431, tmp_262436);
+    var tmp_262446 = tree_213045(43, []);
+    tmp_262446.class = "ui list uri-options";
     L1: do {
-      var d_262548 = null;
+      var d_262567 = null;
       var v_263989 = null;
       for (var k in uriOptions) {
         if (!uriOptions.hasOwnProperty(k)) continue;
         v_263989=uriOptions[k];
-      d_262548 = v_263989;
-      var tmp_262429 = tree_213045(43, []);
-      tmp_262429.class = "item";
-      var tmp_262430 = tree_213045(43, []);
-      tmp_262430.class = "content";
-      var tmp_262431 = tree_213045(43, []);
-      tmp_262431.class = "header";
-      add_211771(tmp_262431, text_213201(d_262548.key));
-      add_211771(tmp_262430, tmp_262431);
-      var tmp_262432 = tree_213045(43, []);
-      tmp_262432.class = "description";
-      add_211771(tmp_262432, text_213201(d_262548.value));
-      add_211771(tmp_262430, tmp_262432);
-      add_211771(tmp_262429, tmp_262430);
-      add_211771(tmp_262428, tmp_262429);
+      d_262567 = v_263989;
+      var tmp_262447 = tree_213045(43, []);
+      tmp_262447.class = "item";
+      var tmp_262448 = tree_213045(43, []);
+      tmp_262448.class = "content";
+      var tmp_262449 = tree_213045(43, []);
+      tmp_262449.class = "header";
+      add_211771(tmp_262449, text_213201(d_262567.key));
+      add_211771(tmp_262448, tmp_262449);
+      var tmp_262450 = tree_213045(43, []);
+      tmp_262450.class = "description";
+      add_211771(tmp_262450, text_213201(d_262567.value));
+      add_211771(tmp_262448, tmp_262450);
+      add_211771(tmp_262447, tmp_262448);
+      add_211771(tmp_262446, tmp_262447);
       }
     } while(false);
-    add_211771(tmp_262413, tmp_262428);
-    var tmp_262433 = tree_213045(43, []);
-    tmp_262433.class = "fluid ui buttons";
-    var tmp_262434 = tree_213045(104, []);
-    tmp_262434.id = "btn-tx-send";
-    tmp_262434.class = "ui inverted olive button center btn-tx-send";
-    add_211771(tmp_262434, text_213148(makeNimstrLit("Send")));
-    add_211771(tmp_262433, tmp_262434);
-    add_211771(tmp_262413, tmp_262433);
-    add_211771(tmp_262401, tmp_262413);
-    result_262400 = tmp_262401;
+    add_211771(tmp_262431, tmp_262446);
+    var tmp_262451 = tree_213045(43, []);
+    tmp_262451.class = "fluid ui buttons";
+    var tmp_262452 = tree_213045(104, []);
+    tmp_262452.id = "btn-tx-send";
+    tmp_262452.class = "ui inverted olive button center btn-tx-send";
+    add_211771(tmp_262452, text_213148(makeNimstrLit("Send")));
+    add_211771(tmp_262451, tmp_262452);
+    add_211771(tmp_262431, tmp_262451);
+    add_211771(tmp_262419, tmp_262431);
+    result_262418 = tmp_262419;
 
-  return result_262400;
+  return result_262418;
 
 }
 
@@ -5582,141 +5653,141 @@ function back_wallet_261907() {
 
 }
 
-function settings_page_262663() {
-  var result_262665 = null;
+function settings_page_262682() {
+  var result_262684 = null;
 
-    var tmp_262666 = tree_213045(43, []);
-    tmp_262666.id = "settings";
-    tmp_262666.class = "ui container";
-    var tmp_262667 = tree_213045(23, []);
-    tmp_262667.class = "ui dividing header";
-    add_211771(tmp_262667, text_213148(makeNimstrLit("Settings")));
-    add_211771(tmp_262666, tmp_262667);
-    var tmp_262668 = tree_213045(104, []);
-    tmp_262668.id = "btn-reset";
-    tmp_262668.class = "ui inverted red button";
-    add_211771(tmp_262668, text_213148(makeNimstrLit("Reset Wallet")));
-    add_211771(tmp_262666, tmp_262668);
-    var tmp_262669 = tree_213045(43, []);
-    tmp_262669.class = "ui pink inverted segment";
-    add_211771(tmp_262669, text_213148(makeNimstrLit("        Delete all your wallet data in your web browser, including your encrypted secret keys.\x0A         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards\x0A         or mnemonics before deleting it. Otherwise you may lost your coins forever.\x0A      ")));
-    add_211771(tmp_262666, tmp_262669);
-    var tmp_262670 = tree_213045(43, []);
-    tmp_262670.class = "ui checkbox";
-    var tmp_262671 = tree_213045(103, []);
-    set_attr_211568(tmp_262671, "type", "checkbox");
-    set_attr_211568(tmp_262671, "name", "confirm");
-    add_211771(tmp_262670, tmp_262671);
-    var tmp_262672 = tree_213045(102, []);
-    add_211771(tmp_262672, text_213148(makeNimstrLit("I confirmed that I have the seed cards or mnemonics or no coins in my wallet.")));
-    add_211771(tmp_262670, tmp_262672);
-    add_211771(tmp_262666, tmp_262670);
-    result_262665 = tmp_262666;
+    var tmp_262685 = tree_213045(43, []);
+    tmp_262685.id = "settings";
+    tmp_262685.class = "ui container";
+    var tmp_262686 = tree_213045(23, []);
+    tmp_262686.class = "ui dividing header";
+    add_211771(tmp_262686, text_213148(makeNimstrLit("Settings")));
+    add_211771(tmp_262685, tmp_262686);
+    var tmp_262687 = tree_213045(104, []);
+    tmp_262687.id = "btn-reset";
+    tmp_262687.class = "ui inverted red button";
+    add_211771(tmp_262687, text_213148(makeNimstrLit("Reset Wallet")));
+    add_211771(tmp_262685, tmp_262687);
+    var tmp_262688 = tree_213045(43, []);
+    tmp_262688.class = "ui pink inverted segment";
+    add_211771(tmp_262688, text_213148(makeNimstrLit("        Delete all your wallet data in your web browser, including your encrypted secret keys.\x0A         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards\x0A         or mnemonics before deleting it. Otherwise you may lost your coins forever.\x0A      ")));
+    add_211771(tmp_262685, tmp_262688);
+    var tmp_262689 = tree_213045(43, []);
+    tmp_262689.class = "ui checkbox";
+    var tmp_262690 = tree_213045(103, []);
+    set_attr_211568(tmp_262690, "type", "checkbox");
+    set_attr_211568(tmp_262690, "name", "confirm");
+    add_211771(tmp_262689, tmp_262690);
+    var tmp_262691 = tree_213045(102, []);
+    add_211771(tmp_262691, text_213148(makeNimstrLit("I confirmed that I have the seed cards or mnemonics or no coins in my wallet.")));
+    add_211771(tmp_262689, tmp_262691);
+    add_211771(tmp_262685, tmp_262689);
+    result_262684 = tmp_262685;
 
-  return result_262665;
-
-}
-
-function settings_modal_262597() {
-  var result_262599 = null;
-
-    var tmp_262600 = tree_213045(43, []);
-    tmp_262600.id = "settings-modal";
-    tmp_262600.class = "ui basic modal";
-    var tmp_262601 = tree_213045(43, []);
-    tmp_262601.class = "ui icon header";
-    var tmp_262602 = tree_213045(61, []);
-    tmp_262602.class = "trash icon";
-    add_211771(tmp_262601, tmp_262602);
-    add_211771(tmp_262601, text_213148(makeNimstrLit("Reset Wallet")));
-    add_211771(tmp_262600, tmp_262601);
-    var tmp_262603 = tree_213045(43, []);
-    tmp_262603.class = "content";
-    var tmp_262604 = tree_213045(31, []);
-    add_211771(tmp_262604, text_213148(makeNimstrLit("Are you sure to reset your wallet?")));
-    add_211771(tmp_262603, tmp_262604);
-    add_211771(tmp_262600, tmp_262603);
-    var tmp_262605 = tree_213045(43, []);
-    tmp_262605.class = "actions";
-    var tmp_262606 = tree_213045(43, []);
-    tmp_262606.class = "ui basic cancel inverted button";
-    var tmp_262607 = tree_213045(61, []);
-    tmp_262607.class = "remove icon";
-    add_211771(tmp_262606, tmp_262607);
-    add_211771(tmp_262606, text_213148(makeNimstrLit("Cancel")));
-    add_211771(tmp_262605, tmp_262606);
-    var tmp_262608 = tree_213045(43, []);
-    tmp_262608.class = "ui red ok inverted button";
-    var tmp_262609 = tree_213045(61, []);
-    tmp_262609.class = "checkmark icon";
-    add_211771(tmp_262608, tmp_262609);
-    add_211771(tmp_262608, text_213148(makeNimstrLit("Reset")));
-    add_211771(tmp_262605, tmp_262608);
-    add_211771(tmp_262600, tmp_262605);
-    result_262599 = tmp_262600;
-
-  return result_262599;
+  return result_262684;
 
 }
 
-function app_main_262714(data_262716) {
-  var result_262717 = null;
+function settings_modal_262616() {
+  var result_262618 = null;
 
-    var tmp_262718 = tree_213045(43, []);
+    var tmp_262619 = tree_213045(43, []);
+    tmp_262619.id = "settings-modal";
+    tmp_262619.class = "ui basic modal";
+    var tmp_262620 = tree_213045(43, []);
+    tmp_262620.class = "ui icon header";
+    var tmp_262621 = tree_213045(61, []);
+    tmp_262621.class = "trash icon";
+    add_211771(tmp_262620, tmp_262621);
+    add_211771(tmp_262620, text_213148(makeNimstrLit("Reset Wallet")));
+    add_211771(tmp_262619, tmp_262620);
+    var tmp_262622 = tree_213045(43, []);
+    tmp_262622.class = "content";
+    var tmp_262623 = tree_213045(31, []);
+    add_211771(tmp_262623, text_213148(makeNimstrLit("Are you sure to reset your wallet?")));
+    add_211771(tmp_262622, tmp_262623);
+    add_211771(tmp_262619, tmp_262622);
+    var tmp_262624 = tree_213045(43, []);
+    tmp_262624.class = "actions";
+    var tmp_262625 = tree_213045(43, []);
+    tmp_262625.class = "ui basic cancel inverted button";
+    var tmp_262626 = tree_213045(61, []);
+    tmp_262626.class = "remove icon";
+    add_211771(tmp_262625, tmp_262626);
+    add_211771(tmp_262625, text_213148(makeNimstrLit("Cancel")));
+    add_211771(tmp_262624, tmp_262625);
+    var tmp_262627 = tree_213045(43, []);
+    tmp_262627.class = "ui red ok inverted button";
+    var tmp_262628 = tree_213045(61, []);
+    tmp_262628.class = "checkmark icon";
+    add_211771(tmp_262627, tmp_262628);
+    add_211771(tmp_262627, text_213148(makeNimstrLit("Reset")));
+    add_211771(tmp_262624, tmp_262627);
+    add_211771(tmp_262619, tmp_262624);
+    result_262618 = tmp_262619;
+
+  return result_262618;
+
+}
+
+function app_main_262733(data_262735) {
+  var result_262736 = null;
+
+    var tmp_262737 = tree_213045(43, []);
     if (show_page1_258069[0]) {
-    var tmp_262719 = tree_213045(17, []);
-    tmp_262719.id = "section1";
-    tmp_262719.class = "section";
-    var tmp_262720 = tree_213045(43, []);
-    tmp_262720.class = "intro";
-    var tmp_262721 = tree_213045(43, []);
-    tmp_262721.class = "intro-head";
-    var tmp_262722 = tree_213045(43, []);
-    tmp_262722.class = "caption";
-    add_211771(tmp_262722, text_213148(makeNimstrLit("Pastel Wallet")));
-    add_211771(tmp_262721, tmp_262722);
-    var tmp_262723 = tree_213045(43, []);
-    tmp_262723.class = "ui container method-selector";
-    var tmp_262724 = tree_213045(43, []);
-    tmp_262724.class = "title";
-    add_211771(tmp_262724, text_213148(makeNimstrLit("Scan your seed cards or mnemonic to start.")));
-    add_211771(tmp_262723, tmp_262724);
-    var tmp_262725 = tree_213045(43, []);
-    tmp_262725.class = "ui buttons";
-    var tmp_262726 = tree_213045(104, []);
-    tmp_262726.id = "seedselector";
-    tmp_262726.class = "ui olive button";
-    add_event_handler_242829(tmp_262726, 0, import_selector_258329(0), kxi_232324[0]);
-    var tmp_262727 = tree_213045(61, []);
-    tmp_262727.class = "qrcode icon";
-    add_211771(tmp_262726, tmp_262727);
-    add_211771(tmp_262726, text_213148(makeNimstrLit("Seed card")));
-    add_211771(tmp_262725, tmp_262726);
-    var tmp_262728 = tree_213045(43, []);
-    tmp_262728.class = "or";
-    add_211771(tmp_262725, tmp_262728);
-    var tmp_262729 = tree_213045(104, []);
-    tmp_262729.id = "mnemonicselector";
-    tmp_262729.class = "ui grey button";
-    add_event_handler_242829(tmp_262729, 0, import_selector_258329(1), kxi_232324[0]);
-    var tmp_262730 = tree_213045(61, []);
-    tmp_262730.class = "list alternate icon";
-    add_211771(tmp_262729, tmp_262730);
-    add_211771(tmp_262729, text_213148(makeNimstrLit("Mnemonic")));
-    add_211771(tmp_262725, tmp_262729);
-    add_211771(tmp_262723, tmp_262725);
-    add_211771(tmp_262721, tmp_262723);
-    add_211771(tmp_262720, tmp_262721);
-    var tmp_262731 = tree_213045(43, []);
-    tmp_262731.class = "intro-body";
+    var tmp_262738 = tree_213045(17, []);
+    tmp_262738.id = "section1";
+    tmp_262738.class = "section";
+    var tmp_262739 = tree_213045(43, []);
+    tmp_262739.class = "intro";
+    var tmp_262740 = tree_213045(43, []);
+    tmp_262740.class = "intro-head";
+    var tmp_262741 = tree_213045(43, []);
+    tmp_262741.class = "caption";
+    add_211771(tmp_262741, text_213148(makeNimstrLit("Pastel Wallet")));
+    add_211771(tmp_262740, tmp_262741);
+    var tmp_262742 = tree_213045(43, []);
+    tmp_262742.class = "ui container method-selector";
+    var tmp_262743 = tree_213045(43, []);
+    tmp_262743.class = "title";
+    add_211771(tmp_262743, text_213148(makeNimstrLit("Scan your seed cards or mnemonic to start.")));
+    add_211771(tmp_262742, tmp_262743);
+    var tmp_262744 = tree_213045(43, []);
+    tmp_262744.class = "ui buttons";
+    var tmp_262745 = tree_213045(104, []);
+    tmp_262745.id = "seedselector";
+    tmp_262745.class = "ui olive button";
+    add_event_handler_242829(tmp_262745, 0, import_selector_258329(0), kxi_232324[0]);
+    var tmp_262746 = tree_213045(61, []);
+    tmp_262746.class = "qrcode icon";
+    add_211771(tmp_262745, tmp_262746);
+    add_211771(tmp_262745, text_213148(makeNimstrLit("Seed card")));
+    add_211771(tmp_262744, tmp_262745);
+    var tmp_262747 = tree_213045(43, []);
+    tmp_262747.class = "or";
+    add_211771(tmp_262744, tmp_262747);
+    var tmp_262748 = tree_213045(104, []);
+    tmp_262748.id = "mnemonicselector";
+    tmp_262748.class = "ui grey button";
+    add_event_handler_242829(tmp_262748, 0, import_selector_258329(1), kxi_232324[0]);
+    var tmp_262749 = tree_213045(61, []);
+    tmp_262749.class = "list alternate icon";
+    add_211771(tmp_262748, tmp_262749);
+    add_211771(tmp_262748, text_213148(makeNimstrLit("Mnemonic")));
+    add_211771(tmp_262744, tmp_262748);
+    add_211771(tmp_262742, tmp_262744);
+    add_211771(tmp_262740, tmp_262742);
+    add_211771(tmp_262739, tmp_262740);
+    var tmp_262750 = tree_213045(43, []);
+    tmp_262750.class = "intro-body";
     if ((current_import_type_258037[0] == 0)) {
-    var tmp_262732 = tree_213045(43, []);
-    tmp_262732.id = "seed-seg";
-    tmp_262732.class = "ui left aligned segment seed-seg";
+    var tmp_262751 = tree_213045(43, []);
+    tmp_262751.id = "seed-seg";
+    tmp_262751.class = "ui left aligned segment seed-seg";
     if (show_scan_result_258064[0]) {
-    var tmp_262733 = tree_213045(43, []);
-    tmp_262733.class = "ui link cards seed-card-holder";
-    tmp_262733.id = "seed-card-holder";
+    var tmp_262752 = tree_213045(43, []);
+    tmp_262752.class = "ui link cards seed-card-holder";
+    tmp_262752.id = "seed-card-holder";
     L1: do {
       var idx_263029 = 0;
       var seed_card_info_263030 = null;
@@ -5727,7 +5798,7 @@ function app_main_262714(data_262716) {
           if (!(i_263600 < l_263601)) break L3;
             idx_263029 = i_263600;
             seed_card_info_263030 = seed_card_infos_258438[0][chckIndx(i_263600, 0, (seed_card_infos_258438[0] != null ? seed_card_infos_258438[0].length : 0)+0-1)-0];
-            add_211771(tmp_262733, seed_card_260915(seed_card_info_263030, idx_263029));
+            add_211771(tmp_262752, seed_card_260915(seed_card_info_263030, idx_263029));
             i_263600 = addInt(i_263600, 1);
             if (!(((seed_card_infos_258438[0] != null ? seed_card_infos_258438[0].length : 0) == l_263601))) {
             failed_assert_impl_60866(makeNimstrLit("iterators.nim(122, 11) `len(a) == L` the length of the seq changed while iterating over it"));
@@ -5736,451 +5807,451 @@ function app_main_262714(data_262716) {
           }
       } while(false);
     } while(false);
-    var tmp_262734 = tree_213045(43, []);
-    tmp_262734.class = "seed-add-container";
-    var tmp_262735 = tree_213045(104, []);
-    tmp_262735.class = "circular ui icon button bt-add-seed";
-    add_event_handler_242829(tmp_262735, 0, show_seed_qr_259869(), kxi_232324[0]);
-    var tmp_262736 = tree_213045(61, []);
-    tmp_262736.class = "plus icon";
-    add_211771(tmp_262735, tmp_262736);
-    add_211771(tmp_262734, tmp_262735);
-    add_211771(tmp_262733, tmp_262734);
-    add_211771(tmp_262732, tmp_262733);
-    var tmp_262737 = tree_213045(44, []);
-    tmp_262737.class = "pagenext";
-    set_attr_211568(tmp_262737, "href", "#section2");
-    var tmp_262738 = tree_213045(70, []);
-    add_211771(tmp_262737, tmp_262738);
-    add_211771(tmp_262737, text_213148(makeNimstrLit("Next")));
-    add_211771(tmp_262732, tmp_262737);
+    var tmp_262753 = tree_213045(43, []);
+    tmp_262753.class = "seed-add-container";
+    var tmp_262754 = tree_213045(104, []);
+    tmp_262754.class = "circular ui icon button bt-add-seed";
+    add_event_handler_242829(tmp_262754, 0, show_seed_qr_259869(), kxi_232324[0]);
+    var tmp_262755 = tree_213045(61, []);
+    tmp_262755.class = "plus icon";
+    add_211771(tmp_262754, tmp_262755);
+    add_211771(tmp_262753, tmp_262754);
+    add_211771(tmp_262752, tmp_262753);
+    add_211771(tmp_262751, tmp_262752);
+    var tmp_262756 = tree_213045(44, []);
+    tmp_262756.class = "pagenext";
+    set_attr_211568(tmp_262756, "href", "#section2");
+    var tmp_262757 = tree_213045(70, []);
+    add_211771(tmp_262756, tmp_262757);
+    add_211771(tmp_262756, text_213148(makeNimstrLit("Next")));
+    add_211771(tmp_262751, tmp_262756);
     }
     
     if (show_scanning_258062[0]) {
-    var tmp_262739 = tree_213045(43, []);
-    tmp_262739.class = "qr-scanning";
-    var tmp_262740 = tree_213045(43, []);
-    add_211771(tmp_262739, tmp_262740);
-    var tmp_262741 = tree_213045(43, []);
-    add_211771(tmp_262739, tmp_262741);
-    add_211771(tmp_262732, tmp_262739);
+    var tmp_262758 = tree_213045(43, []);
+    tmp_262758.class = "qr-scanning";
+    var tmp_262759 = tree_213045(43, []);
+    add_211771(tmp_262758, tmp_262759);
+    var tmp_262760 = tree_213045(43, []);
+    add_211771(tmp_262758, tmp_262760);
+    add_211771(tmp_262751, tmp_262758);
     }
     
     if (show_scan_seed_btn_258061[0]) {
-    var tmp_262742 = tree_213045(43, []);
-    tmp_262742.class = "ui teal labeled icon button bt-scan-seed";
-    add_event_handler_242829(tmp_262742, 0, show_seed_qr_259869(), kxi_232324[0]);
-    add_211771(tmp_262742, text_213148(makeNimstrLit("Scan seed card with camera")));
-    var tmp_262743 = tree_213045(61, []);
-    tmp_262743.class = "camera icon";
-    add_211771(tmp_262742, tmp_262743);
-    add_211771(tmp_262732, tmp_262742);
+    var tmp_262761 = tree_213045(43, []);
+    tmp_262761.class = "ui teal labeled icon button bt-scan-seed";
+    add_event_handler_242829(tmp_262761, 0, show_seed_qr_259869(), kxi_232324[0]);
+    add_211771(tmp_262761, text_213148(makeNimstrLit("Scan seed card with camera")));
+    var tmp_262762 = tree_213045(61, []);
+    tmp_262762.class = "camera icon";
+    add_211771(tmp_262761, tmp_262762);
+    add_211771(tmp_262751, tmp_262761);
     }
     
     if (show_cam_tools_258063[0]) {
-    var tmp_262744 = tree_213045(43, []);
-    tmp_262744.class = "ui small basic icon buttons camtools";
-    var tmp_262745 = tree_213045(104, []);
-    tmp_262745.class = "ui button";
-    add_event_handler_242829(tmp_262745, 0, cam_change_259953(), kxi_232324[0]);
-    var tmp_262746 = tree_213045(61, []);
-    tmp_262746.class = "camera icon";
-    add_211771(tmp_262745, tmp_262746);
-    add_211771(tmp_262744, tmp_262745);
-    var tmp_262747 = tree_213045(104, []);
-    tmp_262747.class = "ui button";
-    add_event_handler_242829(tmp_262747, 0, cam_close_259986(), kxi_232324[0]);
-    var tmp_262748 = tree_213045(61, []);
-    tmp_262748.class = "window close icon";
-    add_211771(tmp_262747, tmp_262748);
-    add_211771(tmp_262744, tmp_262747);
-    add_211771(tmp_262732, tmp_262744);
+    var tmp_262763 = tree_213045(43, []);
+    tmp_262763.class = "ui small basic icon buttons camtools";
+    var tmp_262764 = tree_213045(104, []);
+    tmp_262764.class = "ui button";
+    add_event_handler_242829(tmp_262764, 0, cam_change_259953(), kxi_232324[0]);
+    var tmp_262765 = tree_213045(61, []);
+    tmp_262765.class = "camera icon";
+    add_211771(tmp_262764, tmp_262765);
+    add_211771(tmp_262763, tmp_262764);
+    var tmp_262766 = tree_213045(104, []);
+    tmp_262766.class = "ui button";
+    add_event_handler_242829(tmp_262766, 0, cam_close_259986(), kxi_232324[0]);
+    var tmp_262767 = tree_213045(61, []);
+    tmp_262767.class = "window close icon";
+    add_211771(tmp_262766, tmp_262767);
+    add_211771(tmp_262763, tmp_262766);
+    add_211771(tmp_262751, tmp_262763);
     }
     
-    var tmp_262749 = tree_213045(84, []);
-    tmp_262749.id = "qrcanvas";
-    add_211771(tmp_262732, tmp_262749);
-    var tmp_262750 = tree_213045(43, []);
-    tmp_262750.class = "ui dimmer qrcamera-loader";
-    var tmp_262751 = tree_213045(43, []);
-    tmp_262751.class = "ui indeterminate text loader";
-    add_211771(tmp_262751, text_213148(makeNimstrLit("Preparing Camera")));
+    var tmp_262768 = tree_213045(84, []);
+    tmp_262768.id = "qrcanvas";
+    add_211771(tmp_262751, tmp_262768);
+    var tmp_262769 = tree_213045(43, []);
+    tmp_262769.class = "ui dimmer qrcamera-loader";
+    var tmp_262770 = tree_213045(43, []);
+    tmp_262770.class = "ui indeterminate text loader";
+    add_211771(tmp_262770, text_213148(makeNimstrLit("Preparing Camera")));
+    add_211771(tmp_262769, tmp_262770);
+    add_211771(tmp_262751, tmp_262769);
+    var tmp_262771 = tree_213045(43, []);
+    tmp_262771.class = "ui dimmer qrcamera-shutter";
+    add_211771(tmp_262751, tmp_262771);
     add_211771(tmp_262750, tmp_262751);
-    add_211771(tmp_262732, tmp_262750);
-    var tmp_262752 = tree_213045(43, []);
-    tmp_262752.class = "ui dimmer qrcamera-shutter";
-    add_211771(tmp_262732, tmp_262752);
-    add_211771(tmp_262731, tmp_262732);
     }
     else {
-      var tmp_262753 = tree_213045(43, []);
-      tmp_262753.class = "ui left aligned segment mnemonic-seg";
-      add_211771(tmp_262753, mnemonic_editor_260635());
+      var tmp_262772 = tree_213045(43, []);
+      tmp_262772.class = "ui left aligned segment mnemonic-seg";
+      add_211771(tmp_262772, mnemonic_editor_260635());
       if (mnemonic_fulfill_258073[0]) {
-      var tmp_262754 = tree_213045(44, []);
-      tmp_262754.class = "pagenext";
-      set_attr_211568(tmp_262754, "href", "#section2");
-      var tmp_262755 = tree_213045(70, []);
-      add_211771(tmp_262754, tmp_262755);
-      add_211771(tmp_262754, text_213148(makeNimstrLit("Next")));
-      add_211771(tmp_262753, tmp_262754);
+      var tmp_262773 = tree_213045(44, []);
+      tmp_262773.class = "pagenext";
+      set_attr_211568(tmp_262773, "href", "#section2");
+      var tmp_262774 = tree_213045(70, []);
+      add_211771(tmp_262773, tmp_262774);
+      add_211771(tmp_262773, text_213148(makeNimstrLit("Next")));
+      add_211771(tmp_262772, tmp_262773);
       }
       
-      add_211771(tmp_262731, tmp_262753);
+      add_211771(tmp_262750, tmp_262772);
     }
     
-    add_211771(tmp_262720, tmp_262731);
-    add_211771(tmp_262719, tmp_262720);
-    add_211771(tmp_262718, tmp_262719);
+    add_211771(tmp_262739, tmp_262750);
+    add_211771(tmp_262738, tmp_262739);
+    add_211771(tmp_262737, tmp_262738);
     }
     
     if (show_page2_258070[0]) {
-    var tmp_262756 = tree_213045(17, []);
-    tmp_262756.id = "section2";
-    tmp_262756.class = "section";
-    var tmp_262757 = tree_213045(43, []);
-    tmp_262757.class = "intro";
-    var tmp_262758 = tree_213045(43, []);
-    tmp_262758.class = "intro-head";
-    var tmp_262759 = tree_213045(43, []);
-    tmp_262759.class = "caption";
-    add_211771(tmp_262759, text_213148(makeNimstrLit("Pastel Wallet")));
-    add_211771(tmp_262758, tmp_262759);
-    var tmp_262760 = tree_213045(43, []);
-    tmp_262760.class = "ui container method-selector";
-    var tmp_262761 = tree_213045(43, []);
-    tmp_262761.class = "title";
-    add_211771(tmp_262761, text_213148(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
-    add_211771(tmp_262760, tmp_262761);
-    var tmp_262762 = tree_213045(43, []);
-    tmp_262762.class = "ui buttons";
-    var tmp_262763 = tree_213045(104, []);
-    tmp_262763.id = "keyselector";
-    tmp_262763.class = "ui olive button";
-    add_event_handler_242829(tmp_262763, 0, protect_selector_258381(0), kxi_232324[0]);
-    var tmp_262764 = tree_213045(61, []);
-    tmp_262764.class = "qrcode icon";
-    add_211771(tmp_262763, tmp_262764);
-    add_211771(tmp_262763, text_213148(makeNimstrLit("Key card")));
-    add_211771(tmp_262762, tmp_262763);
-    var tmp_262765 = tree_213045(43, []);
-    tmp_262765.class = "or";
-    add_211771(tmp_262762, tmp_262765);
-    var tmp_262766 = tree_213045(104, []);
-    tmp_262766.id = "passselector";
-    tmp_262766.class = "ui grey button";
-    add_event_handler_242829(tmp_262766, 0, protect_selector_258381(1), kxi_232324[0]);
-    var tmp_262767 = tree_213045(61, []);
-    tmp_262767.class = "list alternate icon";
-    add_211771(tmp_262766, tmp_262767);
-    add_211771(tmp_262766, text_213148(makeNimstrLit("Passphrase")));
-    add_211771(tmp_262762, tmp_262766);
-    add_211771(tmp_262760, tmp_262762);
-    add_211771(tmp_262758, tmp_262760);
-    add_211771(tmp_262757, tmp_262758);
-    var tmp_262768 = tree_213045(43, []);
-    tmp_262768.class = "intro-body";
+    var tmp_262775 = tree_213045(17, []);
+    tmp_262775.id = "section2";
+    tmp_262775.class = "section";
+    var tmp_262776 = tree_213045(43, []);
+    tmp_262776.class = "intro";
+    var tmp_262777 = tree_213045(43, []);
+    tmp_262777.class = "intro-head";
+    var tmp_262778 = tree_213045(43, []);
+    tmp_262778.class = "caption";
+    add_211771(tmp_262778, text_213148(makeNimstrLit("Pastel Wallet")));
+    add_211771(tmp_262777, tmp_262778);
+    var tmp_262779 = tree_213045(43, []);
+    tmp_262779.class = "ui container method-selector";
+    var tmp_262780 = tree_213045(43, []);
+    tmp_262780.class = "title";
+    add_211771(tmp_262780, text_213148(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
+    add_211771(tmp_262779, tmp_262780);
+    var tmp_262781 = tree_213045(43, []);
+    tmp_262781.class = "ui buttons";
+    var tmp_262782 = tree_213045(104, []);
+    tmp_262782.id = "keyselector";
+    tmp_262782.class = "ui olive button";
+    add_event_handler_242829(tmp_262782, 0, protect_selector_258381(0), kxi_232324[0]);
+    var tmp_262783 = tree_213045(61, []);
+    tmp_262783.class = "qrcode icon";
+    add_211771(tmp_262782, tmp_262783);
+    add_211771(tmp_262782, text_213148(makeNimstrLit("Key card")));
+    add_211771(tmp_262781, tmp_262782);
+    var tmp_262784 = tree_213045(43, []);
+    tmp_262784.class = "or";
+    add_211771(tmp_262781, tmp_262784);
+    var tmp_262785 = tree_213045(104, []);
+    tmp_262785.id = "passselector";
+    tmp_262785.class = "ui grey button";
+    add_event_handler_242829(tmp_262785, 0, protect_selector_258381(1), kxi_232324[0]);
+    var tmp_262786 = tree_213045(61, []);
+    tmp_262786.class = "list alternate icon";
+    add_211771(tmp_262785, tmp_262786);
+    add_211771(tmp_262785, text_213148(makeNimstrLit("Passphrase")));
+    add_211771(tmp_262781, tmp_262785);
+    add_211771(tmp_262779, tmp_262781);
+    add_211771(tmp_262777, tmp_262779);
+    add_211771(tmp_262776, tmp_262777);
+    var tmp_262787 = tree_213045(43, []);
+    tmp_262787.class = "intro-body";
     if ((current_protect_type_258043[0] == 0)) {
-    var tmp_262769 = tree_213045(43, []);
-    tmp_262769.id = "seed-seg";
-    tmp_262769.class = "ui left aligned segment seed-seg";
+    var tmp_262788 = tree_213045(43, []);
+    tmp_262788.id = "seed-seg";
+    tmp_262788.class = "ui left aligned segment seed-seg";
     if (show_scan_result2_258068[0]) {
-    var tmp_262770 = tree_213045(43, []);
-    tmp_262770.class = "ui clearing segment keycard-seg";
-    var tmp_262771 = tree_213045(43, []);
-    tmp_262771.class = "ui inverted segment";
-    var tmp_262772 = tree_213045(24, []);
-    tmp_262772.class = "ui grey inverted header center";
-    add_211771(tmp_262772, text_213148(makeNimstrLit("Scanned key card")));
-    add_211771(tmp_262771, tmp_262772);
-    var tmp_262773 = tree_213045(31, []);
-    tmp_262773.class = "center";
-    add_211771(tmp_262773, text_213201(key_card_val_259835[0]));
-    add_211771(tmp_262771, tmp_262773);
-    add_211771(tmp_262770, tmp_262771);
-    var tmp_262774 = tree_213045(104, []);
-    tmp_262774.class = "ui right floated olive button";
-    add_event_handler_242793(tmp_262774, 0, confirm_key_card_259935, kxi_232324[0]);
-    add_211771(tmp_262774, text_213148(makeNimstrLit("Save")));
-    add_211771(tmp_262770, tmp_262774);
-    var tmp_262775 = tree_213045(104, []);
-    tmp_262775.class = "ui right floated grey button";
-    add_event_handler_242829(tmp_262775, 0, show_key_qr_259902(), kxi_232324[0]);
-    add_211771(tmp_262775, text_213148(makeNimstrLit("Rescan")));
-    add_211771(tmp_262770, tmp_262775);
-    add_211771(tmp_262769, tmp_262770);
+    var tmp_262789 = tree_213045(43, []);
+    tmp_262789.class = "ui clearing segment keycard-seg";
+    var tmp_262790 = tree_213045(43, []);
+    tmp_262790.class = "ui inverted segment";
+    var tmp_262791 = tree_213045(24, []);
+    tmp_262791.class = "ui grey inverted header center";
+    add_211771(tmp_262791, text_213148(makeNimstrLit("Scanned key card")));
+    add_211771(tmp_262790, tmp_262791);
+    var tmp_262792 = tree_213045(31, []);
+    tmp_262792.class = "center";
+    add_211771(tmp_262792, text_213201(key_card_val_259835[0]));
+    add_211771(tmp_262790, tmp_262792);
+    add_211771(tmp_262789, tmp_262790);
+    var tmp_262793 = tree_213045(104, []);
+    tmp_262793.class = "ui right floated olive button";
+    add_event_handler_242793(tmp_262793, 0, confirm_key_card_259935, kxi_232324[0]);
+    add_211771(tmp_262793, text_213148(makeNimstrLit("Save")));
+    add_211771(tmp_262789, tmp_262793);
+    var tmp_262794 = tree_213045(104, []);
+    tmp_262794.class = "ui right floated grey button";
+    add_event_handler_242829(tmp_262794, 0, show_key_qr_259902(), kxi_232324[0]);
+    add_211771(tmp_262794, text_213148(makeNimstrLit("Rescan")));
+    add_211771(tmp_262789, tmp_262794);
+    add_211771(tmp_262788, tmp_262789);
     }
     
     if (key_card_fulfill_258074[0]) {
-    var tmp_262776 = tree_213045(44, []);
-    tmp_262776.class = "pagenext";
-    set_attr_211568(tmp_262776, "href", "#section3");
-    var tmp_262777 = tree_213045(70, []);
-    add_211771(tmp_262776, tmp_262777);
-    add_211771(tmp_262776, text_213148(makeNimstrLit("Next")));
-    add_211771(tmp_262769, tmp_262776);
+    var tmp_262795 = tree_213045(44, []);
+    tmp_262795.class = "pagenext";
+    set_attr_211568(tmp_262795, "href", "#section3");
+    var tmp_262796 = tree_213045(70, []);
+    add_211771(tmp_262795, tmp_262796);
+    add_211771(tmp_262795, text_213148(makeNimstrLit("Next")));
+    add_211771(tmp_262788, tmp_262795);
     }
     
     if (show_scanning2_258066[0]) {
-    var tmp_262778 = tree_213045(43, []);
-    tmp_262778.class = "qr-scanning";
-    var tmp_262779 = tree_213045(43, []);
-    add_211771(tmp_262778, tmp_262779);
-    var tmp_262780 = tree_213045(43, []);
-    add_211771(tmp_262778, tmp_262780);
-    add_211771(tmp_262769, tmp_262778);
+    var tmp_262797 = tree_213045(43, []);
+    tmp_262797.class = "qr-scanning";
+    var tmp_262798 = tree_213045(43, []);
+    add_211771(tmp_262797, tmp_262798);
+    var tmp_262799 = tree_213045(43, []);
+    add_211771(tmp_262797, tmp_262799);
+    add_211771(tmp_262788, tmp_262797);
     }
     
     if (show_scan_seed_btn2_258065[0]) {
-    var tmp_262781 = tree_213045(43, []);
-    tmp_262781.class = "ui teal labeled icon button bt-scan-seed";
-    add_event_handler_242829(tmp_262781, 0, show_key_qr_259902(), kxi_232324[0]);
-    add_211771(tmp_262781, text_213148(makeNimstrLit("Scan key card with camera")));
-    var tmp_262782 = tree_213045(61, []);
-    tmp_262782.class = "camera icon";
-    add_211771(tmp_262781, tmp_262782);
-    add_211771(tmp_262769, tmp_262781);
+    var tmp_262800 = tree_213045(43, []);
+    tmp_262800.class = "ui teal labeled icon button bt-scan-seed";
+    add_event_handler_242829(tmp_262800, 0, show_key_qr_259902(), kxi_232324[0]);
+    add_211771(tmp_262800, text_213148(makeNimstrLit("Scan key card with camera")));
+    var tmp_262801 = tree_213045(61, []);
+    tmp_262801.class = "camera icon";
+    add_211771(tmp_262800, tmp_262801);
+    add_211771(tmp_262788, tmp_262800);
     }
     
     if (show_cam_tools2_258067[0]) {
-    var tmp_262783 = tree_213045(43, []);
-    tmp_262783.class = "ui small basic icon buttons camtools";
-    var tmp_262784 = tree_213045(104, []);
-    tmp_262784.class = "ui button";
-    add_event_handler_242829(tmp_262784, 0, cam_change_259953(), kxi_232324[0]);
-    var tmp_262785 = tree_213045(61, []);
-    tmp_262785.class = "camera icon";
-    add_211771(tmp_262784, tmp_262785);
-    add_211771(tmp_262783, tmp_262784);
-    var tmp_262786 = tree_213045(104, []);
-    tmp_262786.class = "ui button";
-    add_event_handler_242829(tmp_262786, 0, cam_close_259986(), kxi_232324[0]);
-    var tmp_262787 = tree_213045(61, []);
-    tmp_262787.class = "window close icon";
-    add_211771(tmp_262786, tmp_262787);
-    add_211771(tmp_262783, tmp_262786);
-    add_211771(tmp_262769, tmp_262783);
+    var tmp_262802 = tree_213045(43, []);
+    tmp_262802.class = "ui small basic icon buttons camtools";
+    var tmp_262803 = tree_213045(104, []);
+    tmp_262803.class = "ui button";
+    add_event_handler_242829(tmp_262803, 0, cam_change_259953(), kxi_232324[0]);
+    var tmp_262804 = tree_213045(61, []);
+    tmp_262804.class = "camera icon";
+    add_211771(tmp_262803, tmp_262804);
+    add_211771(tmp_262802, tmp_262803);
+    var tmp_262805 = tree_213045(104, []);
+    tmp_262805.class = "ui button";
+    add_event_handler_242829(tmp_262805, 0, cam_close_259986(), kxi_232324[0]);
+    var tmp_262806 = tree_213045(61, []);
+    tmp_262806.class = "window close icon";
+    add_211771(tmp_262805, tmp_262806);
+    add_211771(tmp_262802, tmp_262805);
+    add_211771(tmp_262788, tmp_262802);
     }
     
-    var tmp_262788 = tree_213045(84, []);
-    tmp_262788.id = "qrcanvas";
-    add_211771(tmp_262769, tmp_262788);
-    var tmp_262789 = tree_213045(43, []);
-    tmp_262789.class = "ui dimmer qrcamera-loader";
-    var tmp_262790 = tree_213045(43, []);
-    tmp_262790.class = "ui indeterminate text loader";
-    add_211771(tmp_262790, text_213148(makeNimstrLit("Preparing Camera")));
-    add_211771(tmp_262789, tmp_262790);
-    add_211771(tmp_262769, tmp_262789);
-    var tmp_262791 = tree_213045(43, []);
-    tmp_262791.class = "ui dimmer qrcamera-shutter";
-    add_211771(tmp_262769, tmp_262791);
-    add_211771(tmp_262768, tmp_262769);
+    var tmp_262807 = tree_213045(84, []);
+    tmp_262807.id = "qrcanvas";
+    add_211771(tmp_262788, tmp_262807);
+    var tmp_262808 = tree_213045(43, []);
+    tmp_262808.class = "ui dimmer qrcamera-loader";
+    var tmp_262809 = tree_213045(43, []);
+    tmp_262809.class = "ui indeterminate text loader";
+    add_211771(tmp_262809, text_213148(makeNimstrLit("Preparing Camera")));
+    add_211771(tmp_262808, tmp_262809);
+    add_211771(tmp_262788, tmp_262808);
+    var tmp_262810 = tree_213045(43, []);
+    tmp_262810.class = "ui dimmer qrcamera-shutter";
+    add_211771(tmp_262788, tmp_262810);
+    add_211771(tmp_262787, tmp_262788);
     }
     else {
-      var tmp_262792 = tree_213045(43, []);
-      tmp_262792.class = "ui left aligned segment mnemonic-seg";
-      add_211771(tmp_262792, passphrase_editor_261780());
+      var tmp_262811 = tree_213045(43, []);
+      tmp_262811.class = "ui left aligned segment mnemonic-seg";
+      add_211771(tmp_262811, passphrase_editor_261780());
       if (passphrase_fulfill_258075[0]) {
-      var tmp_262793 = tree_213045(44, []);
-      tmp_262793.class = "pagenext";
-      set_attr_211568(tmp_262793, "href", "#section3");
-      var tmp_262794 = tree_213045(70, []);
-      add_211771(tmp_262793, tmp_262794);
-      add_211771(tmp_262793, text_213148(makeNimstrLit("Next")));
-      add_211771(tmp_262792, tmp_262793);
+      var tmp_262812 = tree_213045(44, []);
+      tmp_262812.class = "pagenext";
+      set_attr_211568(tmp_262812, "href", "#section3");
+      var tmp_262813 = tree_213045(70, []);
+      add_211771(tmp_262812, tmp_262813);
+      add_211771(tmp_262812, text_213148(makeNimstrLit("Next")));
+      add_211771(tmp_262811, tmp_262812);
       }
       
-      add_211771(tmp_262768, tmp_262792);
+      add_211771(tmp_262787, tmp_262811);
     }
     
-    add_211771(tmp_262757, tmp_262768);
-    add_211771(tmp_262756, tmp_262757);
-    add_211771(tmp_262718, tmp_262756);
+    add_211771(tmp_262776, tmp_262787);
+    add_211771(tmp_262775, tmp_262776);
+    add_211771(tmp_262737, tmp_262775);
     }
     
     if (show_page3_258071[0]) {
-    var tmp_262795 = tree_213045(17, []);
-    tmp_262795.id = "section3";
-    tmp_262795.class = "section";
-    var tmp_262796 = tree_213045(43, []);
-    tmp_262796.class = "intro";
-    var tmp_262797 = tree_213045(43, []);
-    tmp_262797.class = "intro-head  wallet-head";
-    var tmp_262798 = tree_213045(43, []);
-    tmp_262798.class = "caption";
-    add_211771(tmp_262798, text_213148(makeNimstrLit("Pastel Wallet")));
-    add_211771(tmp_262797, tmp_262798);
-    var tmp_262799 = tree_213045(43, []);
-    tmp_262799.class = "ui container wallet-btns";
-    var tmp_262800 = tree_213045(43, []);
-    tmp_262800.class = "two ui basic buttons sendrecv";
-    var tmp_262801 = tree_213045(104, []);
-    tmp_262801.id = "btn-send";
-    tmp_262801.class = "ui small button send";
-    add_event_handler_242829(tmp_262801, 0, btn_send_261953(), kxi_232324[0]);
-    var tmp_262802 = tree_213045(61, []);
-    tmp_262802.class = "counterclockwise rotated sign-out icon send";
-    add_211771(tmp_262801, tmp_262802);
-    add_211771(tmp_262801, text_213148(makeNimstrLit(" Send")));
-    add_211771(tmp_262800, tmp_262801);
-    var tmp_262803 = tree_213045(104, []);
-    tmp_262803.id = "btn-receive";
-    tmp_262803.class = "ui small button receive";
-    add_event_handler_242829(tmp_262803, 0, btn_receive_261986(), kxi_232324[0]);
-    var tmp_262804 = tree_213045(61, []);
-    tmp_262804.class = "clockwise rotated sign-in icon receive";
-    add_211771(tmp_262803, tmp_262804);
-    add_211771(tmp_262803, text_213148(makeNimstrLit(" Receive")));
-    add_211771(tmp_262800, tmp_262803);
-    add_211771(tmp_262799, tmp_262800);
-    add_211771(tmp_262797, tmp_262799);
-    add_211771(tmp_262796, tmp_262797);
-    var tmp_262805 = tree_213045(43, []);
-    tmp_262805.class = "intro-body wallet-body";
-    var tmp_262806 = tree_213045(43, []);
-    tmp_262806.id = "wallet-balance";
-    tmp_262806.class = "ui center aligned segment";
-    var tmp_262807 = tree_213045(43, []);
-    tmp_262807.class = "ui top left attached tiny label send";
-    var tmp_262808 = tree_213045(70, []);
-    add_211771(tmp_262808, text_213148(makeNimstrLit("0")));
-    add_211771(tmp_262807, tmp_262808);
-    add_211771(tmp_262807, text_213148(makeNimstrLit(" ")));
-    var tmp_262809 = tree_213045(61, []);
-    tmp_262809.class = "counterclockwise rotated sign-out icon";
-    add_211771(tmp_262807, tmp_262809);
-    add_211771(tmp_262806, tmp_262807);
-    var tmp_262810 = tree_213045(43, []);
-    tmp_262810.class = "ui top right attached tiny label receive";
-    var tmp_262811 = tree_213045(61, []);
-    tmp_262811.class = "clockwise rotated sign-in icon";
-    add_211771(tmp_262810, tmp_262811);
-    var tmp_262812 = tree_213045(70, []);
-    add_211771(tmp_262812, text_213148(makeNimstrLit("0")));
-    add_211771(tmp_262810, tmp_262812);
-    add_211771(tmp_262806, tmp_262810);
-    var tmp_262813 = tree_213045(43, []);
-    tmp_262813.class = "balance";
-    add_211771(tmp_262813, text_213148(makeNimstrLit("0")));
-    add_211771(tmp_262806, tmp_262813);
-    var tmp_262814 = tree_213045(43, []);
-    tmp_262814.class = "ui bottom right attached tiny label symbol";
-    add_211771(tmp_262814, text_213148(makeNimstrLit("ZNY")));
-    add_211771(tmp_262806, tmp_262814);
-    add_211771(tmp_262805, tmp_262806);
+    var tmp_262814 = tree_213045(17, []);
+    tmp_262814.id = "section3";
+    tmp_262814.class = "section";
+    var tmp_262815 = tree_213045(43, []);
+    tmp_262815.class = "intro";
+    var tmp_262816 = tree_213045(43, []);
+    tmp_262816.class = "intro-head  wallet-head";
+    var tmp_262817 = tree_213045(43, []);
+    tmp_262817.class = "caption";
+    add_211771(tmp_262817, text_213148(makeNimstrLit("Pastel Wallet")));
+    add_211771(tmp_262816, tmp_262817);
+    var tmp_262818 = tree_213045(43, []);
+    tmp_262818.class = "ui container wallet-btns";
+    var tmp_262819 = tree_213045(43, []);
+    tmp_262819.class = "two ui basic buttons sendrecv";
+    var tmp_262820 = tree_213045(104, []);
+    tmp_262820.id = "btn-send";
+    tmp_262820.class = "ui small button send";
+    add_event_handler_242829(tmp_262820, 0, btn_send_261953(), kxi_232324[0]);
+    var tmp_262821 = tree_213045(61, []);
+    tmp_262821.class = "counterclockwise rotated sign-out icon send";
+    add_211771(tmp_262820, tmp_262821);
+    add_211771(tmp_262820, text_213148(makeNimstrLit(" Send")));
+    add_211771(tmp_262819, tmp_262820);
+    var tmp_262822 = tree_213045(104, []);
+    tmp_262822.id = "btn-receive";
+    tmp_262822.class = "ui small button receive";
+    add_event_handler_242829(tmp_262822, 0, btn_receive_261986(), kxi_232324[0]);
+    var tmp_262823 = tree_213045(61, []);
+    tmp_262823.class = "clockwise rotated sign-in icon receive";
+    add_211771(tmp_262822, tmp_262823);
+    add_211771(tmp_262822, text_213148(makeNimstrLit(" Receive")));
+    add_211771(tmp_262819, tmp_262822);
+    add_211771(tmp_262818, tmp_262819);
+    add_211771(tmp_262816, tmp_262818);
+    add_211771(tmp_262815, tmp_262816);
+    var tmp_262824 = tree_213045(43, []);
+    tmp_262824.class = "intro-body wallet-body";
+    var tmp_262825 = tree_213045(43, []);
+    tmp_262825.id = "wallet-balance";
+    tmp_262825.class = "ui center aligned segment";
+    var tmp_262826 = tree_213045(43, []);
+    tmp_262826.class = "ui top left attached tiny label send";
+    var tmp_262827 = tree_213045(70, []);
+    add_211771(tmp_262827, text_213148(makeNimstrLit("0")));
+    add_211771(tmp_262826, tmp_262827);
+    add_211771(tmp_262826, text_213148(makeNimstrLit(" ")));
+    var tmp_262828 = tree_213045(61, []);
+    tmp_262828.class = "counterclockwise rotated sign-out icon";
+    add_211771(tmp_262826, tmp_262828);
+    add_211771(tmp_262825, tmp_262826);
+    var tmp_262829 = tree_213045(43, []);
+    tmp_262829.class = "ui top right attached tiny label receive";
+    var tmp_262830 = tree_213045(61, []);
+    tmp_262830.class = "clockwise rotated sign-in icon";
+    add_211771(tmp_262829, tmp_262830);
+    var tmp_262831 = tree_213045(70, []);
+    add_211771(tmp_262831, text_213148(makeNimstrLit("0")));
+    add_211771(tmp_262829, tmp_262831);
+    add_211771(tmp_262825, tmp_262829);
+    var tmp_262832 = tree_213045(43, []);
+    tmp_262832.class = "balance";
+    add_211771(tmp_262832, text_213148(makeNimstrLit("0")));
+    add_211771(tmp_262825, tmp_262832);
+    var tmp_262833 = tree_213045(43, []);
+    tmp_262833.class = "ui bottom right attached tiny label symbol";
+    add_211771(tmp_262833, text_213148(makeNimstrLit("ZNY")));
+    add_211771(tmp_262825, tmp_262833);
+    add_211771(tmp_262824, tmp_262825);
     if (show_recv_address_selector_258077[0]) {
-    add_211771(tmp_262805, recv_address_selector_262085());
+    add_211771(tmp_262824, recv_address_selector_262085());
     }
     
     if (show_recv_address_modal_258078[0]) {
-    add_211771(tmp_262805, recv_address_modal_262228());
+    add_211771(tmp_262824, recv_address_modal_262228());
     }
     
-    add_211771(tmp_262805, send_form_262398());
-    var tmp_262815 = tree_213045(43, []);
-    tmp_262815.id = "ball-info";
-    tmp_262815.class = "ui center aligned segment";
-    add_211771(tmp_262815, text_213148([]));
-    var tmp_262816 = tree_213045(71, []);
-    add_211771(tmp_262815, tmp_262816);
-    add_211771(tmp_262815, text_213148([]));
-    add_211771(tmp_262805, tmp_262815);
-    var tmp_262817 = tree_213045(43, []);
-    tmp_262817.id = "wallet-seg";
-    tmp_262817.class = "ui center aligned segment seed-seg";
-    var tmp_262818 = tree_213045(84, []);
-    set_attr_211568(tmp_262818, "width", "0");
-    set_attr_211568(tmp_262818, "height", "0");
-    add_211771(tmp_262817, tmp_262818);
-    add_211771(tmp_262805, tmp_262817);
-    add_211771(tmp_262796, tmp_262805);
-    var tmp_262819 = tree_213045(43, []);
-    tmp_262819.class = "ui two bottom attached buttons settings";
-    var tmp_262820 = tree_213045(43, []);
-    tmp_262820.class = "ui button";
-    add_event_handler_242829(tmp_262820, 0, go_settings_261839(), kxi_232324[0]);
-    var tmp_262821 = tree_213045(61, []);
-    tmp_262821.class = "cog icon";
-    add_211771(tmp_262820, tmp_262821);
-    add_211771(tmp_262820, text_213148(makeNimstrLit("Settings")));
-    var tmp_262822 = tree_213045(70, []);
-    var tmp_262823 = tree_213045(61, []);
-    tmp_262823.class = "chevron down icon";
-    add_211771(tmp_262822, tmp_262823);
-    add_211771(tmp_262820, tmp_262822);
-    add_211771(tmp_262819, tmp_262820);
-    var tmp_262824 = tree_213045(43, []);
-    tmp_262824.class = "ui button";
-    add_event_handler_242829(tmp_262824, 0, go_logs_261874(), kxi_232324[0]);
-    var tmp_262825 = tree_213045(61, []);
-    tmp_262825.class = "list alternate outline icon";
-    add_211771(tmp_262824, tmp_262825);
-    add_211771(tmp_262824, text_213148(makeNimstrLit("Logs")));
-    var tmp_262826 = tree_213045(70, []);
-    var tmp_262827 = tree_213045(61, []);
-    tmp_262827.class = "chevron down icon";
-    add_211771(tmp_262826, tmp_262827);
-    add_211771(tmp_262824, tmp_262826);
-    add_211771(tmp_262819, tmp_262824);
-    var tmp_262828 = tree_213045(43, []);
-    tmp_262828.id = "bottom-blink";
-    add_211771(tmp_262819, tmp_262828);
-    add_211771(tmp_262796, tmp_262819);
-    add_211771(tmp_262795, tmp_262796);
-    var tmp_262829 = tree_213045(109, []);
-    tmp_262829.id = "clipboard";
-    set_attr_211568(tmp_262829, "rows", "1");
-    set_attr_211568(tmp_262829, "tabindex", "-1");
-    add_211771(tmp_262795, tmp_262829);
-    add_211771(tmp_262718, tmp_262795);
+    add_211771(tmp_262824, send_form_262416());
+    var tmp_262834 = tree_213045(43, []);
+    tmp_262834.id = "ball-info";
+    tmp_262834.class = "ui center aligned segment";
+    add_211771(tmp_262834, text_213148([]));
+    var tmp_262835 = tree_213045(71, []);
+    add_211771(tmp_262834, tmp_262835);
+    add_211771(tmp_262834, text_213148([]));
+    add_211771(tmp_262824, tmp_262834);
+    var tmp_262836 = tree_213045(43, []);
+    tmp_262836.id = "wallet-seg";
+    tmp_262836.class = "ui center aligned segment seed-seg";
+    var tmp_262837 = tree_213045(84, []);
+    set_attr_211568(tmp_262837, "width", "0");
+    set_attr_211568(tmp_262837, "height", "0");
+    add_211771(tmp_262836, tmp_262837);
+    add_211771(tmp_262824, tmp_262836);
+    add_211771(tmp_262815, tmp_262824);
+    var tmp_262838 = tree_213045(43, []);
+    tmp_262838.class = "ui two bottom attached buttons settings";
+    var tmp_262839 = tree_213045(43, []);
+    tmp_262839.class = "ui button";
+    add_event_handler_242829(tmp_262839, 0, go_settings_261839(), kxi_232324[0]);
+    var tmp_262840 = tree_213045(61, []);
+    tmp_262840.class = "cog icon";
+    add_211771(tmp_262839, tmp_262840);
+    add_211771(tmp_262839, text_213148(makeNimstrLit("Settings")));
+    var tmp_262841 = tree_213045(70, []);
+    var tmp_262842 = tree_213045(61, []);
+    tmp_262842.class = "chevron down icon";
+    add_211771(tmp_262841, tmp_262842);
+    add_211771(tmp_262839, tmp_262841);
+    add_211771(tmp_262838, tmp_262839);
+    var tmp_262843 = tree_213045(43, []);
+    tmp_262843.class = "ui button";
+    add_event_handler_242829(tmp_262843, 0, go_logs_261874(), kxi_232324[0]);
+    var tmp_262844 = tree_213045(61, []);
+    tmp_262844.class = "list alternate outline icon";
+    add_211771(tmp_262843, tmp_262844);
+    add_211771(tmp_262843, text_213148(makeNimstrLit("Logs")));
+    var tmp_262845 = tree_213045(70, []);
+    var tmp_262846 = tree_213045(61, []);
+    tmp_262846.class = "chevron down icon";
+    add_211771(tmp_262845, tmp_262846);
+    add_211771(tmp_262843, tmp_262845);
+    add_211771(tmp_262838, tmp_262843);
+    var tmp_262847 = tree_213045(43, []);
+    tmp_262847.id = "bottom-blink";
+    add_211771(tmp_262838, tmp_262847);
+    add_211771(tmp_262815, tmp_262838);
+    add_211771(tmp_262814, tmp_262815);
+    var tmp_262848 = tree_213045(109, []);
+    tmp_262848.id = "clipboard";
+    set_attr_211568(tmp_262848, "rows", "1");
+    set_attr_211568(tmp_262848, "tabindex", "-1");
+    add_211771(tmp_262814, tmp_262848);
+    add_211771(tmp_262737, tmp_262814);
     }
     
     if ((show_page3_258071[0] || show_page4_258072[0])) {
-    var tmp_262830 = tree_213045(17, []);
-    tmp_262830.id = "section4";
-    tmp_262830.class = "tradelogs-section";
-    var tmp_262831 = tree_213045(43, []);
-    tmp_262831.class = "ui buttons settings backpage";
-    var tmp_262832 = tree_213045(43, []);
-    tmp_262832.class = "ui button backwallet";
-    add_event_handler_242829(tmp_262832, 0, back_wallet_261907(), kxi_232324[0]);
-    var tmp_262833 = tree_213045(61, []);
-    tmp_262833.class = "dot circle icon";
-    add_211771(tmp_262832, tmp_262833);
-    add_211771(tmp_262832, text_213148(makeNimstrLit("Back")));
-    var tmp_262834 = tree_213045(70, []);
-    var tmp_262835 = tree_213045(61, []);
-    tmp_262835.class = "chevron up icon";
-    add_211771(tmp_262834, tmp_262835);
-    add_211771(tmp_262832, tmp_262834);
-    add_211771(tmp_262831, tmp_262832);
-    add_211771(tmp_262830, tmp_262831);
+    var tmp_262849 = tree_213045(17, []);
+    tmp_262849.id = "section4";
+    tmp_262849.class = "tradelogs-section";
+    var tmp_262850 = tree_213045(43, []);
+    tmp_262850.class = "ui buttons settings backpage";
+    var tmp_262851 = tree_213045(43, []);
+    tmp_262851.class = "ui button backwallet";
+    add_event_handler_242829(tmp_262851, 0, back_wallet_261907(), kxi_232324[0]);
+    var tmp_262852 = tree_213045(61, []);
+    tmp_262852.class = "dot circle icon";
+    add_211771(tmp_262851, tmp_262852);
+    add_211771(tmp_262851, text_213148(makeNimstrLit("Back")));
+    var tmp_262853 = tree_213045(70, []);
+    var tmp_262854 = tree_213045(61, []);
+    tmp_262854.class = "chevron up icon";
+    add_211771(tmp_262853, tmp_262854);
+    add_211771(tmp_262851, tmp_262853);
+    add_211771(tmp_262850, tmp_262851);
+    add_211771(tmp_262849, tmp_262850);
     if (show_trade_logs_258079[0]) {
-    var tmp_262836 = tree_213045(43, []);
-    tmp_262836.class = "ui container";
-    var tmp_262837 = tree_213045(43, []);
-    tmp_262837.id = "tradeunconfs";
-    tmp_262837.class = "ui cards tradelogs";
-    add_211771(tmp_262836, tmp_262837);
-    var tmp_262838 = tree_213045(43, []);
-    tmp_262838.id = "tradelogs";
-    tmp_262838.class = "ui cards tradelogs";
-    add_211771(tmp_262836, tmp_262838);
-    add_211771(tmp_262830, tmp_262836);
+    var tmp_262855 = tree_213045(43, []);
+    tmp_262855.class = "ui container";
+    var tmp_262856 = tree_213045(43, []);
+    tmp_262856.id = "tradeunconfs";
+    tmp_262856.class = "ui cards tradelogs";
+    add_211771(tmp_262855, tmp_262856);
+    var tmp_262857 = tree_213045(43, []);
+    tmp_262857.id = "tradelogs";
+    tmp_262857.class = "ui cards tradelogs";
+    add_211771(tmp_262855, tmp_262857);
+    add_211771(tmp_262849, tmp_262855);
     }
     
     if (show_settings_258080[0]) {
-    add_211771(tmp_262830, settings_page_262663());
-    add_211771(tmp_262830, settings_modal_262597());
+    add_211771(tmp_262849, settings_page_262682());
+    add_211771(tmp_262849, settings_modal_262616());
     }
     
-    add_211771(tmp_262718, tmp_262830);
+    add_211771(tmp_262737, tmp_262849);
     }
     
-    result_262717 = tmp_262718;
+    result_262736 = tmp_262737;
 
-  return result_262717;
+  return result_262736;
 
 }
 
@@ -6381,4 +6452,4 @@ if (wallet_setup_263537[0]) {
 view_selector_258124(12, true);
 }
 
-app_inst_258014[0] = set_initializer_242707(app_main_262714, "main", after_script_263505);
+app_inst_258014[0] = set_initializer_242707(app_main_262733, "main", after_script_263505);
