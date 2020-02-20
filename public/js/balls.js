@@ -336,20 +336,26 @@ UtxoBalls.simple = function() {
               var idx_ref = create_bodies_idx({ballType: 1, unconf: ref});
               var ball_ref = Ball.bodies_idx[idx_ref];
               if(ball_ref) {
-                var rx = 5 * (Math.random() - 0.5);
-                var ry = 5 * (Math.random() - 0.5);
-                ball.fluffy_free = true;
-                setFluffyCollisionAll(ball);
-                fluffy_frees.push(ball);
-                fluffy_free_worker_start();
-                Body.setPosition(ball, {x: ball_ref.position.x, y: ball_ref.position.y});
-                Body.setVelocity(ball, {x: rx, y: ry});
-                Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
+                setTimeout(function() {
+                  var rx = 5 * (Math.random() - 0.5);
+                  var ry = 5 * (Math.random() - 0.5);
+                  ball.fluffy_free = true;
+                  setFluffyCollisionAll(ball);
+                  fluffy_frees.push(ball);
+                  fluffy_free_worker_start();
+                  Body.setPosition(ball, {x: ball_ref.position.x, y: ball_ref.position.y});
+                  Body.setVelocity(ball, {x: rx, y: ry});
+                  Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
+                  World.add(world, ball);
+                }, 1000);
+              Ball.bodies.push(ball);
+              add_bodies_idx(ball);
               }
+            } else {
+              Ball.bodies.push(ball);
+              add_bodies_idx(ball);
+              World.add(world, ball);
             }
-            Ball.bodies.push(ball);
-            add_bodies_idx(ball);
-            World.add(world, ball);
           }
         }
       }
