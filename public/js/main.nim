@@ -1032,6 +1032,9 @@ asm """
   function reset_switch(switch_id) {
     if(!$('#send-coins').hasClass('hidden') && (switch_id == null || switch_id == 1)) {
       sendrecv_switch_busy = true;
+      if(switch_id == 1) {
+        pastel.utxoballs.setsend(0);
+      }
       $('#send-coins').transition({
         animation: 'fade down',
         onComplete : function() {
