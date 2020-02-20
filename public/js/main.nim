@@ -864,6 +864,7 @@ asm """
         amount = amount.replace(/,/g, '');
         var amounts = amount.split('.');
         if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+          var value = '';
           if(amounts.length == 1) {
             value = amounts[0] + '00000000';
           } else if(amounts.length == 2) {
