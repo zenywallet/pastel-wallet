@@ -929,6 +929,13 @@ UtxoBalls.simple = function() {
         cnt++;
       }
     }
+    if(Ball.too_much_balls) {
+      if(count > cnt) {
+        setFluffy(Ball.too_much_balls, fluffy2);
+      } else {
+        setFluffy(Ball.too_much_balls, fluffy3);
+      }
+    }
     return valid_cnt;
   }
 
@@ -939,30 +946,28 @@ UtxoBalls.simple = function() {
       if(!b.rnd) {
         b.rnd = Math.random();
       }
-      if(b.address) {
-        if(!b.fluffy_free) {
-          switch(b.fluffy) {
-            case fluffy1:
-              var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
-              if(vy < -10) {
-                vy = -10;
-              } else if (vy > 10) {
-                vy = 10;
-              }
-              Body.setVelocity(b, {x: 0, y: vy});
-              Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 30);
-              break;
-            case fluffy2:
-              var vy = (rect.y + 264 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 3 / 1000));
-              if(vy < -10) {
-                vy = -10;
-              } else if (vy > 10) {
-                vy = 10;
-              }
-              Body.setVelocity(b, {x: 0, y: vy});
-              Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 20);
-              break;
-          }
+      if(!b.fluffy_free) {
+        switch(b.fluffy) {
+          case fluffy1:
+            var vy = (rect.y + 64 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 2 / 1000));
+            if(vy < -10) {
+              vy = -10;
+            } else if (vy > 10) {
+              vy = 10;
+            }
+            Body.setVelocity(b, {x: 0, y: vy});
+            Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 30);
+            break;
+          case fluffy2:
+            var vy = (rect.y + 264 - b.position.y) / 10 + (b.rnd + 0.5) * Math.sin((b.rnd * 1000 + time) * (0.001 + b.rnd * 3 / 1000));
+            if(vy < -10) {
+              vy = -10;
+            } else if (vy > 10) {
+              vy = 10;
+            }
+            Body.setVelocity(b, {x: 0, y: vy});
+            Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 20);
+            break;
         }
       }
     }
