@@ -1049,6 +1049,7 @@ proc btnSend: proc() =
         return;
       }
       sendrecv_select((sendrecv_switch == 1) ? 0 : 1);
+      document.getElementById('btn-send').blur();
     """
 
 proc btnReceive: proc() =
@@ -1058,6 +1059,7 @@ proc btnReceive: proc() =
         return;
       }
       sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
+      document.getElementById('btn-receive').blur();
     """
 
 proc btnSendClose: proc() =
