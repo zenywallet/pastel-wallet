@@ -18,7 +18,8 @@ var Ball = Ball || {
   bodies: [],
   bodies_idx: {},
   too_much_balls_enable: false,
-  too_much_balls: null
+  too_much_balls: null,
+  prev_setsend_count: 0
 };
 
 var UtxoBalls = UtxoBalls || {};
@@ -358,6 +359,8 @@ UtxoBalls.simple = function() {
             }
           }
         }
+      } else if(task.type == 20) {
+        setsend(Ball.prev_setsend_count);
       }
       create_balls_worker_tval = setTimeout(create_balls_worker, 10);
     } else {
@@ -460,6 +463,7 @@ UtxoBalls.simple = function() {
       for(var i in unconfs) {
         Ball.create_balls_task.push({type: 19, unconf: unconfs[i]});
       }
+      Ball.create_balls_task.push({type: 20});
     } else {
       Ball.create_balls_task.push({type: 11});
       utxos = utxos.slice(0, 140);
@@ -907,7 +911,8 @@ UtxoBalls.simple = function() {
   }
 
   function setsend(count) {
-    console.log('setsend', count);
+    console.log('setsend', Ball.prev_setsend_count, count);
+    Ball.prev_setsend_count = count;
     var cnt = 0;
     var valid_cnt = 0;
     var utxos = Ball.utxos;
