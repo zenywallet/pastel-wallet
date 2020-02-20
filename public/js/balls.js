@@ -249,7 +249,7 @@ UtxoBalls.simple = function() {
               var tb = Ball.too_much_balls;
               var r = tb.circleRadius / 3 * (Math.random() - 0.5);
               Body.setPosition(ball, {x: tb.position.x + r, y: tb.position.y - tb.circleRadius / 2});
-              Body.setVelocity(ball, {x: r, y: -10});
+              Body.setVelocity(ball, {x: r, y: -5});
               Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
             }
             Ball.bodies.push(ball);
