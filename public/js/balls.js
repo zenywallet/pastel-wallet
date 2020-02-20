@@ -19,7 +19,8 @@ var Ball = Ball || {
   bodies_idx: {},
   too_much_balls_enable: false,
   too_much_balls: null,
-  prev_setsend_count: 0
+  prev_setsend_count: 0,
+  bodies_away: []
 };
 
 var UtxoBalls = UtxoBalls || {};
@@ -309,9 +310,12 @@ UtxoBalls.simple = function() {
               add_bodies_idx(ball);
               setFluffy(ball, fluffy3);
             } else {
-              Matter.Composite.remove(world, ball);
+              Ball.bodies_away.push(ball);
               remove_bodies_idx(ball);
               Ball.bodies.splice(i, 1);
+              setTimeout(function() {
+                Matter.Composite.remove(world, Ball.bodies_away.shift());
+              }, 6000);
             }
           }
         }
@@ -970,6 +974,9 @@ UtxoBalls.simple = function() {
             break;
         }
       }
+    }
+    for(var i in Ball.bodies_away) {
+      Body.setVelocity(Ball.bodies_away[i], {x: 0, y: -2});
     }
   });
 
