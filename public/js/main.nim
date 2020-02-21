@@ -989,6 +989,9 @@ asm """
             case ErrSend.INVALID_ADDRESS:
               Notify.show('Error', 'Address is invalid.', Notify.msgtype.error);
               break;
+            case ErrSend.INSUFFICIENT_BALANCE:
+              Notify.show('Error', 'Balance is insufficient.', Notify.msgtype.error);
+              break;
             case ErrSend.DUST_VALUE:
               Notify.show('Error', 'Amount is too small.', Notify.msgtype.error);
               break;

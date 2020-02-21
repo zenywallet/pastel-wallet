@@ -539,6 +539,10 @@ function Wallet() {
         }
       }
     }
+    if(result_out == 0) {
+      cb({err: ErrSend.INSUFFICIENT_BALANCE});
+      return;
+    }
 
     var priv_nodes = {};
     var keys = {};
