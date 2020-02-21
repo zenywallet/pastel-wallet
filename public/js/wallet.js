@@ -522,8 +522,7 @@ function Wallet() {
       console.log(in_value.toString(), value.toString());
 
       if(in_value.gt(value)) {
-        var sub = UINT64(in_value);
-        sub.subtract(value);
+        var sub = in_value.clone().subtract(value);
         var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
         if(sub.gt(fee1) || sub.eq(fee1)) {
           result_out = 2;
@@ -567,8 +566,7 @@ function Wallet() {
       }
       var rawtx = tx.build().toHex();
       var total_bytes = rawtx.length / 2;
-      var fee = UINT64(in_value);
-      fee.subtract(value);
+      var fee = in_value.clone().subtract(value);
       console.log('tx1', fee.toString(), total_bytes, rawtx);
       send_tx(rawtx, function(result) {
         cb(result);
@@ -576,8 +574,7 @@ function Wallet() {
       return;
     }
 
-    var change_value = UINT64(in_value);
-    change_value.subtract(value);
+    var change_value = in_value.clone().subtract(value);
     var fee_low = 147 * utxo_count + 34 * 2 + 10;
     var fee_high = 148 * utxo_count + 34 * 2 + 10;
     var fee_mid = Math.round(147.5 * utxo_count + 34 * 2 + 10);
@@ -590,8 +587,7 @@ function Wallet() {
     var better_size = 0;
     var better_fee = fee;
     for(var fee = fee_start; fee <= fee_high; fee++) {
-      var change_sub = UINT64(change_value);
-      change_sub.subtract(UINT64(String(fee)));
+      var change_sub = change_value.clone().subtract(UINT64(String(fee)));
       tx.addOutput(change_address, change_sub);
       for(var i in sign_utxos) {
         var s = sign_utxos[i];
@@ -712,8 +708,7 @@ function Wallet() {
       in_value.add(UINT64(String(utxo.value)));
       utxo_count++;
       if(in_value.gt(value)) {
-        var sub = UINT64(in_value);
-        sub.subtract(value);
+        var sub = in_value.clone().subtract(value);
         var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
         var chk_eq = sub.eq(fee1);
         if(sub.gt(fee1) || chk_eq) {
@@ -722,7 +717,6 @@ function Wallet() {
           break;
         } else {
           var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
-
           var chk_eq = sub.eq(fee2);
           if(sub.gt(fee2) || chk_eq) {
             result_out = 1;
