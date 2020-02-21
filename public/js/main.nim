@@ -804,6 +804,9 @@ asm """
     send_ball_count = 0;
     send_ball_count_less = false;
     send_ball_count_over = false;
+    $('#btn-utxo-count').text('...');
+    pastel.utxoballs.setsend(0);
+    send_ball_count = 0;
   }
 
   function setSendUtxo(value) {
@@ -837,6 +840,9 @@ asm """
     $('#btn-send-clear').off('click').click(function() {
       $('#send-coins input[name="address"]').val('');
       $('#send-coins input[name="amount"]').val('');
+      $('#send-coins input[name="address"]').closest('.field').removeClass('error');
+      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
+      resetSendBallCount();
       uriOptions = [];
       jsViewSelector(12);
       $(this).blur();
@@ -1254,9 +1260,6 @@ proc checkSendAmount(ev: Event; n: VNode) =
           setSendUtxo(value);
         } else {
           resetSendBallCount();
-          $('#btn-utxo-count').text('...');
-          pastel.utxoballs.setsend(0);
-          send_ball_count = 0;
         }
       } else {
         amount_elm.closest('.field').addClass('error');
@@ -1264,9 +1267,6 @@ proc checkSendAmount(ev: Event; n: VNode) =
     } else {
       amount_elm.closest('.field').removeClass('error');
       resetSendBallCount();
-      $('#btn-utxo-count').text('...');
-      pastel.utxoballs.setsend(0);
-      send_ball_count = 0;
     }
   """
 
