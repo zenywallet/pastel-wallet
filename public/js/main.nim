@@ -932,6 +932,32 @@ asm """
         var address = String($('#send-coins input[name="address"]').val()).trim();
         var amount = String($('#send-coins input[name="amount"]').val()).trim();
         if(address.length == 0 || amount.length == 0) {
+          var address_elm = $('#send-coins input[name="address"]').closest('.field');
+          var amount_elm = $('#send-coins input[name="amount"]').closest('.field');
+          var flag = true;
+          var alert_count = 0;
+          function alert_worker() {
+            if(address.length == 0) {
+              if(flag) {
+                address_elm.addClass('error');
+              } else {
+                address_elm.removeClass('error');
+              }
+            }
+            if(amount.length == 0) {
+              if(flag) {
+                amount_elm.addClass('error');
+              } else {
+                amount_elm.removeClass('error');
+              }
+            }
+            alert_count++;
+            if(alert_count < 4) {
+              flag = !flag;
+              setTimeout(alert_worker, 100);
+            }
+          }
+          alert_worker();
           return;
         }
         amount = amount.replace(/,/g, '');
