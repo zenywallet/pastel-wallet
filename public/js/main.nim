@@ -783,6 +783,7 @@ proc backWallet(): proc() =
 asm """
   var send_ball_count = 0;
   var send_ball_count_less = false;
+  var send_ball_count_over = false;
 
   function conv_coin(uint64_val) {
     strval = uint64_val.toString();
@@ -799,19 +800,33 @@ asm """
     return val / 100000000;
   }
 
+  function resetSendBallCount() {
+    send_ball_count = 0;
+    send_ball_count_less = false;
+    send_ball_count_over = false;
+  }
+
   function setSendUtxo(value) {
-    pastel.wallet.calcSendUtxo(value, function(result) {
-      if(result.err) {
-        $('#btn-utxo-count').text('>' + String(result.safe_count));
-        pastel.utxoballs.setsend(result.safe_count);
-        send_ball_count = result.safe_count;
+    var ret = pastel.wallet.calcSendUtxo(value);
+    if(ret.err) {
+      send_ball_count_over = true;
+      $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
+      pastel.utxoballs.setsend(ret.safe_count);
+      send_ball_count = ret.safe_count;
+    } else {
+      send_ball_count_less = !ret.eq;
+      if(ret.utxo_count > ret.safe_count) {
+        send_ball_count_over = true;
+        $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
+        pastel.utxoballs.setsend(ret.safe_count);
+        send_ball_count = ret.safe_count;
       } else {
-        send_ball_count_less = !result.eq;
-        $('#btn-utxo-count').text((result.eq ? '' : '≤') + String(result.utxo_count));
-        pastel.utxoballs.setsend(result.utxo_count);
-        send_ball_count = result.utxo_count;
+        send_ball_count_over = false;
+        $('#btn-utxo-count').text((ret.eq ? '' : '≤') + String(ret.utxo_count) + (ret.utxo_count == ret.safe_count ? ' max' : ''));
+        pastel.utxoballs.setsend(ret.utxo_count);
+        send_ball_count = ret.utxo_count;
       }
-    });
+    }
   }
 
   function initSendForm() {
@@ -877,14 +892,24 @@ asm """
       if(send_ball_count >= 1000) {
         send_ball_count = 999;
       }
-      pastel.utxoballs.setsend(send_ball_count);
+      var safe_count = pastel.wallet.getSafeCount();
+      if(send_ball_count > safe_count) {
+        send_ball_count = safe_count;
+      }
       var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      pastel.utxoballs.setsend(send_ball_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      $('#btn-utxo-count').text(String(sendval.count));
+      $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
       $(this).blur();
     });
     $('#btn-utxo-minus').off('click').click(function() {
-      send_ball_count--;
+      var safe_count = pastel.wallet.getSafeCount();
+      if(send_ball_count_over) {
+        send_ball_count_over = false;
+        send_ball_count = safe_count;
+      } else {
+        send_ball_count--;
+      }
       send_ball_count_less = false;
       if(send_ball_count < 0) {
         send_ball_count = 0;
@@ -892,7 +917,7 @@ asm """
       pastel.utxoballs.setsend(send_ball_count);
       var sendval = pastel.wallet.calcSendValue(send_ball_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      $('#btn-utxo-count').text(String(sendval.count));
+      $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
       $(this).blur();
     });
     $('#btn-tx-send').off('click').click(function() {
@@ -1192,10 +1217,19 @@ proc checkSendAmount(ev: Event; n: VNode) =
           value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
         }
         if(value.length > 0) {
-          console.log(value);
           setSendUtxo(value);
+        } else {
+          resetSendBallCount();
+          $('#btn-utxo-count').text('...');
+          pastel.utxoballs.setsend(0);
+          send_ball_count = 0;
         }
       }
+    } else {
+      resetSendBallCount();
+      $('#btn-utxo-count').text('...');
+      pastel.utxoballs.setsend(0);
+      send_ball_count = 0;
     }
   """
 
