@@ -808,11 +808,13 @@ asm """
 
   function setSendUtxo(value) {
     var ret = pastel.wallet.calcSendUtxo(value);
+    var amount_elm = $('#send-coins input[name="amount"]');
     if(ret.err) {
       send_ball_count_over = true;
       $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
       pastel.utxoballs.setsend(ret.safe_count);
       send_ball_count = ret.safe_count;
+      amount_elm.closest('.field').addClass('error');
     } else {
       send_ball_count_less = !ret.eq;
       if(ret.utxo_count > ret.safe_count) {
@@ -820,7 +822,9 @@ asm """
         $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
         pastel.utxoballs.setsend(ret.safe_count);
         send_ball_count = ret.safe_count;
+        amount_elm.closest('.field').addClass('error');
       } else {
+        amount_elm.closest('.field').removeClass('error');
         send_ball_count_over = false;
         $('#btn-utxo-count').text((ret.eq ? '' : '≤') + String(ret.utxo_count) + (ret.utxo_count == ret.safe_count ? ' max' : ''));
         pastel.utxoballs.setsend(ret.utxo_count);
@@ -884,6 +888,7 @@ asm """
     pastel.utxoballs.setsend(send_ball_count);
 
     $('#btn-utxo-plus').off('click').click(function() {
+      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
       if(send_ball_count_less) {
         send_ball_count_less = false;
       } else {
@@ -903,6 +908,7 @@ asm """
       $(this).blur();
     });
     $('#btn-utxo-minus').off('click').click(function() {
+      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
       var safe_count = pastel.wallet.getSafeCount();
       if(send_ball_count_over) {
         send_ball_count_over = false;
@@ -1206,10 +1212,12 @@ proc checkSendAmount(ev: Event; n: VNode) =
   var s = n.value
   asm """
     var amount = String(`s`).trim();
+    var amount_elm = $('#send-coins input[name="amount"]');
     if(amount.length > 0) {
       amount = amount.replace(/,/g, '');
       var amounts = amount.split('.');
       if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+        amount_elm.closest('.field').removeClass('error');
         var value = '';
         if(amounts.length == 1) {
           value = amounts[0] + '00000000';
@@ -1224,8 +1232,11 @@ proc checkSendAmount(ev: Event; n: VNode) =
           pastel.utxoballs.setsend(0);
           send_ball_count = 0;
         }
+      } else {
+        amount_elm.closest('.field').addClass('error');
       }
     } else {
+      amount_elm.closest('.field').removeClass('error');
       resetSendBallCount();
       $('#btn-utxo-count').text('...');
       pastel.utxoballs.setsend(0);
