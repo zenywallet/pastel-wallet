@@ -19,6 +19,7 @@ var Ball = Ball || {
   bodies_idx: {},
   too_much_balls_enable: false,
   too_much_balls: null,
+  too_much_balls_fluffy: null,
   prev_setsend_count: 0,
   bodies_away: []
 };
@@ -558,6 +559,7 @@ UtxoBalls.simple = function() {
         }
         var x = Math.round(Math.random() * (w - s2) + s2 / 2);
 
+        var fluffy = Ball.too_much_balls_fluffy || fluffy3;
         var ball = Bodies.circle(x, 140, s2 / 2, {
           ballType: 2,
           label: 'ball',
@@ -565,10 +567,10 @@ UtxoBalls.simple = function() {
           value: null,
           restitution: 0.3,
           frictionAir: 0.03,
-          fluffy: fluffy3,
+          fluffy: fluffy,
           collisionFilter: {
-            category: fluffy3,
-            mask: defaultCategory | fluffy3
+            category: fluffy,
+            mask: defaultCategory | fluffy
           },
           render: {
             sprite: {
@@ -933,10 +935,14 @@ UtxoBalls.simple = function() {
         cnt++;
       }
     }
-    if(Ball.too_much_balls) {
-      if(count > cnt) {
+    if(count > cnt) {
+      Ball.too_much_balls_fluffy = fluffy2;
+      if(Ball.too_much_balls) {
         setFluffy(Ball.too_much_balls, fluffy2);
-      } else {
+      }
+    } else {
+      Ball.too_much_balls_fluffy = fluffy3;
+      if(Ball.too_much_balls) {
         setFluffy(Ball.too_much_balls, fluffy3);
       }
     }
