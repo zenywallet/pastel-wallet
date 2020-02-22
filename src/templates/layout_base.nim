@@ -43,6 +43,8 @@ proc layout_base*(debug: bool): string =
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="msapplication-TileColor" content="#00aba9">
   <meta name="theme-color" content="#ffffff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/semantic/semantic.min.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
