@@ -12,6 +12,10 @@ function ready(cb) {
   }
 }
 
+function adjustHeight() {
+  var vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
 var bodyWidth, bodyHeight;
 function onClientSizeChanged(cb) {
   bodyWidth = document.body.clientWidth;
@@ -24,7 +28,9 @@ function onClientSizeChanged(cb) {
       bodyWidth = newBodyWidth;
       bodyHeight = newBodyHeight;
     }
+    adjustHeight();
   }
+  adjustHeight();
 }
 
 var target_scroll_pos = null;
