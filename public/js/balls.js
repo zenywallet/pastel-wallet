@@ -1013,7 +1013,7 @@ UtxoBalls.simple = function() {
     //}
   }
 
-  if(!UtxoBalls.resize_func) {
+  if(UtxoBalls.resize_func) {
     clearTimeout(UtxoBalls.resize_tval);
     window.removeEventListener('resize', UtxoBalls.resize_func);
   }
