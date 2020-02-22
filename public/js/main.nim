@@ -1437,7 +1437,7 @@ proc appMain(data: RouterData): VNode =
               tdiv(class="title"):
                 text """
                   A key card or passphrase is required to encrypt and save the private key in your browser.
-                   You will need key card or passphrase before sending your coins.
+                   You will need it before sending your coins.
                 """
               tdiv(class="ui buttons"):
                 button(id="keyselector", class="ui olive button", onclick=protectSelector(ProtectType.KeyCard)):
