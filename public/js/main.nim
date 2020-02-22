@@ -730,7 +730,7 @@ proc passphraseEditor(): VNode =
           tdiv(class="field"):
             input(class="center", type="text", name="input-passphrase", value=passPhrase, placeholder="Passphrase", onkeyup=changePassphrase, onkeyupenter=confirmPassphrase)
       button(class="ui right floated olive button", onclick=confirmPassphrase):
-        text "Save"
+        text "Apply"
 
 proc goSettings(): proc() =
   result = proc() =
@@ -1456,7 +1456,7 @@ proc appMain(data: RouterData): VNode =
                       h4(class="ui grey inverted header center"): text "Scanned key card"
                       p(class="center"): text keyCardVal
                     button(class="ui right floated olive button", onclick=confirmKeyCard):
-                      text "Save"
+                      text "Apply"
                     button(class="ui right floated grey button", onclick=showKeyQr()):
                       text "Rescan"
                 if keyCardFulfill:
