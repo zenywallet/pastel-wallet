@@ -838,32 +838,36 @@ asm """
 
   function initSendForm() {
     $('#btn-send-clear').off('click').click(function() {
-      $('#send-coins input[name="address"]').val('');
-      $('#send-coins input[name="amount"]').val('');
-      $('#send-coins input[name="address"]').closest('.field').removeClass('error');
-      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
-      resetSendBallCount();
-      uriOptions = [];
-      jsViewSelector(12);
+      if(!`showPage4`) {
+        $('#send-coins input[name="address"]').val('');
+        $('#send-coins input[name="amount"]').val('');
+        $('#send-coins input[name="address"]').closest('.field').removeClass('error');
+        $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
+        resetSendBallCount();
+        uriOptions = [];
+        jsViewSelector(12);
+      }
       $(this).blur();
     });
     $('#btn-send-qrcode').off('click').click(function() {
-      qrReaderModal.show(function(uri) {
-        var data = bip21reader(uri);
-        $('#send-coins input[name="address"]').val(data.address || '');
-        $('#send-coins input[name="amount"]').val(data.amount || '');
-        uriOptions = [];
-        for(var k in data) {
-          var p = data[k];
-          if(k == 'address' || k == 'amount') {
-            continue;
+      if(!`showPage4`) {
+        qrReaderModal.show(function(uri) {
+          var data = bip21reader(uri);
+          $('#send-coins input[name="address"]').val(data.address || '');
+          $('#send-coins input[name="amount"]').val(data.amount || '');
+          uriOptions = [];
+          for(var k in data) {
+            var p = data[k];
+            if(k == 'address' || k == 'amount') {
+              continue;
+            }
+            var key = crlftab_to_html(k);
+            key = key.charAt(0).toUpperCase() + key.slice(1);
+            uriOptions.push({key: key, value: crlftab_to_html(p)});
           }
-          var key = crlftab_to_html(k);
-          key = key.charAt(0).toUpperCase() + key.slice(1);
-          uriOptions.push({key: key, value: crlftab_to_html(p)});
-        }
-        jsViewSelector(12);
-      });
+          jsViewSelector(12);
+        });
+      }
       $(this).blur();
     });
     $('#btn-send-lock').off('click').click(function() {
@@ -1710,6 +1714,7 @@ proc afterScript(data: RouterData) =
           reloadViewSafeStart();
           jsViewSelector(12);
           page_scroll_done = function() {};
+          showPage4 = false;
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
