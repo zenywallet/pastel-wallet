@@ -824,13 +824,13 @@ i.receive {
   position: absolute;
   border: 0px solid #000;
   display: inline-block;
-  min-width: 6em;
-  min-height: 6em;
+  min-width: 3em;
+  min-height: 3em;
   padding: 0em;
-  border-radius: 50%;
+  border-bottom-left-radius: 100%;
   background-color: rgba(200, 200, 200, 0.5);
-  right: -3em;
-  top: -3em;
+  right: 0;
+  top: 0;
 }
 #recv-modal .close-arc:hover {
   background-color: rgba(210, 210, 210, 0.5);
