@@ -88,7 +88,8 @@ function reloadSection(cb) {
 var target_page_scroll = null;
 var page_scroll_done = function () {};
 var scroll_tval = null;
-window.onscroll = function() {
+var section_auto_scroll = true;
+var onscroll_func = function() {
   if(scroll_tval != null) {
     clearTimeout(scroll_tval);
     scroll_tval = null;
@@ -124,7 +125,7 @@ window.onscroll = function() {
     lastSection = min_item;
   }
   scroll_tval = setTimeout(function() {
-    if(lastSection) {
+    if(lastSection && section_auto_scroll) {
       if(lastSection == target_page_scroll) {
         goSection(lastSection, page_scroll_done);
       } else {
@@ -133,6 +134,13 @@ window.onscroll = function() {
     }
   }, 1200);
 }
+function setAutoScroll(flag) {
+  section_auto_scroll = flag;
+  if(section_auto_scroll) {
+    onscroll_func();
+  }
+}
+window.onscroll = onscroll_func;
 
 function showQrReader() {
   var qr = new QCodeDecoder();
@@ -287,6 +295,7 @@ function initRecvModal() {
 
   $('#recv-modal .close-arc').click(function() {
     hideRecvModal();
+    setAutoScroll(true);
   });
 }
 
@@ -451,6 +460,7 @@ function showRecvAddress(cb) {
           $('#recvaddr-form .menu .item:eq(' + sel_item + ')').addClass('active selected');
         }
         recvform_change();
+        setAutoScroll(false);
         showRecvModal();
       });
 
