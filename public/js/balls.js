@@ -1040,6 +1040,17 @@ UtxoBalls.simple = function() {
     }
   }
   window.addEventListener('visibilitychange', UtxoBalls.visibility_func, false);
+  if(UtxoBalls.device_gamma_func) {
+    window.removeEventListener('deviceorientation', UtxoBalls.device_gamma_func);
+  }
+  UtxoBalls.device_gamma_func = function(evt) {
+    var rad = evt.gamma * Math.PI / 180;
+    var gx = Math.sin(rad);
+    var gy = Math.cos(rad);
+    engine.world.gravity.x = gx;
+    engine.world.gravity.y = gy;
+  }
+  window.addEventListener('deviceorientation', UtxoBalls.device_gamma_func);
 
   if(!UtxoBalls.result_obj) {
     UtxoBalls.result_obj = {
