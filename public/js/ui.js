@@ -1333,7 +1333,7 @@ var PhraseLock = (function() {
       content: msg,
       on: 'manual',
       variation: 'inverted',
-      position: 'top right',
+      position: 'left center',
       distanceAway: 0,
       exclusive: true
     }).popup('show');
