@@ -473,12 +473,14 @@ function showRecvAddress(cb) {
           var copydata = '';
           var textarea = document.getElementById('clipboard');
           if(textarea) {
-            textarea.style.visibility ="visible";
             copydata = address_elm.textContent;
+            textarea.style.visibility ="visible";
+            textarea.readOnly = false;
             textarea.textContent = copydata;
             textarea.select();
             ret = document.execCommand('copy');
             textarea.textContent = '';
+            textarea.readOnly = true;
             textarea.style.visibility ="hidden";
           }
           if(!ret && window.getSelection) {
