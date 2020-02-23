@@ -1044,11 +1044,13 @@ UtxoBalls.simple = function() {
     window.removeEventListener('deviceorientation', UtxoBalls.device_gamma_func);
   }
   UtxoBalls.device_gamma_func = function(evt) {
-    var rad = evt.gamma * Math.PI / 180;
-    var gx = Math.sin(rad);
-    var gy = Math.cos(rad);
-    engine.world.gravity.x = gx;
-    engine.world.gravity.y = gy;
+    if(evt.gamma) {
+      var rad = evt.gamma * Math.PI / 180;
+      var gx = Math.sin(rad);
+      var gy = Math.cos(rad);
+      engine.world.gravity.x = gx;
+      engine.world.gravity.y = gy;
+    }
   }
   window.addEventListener('deviceorientation', UtxoBalls.device_gamma_func);
 
