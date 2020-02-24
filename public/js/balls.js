@@ -757,6 +757,7 @@ UtxoBalls.simple = function() {
   mouse.element.removeEventListener('mousewheel', mouse.mousewheel);
   mouse.element.removeEventListener('DOMMouseScroll', mouse.mousewheel);
 
+  var touch_device_flag = ('ontouchstart' in window);
   var dragging = false;
   var dragging_body = null;
   Events.on(mouseConstraint, 'startdrag', function(e) {
@@ -775,6 +776,10 @@ UtxoBalls.simple = function() {
     if(e.body.fluffy) {
       clearTimeout(e.body.fluffyback_tval);
       setFluffyCollisionAll(e.body);
+    }
+    if(touch_device_flag && !dragging) {
+      show_ball_info(e.body);
+      delay_hide_ball_info(4000);
     }
     dragging_body = e.body;
     dragging = true;
@@ -845,41 +850,51 @@ UtxoBalls.simple = function() {
   }
   document.addEventListener('mouseup', UtxoBalls.mouseup, false);
 
-  var cur_id = -1;
-  var tval = null;
+  var cur_ball_id = -1;
+  var ball_info_tval = null;
   $('#wallet-seg').mouseout(function() {
     $('#ball-info').fadeOut(800);
   });
+  function show_ball_info(ball) {
+    if(cur_ball_id != ball.id && ball.address && ball.value) {
+      cur_ball_id = ball.id;
+      var bc = ball.utxo || ball.unconf;
+      var text = '';
+      if(bc && bc.change == 1) {
+        text = 'Change-' + Number(bc.index) + '<br>' + ball.value;
+      } else {
+        text = ball.address + '<br>' + ball.value;
+      }
+      $('#ball-info').html(text).css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3}).stop(true, true).fadeTo(400, 1);
+    } else if(cur_ball_id == ball.id) {
+      $('#ball-info').css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3});
+    }
+  }
+
+  function hide_ball_info() {
+    if(cur_ball_id != -1) {
+      cur_ball_id = -1;
+      $('#ball-info').fadeOut(800);
+    }
+  }
+  function delay_hide_ball_info(delay) {
+    clearTimeout(ball_info_tval);
+    ball_info_tval = setTimeout(function() {
+      if(cur_ball_id != -1) {
+        cur_ball_id = -1;
+        $('#ball-info').fadeOut(800);
+      }
+    }, delay || 5000);
+  }
   Events.on(mouseConstraint, 'mousemove', function(e) {
     var foundPhysics = Matter.Query.point(Ball.bodies, e.mouse.position);
     if(foundPhysics.length == 1 && !dragging) {
       var ball = foundPhysics[0];
-      if(cur_id != ball.id && ball.address && ball.value) {
-        cur_id = ball.id;
-        var bc = ball.utxo || ball.unconf;
-        var text = '';
-        if(bc && bc.change == 1) {
-          text = 'Change-' + Number(bc.index) + '<br>' + ball.value;
-        } else {
-          text = ball.address + '<br>' + ball.value;
-        }
-        $('#ball-info').html(text).css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3}).stop(true, true).fadeIn(400);
-      } else if(cur_id == ball.id) {
-        $('#ball-info').css({left: ball.position.x + 28, top: ball.position.y - 100 - ball.circleRadius * 2 / 3});
-      }
+      show_ball_info(ball);
     } else {
-      if(cur_id != -1) {
-        cur_id = -1;
-        $('#ball-info').fadeOut(800);
-      }
+      hide_ball_info();
     }
-    clearTimeout(tval);
-    tval = setTimeout(function() {
-      if(cur_id != -1) {
-        cur_id = -1;
-        $('#ball-info').fadeOut(800);
-      }
-    }, 5000);
+    delay_hide_ball_info();
   });
 
   Events.on(mouseConstraint, 'mousedown', function(e) {
