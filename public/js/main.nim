@@ -691,7 +691,7 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
       tdiv(class="inline field"):
         tdiv(class="vector-label"): text "Seed Vector:"
         tdiv(class="ui mini input vector-input"):
-          input(type="text", placeholder="Type your seed vector"):
+          input(type="text", placeholder="Type your seed vector", spellcheck="false"):
             proc onkeyup(ev: Event; n: Vnode) =
               seedCardInfos[idx].sv = n.value
     tdiv(class="bt-seed-del"):
@@ -728,7 +728,9 @@ proc passphraseEditor(): VNode =
         h4(class="ui grey inverted header center"): text "Input passphrase"
         tdiv(class="ui form"):
           tdiv(class="field"):
-            input(class="center", type="text", name="input-passphrase", value=passPhrase, placeholder="Passphrase", onkeyup=changePassphrase, onkeyupenter=confirmPassphrase)
+            input(class="center", type="text", name="input-passphrase", value=passPhrase,
+                  placeholder="Passphrase", onkeyup=changePassphrase,
+                  onkeyupenter=confirmPassphrase, spellcheck="false")
       button(class="ui right floated olive button", onclick=confirmPassphrase):
         text "Apply"
 
@@ -1237,7 +1239,7 @@ proc recvAddressModal(): VNode =
           tdiv(class="field"):
             label: text "Amount"
             tdiv(class="ui right labeled input"):
-              input(class="right", type="text", name="amount", placeholder="Amount")
+              input(class="right", type="text", name="amount", placeholder="Amount", spellcheck="false")
               tdiv(class="ui basic label"): text "ZNY"
         tdiv(class="two fields"):
           tdiv(class="field"):
@@ -1299,11 +1301,12 @@ proc sendForm(): VNode =
       tdiv(class="field"):
         label: text "Send Address"
         tdiv(class="ui small input"):
-          input(class="center", type="text", name="address", placeholder="Address")
+          input(class="center", type="text", name="address", placeholder="Address", spellcheck="false")
       tdiv(class="field"):
         label: text "Amount"
         tdiv(class="ui small input"):
-          input(class="center", type="text", name="amount", placeholder="Amount", onkeyup=checkSendAmount)
+          input(class="center", type="text", name="amount", placeholder="Amount",
+                onkeyup=checkSendAmount, spellcheck="false")
           tdiv(class="ui mini basic icon buttons utxoctrl"):
             button(id="btn-utxo-minus", class="ui button", title="-1 Ball"):
               italic(class="minus circle icon")
@@ -1542,7 +1545,7 @@ proc appMain(data: RouterData): VNode =
               text "Logs"
               span: italic(class="chevron down icon")
             tdiv(id="bottom-blink")
-        textarea(id="clipboard", rows="1", tabindex="-1", readOnly="true")
+        textarea(id="clipboard", rows="1", tabindex="-1", readOnly="true", spellcheck="false")
 
     if showPage3 or showPage4:
       section(id="section4", class="tradelogs-section"):

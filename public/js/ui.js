@@ -1389,7 +1389,7 @@ var PhraseLock = (function() {
           '<div class="scrolling content">' +
             '<div id="passphrase-modal-seg" class="ui center aligned segment">' +
                 '<div class="ui form">' +
-                  '<div class="field"><input class="center" type="text" name="input-passphrase" placeholder="Passphrase"></div>' +
+                  '<div class="field"><input class="center" type="text" name="input-passphrase" placeholder="Passphrase" spellcheck="false"></div>' +
                 '</div>' +
             '</div>' +
           '</div>' +
