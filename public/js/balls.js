@@ -1028,12 +1028,17 @@ UtxoBalls.simple = function() {
     //}
   }
 
+  var pwa_mode = (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone) || document.referrer.includes('android-app://');
+
   if(UtxoBalls.resize_func) {
     clearTimeout(UtxoBalls.resize_tval);
     window.removeEventListener('resize', UtxoBalls.resize_func);
   }
   UtxoBalls.resize_tval = null;
   UtxoBalls.resize_func = function() {
+    if(pwa_mode) {
+      return;
+    }
     clearTimeout(UtxoBalls.resize_tval);
     UtxoBalls.resize_tval = setTimeout(function() {
       stop();
