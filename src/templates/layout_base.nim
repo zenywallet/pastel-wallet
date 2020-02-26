@@ -51,7 +51,27 @@ proc layout_base*(debug: bool): string =
   <meta name="theme-color" content="#ffffff">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="/semantic/semantic.min.css">
+  <link rel="stylesheet" href="/semantic/components/button.css">
+  <link rel="stylesheet" href="/semantic/components/card.css">
+  <link rel="stylesheet" href="/semantic/components/checkbox.css">
+  <link rel="stylesheet" href="/semantic/components/container.css">
+  <link rel="stylesheet" href="/semantic/components/dimmer.css">
+  <link rel="stylesheet" href="/semantic/components/dropdown.css">
+  <link rel="stylesheet" href="/semantic/components/form.css">
+  <link rel="stylesheet" href="/semantic/components/header.css">
+  <link rel="stylesheet" href="/semantic/components/icon.css">
+  <link rel="stylesheet" href="/semantic/components/input.css">
+  <link rel="stylesheet" href="/semantic/components/item.css">
+  <link rel="stylesheet" href="/semantic/components/label.css">
+  <link rel="stylesheet" href="/semantic/components/list.css">
+  <link rel="stylesheet" href="/semantic/components/loader.css">
+  <link rel="stylesheet" href="/semantic/components/message.css">
+  <link rel="stylesheet" href="/semantic/components/modal.css">
+  <link rel="stylesheet" href="/semantic/components/popup.css">
+  <link rel="stylesheet" href="/semantic/components/reset.css">
+  <link rel="stylesheet" href="/semantic/components/segment.css">
+  <link rel="stylesheet" href="/semantic/components/site.css">
+  <link rel="stylesheet" href="/semantic/components/transition.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
