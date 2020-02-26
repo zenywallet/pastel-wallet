@@ -11,6 +11,7 @@ proc layout_base*(debug: bool): string =
 <script type="text/javascript" src="/js/rawinflate.min.js"></script>
 <script type="text/javascript" src="/js/jquery-3.4.1.js"></script>
 <script type="text/javascript" src="/semantic/semantic.js"></script>
+<script type="text/javascript" src="/formatic/components/modal.js"></script>
 <script type="text/javascript" src="/js/jquery-qrcode.js"></script>
 <script type="text/javascript" src="/js/stor.js"></script>
 <script type="text/javascript" src="/js/matter.js"></script>
