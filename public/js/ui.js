@@ -69,12 +69,28 @@ function scrollPos(pos, duration, done) {
 }
 
 var lastSection = null;
+var pause_user_scroll = false;
+var pause_event_list = {};
 function goSection(selector, cb) {
   var section = document.querySelector(selector);
   if(section) {
+    pause_user_scroll = true;
+    if(!pause_event_list[selector]) {
+      pause_event_list[selector] = 1;
+      $(selector).on('touchstart touchmove', function(e) {
+        if(pause_user_scroll) {
+          e.preventDefault();
+        }
+      });
+    }
     var rect = section.getBoundingClientRect();
     var offset_top = rect.top + (window.pageYOffset || document.documentElement.scrollTop);
-    scrollPos(offset_top, 800, cb);
+    scrollPos(offset_top, 800, function() {
+      pause_user_scroll = false;
+      if(cb) {
+        cb();
+      }
+    });
     lastSection = selector;
   }
 }
@@ -134,6 +150,7 @@ var onscroll_func = function() {
     }
   }, 1200);
 }
+
 function setAutoScroll(flag) {
   section_auto_scroll = flag;
   if(section_auto_scroll) {
