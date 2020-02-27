@@ -9,8 +9,12 @@ A sample wallet using Blockstor API
 
 ### Build Instructions
 ```bash
-git clone https://github.com/zenywallet/pastel-wallet
-cd pastel-wallet
+git clone --recursive https://github.com/zenywallet/pastel-wallet
+cd pastel-wallet/deps/libbtc
+./autogen.sh
+./configure --disable-wallet --disable-tools
+make
+cd ../..
 nimble build
 ```
 
