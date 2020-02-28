@@ -351,17 +351,6 @@ proc watcher_main() {.thread.} =
   while true:
     if ready:
       doWork()
-      for d in db.getWallets(""):
-        debug "wid=", d.wallet_id, " ", d.xpubkey
-        debug "---getAddrvals"
-        for g in db.getAddrvals(d.wallet_id):
-          debug g
-        debug "---getAddrlogs"
-        for g in db.getAddrlogs(d.wallet_id):
-          debug g
-        debug "---getUnspents"
-        for g in db.getUnspents(d.wallet_id):
-          debug g
     for i in 0..<6:
       if not active:
         return
