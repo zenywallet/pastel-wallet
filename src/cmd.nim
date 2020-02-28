@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import terminal, parseopt, db, blockstor, logs
+import terminal, parseopt, db, blockstor, logs, strutils
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
 
 proc usage() =
@@ -8,8 +8,11 @@ proc usage() =
 usage:
   debug { 1 | 0 }
     1 - enable, 0 - disable
-  wallets
+  wallets [ xpub | wallet_id ]
   delwallets
+  addrvals { wallet_id }
+  addrlogs { wallet_id }
+  unspents { wallet_id }
 """);
 
 proc cmd_main() {.thread.} =
@@ -25,8 +28,22 @@ proc cmd_main() {.thread.} =
       of cmdArgument:
         if p.key == "wallets":
           p.next()
-          for d in db.getWallets(if p.kind == cmdEnd: "" else: p.key):
-            stdout.styledWriteLine(styleBright, fgBlue, $d)
+          if p.kind == cmdEnd:
+            for d in db.getWallets(""):
+              stdout.styledWriteLine(styleBright, fgBlue, $d)
+          else:
+            var find_flag = false
+            for d in db.getWallets(p.key):
+              stdout.styledWriteLine(styleBright, fgBlue, $d)
+              find_flag = true
+            if not find_flag:
+              try:
+                var wallet_id = parseUInt(p.key)
+                for d in db.getWallets(""):
+                  if d.wallet_id == wallet_id:
+                    stdout.styledWriteLine(styleBright, fgBlue, $d)
+              except:
+                discard
           break
         elif p.key == "delwallets":
           db.delWallets()
@@ -38,8 +55,32 @@ proc cmd_main() {.thread.} =
             debugEnable()
           elif p.key == "0" or p.key == "false":
             debugDisable()
-          else:
-            usage()
+        elif p.key == "addrvals":
+          p.next()
+          try:
+            var wallet_id = parseUInt(p.key)
+            for g in db.getAddrvals(wallet_id):
+              stdout.styledWriteLine(styleBright, fgBlue, $g)
+          except:
+            discard
+        elif p.key == "addrlogs":
+          p.next()
+          try:
+            var wallet_id = parseUInt(p.key)
+            for g in db.getAddrlogs(wallet_id):
+              stdout.styledWriteLine(styleBright, fgBlue, $g)
+          except:
+            discard
+        elif p.key == "unspents":
+          p.next()
+          try:
+            var wallet_id = parseUInt(p.key)
+            for g in db.getUnspents(wallet_id):
+              stdout.styledWriteLine(styleBright, fgBlue, $g)
+          except:
+            discard
+        else:
+          usage()
       else: discard
 
 var cmd_thread: Thread[void]
