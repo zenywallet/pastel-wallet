@@ -853,7 +853,7 @@ i.receive {
 }
 #recv-qrcode-uri {
   margin: 7px 0;
-  word-break : break-all;
+  word-break: break-all;
   word-wrap: break-word;
   text-align: left;
   font-size: 7px;
