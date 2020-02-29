@@ -859,6 +859,11 @@ i.receive {
   font-size: 7px;
   line-height: 1em;
 }
+.ui.popup {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 90%;
+}
 #recvaddr-form {
   text-align: left;
   margin-top: 1em;
