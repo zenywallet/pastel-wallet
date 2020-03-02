@@ -1126,9 +1126,9 @@ var qrReaderModal = (function() {
 
   function show(cb, title) {
     if(!$('#qrcode-modal').length) {
-      $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header">'
-        + (title || 'Scan QR code') + '</div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">Preparing Camera</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
+      $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header"></div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">Preparing Camera</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
     }
+    $('#qrcode-modal .ui.header').text(title || 'Scan QR code');
     $('#qrcode-modal').modal("setting", {
       closable: false,
       autofocus: false,
