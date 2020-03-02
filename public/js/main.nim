@@ -1694,6 +1694,7 @@ proc afterScript(data: RouterData) =
 
   if showPage4:
     asm """
+      pastel.utxoballs.pause();
       //$.fn.visibility.settings.silent = true;
       $('.backpage').visibility({
         type: 'fixed',
@@ -1722,6 +1723,7 @@ proc afterScript(data: RouterData) =
           reloadViewSafeStart();
           jsViewSelector(12);
           page_scroll_done = function() {};
+          pastel.utxoballs.resume();
           showPage4 = false;
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
