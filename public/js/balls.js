@@ -390,7 +390,7 @@ var UtxoBalls = function() {
           ball.mark_utxo = 0;
           if(ball.circleRadius != calc_ball_radius(task.data)) {
             var new_ball = create_ball(ball.ballType, ball.ballData, {
-              fluffy: ball.fluffy == fluffy1 ? fluffy1 : fluffy3,
+              fluffy: ball.fluffy,
               x: ball.position.x, y: ball.position.y, angle: ball.angle
             });
             for(var i in _ballBodies) {
@@ -494,7 +494,9 @@ var UtxoBalls = function() {
             if(ball.ballData.txtype == 1) {
               ball.mark_utxo = 0;
               ball.ballType = ballType.utxo;
-              setFluffy(ball, fluffy3);
+              if(ball.fluffy == fluffy1) {
+                setFluffy(ball, fluffy3);
+              }
             } else {
               _ballBodiesAway.push(ball);
               remove_bodies_idx(ball);
