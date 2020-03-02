@@ -1423,7 +1423,7 @@ var PhraseLock = (function() {
           console.log('deny');
           cb(Module.PLOCK_CANCEL);
         },
-        onHide: function() {
+        onHidden: function() {
           $('#passphrase-modal-seg input[name="input-passphrase"]').val('');
         }
       }).modal('show');
