@@ -632,6 +632,9 @@ i.receive {
 #receive-address .ui.label, #receive-address .ui.buttons, #address-text, #receive-address .ui.ball img {
   pointer-events: auto;
 }
+#receive-address .used .ui.ball img {
+  pointer-events: none;
+}
 #receive-address .btn-close {
   position: absolute;
   right: 0em;
