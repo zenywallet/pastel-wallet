@@ -289,6 +289,9 @@ var TradeLogs = (function() {
       if(a.trans_time != b.trans_time) {
         return b.trans_time - a.trans_time;
       }
+      if(a.txid != b.txid) {
+        return b.txid > a.txid ? 1 : -1;
+      }
       if(a.txtype != b.txtype) {
         return b.txtype - a.txtype;
       }
