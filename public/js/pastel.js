@@ -642,8 +642,10 @@ pastel.ready = function() {
               var spent = spents[i];
               send.add(UINT64(String(spent.value)));
             }
-            send.subtract(recv_change);
           }
+        }
+        if(send.greaterThan(recv_change) || send.eq(recv_change)) {
+          send.subtract(recv_change);
         }
         for(var txid in data.txs) {
           var tx = data.txs[txid];
