@@ -847,7 +847,7 @@ var UtxoBalls = function() {
 
       Events.on(_render.engine, 'beforeUpdate', function(event) {
         var time = _render.engine.timing.timestamp;
-        var rect = _render.element.getBoundingClientRect();
+        var rect = {y: 137}; //_render.element.getBoundingClientRect();
         for(var i in _ballBodies) {
           var b = _ballBodies[i];
           if(!b.rnd) {
