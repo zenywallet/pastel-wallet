@@ -1136,6 +1136,7 @@ var qrReaderModal = (function() {
         qrShow(function(data) {
           cb(data);
           hide();
+          $('#qrcode-modal').modal('hide');
         });
       },
       onApprove: function() {
