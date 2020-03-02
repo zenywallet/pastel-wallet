@@ -807,7 +807,7 @@ asm """
     send_ball_count_less = false;
     send_ball_count_over = false;
     $('#btn-utxo-count').text('...');
-    pastel.utxoballs.setsend(0);
+    pastel.utxoballs.setSend(0);
     send_ball_count = 0;
   }
 
@@ -817,7 +817,7 @@ asm """
     if(ret.err) {
       send_ball_count_over = true;
       $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
-      pastel.utxoballs.setsend(ret.safe_count);
+      pastel.utxoballs.setSend(ret.safe_count);
       send_ball_count = ret.safe_count;
       amount_elm.closest('.field').addClass('error');
     } else {
@@ -825,14 +825,14 @@ asm """
       if(ret.utxo_count > ret.safe_count) {
         send_ball_count_over = true;
         $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
-        pastel.utxoballs.setsend(ret.safe_count);
+        pastel.utxoballs.setSend(ret.safe_count);
         send_ball_count = ret.safe_count;
         amount_elm.closest('.field').addClass('error');
       } else {
         amount_elm.closest('.field').removeClass('error');
         send_ball_count_over = false;
         $('#btn-utxo-count').text((ret.eq ? '' : '≤') + String(ret.utxo_count) + (ret.utxo_count == ret.safe_count ? ' max' : ''));
-        pastel.utxoballs.setsend(ret.utxo_count);
+        pastel.utxoballs.setSend(ret.utxo_count);
         send_ball_count = ret.utxo_count;
       }
     }
@@ -897,7 +897,7 @@ asm """
       }
       elm.blur();
     });
-    pastel.utxoballs.setsend(send_ball_count);
+    pastel.utxoballs.setSend(send_ball_count);
 
     $('#btn-utxo-plus').off('click').click(function() {
       $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
@@ -914,7 +914,7 @@ asm """
         send_ball_count = safe_count;
       }
       var sendval = pastel.wallet.calcSendValue(send_ball_count);
-      pastel.utxoballs.setsend(send_ball_count);
+      pastel.utxoballs.setSend(send_ball_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
       $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
       $(this).blur();
@@ -932,7 +932,7 @@ asm """
       if(send_ball_count < 0) {
         send_ball_count = 0;
       }
-      pastel.utxoballs.setsend(send_ball_count);
+      pastel.utxoballs.setSend(send_ball_count);
       var sendval = pastel.wallet.calcSendValue(send_ball_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
       $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
@@ -1105,7 +1105,7 @@ asm """
     if(!$('#send-coins').hasClass('hidden') && (switch_id == null || switch_id == 1)) {
       sendrecv_switch_busy = true;
       if(switch_id == 1) {
-        pastel.utxoballs.setsend(0);
+        pastel.utxoballs.setSend(0);
       }
       $('#send-coins').transition({
         animation: 'fade down',
@@ -1153,7 +1153,7 @@ asm """
   function sendrecv_select(val) {
     clearTimeout(sendrecv_switch_tval);
     if(val != 1) {
-      pastel.utxoballs.setsend(0);
+      pastel.utxoballs.setSend(0);
     }
     sendrecv_switch = val;
     sendrecv_switch_worker();
