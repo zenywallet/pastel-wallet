@@ -881,6 +881,9 @@ asm """
           elm.attr('title', 'Locked');
           PhraseLock.notify_locked();
         }
+        setTimeout(function() {
+          elm.focus();
+        }, 1000);
       } else {
         Notify.hide_all();
         PhraseLock.showPhraseInput(function(status) {
@@ -893,9 +896,11 @@ asm """
           } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
             Notify.show("Error", "Failed to unlock. Passphrase is incorrect.", Notify.msgtype.error);
           }
+          setTimeout(function() {
+            elm.focus();
+          }, 1000);
         });
       }
-      elm.blur();
     });
     pastel.utxoballs.setSend(send_ball_count);
 
