@@ -226,6 +226,8 @@ var UtxoBalls = function() {
 
   var valid_utxos = [];
   var valid_unconfs = [];
+  var full_utxos = [];
+  var full_unconfs = [];
   var cur_balls_r = 0;
   var calc_balls_r = function() {
     if(valid_utxos.length > 0 || valid_unconfs.length > 0) {
@@ -330,6 +332,7 @@ var UtxoBalls = function() {
         var count = 0;
         var too_much = (task.data.length > 140);
         valid_utxos = task.data.slice(0, 140);
+        full_utxos = task.data;
         for(var i in valid_utxos) {
           var utxo = valid_utxos[i];
           utxo.value_d = conv_coin(sanitize(utxo.value))
@@ -355,6 +358,7 @@ var UtxoBalls = function() {
         var count = 0;
         var too_much = (task.data.length > 160);
         valid_unconfs = task.data.slice(0, 160);
+        full_unconfs = task.data;
         for(var i in valid_unconfs) {
           var unconf = valid_unconfs[i];
           unconf.value_d = conv_coin(sanitize(unconf.value))
@@ -943,8 +947,8 @@ var UtxoBalls = function() {
     prev_setsend_count = count;
     var cnt = 0;
     var valid_cnt = 0;
-    for(var i in valid_utxos) {
-      var idx = create_bodies_idx({ballType: ballType.utxo, ballData: valid_utxos[i]});
+    for(var i in full_utxos) {
+      var idx = create_bodies_idx({ballType: ballType.utxo, ballData: full_utxos[i]});
       var ball = _ballBodiesIdx[idx];
       if(ball && ball.ballType == ballType.utxo) {
         if(cnt < count) {
