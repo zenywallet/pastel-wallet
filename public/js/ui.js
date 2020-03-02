@@ -1418,10 +1418,12 @@ var PhraseLock = (function() {
           } else {
             cb(Module.PLOCK_FAILED_PHRASE);
           }
+          $('#passphrase-modal-seg input[name="input-passphrase"]').val('');
         },
         onDeny: function() {
           console.log('deny');
           cb(Module.PLOCK_CANCEL);
+          $('#passphrase-modal-seg input[name="input-passphrase"]').val('');
         }
       }).modal('show');
     }
