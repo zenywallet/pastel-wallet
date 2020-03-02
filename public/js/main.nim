@@ -696,7 +696,7 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
               seedCardInfos[idx].sv = n.value
     tdiv(class="bt-seed-del"):
       button(class="circular ui icon mini button", onclick=removeSeedCard(idx)):
-        italic(class="cut icon")
+        italic(class="close icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
   passphraseFulfill = false
