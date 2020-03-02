@@ -2645,6 +2645,7 @@ function levens_one(word, wordlist) {
 var confirm_mnemonic_advanced_260300 = [false];
   var send_ball_count = 0;
   var send_ball_count_less = false;
+  var send_ball_count_over = false;
 
   function conv_coin(uint64_val) {
     strval = uint64_val.toString();
@@ -2661,46 +2662,74 @@ var confirm_mnemonic_advanced_260300 = [false];
     return val / 100000000;
   }
 
+  function resetSendBallCount() {
+    send_ball_count = 0;
+    send_ball_count_less = false;
+    send_ball_count_over = false;
+    $('#btn-utxo-count').text('...');
+    pastel.utxoballs.setSend(0);
+    send_ball_count = 0;
+  }
+
   function setSendUtxo(value) {
-    pastel.wallet.calcSendUtxo(value, function(result) {
-      if(result.err) {
-        $('#btn-utxo-count').text('>' + String(result.safe_count));
-        pastel.utxoballs.setsend(result.safe_count);
-        send_ball_count = result.safe_count;
+    var ret = pastel.wallet.calcSendUtxo(value);
+    var amount_elm = $('#send-coins input[name="amount"]');
+    if(ret.err) {
+      send_ball_count_over = true;
+      $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
+      pastel.utxoballs.setSend(ret.safe_count);
+      send_ball_count = ret.safe_count;
+      amount_elm.closest('.field').addClass('error');
+    } else {
+      send_ball_count_less = !ret.eq;
+      if(ret.utxo_count > ret.safe_count) {
+        send_ball_count_over = true;
+        $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
+        pastel.utxoballs.setSend(ret.safe_count);
+        send_ball_count = ret.safe_count;
+        amount_elm.closest('.field').addClass('error');
       } else {
-        send_ball_count_less = !result.eq;
-        $('#btn-utxo-count').text((result.eq ? '' : '≤') + String(result.utxo_count));
-        pastel.utxoballs.setsend(result.utxo_count);
-        send_ball_count = result.utxo_count;
+        amount_elm.closest('.field').removeClass('error');
+        send_ball_count_over = false;
+        $('#btn-utxo-count').text((ret.eq ? '' : '≤') + String(ret.utxo_count) + (ret.utxo_count == ret.safe_count ? ' max' : ''));
+        pastel.utxoballs.setSend(ret.utxo_count);
+        send_ball_count = ret.utxo_count;
       }
-    });
+    }
   }
 
   function initSendForm() {
     $('#btn-send-clear').off('click').click(function() {
-      $('#send-coins input[name="address"]').val('');
-      $('#send-coins input[name="amount"]').val('');
-      uriOptions = [];
-      jsViewSelector(12);
+      if(!show_page4_258072[0]) {
+        $('#send-coins input[name="address"]').val('');
+        $('#send-coins input[name="amount"]').val('');
+        $('#send-coins input[name="address"]').closest('.field').removeClass('error');
+        $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
+        resetSendBallCount();
+        uriOptions = [];
+        jsViewSelector(12);
+      }
       $(this).blur();
     });
     $('#btn-send-qrcode').off('click').click(function() {
-      qrReaderModal.show(function(uri) {
-        var data = bip21reader(uri);
-        $('#send-coins input[name="address"]').val(data.address || '');
-        $('#send-coins input[name="amount"]').val(data.amount || '');
-        uriOptions = [];
-        for(var k in data) {
-          var p = data[k];
-          if(k == 'address' || k == 'amount') {
-            continue;
+      if(!show_page4_258072[0]) {
+        qrReaderModal.show(function(uri) {
+          var data = bip21reader(uri);
+          $('#send-coins input[name="address"]').val(data.address || '');
+          $('#send-coins input[name="amount"]').val(data.amount || '');
+          uriOptions = [];
+          for(var k in data) {
+            var p = data[k];
+            if(k == 'address' || k == 'amount') {
+              continue;
+            }
+            var key = crlftab_to_html(k);
+            key = key.charAt(0).toUpperCase() + key.slice(1);
+            uriOptions.push({key: key, value: crlftab_to_html(p)});
           }
-          var key = crlftab_to_html(k);
-          key = key.charAt(0).toUpperCase() + key.slice(1);
-          uriOptions.push({key: key, value: crlftab_to_html(p)});
-        }
-        jsViewSelector(12);
-      });
+          jsViewSelector(12);
+        });
+      }
       $(this).blur();
     });
     $('#btn-send-lock').off('click').click(function() {
@@ -2712,6 +2741,9 @@ var confirm_mnemonic_advanced_260300 = [false];
           elm.attr('title', 'Locked');
           PhraseLock.notify_locked();
         }
+        setTimeout(function() {
+          elm.focus();
+        }, 1000);
       } else {
         Notify.hide_all();
         PhraseLock.showPhraseInput(function(status) {
@@ -2724,13 +2756,16 @@ var confirm_mnemonic_advanced_260300 = [false];
           } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
             Notify.show("Error", "Failed to unlock. Passphrase is incorrect.", Notify.msgtype.error);
           }
+          setTimeout(function() {
+            elm.focus();
+          }, 1000);
         });
       }
-      elm.blur();
     });
-    pastel.utxoballs.setsend(send_ball_count);
+    pastel.utxoballs.setSend(send_ball_count);
 
     $('#btn-utxo-plus').off('click').click(function() {
+      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
       if(send_ball_count_less) {
         send_ball_count_less = false;
       } else {
@@ -2739,22 +2774,33 @@ var confirm_mnemonic_advanced_260300 = [false];
       if(send_ball_count >= 1000) {
         send_ball_count = 999;
       }
-      pastel.utxoballs.setsend(send_ball_count);
+      var safe_count = pastel.wallet.getSafeCount();
+      if(send_ball_count > safe_count) {
+        send_ball_count = safe_count;
+      }
       var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      pastel.utxoballs.setSend(send_ball_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      $('#btn-utxo-count').text(String(sendval.count));
+      $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
       $(this).blur();
     });
     $('#btn-utxo-minus').off('click').click(function() {
-      send_ball_count--;
+      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
+      var safe_count = pastel.wallet.getSafeCount();
+      if(send_ball_count_over) {
+        send_ball_count_over = false;
+        send_ball_count = safe_count;
+      } else {
+        send_ball_count--;
+      }
       send_ball_count_less = false;
       if(send_ball_count < 0) {
         send_ball_count = 0;
       }
-      pastel.utxoballs.setsend(send_ball_count);
+      pastel.utxoballs.setSend(send_ball_count);
       var sendval = pastel.wallet.calcSendValue(send_ball_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      $('#btn-utxo-count').text(String(sendval.count));
+      $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
       $(this).blur();
     });
     $('#btn-tx-send').off('click').click(function() {
@@ -2763,6 +2809,32 @@ var confirm_mnemonic_advanced_260300 = [false];
         var address = String($('#send-coins input[name="address"]').val()).trim();
         var amount = String($('#send-coins input[name="amount"]').val()).trim();
         if(address.length == 0 || amount.length == 0) {
+          var address_elm = $('#send-coins input[name="address"]').closest('.field');
+          var amount_elm = $('#send-coins input[name="amount"]').closest('.field');
+          var flag = true;
+          var alert_count = 0;
+          function alert_worker() {
+            if(address.length == 0) {
+              if(flag) {
+                address_elm.addClass('error');
+              } else {
+                address_elm.removeClass('error');
+              }
+            }
+            if(amount.length == 0) {
+              if(flag) {
+                amount_elm.addClass('error');
+              } else {
+                amount_elm.removeClass('error');
+              }
+            }
+            alert_count++;
+            if(alert_count < 4) {
+              flag = !flag;
+              setTimeout(alert_worker, 100);
+            }
+          }
+          alert_worker();
           return;
         }
         amount = amount.replace(/,/g, '');
@@ -2787,6 +2859,9 @@ var confirm_mnemonic_advanced_260300 = [false];
               break;
             case ErrSend.INVALID_ADDRESS:
               Notify.show('Error', 'Address is invalid.', Notify.msgtype.error);
+              break;
+            case ErrSend.INSUFFICIENT_BALANCE:
+              Notify.show('Error', 'Balance is insufficient.', Notify.msgtype.error);
               break;
             case ErrSend.DUST_VALUE:
               Notify.show('Error', 'Amount is too small.', Notify.msgtype.error);
@@ -2894,6 +2969,9 @@ var confirm_mnemonic_advanced_260300 = [false];
   function reset_switch(switch_id) {
     if(!$('#send-coins').hasClass('hidden') && (switch_id == null || switch_id == 1)) {
       sendrecv_switch_busy = true;
+      if(switch_id == 1) {
+        pastel.utxoballs.setSend(0);
+      }
       $('#send-coins').transition({
         animation: 'fade down',
         onComplete : function() {
@@ -2940,7 +3018,7 @@ var confirm_mnemonic_advanced_260300 = [false];
   function sendrecv_select(val) {
     clearTimeout(sendrecv_switch_tval);
     if(val != 1) {
-      pastel.utxoballs.setsend(0);
+      pastel.utxoballs.setSend(0);
     }
     sendrecv_switch = val;
     sendrecv_switch_worker();
@@ -3413,6 +3491,7 @@ function seed_card_260915(card_info_260917, idx_260918) {
     var tmp_260940 = tree_213045(103, []);
     set_attr_211568(tmp_260940, "type", "text");
     set_attr_211568(tmp_260940, "placeholder", "Type your seed vector");
+    set_attr_211568(tmp_260940, "spellcheck", "false");
     add_event_handler_242793(tmp_260940, 3, HEX3Aanonymous_261700, kxi_232324[0]);
     add_211771(tmp_260939, tmp_260940);
     add_211771(tmp_260937, tmp_260939);
@@ -5102,6 +5181,7 @@ function passphrase_editor_261780() {
     set_attr_211568(tmp_261789, "placeholder", "Passphrase");
     add_event_handler_242793(tmp_261789, 3, change_passphrase_261745, kxi_232324[0]);
     add_event_handler_242793(tmp_261789, 29, confirm_passphrase_261762, kxi_232324[0]);
+    set_attr_211568(tmp_261789, "spellcheck", "false");
     add_211771(tmp_261788, tmp_261789);
     add_211771(tmp_261787, tmp_261788);
     add_211771(tmp_261785, tmp_261787);
@@ -5109,7 +5189,7 @@ function passphrase_editor_261780() {
     var tmp_261790 = tree_213045(104, []);
     tmp_261790.class = "ui right floated olive button";
     add_event_handler_242793(tmp_261790, 0, confirm_passphrase_261762, kxi_232324[0]);
-    add_211771(tmp_261790, text_213148(makeNimstrLit("Save")));
+    add_211771(tmp_261790, text_213148(makeNimstrLit("Apply")));
     add_211771(tmp_261784, tmp_261790);
     add_211771(tmp_261783, tmp_261784);
     result_261782 = tmp_261783;
@@ -5340,6 +5420,7 @@ function recv_address_modal_262228() {
     set_attr_211568(tmp_262250, "type", "text");
     set_attr_211568(tmp_262250, "name", "amount");
     set_attr_211568(tmp_262250, "placeholder", "Amount");
+    set_attr_211568(tmp_262250, "spellcheck", "false");
     add_211771(tmp_262249, tmp_262250);
     var tmp_262251 = tree_213045(43, []);
     tmp_262251.class = "ui basic label";
@@ -5405,10 +5486,12 @@ function btn_send_close_262019() {
 function check_send_amount_262384(ev_262386, n_262387) {
     var s_262388 = value_210867(n_262387);
         var amount = String(s_262388).trim();
+    var amount_elm = $('#send-coins input[name="amount"]');
     if(amount.length > 0) {
       amount = amount.replace(/,/g, '');
       var amounts = amount.split('.');
       if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+        amount_elm.closest('.field').removeClass('error');
         var value = '';
         if(amounts.length == 1) {
           value = amounts[0] + '00000000';
@@ -5416,10 +5499,16 @@ function check_send_amount_262384(ev_262386, n_262387) {
           value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
         }
         if(value.length > 0) {
-          console.log(value);
           setSendUtxo(value);
+        } else {
+          resetSendBallCount();
         }
+      } else {
+        amount_elm.closest('.field').addClass('error');
       }
+    } else {
+      amount_elm.closest('.field').removeClass('error');
+      resetSendBallCount();
     }
   
 
@@ -5486,6 +5575,7 @@ function send_form_262416() {
     set_attr_211568(tmp_262435, "type", "text");
     set_attr_211568(tmp_262435, "name", "address");
     set_attr_211568(tmp_262435, "placeholder", "Address");
+    set_attr_211568(tmp_262435, "spellcheck", "false");
     add_211771(tmp_262434, tmp_262435);
     add_211771(tmp_262432, tmp_262434);
     add_211771(tmp_262431, tmp_262432);
@@ -5502,6 +5592,7 @@ function send_form_262416() {
     set_attr_211568(tmp_262439, "name", "amount");
     set_attr_211568(tmp_262439, "placeholder", "Amount");
     add_event_handler_242793(tmp_262439, 3, check_send_amount_262384, kxi_232324[0]);
+    set_attr_211568(tmp_262439, "spellcheck", "false");
     add_211771(tmp_262438, tmp_262439);
     var tmp_262440 = tree_213045(43, []);
     tmp_262440.class = "ui mini basic icon buttons utxoctrl";
@@ -5921,7 +6012,7 @@ function app_main_262733(data_262735) {
     tmp_262779.class = "ui container method-selector";
     var tmp_262780 = tree_213045(43, []);
     tmp_262780.class = "title";
-    add_211771(tmp_262780, text_213148(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need key card or passphrase before sending your coins.\x0A                ")));
+    add_211771(tmp_262780, text_213148(makeNimstrLit("                  A key card or passphrase is required to encrypt and save the private key in your browser.\x0A                   You will need it before sending your coins.\x0A                ")));
     add_211771(tmp_262779, tmp_262780);
     var tmp_262781 = tree_213045(43, []);
     tmp_262781.class = "ui buttons";
@@ -5972,7 +6063,7 @@ function app_main_262733(data_262735) {
     var tmp_262793 = tree_213045(104, []);
     tmp_262793.class = "ui right floated olive button";
     add_event_handler_242793(tmp_262793, 0, confirm_key_card_259935, kxi_232324[0]);
-    add_211771(tmp_262793, text_213148(makeNimstrLit("Save")));
+    add_211771(tmp_262793, text_213148(makeNimstrLit("Apply")));
     add_211771(tmp_262789, tmp_262793);
     var tmp_262794 = tree_213045(104, []);
     tmp_262794.class = "ui right floated grey button";
@@ -6203,6 +6294,8 @@ function app_main_262733(data_262735) {
     tmp_262848.id = "clipboard";
     set_attr_211568(tmp_262848, "rows", "1");
     set_attr_211568(tmp_262848, "tabindex", "-1");
+    set_attr_211568(tmp_262848, "readOnly", "true");
+    set_attr_211568(tmp_262848, "spellcheck", "false");
     add_211771(tmp_262814, tmp_262848);
     add_211771(tmp_262737, tmp_262814);
     }
@@ -6412,6 +6505,7 @@ function after_script_263505(data_263507) {
           reloadViewSafeStart();
           jsViewSelector(12);
           page_scroll_done = function() {};
+          showPage4 = false;
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
