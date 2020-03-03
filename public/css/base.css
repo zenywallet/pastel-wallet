@@ -1095,3 +1095,9 @@ i.receive {
   color: #eee;
   text-align: right;
 }
+#connection-monitor {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: rgba(145, 118, 54, .7);
+}

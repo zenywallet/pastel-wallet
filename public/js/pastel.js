@@ -445,12 +445,14 @@ var Stream = (function() {
   var reconnect_timer;
   var reconnect = true;
   var status = 0;
+  var monitor = null;
 
   function Stream(ws_url, ws_protocol) {
     if(this instanceof Stream) {
       this.ws_url = ws_url;
       this.ws_protocol = ws_protocol;
       var self = this;
+      self.startMonitor();
       $(window).on('beforeunload', function() {
         self.stop();
       });
@@ -478,7 +480,9 @@ var Stream = (function() {
     this.ws.onopen = this.onOpen;
     this.ws.onmessage = this.onMessage;
     var self = this;
+    self.showStatus(true);
     this.ws.onclose = function() {
+      self.showStatus(false);
       console.log('onclose');
       clearTimeout(reconnect_timer);
       if(reconnect) {
@@ -508,6 +512,22 @@ var Stream = (function() {
     }
   }
 
+  Stream.prototype.startMonitor = function() {
+    this.monitor = document.getElementById('connection-monitor');
+    if(!monitor) {
+      var elm = document.createElement('div');
+      elm.id = 'connection-monitor';
+      this.monitor = document.body.appendChild(elm);
+    }
+  }
+
+  Stream.prototype.showStatus = function(status) {
+    if(status) {
+      this.monitor.innerHTML = '<i class="heartbeat icon"></i>';
+    } else {
+      this.monitor.innerHTML = '<i class="heart outline icon"></i>';
+    }
+  }
   return Stream;
 }());
 
