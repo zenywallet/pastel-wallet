@@ -587,19 +587,25 @@ pastel.ready = function() {
     return true;
   }
 
+  function thousands_separators(num) {
+    var num_parts = num.toString().split(".");
+    num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return num_parts.join(".");
+  }
+
   function conv_coin(uint64_val) {
     strval = uint64_val.toString();
     val = parseInt(strval);
     if(val > Number.MAX_SAFE_INTEGER) {
       var d = strval.slice(-8).replace(/0+$/, '');
-      var n = strval.substr(0, strval.length - 8);
+      var n = thousands_separators(strval.substr(0, strval.length - 8));
       if(d.length > 0) {
         return n + '.' + d;
       } else {
         return n;
       }
     }
-    return val / 100000000;
+    return thousands_separators(val / 100000000);
   }
 
   function fadeIn(el, speed) {
