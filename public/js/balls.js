@@ -1039,16 +1039,23 @@ var UtxoBalls = function() {
   }
   window.addEventListener('deviceorientation', device_gamma_func);
 
+  var pause_state = false;
   function visibility_func() {
     if(document.hidden) {
-      self.pause();
-      window.removeEventListener('deviceorientation', device_gamma_func);
-      window.removeEventListener('resize', resize_func);
+      if(!pause_state) {
+        pause_state = true;
+        self.pause();
+        window.removeEventListener('deviceorientation', device_gamma_func);
+        window.removeEventListener('resize', resize_func);
+      }
     } else {
-      resize_func();
-      self.resume();
-      window.addEventListener('resize', resize_func);
-      window.addEventListener('deviceorientation', device_gamma_func);
+      if(pause_state) {
+        resize_func();
+        self.resume();
+        window.addEventListener('resize', resize_func);
+        window.addEventListener('deviceorientation', device_gamma_func);
+        pause_state = false;
+      }
     }
   }
   window.addEventListener('visibilitychange', visibility_func);
@@ -1056,6 +1063,7 @@ var UtxoBalls = function() {
   function mouseup_func() {
     if(_mouseConstraint) {
       _mouseConstraint.mouse.button = -1;
+      visibility_func();
     }
   }
   document.addEventListener('mouseup', mouseup_func);
