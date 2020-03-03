@@ -301,6 +301,9 @@ html::-webkit-scrollbar {
   z-index: 5;
   visibility: hidden;
 }
+.ui.dimmer.modals.top-align {
+  justify-content: flex-start;
+}
 .ui.dimmer.qrcamera-loader {
   z-index: 7;
 }
@@ -1058,6 +1061,9 @@ i.receive {
   max-height: 80px;
   min-height: 80px;
   overflow: hidden;
+}
+#passphrase-modal {
+  margin-top: 120px;
 }
 #send-coins .ui.list {
   text-align: left;

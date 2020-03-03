@@ -1405,6 +1405,7 @@ var PhraseLock = (function() {
         closable: false,
         autofocus: true,
         onShow: function() {
+          $('.ui.dimmer.modals').addClass('top-align');
           $('#passphrase-modal-seg input[name="input-passphrase"]').off('keydown').on('keydown', function(evt) {
             if(evt.which == 13 || evt.keyCode == 13) {
               $('#passphrase-modal .ui.ok.button').click();
@@ -1426,6 +1427,7 @@ var PhraseLock = (function() {
         },
         onHidden: function() {
           $('#passphrase-modal-seg input[name="input-passphrase"]').val('');
+          $('.ui.dimmer.modals').removeClass('top-align');
         }
       }).modal('show');
     }
