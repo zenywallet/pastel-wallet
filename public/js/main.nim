@@ -783,9 +783,8 @@ proc backWallet(): proc() =
     """
 
 asm """
-  var send_ball_count = 0;
-  var send_ball_count_less = false;
-  var send_ball_count_over = false;
+  var send_balls_count = 0;
+  var cur_calc_send_utxo = null;
 
   function conv_coin(uint64_val) {
     strval = uint64_val.toString();
@@ -803,37 +802,38 @@ asm """
   }
 
   function resetSendBallCount() {
-    send_ball_count = 0;
-    send_ball_count_less = false;
-    send_ball_count_over = false;
+    send_balls_count = 0;
+    cur_calc_send_utxo = null;
     $('#btn-utxo-count').text('...');
     pastel.utxoballs.setSend(0);
-    send_ball_count = 0;
   }
 
   function setSendUtxo(value) {
     var ret = pastel.wallet.calcSendUtxo(value);
+    cur_calc_send_utxo = ret;
     var amount_elm = $('#send-coins input[name="amount"]');
     if(ret.err) {
-      send_ball_count_over = true;
-      $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
-      pastel.utxoballs.setSend(ret.safe_count);
-      send_ball_count = ret.safe_count;
+      if(ret.all > ret.max) {
+        $('#btn-utxo-count').text('>' + String(ret.max) + ' max');
+        pastel.utxoballs.setSend(ret.max);
+        send_balls_count = ret.max;
+      } else {
+        $('#btn-utxo-count').text('>' + String(ret.all) + ' all');
+        pastel.utxoballs.setSend(ret.all);
+        send_balls_count = ret.all;
+      }
       amount_elm.closest('.field').addClass('error');
     } else {
-      send_ball_count_less = !ret.eq;
-      if(ret.utxo_count > ret.safe_count) {
-        send_ball_count_over = true;
-        $('#btn-utxo-count').text('>' + String(ret.safe_count) + ' max');
-        pastel.utxoballs.setSend(ret.safe_count);
-        send_ball_count = ret.safe_count;
+      if(ret.count > ret.max) {
+        $('#btn-utxo-count').text('>' + String(ret.max) + ' max');
+        pastel.utxoballs.setSend(ret.max);
+        send_balls_count = ret.max;
         amount_elm.closest('.field').addClass('error');
       } else {
         amount_elm.closest('.field').removeClass('error');
-        send_ball_count_over = false;
-        $('#btn-utxo-count').text((ret.eq ? '' : '≤') + String(ret.utxo_count) + (ret.utxo_count == ret.safe_count ? ' max' : ''));
-        pastel.utxoballs.setSend(ret.utxo_count);
-        send_ball_count = ret.utxo_count;
+        $('#btn-utxo-count').text((ret.sign == 0 ? '' : '≤') + String(ret.count) + (ret.count == ret.all ? ' all' : ''));
+        pastel.utxoballs.setSend(ret.count);
+        send_balls_count = ret.count;
       }
     }
   }
@@ -902,45 +902,77 @@ asm """
         });
       }
     });
-    pastel.utxoballs.setSend(send_ball_count);
+    pastel.utxoballs.setSend(send_balls_count);
 
     $('#btn-utxo-plus').off('click').click(function() {
       $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
-      if(send_ball_count_less) {
-        send_ball_count_less = false;
+      var cur = cur_calc_send_utxo;
+      if(cur) {
+        if(cur.err) {
+          cur.count = Math.min(cur.all, cur.max);
+          cur.sign = 0;
+          cur.err = 0;
+        } else {
+          if(cur.sign == 0) {
+            cur.count++;
+          } else {
+            cur.sign = 0;
+          }
+        }
       } else {
-        send_ball_count++;
+        cur = {err: 0, count: 1, sign: 0};
+        cur_calc_send_utxo = cur;
       }
-      if(send_ball_count >= 1000) {
-        send_ball_count = 999;
-      }
-      var safe_count = pastel.wallet.getSafeCount();
-      if(send_ball_count > safe_count) {
-        send_ball_count = safe_count;
-      }
-      var sendval = pastel.wallet.calcSendValue(send_ball_count);
-      pastel.utxoballs.setSend(send_ball_count);
+      var sendval = pastel.wallet.calcSendValue(cur.count);
+      cur.all = sendval.all;
+      cur.max = sendval.max;
+      cur.count = sendval.count;
+      send_balls_count = cur.count;
+      pastel.utxoballs.setSend(send_balls_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
+      var exinfo = '';
+      if(sendval.count == sendval.all) {
+        exinfo = ' all';
+      } else if(sendval.count == sendval.max) {
+        exinfo = ' max';
+      }
+      $('#btn-utxo-count').text(String(sendval.count) + exinfo);
       $(this).blur();
     });
     $('#btn-utxo-minus').off('click').click(function() {
       $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
-      var safe_count = pastel.wallet.getSafeCount();
-      if(send_ball_count_over) {
-        send_ball_count_over = false;
-        send_ball_count = safe_count;
+      var cur = cur_calc_send_utxo;
+      if(cur) {
+        if(cur.err) {
+          cur.count = Math.min(cur.all, cur.max);
+          cur.sign = 0;
+          cur.err = 0;
+        } else {
+          if(cur.sign <= 0) {
+            if(cur.count > 0) {
+              cur.count--;
+            }
+          }
+          cur.sign = 0;
+        }
       } else {
-        send_ball_count--;
+        cur = {err: 0, count: 0, sign: 0};
+        cur_calc_send_utxo = cur;
       }
-      send_ball_count_less = false;
-      if(send_ball_count < 0) {
-        send_ball_count = 0;
-      }
-      pastel.utxoballs.setSend(send_ball_count);
-      var sendval = pastel.wallet.calcSendValue(send_ball_count);
+      var sendval = pastel.wallet.calcSendValue(cur.count);
+      cur.all = sendval.all;
+      cur.max = sendval.max;
+      cur.count = sendval.count;
+      send_balls_count = cur.count;
+      pastel.utxoballs.setSend(send_balls_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      $('#btn-utxo-count').text(String(sendval.count) + (sendval.count == safe_count ? ' max' : ''));
+      var exinfo = '';
+      if(sendval.count == sendval.all) {
+        exinfo = ' all';
+      } else if(sendval.count == sendval.max) {
+        exinfo = ' max';
+      }
+      $('#btn-utxo-count').text(String(sendval.count) + exinfo);
       $(this).blur();
     });
     $('#btn-tx-send').off('click').click(function() {
