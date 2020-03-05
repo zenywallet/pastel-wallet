@@ -588,8 +588,8 @@ function Wallet() {
     }
 
     var better_tx = null;
-    var better_size = 0;
-    var better_fee = fee;
+    var better_size;
+    var better_fee;
     for(var fee = fee_start; fee <= fee_high; fee++) {
       var change_sub = change_value.clone().subtract(UINT64(String(fee)));
       tx.addOutput(change_address, change_sub);
