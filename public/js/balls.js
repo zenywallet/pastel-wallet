@@ -743,13 +743,13 @@ var UtxoBalls = function() {
         if(too_much_balls) {
           for(var i = _ballBodies.length - 1; i >= 0; i--) {
             if(too_much_balls == _ballBodies[i]) {
-              Ball.bodies.splice(i, 1);
+             _ballBodies.splice(i, 1);
               break;
             }
           }
           Matter.Composite.remove(_world, too_much_balls);
-          Ball.too_much_balls = null;
-          Ball.too_much_balls_enable = false;
+          too_much_balls = null;
+          too_much_balls_enable = false;
         }
       }
     }
