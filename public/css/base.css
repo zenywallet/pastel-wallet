@@ -943,7 +943,7 @@ i.receive {
   background: rgba(113, 120, 54, 0.5);
 }
 #send-coins .btn-tx-send:hover, #send-coins .btn-tx-send:focus {
- background: rgba(217, 231, 120, 0.8);
+  background: rgba(217, 231, 120, 0.8);
 }
 #send-coins .btn-close {
   position: absolute;
