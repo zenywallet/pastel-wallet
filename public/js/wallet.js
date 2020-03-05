@@ -498,11 +498,16 @@ function Wallet() {
       }
       cb_rawtx = function(result_rawtx) {}
     }
-    pastel.send({cmd: 'rawtx', data: rawtx});
-    tval = setTimeout(function() {
+    var ret = pastel.send({cmd: 'rawtx', data: rawtx});
+    if(ret) {
+      tval = setTimeout(function() {
+        result_cb = function(ignore) {};
+        cb({err: ErrSend.TX_TIMEOUT, res: null});
+      }, 30000);
+    } else {
       result_cb = function(ignore) {};
-      cb({err: ErrSend.TX_TIMEOUT, res: null});
-    }, 30000);
+      cb({err: ErrSend.TX_FAILED, res: null});
+    }
   }
 
   function send_internal(send_address, change_address, value, cb) {

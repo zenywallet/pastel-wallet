@@ -583,8 +583,7 @@ pastel.ready = function() {
     }
     console.log('sdata=', sdata);
     console.log(cipher.buf2hex(sdata));
-    stream.send(sdata);
-    return true;
+    return stream.send(sdata);
   }
 
   function thousands_separators(num) {
