@@ -475,6 +475,10 @@ var UtxoBalls = function() {
                 setFluffyCollisionAll(ball);
                 fluffy_frees.push(ball);
                 fluffy_free_worker_start();
+                var cur_ball_ref = _ballBodiesIdx[idx_ref];
+                if(cur_ball_ref) {
+                  ball_ref = cur_ball_ref;
+                }
                 Body.setPosition(ball, {x: ball_ref.position.x, y: ball_ref.position.y + 5});
                 Body.setVelocity(ball, {x: rx, y: ry});
                 Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
