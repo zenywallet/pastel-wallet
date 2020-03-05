@@ -1024,6 +1024,7 @@ asm """
             value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
           }
           Notify.hide_all();
+          var self = $(this);
           var send_text = $('#btn-tx-send').text();
           $('#btn-tx-send').html('<div class="ui active inline mini loader"></div>');
           pastel.wallet.send(address, value, function(result) {
@@ -1067,6 +1068,7 @@ asm """
             default:
               Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
             }
+            self.blur();
             $('#btn-tx-send').text(send_text);
             send_busy = false;
           });
@@ -1077,8 +1079,8 @@ asm """
             Notify.show('Error', 'Amount is invalid.', Notify.msgtype.error);
           }
           send_busy = false;
+          $(this).blur();
         }
-        $(this).blur();
       } else {
         $('#btn-send-lock').focus();
         send_busy = false;
