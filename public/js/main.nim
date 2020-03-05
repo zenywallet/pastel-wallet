@@ -1019,6 +1019,8 @@ asm """
             value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
           }
           Notify.hide_all();
+          var send_text = $('#btn-tx-send').text();
+          $('#btn-tx-send').html('<div class="ui active inline mini loader"></div>');
           pastel.wallet.send(address, value, function(result) {
             console.log('send result', result);
             var ErrSend = pastel.wallet.ERR_SEND;
@@ -1060,6 +1062,7 @@ asm """
             default:
               Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
             }
+            $('#btn-tx-send').text(send_text);
           });
         } else {
           if(amounts.length > 1 && amounts[1].length > 8) {
