@@ -491,10 +491,12 @@ var UtxoBalls = function() {
         }
         break;
       case taskType.unconfs_end:
+        var utxo_update = false;
         for(var i = _ballBodies.length - 1; i >= 0; i--) {
           var ball = _ballBodies[i];
           if(ball.ballType == ballType.unconf && ball.mark_unconf == 1) {
             ball.mark_unconf = 0;
+            utxo_update = true;
             if(ball.ballData.txtype == 1) {
               ball.mark_utxo = 0;
               ball.ballType = ballType.utxo;
@@ -510,6 +512,10 @@ var UtxoBalls = function() {
               }, 6000);
             }
           }
+        }
+        if(utxo_update) {
+          console.log('request unspents');
+          pastel.send({cmd: 'unspents'});
         }
         break;
       default:
