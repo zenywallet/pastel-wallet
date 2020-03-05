@@ -622,6 +622,180 @@ function Wallet() {
     cb({err: ErrSend.FAILED});
   }
 
+  function send_lazy_internal(send_address, change_address, value, cb) {
+    var lazy_time = 2;
+    var tx = new coin.TransactionBuilder(network);
+    var in_value = UINT64(0);
+    var sign_utxos = [];
+    var utxo_count = 0;
+    var result_out = 0;
+
+    var sign_worker_sign_utxos;
+    var sign_i;
+    var better_tx = null;
+    var better_size;
+    var better_fee;
+    var sign_fee, sign_fee_high;
+    function sign_worker4() {
+      var s = sign_worker_sign_utxos.shift();
+      if(s) {
+        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
+        tx.sign(Number(sign_i), key);
+        sign_i++;
+        setTimeout(sign_worker4, lazy_time);
+      } else {
+        var rawtx = tx.build().toHex();
+        var total_bytes = rawtx.length / 2;
+        console.log('tx2', sign_fee, total_bytes, rawtx);
+
+        if(sign_fee >= total_bytes) {
+          better_tx = rawtx;
+          better_size = total_bytes;
+          better_fee = sign_fee;
+          console.log('tx2 best', better_fee, better_size, better_tx);
+          send_tx(better_tx, function(result) {
+            cb(result);
+          });
+        } else {
+          tx.removeOutput(1);
+          tx.removeSign();
+          sign_fee++;
+          if(sign_fee <= sign_fee_high) {
+            sign_worker3();
+          } else {
+            if(better_tx != null) {
+              console.log('tx2 best', better_fee, better_size, better_tx);
+              send_tx(better_tx, function(result) {
+                cb(result);
+              });
+            } else {
+              cb({err: ErrSend.FAILED});
+            }
+          }
+        }
+      }
+    }
+
+    var change_value;
+    function sign_worker3() {
+      var change_sub = change_value.clone().subtract(UINT64(String(sign_fee)));
+      tx.addOutput(change_address, change_sub);
+      sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
+      sign_i = 0;
+      sign_worker4();
+    }
+
+    function sign_worker2() {
+      change_value = in_value.clone().subtract(value);
+      var fee_low = 147 * utxo_count + 34 * 2 + 10;
+      var fee_high = 148 * utxo_count + 34 * 2 + 10;
+      var fee_mid = Math.round(147.5 * utxo_count + 34 * 2 + 10);
+      var fee_start = fee_mid - Math.ceil(1000 / utxo_count);
+      if(fee_start < fee_low) {
+        fee_start = fee_low;
+      }
+      sign_fee = fee_start;
+      sign_fee_high = fee_high;
+      sign_worker3();
+    }
+
+    function sign_worker() {
+      var s = sign_worker_sign_utxos.shift();
+      if(s) {
+        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
+        tx.sign(Number(sign_i), key);
+        sign_i++;
+        setTimeout(sign_worker, lazy_time);
+      } else {
+        var rawtx = tx.build().toHex();
+        var total_bytes = rawtx.length / 2;
+        var fee = in_value.clone().subtract(value);
+        console.log('tx1', fee.toString(), total_bytes, rawtx);
+        send_tx(rawtx, function(result) {
+          cb(result);
+        });
+      }
+    }
+
+    function addoutput_worker() {
+      try {
+        tx.addOutput(send_address, value);
+      } catch(ex) {
+        console.log(ex);
+        cb({err: ErrSend.INVALID_ADDRESS});
+        return;
+      }
+      if(result_out == 1) {
+        sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
+        sign_i = 0;
+        sign_worker();
+      } else {
+        sign_worker2();
+      }
+    }
+
+    var priv_nodes = {};
+    var keys = {};
+    var keys_worker_sign_utxos = [];
+    function keys_worker() {
+      var s = keys_worker_sign_utxos.shift();
+      if(s) {
+        if(!priv_nodes[s.xpub_idx]) {
+          priv_nodes[s.xpub_idx] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx], network);
+        }
+        var child = priv_nodes[s.xpub_idx].derive(s.change).derive(s.index);
+        keys[s.xpub_idx + '-' + s.change + '-' + s.index] = child;
+        setTimeout(keys_worker, lazy_time);
+      } else {
+        addoutput_worker();
+      }
+    }
+
+    var utxos = JSON.parse(JSON.stringify(_utxos));
+    function addinput_worker() {
+      var utxo = utxos.shift();
+      if(utxo) {
+        console.log('addInput', tx.addInput(utxo.txid, utxo.n));
+        console.log(utxo.address, utxo.value.toString());
+        in_value.add(UINT64(String(utxo.value)));
+        sign_utxos.push(utxo);
+        utxo_count++;
+        console.log(in_value.toString(), value.toString());
+
+        if(in_value.gt(value)) {
+          var sub = in_value.clone().subtract(value);
+          var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
+          if(sub.gt(fee1) || sub.eq(fee1)) {
+            result_out = 2;
+            keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
+            keys_worker();
+            return;
+          } else {
+            var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
+            if(sub.gt(fee2) || sub.eq(fee2)) {
+              result_out = 1;
+              var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
+              if(sub.lt(fee3)) {
+                keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
+                keys_worker();
+                return;
+              }
+            }
+          }
+        }
+        setTimeout(addinput_worker, lazy_time);
+      } else {
+        if(result_out == 0) {
+          cb({err: ErrSend.INSUFFICIENT_BALANCE});
+          return;
+        }
+        keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
+        keys_worker();
+      }
+    }
+    addinput_worker();
+  }
+
   var send_busy = false;
   this.send = function(address, value_str, cb) {
     if(send_busy) {
@@ -648,7 +822,7 @@ function Wallet() {
         }
         var child = _nodes[xpub].derive(1).derive(index);
         var change_address = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
-        send_internal(address, change_address, value, function(ret) {
+        send_lazy_internal(address, change_address, value, function(ret) {
           send_busy = false;
           cb(ret);
         });
