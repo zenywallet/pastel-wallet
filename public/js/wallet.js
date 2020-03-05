@@ -811,8 +811,10 @@ function Wallet() {
       return;
     }
     var cb_set_change_called = false;
+    var cb_set_tval = null;
     cb_set_change = function(data) {
       cb_set_change_called = true;
+      clearTimeout(cb_set_tval);
       cb_set_change = function(data) {}
       if(data.length > 0) {
         var index = data[0];
@@ -832,14 +834,12 @@ function Wallet() {
       }
     }
     pastel.send({cmd: 'change'});
-    setTimeout(function() {
-      cb_set_change = function(data) {}
-      setTimeout(function() {
-        if(!cb_set_change_called) {
-          send_busy = false;
-          cb({err: ErrSend.SERVER_TIMEOUT});
-        }
-      }, 1000);
+    cb_set_tval = setTimeout(function() {
+      if(!cb_set_change_called) {
+        cb_set_change = function(data) {}
+        send_busy = false;
+        cb({err: ErrSend.SERVER_TIMEOUT});
+      }
     }, 30000);
   }
 
