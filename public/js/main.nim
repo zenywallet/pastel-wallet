@@ -975,7 +975,12 @@ asm """
       $('#btn-utxo-count').text(String(sendval.count) + exinfo);
       $(this).blur();
     });
+    var send_busy = false;
     $('#btn-tx-send').off('click').click(function() {
+      if(send_busy) {
+        return;
+      }
+      send_busy = true;
       var locked = PhraseLock.notify_if_need_unlock();
       if(!locked && pastel.wallet) {
         var address = String($('#send-coins input[name="address"]').val()).trim();
@@ -1063,6 +1068,7 @@ asm """
               Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
             }
             $('#btn-tx-send').text(send_text);
+            send_busy = false;
           });
         } else {
           if(amounts.length > 1 && amounts[1].length > 8) {
@@ -1070,10 +1076,12 @@ asm """
           } else {
             Notify.show('Error', 'Amount is invalid.', Notify.msgtype.error);
           }
+          send_busy = false;
         }
         $(this).blur();
       } else {
         $('#btn-send-lock').focus();
+        send_busy = false;
       }
     });
   }
