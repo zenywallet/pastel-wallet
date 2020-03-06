@@ -25,6 +25,12 @@ proc main() {.thread.} =
       var data = %*{"pub": @"pubkey"}
       resp $data, "application/json"
 
+    error Http404:
+      resp Http404, "Not found"
+
+    error Exception:
+      resp Http500, "Server error"
+
 var thread: Thread[void]
 
 proc start*(): Thread[void] =
