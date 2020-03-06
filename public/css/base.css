@@ -263,7 +263,7 @@ html::-webkit-scrollbar {
 .intro-body .passphrase-seg .ui.inverted.segment {
   background-color: rgba(72,81,75,.3);
 }
-.intro-body .passphrase-seg .ui.form input[type="text"] {
+.intro-body .passphrase-seg .ui.form input[type="text"], .intro-body .passphrase-seg .ui.form input[type="password"] {
   background: rgba(128, 128, 128, 0.6);
   color: #f0f0f0;
 }
@@ -1054,7 +1054,7 @@ i.receive {
   object-fit: cover;
   background: linear-gradient(0deg, rgba(136,136,136,0.6), rgba(221,221,221,0.6));
 }
-#passphrase-modal-seg .ui.form input[type="text"] {
+#passphrase-modal-seg .ui.form input[type="text"], #passphrase-modal-seg .ui.form input[type="password"] {
     background: rgba(43, 51, 45, 0.6);
     color: #f0f0f0;
 }
