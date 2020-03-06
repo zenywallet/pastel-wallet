@@ -22,8 +22,8 @@ var UtxoBalls = function() {
   }
 
   function conv_coin(uint64_val) {
-    strval = uint64_val.toString();
-    val = parseInt(strval);
+    var strval = uint64_val.toString();
+    var val = parseInt(strval);
     if(val > Number.MAX_SAFE_INTEGER) {
       var d = strval.slice(-8).replace(/0+$/, '');
       var n = strval.substr(0, strval.length - 8);
@@ -408,7 +408,7 @@ var UtxoBalls = function() {
             World.add(_world, new_ball);
           }
         } else {
-          var ball = create_ball(ballType.utxo, task.data, {fluffy: fluffy3});
+          ball = create_ball(ballType.utxo, task.data, {fluffy: fluffy3});
           //ball.mark_utxo = 0;
           if(too_much_balls) {
             var tb = too_much_balls;
@@ -462,7 +462,7 @@ var UtxoBalls = function() {
             setFluffy(ball, fluffy1);
           }
         } else {
-          var ball = create_ball(ballType.unconf, task.data, {fluffy: fluffy1});
+          ball = create_ball(ballType.unconf, task.data, {fluffy: fluffy1});
           if(task.data.ref) {
             var ref = task.data.ref;
             var idx_ref = create_bodies_idx({ballType: ballType.unconf, ballData: ref});

@@ -127,7 +127,7 @@ pastel.load = function() {
         var dst = cipher.alloc(16);
         src.set(data);
         cipher.mod_encrypt(handle, src, dst);
-        ret = dst.get();
+        var ret = dst.get();
         dst.free();
         src.free();
         return ret;
@@ -138,7 +138,7 @@ pastel.load = function() {
         var dst = cipher.alloc(16);
         src.set(data);
         cipher.mod_decrypt(handle, src, dst);
-        ret = dst.get();
+        var ret = dst.get();
         dst.free();
         src.free();
         return ret;
@@ -415,7 +415,7 @@ pastel.load = function() {
   pastel.coin = coinlibs.coin;
   ready_flag.coin = true;
 
-  stime = new Date();
+  var stime = new Date();
   var check_ready = function() {
     setTimeout(function() {
       var check = true;
@@ -457,7 +457,7 @@ var Stream = (function() {
         self.stop();
       });
     } else {
-      return new Stream(url, protocol);
+      return new Stream(ws_url, ws_protocol);
     }
   }
 
@@ -593,8 +593,8 @@ pastel.ready = function() {
   }
 
   function conv_coin(uint64_val) {
-    strval = uint64_val.toString();
-    val = parseInt(strval);
+    var strval = uint64_val.toString();
+    var val = parseInt(strval);
     if(val > Number.MAX_SAFE_INTEGER) {
       var d = strval.slice(-8).replace(/0+$/, '');
       var n = thousands_separators(strval.substr(0, strval.length - 8));

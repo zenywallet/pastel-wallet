@@ -647,7 +647,8 @@ var camDevice = (function() {
 })();
 
 var qrReader = (function() {
-  var video, canvas, ctx, seg;
+  var video = null;
+  var canvas, ctx, seg;
   var cipher = {};
   var abort = false;
   var showing = false;
@@ -655,7 +656,7 @@ var qrReader = (function() {
   function drawPoly(poly, lineWidth, color) {
     ctx.beginPath();
     ctx.moveTo(poly[0], poly[1]);
-    for(item = 2; item < poly.length - 1; item += 2) {
+    for(var item = 2; item < poly.length - 1; item += 2) {
       ctx.lineTo(poly[item], poly[item + 1]);
     }
     ctx.lineWidth = lineWidth;
@@ -744,7 +745,7 @@ var qrReader = (function() {
         y2 -= mergin;
       }
       var range_flag = true;
-      for(i = 0; i < polygon.length - 1; i += 2) {
+      for(var i = 0; i < polygon.length - 1; i += 2) {
         if(!checkRange(polygon[i], polygon[i + 1], x1, y1, x2, y2)) {
           range_flag = false;
           break;
@@ -780,7 +781,6 @@ var qrReader = (function() {
   }
 
   var mode_show = true;
-  var video = null;
   var qr_instance = null;
   var scan_done = false;
 
@@ -901,7 +901,8 @@ var qrReader = (function() {
 })();
 
 var qrReaderModal = (function() {
-  var video, canvas, ctx, seg;
+  var video = null;
+  var canvas, ctx, seg;
   var cipher = {};
   var abort = false;
   var showing = false;
@@ -909,7 +910,7 @@ var qrReaderModal = (function() {
   function drawPoly(poly, lineWidth, color) {
     ctx.beginPath();
     ctx.moveTo(poly[0], poly[1]);
-    for(item = 2; item < poly.length - 1; item += 2) {
+    for(var item = 2; item < poly.length - 1; item += 2) {
       ctx.lineTo(poly[item], poly[item + 1]);
     }
     ctx.lineWidth = lineWidth;
@@ -998,7 +999,7 @@ var qrReaderModal = (function() {
         y2 -= mergin;
       }
       var range_flag = true;
-      for(i = 0; i < polygon.length - 1; i += 2) {
+      for(var i = 0; i < polygon.length - 1; i += 2) {
         if(!checkRange(polygon[i], polygon[i + 1], x1, y1, x2, y2)) {
           range_flag = false;
           break;
@@ -1034,7 +1035,6 @@ var qrReaderModal = (function() {
   }
 
   var mode_show = true;
-  var video = null;
   var qr_instance = null;
   var scan_done = false;
 

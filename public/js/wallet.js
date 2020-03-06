@@ -83,16 +83,16 @@ function Wallet() {
 
   this.resetXpubFromSeed = function(seed, hdpath) {
     stor.del_xpubs();
-    var xpub = wallet.getHdNodePublic(seed, hdpath || _hdpash);
+    var xpub = this.getHdNodePublic(seed, hdpath || _hdpash);
     stor.add_xpub(xpub);
   }
 
   this.resetXpubFromMnemonic = function(mnemonic, mlang, password, hdpath) {
-    var seeds = wallet.getMnemonicToSeeds(mnemonic, mlang, password);
+    var seeds = this.getMnemonicToSeeds(mnemonic, mlang, password);
     stor.del_xpubs();
     for(var i in seeds) {
       var seed = seeds[i].seed;
-      var xpub = wallet.getHdNodePublic(seed, hdpath || _hdpash);
+      var xpub = this.getHdNodePublic(seed, hdpath || _hdpash);
       stor.add_xpub(xpub);
     }
   }
@@ -219,7 +219,7 @@ function Wallet() {
   this.setUnusedAddress = function(data) {
     var changed = false;
     if(_unusedList.length == data.length) {
-      for(i in _unusedList) {
+      for(var i in _unusedList) {
         if(_unusedList[i] != data[i]) {
           changed = true;
           break;
@@ -908,10 +908,10 @@ function Wallet() {
           break;
         } else {
           var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
-          var chk_eq = sub.eq(fee2);
-          if(sub.gt(fee2) || chk_eq) {
+          var chk_eq2 = sub.eq(fee2);
+          if(sub.gt(fee2) || chk_eq2) {
             result_out = 1;
-            eq = chk_eq;
+            eq = chk_eq2;
             var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
             if(sub.lt(fee3)) {
               break;

@@ -6,8 +6,8 @@ var TradeLogs = (function() {
   var _height = 0;
 
   function conv_coin(uint64_val) {
-    strval = uint64_val.toString();
-    val = parseInt(strval);
+    var strval = uint64_val.toString();
+    var val = parseInt(strval);
     if(val > Number.MAX_SAFE_INTEGER) {
       var d = strval.slice(-8).replace(/0+$/, '');
       var n = strval.substr(0, strval.length - 8);
@@ -108,12 +108,12 @@ var TradeLogs = (function() {
 
   function txlogs_item(item) {
     var data = item;
-    imgsrc = DotMatrix.getImage(cipher.buf2hex(cipher.murmurhash((new TextEncoder).encode(data.address))), 36, 1);
+    var imgsrc = DotMatrix.getImage(cipher.buf2hex(cipher.murmurhash((new TextEncoder).encode(data.address))), 36, 1);
     var send = (data.txtype == 0);
     var confirm = (_height >= data.height);
     var confirm_count = _height - data.height + 1;
     var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
-    confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (<span class="tx-confirm" data-height="' + data.height + '">' + confirm_count + '</span>)' : '<i class="red dont icon"></i> Unconfirmed';
+    var confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (<span class="tx-confirm" data-height="' + data.height + '">' + confirm_count + '</span>)' : '<i class="red dont icon"></i> Unconfirmed';
     var amount = conv_coin(data.value);
     var local_time = confirm ? conv_time(data.time) : '';
     var trans_time = data.trans_time ? conv_time(data.trans_time) : local_time;
@@ -222,7 +222,7 @@ var TradeLogs = (function() {
     for(var addr in _unconfs.addrs) {
       var val = _unconfs.addrs[addr];
       if(val.spents) {
-        for(i in val.spents) {
+        for(var i in val.spents) {
           var spent = val.spents[i];
           spent_addrs[addr] = 1;
           break;
@@ -230,7 +230,7 @@ var TradeLogs = (function() {
       }
       if(val.txouts) {
         if(val.change != 1) {
-          for(i in val.txouts) {
+          for(var i in val.txouts) {
             var txout = val.txouts[i];
             var item = {txtype: 1, address: addr, txid: txout.txid, value: txout.value,
               change: val.change, index: val.index, xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
@@ -328,7 +328,6 @@ var TradeLogs = (function() {
     start = true;
     abort = false;
     console.log('start');
-    test_tx_count = 0;
     eof = false;
     first_sequence = null;
     last_sequence = null;

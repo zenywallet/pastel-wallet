@@ -100,9 +100,9 @@ var DotMatrix = (function() {
   DotMatrix.getImage = function(hash_data, size = SIZE, round = 0, label) {
     var hash;
     if (typeof hash_data === 'string') {
-      var hash = new Uint8Array(hexToBytes(hash_data));
+      hash = new Uint8Array(hexToBytes(hash_data));
     } else {
-      var hash = hash_data;
+      hash = hash_data;
     }
     var canvas = document.createElement('canvas');
     canvas.width  = size;
