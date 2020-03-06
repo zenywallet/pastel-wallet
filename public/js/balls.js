@@ -120,7 +120,7 @@ var UtxoBalls = function() {
   var _unconfs = [];
 
   var ballType = {
-    utxo_conf: 1,
+    utxo: 1,
     unconf: 2,
     too_much: 3
   };
