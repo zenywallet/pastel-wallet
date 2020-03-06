@@ -23,7 +23,7 @@ var UtxoBalls = function() {
 
   function conv_coin(uint64_val) {
     var strval = uint64_val.toString();
-    var val = parseInt(strval);
+    var val = parseInt(strval, 10);
     if(val > Number.MAX_SAFE_INTEGER) {
       var d = strval.slice(-8).replace(/0+$/, '');
       var n = strval.substr(0, strval.length - 8);
