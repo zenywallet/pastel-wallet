@@ -381,7 +381,7 @@ var UtxoBalls = function() {
         break;
       case taskType.utxos_start:
         for(var i in _ballBodies) {
-          var ball = _ballBodies[i];
+          var ball = _ballBodies[Number(i)];
           if(ball.ballType == ballType.utxo) {
             ball.mark_utxo = 1;
           }
@@ -398,8 +398,8 @@ var UtxoBalls = function() {
               x: ball.position.x, y: ball.position.y, angle: ball.angle
             });
             for(var i in _ballBodies) {
-              if(ball == _ballBodies[i]) {
-                _ballBodies[i] = new_ball;
+              if(ball == _ballBodies[Number(i)]) {
+                _ballBodies[Number(i)] = new_ball;
                 break;
               }
             }
@@ -424,7 +424,7 @@ var UtxoBalls = function() {
         break;
       case taskType.utxos_end:
         for(var i = _ballBodies.length - 1; i >= 0; i--) {
-          var ball = _ballBodies[i];
+          var ball = _ballBodies[Number(i)];
           if(ball.ballType == ballType.utxo && ball.mark_utxo == 1) {
             Matter.Composite.remove(_world, ball);
             remove_bodies_idx(ball);
@@ -434,7 +434,7 @@ var UtxoBalls = function() {
         break;
       case taskType.unconfs_start:
         for(var i in _ballBodies) {
-          var ball = _ballBodies[i];
+          var ball = _ballBodies[Number(i)];
           if(ball.ballType == ballType.unconf) {
             ball.mark_unconf = 1;
           }
@@ -450,8 +450,8 @@ var UtxoBalls = function() {
           if(ball.circleRadius != calc_ball_radius(task.data)) {
             var new_ball = create_ball(ball.ballType, ball.ballData, {fluffy: fluffy1, x: ball.position.x, y: ball.position.y, angle: ball.angle});
             for(var i in _ballBodies) {
-              if(ball == _ballBodies[i]) {
-                _ballBodies[i] = new_ball;
+              if(ball == _ballBodies[Number(i)]) {
+                _ballBodies[Number(i)] = new_ball;
                 break;
               }
             }
@@ -497,7 +497,7 @@ var UtxoBalls = function() {
       case taskType.unconfs_end:
         var utxo_update = false;
         for(var i = _ballBodies.length - 1; i >= 0; i--) {
-          var ball = _ballBodies[i];
+          var ball = _ballBodies[Number(i)];
           if(ball.ballType == ballType.unconf && ball.mark_unconf == 1) {
             ball.mark_unconf = 0;
             utxo_update = true;
@@ -635,7 +635,7 @@ var UtxoBalls = function() {
   function check_out_balls() {
     var find = false;
     for(var i in _ballBodies) {
-      var b = _ballBodies[i];
+      var b = _ballBodies[Number(i)];
       if(b.fluffy != fluffy3) {
         if(check_out(b)) {
           find = true;
@@ -752,7 +752,7 @@ var UtxoBalls = function() {
       if(too_much_balls_enable) {
         if(too_much_balls) {
           for(var i = _ballBodies.length - 1; i >= 0; i--) {
-            if(too_much_balls == _ballBodies[i]) {
+            if(too_much_balls == _ballBodies[Number(i)]) {
              _ballBodies.splice(i, 1);
               break;
             }
@@ -859,7 +859,7 @@ var UtxoBalls = function() {
         var time = _render.engine.timing.timestamp;
         var rect = {y: 137}; //_render.element.getBoundingClientRect();
         for(var i in _ballBodies) {
-          var b = _ballBodies[i];
+          var b = _ballBodies[Number(i)];
           if(!b.rnd) {
             b.rnd = Math.random();
           }
@@ -889,7 +889,7 @@ var UtxoBalls = function() {
           }
         }
         for(var i in _ballBodiesAway) {
-          Body.setVelocity(_ballBodiesAway[i], {x: 0, y: -2});
+          Body.setVelocity(_ballBodiesAway[Number(i)], {x: 0, y: -2});
         }
       });
       Events.on(_render.engine, 'collisionStart', function(event) {
@@ -999,7 +999,7 @@ var UtxoBalls = function() {
     var h = _canvas.height;
 
     for(var i in _ballBodies) {
-      var ball = _ballBodies[i];
+      var ball = _ballBodies[Number(i)];
       var x = ball.position.x * w / prev_w;
       var y = ball.position.y * h / prev_h;
       if(x < 0) {
@@ -1018,7 +1018,7 @@ var UtxoBalls = function() {
       } else {
         new_ball = create_ball(ball.ballType, ball.ballData, {fluffy: ball.fluffy, x: x, y: y, angle: ball.angle});
       }
-      _ballBodies[i] = new_ball;
+      _ballBodies[Number(i)] = new_ball;
       add_bodies_idx(new_ball);
       Matter.Composite.remove(_world, ball);
       World.add(_world, new_ball);
