@@ -236,63 +236,63 @@ var UtxoBalls = function() {
       var len = valid_utxos.length + valid_unconfs.length;
       if(len > 1) {
         for(var i in valid_utxos) {
-          ave += valid_utxos[i].r;
+          ave += valid_utxos[Number(i)].r;
         }
         for(var i in valid_unconfs) {
-          ave += valid_unconfs[i].r;
+          ave += valid_unconfs[Number(i)].r;
         }
         ave /= len;
         for(var i in valid_utxos) {
-          var d = valid_utxos[i].r - ave;
+          var d = valid_utxos[Number(i)].r - ave;
           sd += d * d;
         }
         for(var i in valid_unconfs) {
-          var d = valid_unconfs[i].r - ave;
+          var d = valid_unconfs[Number(i)].r - ave;
           sd += d * d;
         }
         sd = Math.sqrt(sd / (len - 1));
         if(sd > 0) {
           for(var i in valid_utxos) {
-            var cr = 36 + 28 * (valid_utxos[i].r - ave) / (1.5 * sd);
+            var cr = 36 + 28 * (valid_utxos[Number(i)].r - ave) / (1.5 * sd);
             if(cr > 64) {
               cr = 64;
             } else if(cr < 8) {
               cr = 8;
             }
-            valid_utxos[i].cr = cr;
+            valid_utxos[Number(i)].cr = cr;
           }
           for(var i in valid_unconfs) {
-            var cr = 36 + 28 * (valid_unconfs[i].r - ave) / (1.5 * sd);
+            var cr = 36 + 28 * (valid_unconfs[Number(i)].r - ave) / (1.5 * sd);
             if(cr > 64) {
               cr = 64;
             } else if(cr < 8) {
               cr = 8;
             }
-            valid_unconfs[i].cr = cr;
+            valid_unconfs[Number(i)].cr = cr;
           }
         } else {
           for(var i in valid_utxos) {
-            valid_utxos[i].cr = 36;
+            valid_utxos[Number(i)].cr = 36;
           }
           for(var i in valid_unconfs) {
-            valid_unconfs[i].cr = 36;
+            valid_unconfs[Number(i)].cr = 36;
           }
         }
       } else {
         for(var i in valid_utxos) {
-          valid_utxos[i].cr = 36;
+          valid_utxos[Number(i)].cr = 36;
         }
         for(var i in valid_unconfs) {
-          valid_unconfs[i].cr = 36;
+          valid_unconfs[Number(i)].cr = 36;
         }
       }
       var ss = 0;
       for(var i in valid_utxos) {
-        var cr = valid_utxos[i].cr;
+        var cr = valid_utxos[Number(i)].cr;
         ss += cr * cr;
       }
       for(var i in valid_unconfs) {
-        var cr = valid_unconfs[i].cr;
+        var cr = valid_unconfs[Number(i)].cr;
         ss += cr * cr;
       }
       var prev = cur_balls_r;
@@ -334,18 +334,18 @@ var UtxoBalls = function() {
         valid_utxos = task.data.slice(0, 140);
         full_utxos = task.data;
         for(var i in valid_utxos) {
-          var utxo = valid_utxos[i];
+          var utxo = valid_utxos[Number(i)];
           utxo.value_d = conv_coin(sanitize(utxo.value))
           utxo.s = parseFloat(utxo.value_d);
           utxo.r = Math.sqrt(utxo.s);
         }
         var r_changed = calc_balls_r();
         for(var i in valid_utxos) {
-          _ballTask.push({type: taskType.utxo, data: valid_utxos[i]});
+          _ballTask.push({type: taskType.utxo, data: valid_utxos[Number(i)]});
         }
         if(r_changed) {
           for(var i in valid_unconfs) {
-            _ballTask.push({type: taskType.unconf, data: valid_unconfs[i]});
+            _ballTask.push({type: taskType.unconf, data: valid_unconfs[Number(i)]});
           }
         }
         _ballTask.push({type: taskType.utxos_end});
@@ -360,18 +360,18 @@ var UtxoBalls = function() {
         valid_unconfs = task.data.slice(0, 160);
         full_unconfs = task.data;
         for(var i in valid_unconfs) {
-          var unconf = valid_unconfs[i];
+          var unconf = valid_unconfs[Number(i)];
           unconf.value_d = conv_coin(sanitize(unconf.value))
           unconf.s = parseFloat(unconf.value_d);
           unconf.r = Math.sqrt(unconf.s);
         }
         var r_changed = calc_balls_r();
         for(var i in valid_unconfs) {
-          _ballTask.push({type: taskType.unconf, data: valid_unconfs[i]});
+          _ballTask.push({type: taskType.unconf, data: valid_unconfs[Number(i)]});
         }
         if(r_changed) {
           for(var i in valid_utxos) {
-            _ballTask.push({type: taskType.utxo, data: valid_utxos[i]});
+            _ballTask.push({type: taskType.utxo, data: valid_utxos[Number(i)]});
           }
         }
         _ballTask.push({type: taskType.unconfs_end});
@@ -558,7 +558,7 @@ var UtxoBalls = function() {
       var val = data.addrs[addr];
       if(val.spents) {
         for(i in val.spents) {
-          var spent = val.spents[i];
+          var spent = val.spents[Number(i)];
           var item = {txtype: 0, address: addr, txid: spent.txid, n: spent.n,
             value: spent.value, change: val.change, index: val.index,
             xpub_idx: val.xpub_idx, trans_time: spent.trans_time,
@@ -568,7 +568,7 @@ var UtxoBalls = function() {
       }
       if(val.txouts) {
         for(i in val.txouts) {
-          var txout = val.txouts[i];
+          var txout = val.txouts[Number(i)];
           var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n,
             value: txout.value, change: val.change, index: val.index,
             xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
@@ -582,26 +582,26 @@ var UtxoBalls = function() {
     }
     var mark = {};
     for(var i in unconf_pop_list) {
-      var itemp = unconf_pop_list[i];
+      var itemp = unconf_pop_list[Number(i)];
       var send_addrs = mytxs[itemp.txid];
       for(var j in unconf_list) {
-        var item = unconf_list[j];
-        if(mark[j]) {
+        var item = unconf_list[Number(j)];
+        if(mark[Number(j)]) {
           continue;
         }
         if(item.txtype == 0 && send_addrs[item.address] && item.txid_out == itemp.txid) {
-          mark[j] = 1;
+          mark[Number(j)] = 1;
           itemp.ref = item;
           break;
         }
       }
     }
     for(var i in unconf_pop_list) {
-      var itemp = unconf_pop_list[i];
+      var itemp = unconf_pop_list[Number(i)];
       if(!itemp.ref) {
         var send_addrs = mytxs[itemp.txid];
         for(var j in unconf_list) {
-          var item = unconf_list[j];
+          var item = unconf_list[Number(j)];
           if(item.txtype == 0 && send_addrs[item.address] && item.txid_out == itemp.txid) {
             itemp.ref = item;
             break;
@@ -895,7 +895,7 @@ var UtxoBalls = function() {
       Events.on(_render.engine, 'collisionStart', function(event) {
         if(dragging_body) {
           for(var i in event.pairs) {
-            var pair = event.pairs[i];
+            var pair = event.pairs[Number(i)];
             if(pair.bodyA == dragging_body && pair.bodyB.fluffy) {
               pair.bodyB.fluffy_free = true;
               setFluffyCollisionAll(pair.bodyB);
@@ -958,7 +958,7 @@ var UtxoBalls = function() {
     var cnt = 0;
     var valid_cnt = 0;
     for(var i in full_utxos) {
-      var idx = create_bodies_idx({ballType: ballType.utxo, ballData: full_utxos[i]});
+      var idx = create_bodies_idx({ballType: ballType.utxo, ballData: full_utxos[Number(i)]});
       var ball = _ballBodiesIdx[idx];
       if(ball && ball.ballType == ballType.utxo) {
         if(cnt < count) {
