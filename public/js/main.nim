@@ -1612,7 +1612,6 @@ proc appMain(data: RouterData): VNode =
           settingsModal()
 
 proc afterScript(data: RouterData) =
-  jq("#section0").remove()
   jq(".ui.dropdown").dropdown()
   if showScanResult:
     asm """

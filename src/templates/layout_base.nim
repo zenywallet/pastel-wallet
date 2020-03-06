@@ -56,13 +56,13 @@ proc layout_base*(debug: bool): string =
   <title>Pastel WALLET</title>
 </head>
 <body>
-  <div id="main"></div>
-  <section id="section0" class="section">
+  <div id="main">
     <div class ="intro">
-      <div class="caption">Pastel Wallet</div>
-      <div class="ui active centered inline inverted loader"></div>
+      <div class="intro-head">
+        <div class="caption">Pastel Wallet</div>
+      </div>
     </div>
-  </section>
+  </div>
   <script type="text/javascript" src="/js/main.js"></script>
 </body>
 </html>
