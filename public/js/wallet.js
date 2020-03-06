@@ -139,6 +139,7 @@ function Wallet() {
       if(utxo.address != cache.p2pkh) {
         var p2wpkh = address_caches[idx]['p2wpkh'];
         if(!p2wpkh) {
+          var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
           p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
           address_caches[idx]['p2wpkh'] = p2wpkh;
         }
