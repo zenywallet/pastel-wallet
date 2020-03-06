@@ -424,8 +424,9 @@ html::-webkit-scrollbar {
   margin-top: -3px;
   margin-right: -3px;
   font-family: "Courier New", Courier, Consolas, Monaco, monospace;
+  font-weight: 800;
   color: #fff;
-  text-shadow: 1px 1px 2px #000;
+  text-shadow: 1px 1px 2px #1c1c1c;
 }
 .ui.card.seed-card > .content > .header {
   margin-top: -8px;
@@ -440,8 +441,9 @@ html::-webkit-scrollbar {
 }
 .ui.card.seed-card > .content .seed {
   font-family: "Courier New", Courier, Consolas, Monaco, monospace;
+  font-weight: 800;
   color: #fff;
-  text-shadow: 1px 1px 2px #333;
+  text-shadow: 1px 1px 2px #1c1c1c;
   letter-spacing: 0.1em
 }
 .ui.card.seed-card > .content, .ui.cards > .card > .content {
