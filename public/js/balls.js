@@ -995,8 +995,8 @@ var UtxoBalls = function() {
     self.stop();
     self.start();
     calc_balls_r();
-    var w = _canvas.width;
-    var h = _canvas.height;
+    w = _canvas.width;
+    h = _canvas.height;
 
     for(var i in _ballBodies) {
       var ball = _ballBodies[Number(i)];
