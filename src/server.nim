@@ -3,11 +3,23 @@
 import jester, json
 import templates/layout_base
 
+type Page* {.pure.} = enum
+  Release
+  Maintenance
+  Debug
+
+var page*: Page = Page.Debug
+
 proc main() {.thread.} =
   routes:
     get "/":
-      resp layout_base(true)
-      #redirect "index.html"
+      case page
+      of Page.Release:
+        resp layout_release()
+      of Page.Maintenance:
+        resp Http503, layout_maintenance()
+      of Page.Debug:
+        resp layout_debug()
 
     get "/api/pub/@pubkey":
       var data = %*{"pub": @"pubkey"}

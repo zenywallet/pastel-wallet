@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import terminal, parseopt, db, blockstor, logs, strutils
+import terminal, parseopt, db, blockstor, logs, strutils, server
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
 
 proc usage() =
@@ -13,6 +13,7 @@ usage:
   addrvals { wallet_id }
   addrlogs { wallet_id }
   unspents { wallet_id }
+  page { release | maintenance | debug }
 """);
 
 proc cmd_main() {.thread.} =
@@ -77,6 +78,19 @@ proc cmd_main() {.thread.} =
             var wallet_id = parseUInt(p.key)
             for g in db.getUnspents(wallet_id):
               stdout.styledWriteLine(styleBright, fgBlue, $g)
+          except:
+            discard
+        elif p.key == "page":
+          p.next()
+          try:
+            if p.key == "release":
+              page = Page.Release
+            elif p.key == "maintenance":
+              page = Page.Maintenance
+            elif p.key == "debug":
+              page = Page.Debug
+            else:
+              usage()
           except:
             discard
         else:
