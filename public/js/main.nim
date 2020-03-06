@@ -1767,7 +1767,7 @@ proc afterScript(data: RouterData) =
           jsViewSelector(12);
           page_scroll_done = function() {};
           pastel.utxoballs.resume();
-          showPage4 = false;
+          `showPage4` = false;
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
