@@ -804,15 +804,18 @@ var UtxoBalls = function() {
         if(e.body.address) {
           if(e.body.ballData.change == 0) {
             click_cb(e.body.address);
+            clearTimeout(e.body.fluffyback_tval);
+            setFluffyCollisionAll(e.body);
           } else {
             e.body.fluffy_free = true;
-            setFluffyCollisionAll(e.body);
-            fluffy_frees.push(e.body);
-            fluffy_free_worker_start();
             Body.setAngularVelocity(e.body, 1.0);
+            setTimeout(function() {
+              e.body.fluffy_free = false;
+              clearTimeout(e.body.fluffyback_tval);
+              setFluffyCollisionAll(e.body);
+            }, 200);
           }
-        }
-        if(e.body.fluffy) {
+        } else if(e.body.fluffy) {
           clearTimeout(e.body.fluffyback_tval);
           setFluffyCollisionAll(e.body);
         }
