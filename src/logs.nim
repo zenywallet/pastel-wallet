@@ -8,8 +8,12 @@ proc debugEnable*() =
 proc debugDisable*() =
   debugMode = false
 
-proc debug*(x: varargs[string, `$`]) =
+template debug*(x: varargs[string, `$`]) =
   if debugMode:
     for s in x:
       stdout.write s
     stdout.writeLine ""
+
+when isMainModule:
+  var a: int = 12345
+  debug "test", $a
