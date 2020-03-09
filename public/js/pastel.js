@@ -474,13 +474,15 @@ var Stream = (function() {
   }
 
   Stream.prototype.connect = function() {
+    var self = this;
     reconnect = true;
     this.ws = new WebSocket(this.ws_url, this.ws_protocol);
     this.ws.binaryType = 'arraybuffer';
-    this.ws.onopen = this.onOpen;
+    this.ws.onopen = function(evt) {
+      self.showStatus(true);
+      self.onOpen(evt);
+    }
     this.ws.onmessage = this.onMessage;
-    var self = this;
-    self.showStatus(true);
     this.ws.onclose = function() {
       self.showStatus(false);
       console.log('onclose');
