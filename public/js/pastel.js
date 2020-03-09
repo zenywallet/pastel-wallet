@@ -445,7 +445,17 @@ var Stream = (function() {
   var reconnect_timer;
   var reconnect_count = 3;
   var status = 0;
+  var pause = false;
   var monitor = null;
+  var visibility_func_cb = function() {};
+  function visibility_func() {
+    visibility_func_cb();
+  }
+  function set_visibility_event(cb) {
+    visibility_func_cb = cb;
+    window.removeEventListener('visibilitychange', visibility_func);
+    window.addEventListener('visibilitychange', visibility_func);
+  }
 
   function Stream(ws_url, ws_protocol) {
     if(this instanceof Stream) {
@@ -455,6 +465,19 @@ var Stream = (function() {
       self.startMonitor();
       $(window).on('beforeunload', function() {
         self.stop();
+      });
+      set_visibility_event(function() {
+        if(document.hidden) {
+          if(!pause && status == 1) {
+            pause = true;
+            self.stop();
+          }
+        } else {
+          if(pause && status == 0) {
+            pause = false;
+            self.start();
+          }
+        }
       });
     } else {
       return new Stream(ws_url, ws_protocol);
