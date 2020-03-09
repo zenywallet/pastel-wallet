@@ -443,7 +443,7 @@ pastel.load = function() {
 
 var Stream = (function() {
   var reconnect_timer;
-  var reconnect = true;
+  var reconnect_count = 3;
   var status = 0;
   var monitor = null;
 
@@ -475,7 +475,6 @@ var Stream = (function() {
 
   Stream.prototype.connect = function() {
     var self = this;
-    reconnect = true;
     this.ws = new WebSocket(this.ws_url, this.ws_protocol);
     this.ws.binaryType = 'arraybuffer';
     this.ws.onopen = function(evt) {
@@ -487,9 +486,10 @@ var Stream = (function() {
       self.showStatus(false);
       console.log('onclose');
       clearTimeout(reconnect_timer);
-      if(reconnect) {
+      if(reconnect_count > 0) {
         reconnect_timer = setTimeout(function() {
           console.log('reconnect');
+          reconnect_count--;
           self.connect();
         }, 5000);//10000 + Math.round(Math.random() * 20) * 1000);
       }
@@ -502,12 +502,13 @@ var Stream = (function() {
 
   Stream.prototype.start = function() {
     status = 1;
+    reconnect_count = 3;
     this.connect();
   }
 
   Stream.prototype.stop = function() {
     status = 0;
-    reconnect = false;
+    reconnect_count = 0;
     clearTimeout(reconnect_timer);
     if(this.ws) {
       this.ws.close();
