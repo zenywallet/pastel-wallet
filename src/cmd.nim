@@ -20,6 +20,8 @@ proc cmd_main() {.thread.} =
   while true:
     stdout.styledWrite(styleBright, fgCyan, "> ")
     var cmd = stdin.readLine()
+    if cmd.len == 0:
+      continue
     stdout.styledWriteLine(styleBright, fgCyan, "cmd: ", cmd)
     var p = initOptParser(cmd)
     while true:
