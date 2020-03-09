@@ -544,6 +544,14 @@ var Stream = (function() {
       var elm = document.createElement('div');
       elm.id = 'connection-monitor';
       this.monitor = document.body.appendChild(elm);
+      var self = this;
+      elm.addEventListener('click', function() {
+        if(status) {
+          self.stop();
+        } else {
+          self.start();
+        }
+      });
     }
   }
 
