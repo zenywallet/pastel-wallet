@@ -86,6 +86,8 @@ proc cmd_main() {.thread.} =
               elif p.key == "0" or p.key == "false":
                 debugDisable()
                 debug_status()
+              else:
+                usage()
           elif p.key == "addrvals":
             p.next()
             try:
