@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import bitops
+import bitops, strutils
 
 type Debug* {.pure.} = enum
   All
@@ -26,12 +26,14 @@ proc debugDisable*() =
 
 template debug*(x: varargs[string, `$`]) =
   if testBit(msgflag, Debug.Common.ord) or testBit(msgflag, Debug.All.ord):
+    stdout.write "\r"
     for s in x:
       stdout.write s
     stdout.writeLine ""
 
 template write*(msgtype: Debug, x: varargs[string, `$`]) =
   if testBit(msgflag, msgtype.ord) or testBit(msgflag, Debug.All.ord):
+    stdout.write "\r"
     for s in x:
       stdout.write s
     stdout.writeLine ""
