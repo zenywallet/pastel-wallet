@@ -488,9 +488,10 @@ proc stream_main() {.thread.} =
               walletmap[wid] = wmdatas
             else:
               walletmap.del(wid)
+        clients.del(fd)
+        BallCommand.DelClient.send(BallDataDelClient(client: client))
         client.wallets = @[]
         client.xpubs = @[]
-      clientDelete(fd)
       waitFor ws.close()
     except:
       Debug.Connection.write "close error"
