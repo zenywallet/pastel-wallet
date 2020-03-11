@@ -197,12 +197,8 @@ proc stream_main() {.thread.} =
   initLock(clientsLock)
 
   proc clientDelete(client: ClientData) =
-    withLock clientsLock:
-      if not closedclients.contains(client):
-        echo "clientDelete not contains"
-        closedclients.add(client)
-      else:
-        echo "clientDelete contains"
+    if not closedclients.contains(client):
+      closedclients.add(client)
 
   proc toStr(oa: openarray[byte]): string =
     result = newString(oa.len)
@@ -502,27 +498,27 @@ proc stream_main() {.thread.} =
       discard
 
   proc deleteClosedClient() =
-    withLock clientsLock:
-      for client in closedclients:
-        BallCommand.DelClient.send(BallDataDelClient(client: client))
-      closedclients = @[]
+    for client in closedclients:
+      BallCommand.DelClient.send(BallDataDelClient(client: client))
+    closedclients = @[]
 
   proc activecheck() {.async.} =
     while true:
       try:
-        deleteClosedClient()
-        for fd, client in clients:
-          debug "fd=", fd
-          if fd in pingclients and pingclients[fd]:
-            clientDelete(client)
-            clients.del(fd)
-            waitFor client.ws.close()
-        clear(pingclients)
-        deleteClosedClient()
-        for fd, client in clients:
-          debug "fd=", fd
-          pingclients.add(fd, true)
-          await client.ws.sendPing()
+        withLock clientsLock:
+          deleteClosedClient()
+          for fd, client in clients:
+            debug "fd=", fd
+            if fd in pingclients and pingclients[fd]:
+              clientDelete(client)
+              clients.del(fd)
+              waitFor client.ws.close()
+          clear(pingclients)
+          deleteClosedClient()
+          for fd, client in clients:
+            debug "fd=", fd
+            pingclients.add(fd, true)
+            await client.ws.sendPing()
       except:
         let e = getCurrentException()
         debug e.name, ": ", e.msg
@@ -532,11 +528,12 @@ proc stream_main() {.thread.} =
   proc senddata() {.async.} =
     while true:
       try:
-        deleteClosedClient()
-        for fd, client in clients:
-          debug "fd=", fd
-          if not client.ws.sock.isClosed:
-            waitFor client.ws.sendText("test")
+        withLock clientsLock:
+          deleteClosedClient()
+          for fd, client in clients:
+            debug "fd=", fd
+            if not client.ws.sock.isClosed:
+              waitFor client.ws.sendText("test")
       except:
         let e = getCurrentException()
         debug e.name, ": ", e.msg
