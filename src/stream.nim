@@ -262,14 +262,14 @@ proc stream_main() {.thread.} =
     while true:
       try:
         let (opcode, data) = await ws.readData()
-        debug "opcode=", opcode, " len=", data.len
+        Debug.Stream.write "opcode=", opcode, " len=", data.len
         case opcode
         of Opcode.Text:
-          debug "text: ", data
+          Debug.Stream.write "text: ", data
         of Opcode.Binary:
           if not exchange:
             if not data.len == 32:
-              debug "error: invalid data len=", data.len
+              Debug.StreamError.write "error: invalid data len=", data.len
               break
             clientKeyExchange(client, data)
             exchange = true
@@ -544,7 +544,7 @@ proc stream_main() {.thread.} =
     while true:
       while sendMesChannel.peek() > 0:
         let sdata = sendMesChannel.recv()
-        debug "sendManager wid=", sdata.wallet_id, " data=", sdata.data
+        Debug.Stream.write "sendManager wid=", sdata.wallet_id, " data=", sdata.data
         if walletmap.hasKey(sdata.wallet_id):
           let wmdatas = walletmap[sdata.wallet_id]
           for wmdata in wmdatas:
@@ -577,8 +577,8 @@ proc stream_main() {.thread.} =
   proc cb(req: Request) {.async, gcsafe.} =
     let (ws, error) = await verifyWebsocketRequest(req, "pastel-v0.1")
     if ws.isNil:
-      debug "WS negotiation failed: ", error
-      debug %*req.headers
+      Debug.ConnectionError.write "WS negotiation failed: ", error
+      Debug.Connection.write %*req.headers
       await req.respond(Http400, "Websocket negotiation failed: " & error)
       req.client.close()
       return

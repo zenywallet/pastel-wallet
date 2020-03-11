@@ -8,8 +8,9 @@ proc usage() =
 usage:
   debug { 1 | 0 }
     1 - enable, 0 - disable
-  debug { all | common | connection } { 1 | 0 }
+  debug { all | common | connection ... } { 1 | 0 }
     1 - enable, 0 - disable
+  debug
   wallets [ xpub | wallet_id ]
   delwallets
   addrvals { wallet_id }

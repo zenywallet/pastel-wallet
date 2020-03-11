@@ -6,6 +6,10 @@ type Debug* {.pure.} = enum
   All
   Common
   Connection
+  Stream
+  CommonError
+  ConnectionError
+  StreamError
   Critical
 
 var msgflag: uint32
@@ -39,6 +43,9 @@ template write*(msgtype: Debug, x: varargs[string, `$`]) =
       stdout.write s
     stdout.writeLine ""
 
+Debug.CommonError.enable()
+Debug.ConnectionError.enable()
+Debug.StreamError.enable()
 Debug.Critical.enable()
 
 when isMainModule:
