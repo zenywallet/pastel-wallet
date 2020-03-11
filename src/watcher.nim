@@ -901,7 +901,7 @@ proc ball_main() {.thread.} =
 
     of BallCommand.AddClient:
       var data = BallDataAddClient(ch_data.data)
-      echo data.client.wallets
+      debug "AddClient ", data.client.wallets
       wallet_ids.incl(data.client.wallets)
       active_wids.incl(data.client.wallets.toHashSet())
       BallCommand.Unspents.send(BallDataUnspents(wallets: data.client.wallets))
@@ -913,6 +913,7 @@ proc ball_main() {.thread.} =
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
+      debug "DelClient ", data.client.wallets
       if data.client.wallets.len > 0:
         let client_wid: WalletId = data.client.wallets[0]
         wallet_ids.excl(data.client.wallets)
