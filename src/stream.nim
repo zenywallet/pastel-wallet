@@ -68,6 +68,9 @@ type
     wallet_id*: WalletId
     rawtx*: string
 
+type
+  StreamCriticalErr* = object of Exception
+
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
 
@@ -563,6 +566,8 @@ proc stream_main() {.thread.} =
     salt[0..31] = seed()
     salt[32..63] = seed()
     let clientdata = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
+    if fd in clients:
+      raise newException(StreamCriticalErr, "socket fd conflict")
     clients[fd] = clientdata;
     debug "client count=", clients.len
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
@@ -581,8 +586,13 @@ proc stream_main() {.thread.} =
       return
     asyncCheck clientStart(ws)
 
-  waitFor server.serve(Port(5001), cb)
-
+  try:
+    waitFor server.serve(Port(5001), cb)
+  except:
+    let e = getCurrentException()
+    Debug.Critical.write e.name, ": ", e.msg
+    server.close()
+    quit(QuitFailure)
 
 var stream_thread: Thread[void]
 

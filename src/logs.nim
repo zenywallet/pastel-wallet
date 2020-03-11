@@ -6,6 +6,7 @@ type Debug* {.pure.} = enum
   All
   Common
   Connection
+  Critical
 
 var msgflag: uint32
 
@@ -37,6 +38,8 @@ template write*(msgtype: Debug, x: varargs[string, `$`]) =
     for s in x:
       stdout.write s
     stdout.writeLine ""
+
+Debug.Critical.enable()
 
 when isMainModule:
   var a: int = 12345
