@@ -777,6 +777,7 @@ pastel.ready = function() {
       console.log('rollback');
     } else if(type == 'rollbacked') {
       TradeLogs.rollbacked(json.data);
+      pastel.send({cmd: 'unspents'});
     } else if(type == 'txlogs') {
       if(json.data) {
         TradeLogs.get_txlogs_cb(json.data);
