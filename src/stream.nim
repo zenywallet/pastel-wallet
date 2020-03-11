@@ -578,6 +578,7 @@ proc stream_main() {.thread.} =
     let (ws, error) = await verifyWebsocketRequest(req, "pastel-v0.1")
     if ws.isNil:
       debug "WS negotiation failed: ", error
+      debug %*req.headers
       await req.respond(Http400, "Websocket negotiation failed: " & error)
       req.client.close()
       return
