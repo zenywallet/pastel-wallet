@@ -1019,7 +1019,11 @@ asm """
         if(amount.match(/^\d+(\.\d{1,8})?$/)) {
           var value = '';
           if(amounts.length == 1) {
-            value = amounts[0] + '00000000';
+            if(amounts[0] != '0') {
+              value = amounts[0] + '00000000';
+            } else {
+              value = amounts[0];
+            }
           } else if(amounts.length == 2) {
             value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
           }
@@ -1043,7 +1047,11 @@ asm """
               Notify.show('Error', 'Balance is insufficient.', Notify.msgtype.error);
               break;
             case ErrSend.DUST_VALUE:
-              Notify.show('Error', 'Amount is too small.', Notify.msgtype.error);
+              if(value == '0') {
+                Notify.show('Error', 'Amount is zero.', Notify.msgtype.error);
+              } else {
+                Notify.show('Error', 'Amount is too small.' + value, Notify.msgtype.error);
+              }
               break;
             case ErrSend.BUSY:
               Notify.show('Error', 'Failed to send coins. Busy.', Notify.msgtype.error);
