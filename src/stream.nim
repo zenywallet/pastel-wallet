@@ -188,17 +188,18 @@ proc stream_main() {.thread.} =
   let server = newAsyncHttpServer()
   var clients: Table[int, ClientData]
   var walletmap: Table[uint64, seq[WalletMapData]]
-  var closedclients: seq[int]
+  var closedclients: seq[ClientData]
   var pingclients = initTable[int, bool]()
   var clientsLock: Lock
   initLock(clientsLock)
 
-  proc clientDelete(fd: int) =
+  proc clientDelete(client: ClientData) =
     withLock clientsLock:
-      if not closedclients.contains(fd):
-        closedclients.add(fd)
-      let client_count = clients.len - closedclients.len
-      debug "client count=", client_count
+      if not closedclients.contains(client):
+        echo "clientDelete not contains"
+        closedclients.add(client)
+      else:
+        echo "clientDelete contains"
 
   proc toStr(oa: openarray[byte]): string =
     result = newString(oa.len)
@@ -499,10 +500,8 @@ proc stream_main() {.thread.} =
 
   proc deleteClosedClient() =
     withLock clientsLock:
-      for fd in closedclients:
-        let clientdata = clients[fd]
-        clients.del(fd)
-        BallCommand.DelClient.send(BallDataDelClient(client: clientdata))
+      for client in closedclients:
+        BallCommand.DelClient.send(BallDataDelClient(client: client))
       closedclients = @[]
 
   proc activecheck() {.async.} =
@@ -512,7 +511,8 @@ proc stream_main() {.thread.} =
         for fd, client in clients:
           debug "fd=", fd
           if fd in pingclients and pingclients[fd]:
-            clientDelete(fd)
+            clientDelete(client)
+            clients.del(fd)
             waitFor client.ws.close()
         clear(pingclients)
         deleteClosedClient()
@@ -568,7 +568,7 @@ proc stream_main() {.thread.} =
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
     asyncCheck recvdata(fd, ws)
 
-  #asyncCheck activecheck()
+  asyncCheck activecheck()
   #asyncCheck senddata()
   asyncCheck sendManager()
 
