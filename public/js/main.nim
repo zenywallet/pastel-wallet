@@ -1318,7 +1318,11 @@ proc checkSendAmount(ev: Event; n: VNode) =
         amount_elm.closest('.field').removeClass('error');
         var value = '';
         if(amounts.length == 1) {
-          value = amounts[0] + '00000000';
+          if(amounts[0] != '0') {
+            value = amounts[0] + '00000000';
+          } else {
+            value = amounts[0];
+          }
         } else if(amounts.length == 2) {
           value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
         }
