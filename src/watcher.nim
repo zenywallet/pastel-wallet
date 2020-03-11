@@ -913,16 +913,16 @@ proc ball_main() {.thread.} =
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
-      echo data.client.wallets
-      let client_wid: WalletId = data.client.wallets[0]
-      wallet_ids.excl(data.client.wallets)
-      var find = false
-      for wallets in wallet_ids:
-        if wallets[0] == client_wid:
-          find = true
-          break
-      if not find:
-        active_wids.excl(data.client.wallets.toHashSet())
+      if data.client.wallets.len > 0:
+        let client_wid: WalletId = data.client.wallets[0]
+        wallet_ids.excl(data.client.wallets)
+        var find = false
+        for wallets in wallet_ids:
+          if wallets[0] == client_wid:
+            find = true
+            break
+        if not find:
+          active_wids.excl(data.client.wallets.toHashSet())
 
     of BallCommand.Abort:
       return
