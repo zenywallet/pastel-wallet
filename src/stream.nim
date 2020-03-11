@@ -317,6 +317,7 @@ proc stream_main() {.thread.} =
                 var json = %*{"type": "xpubs", "data": client.xpubs}
                 BallCommand.AddClient.send(BallDataAddClient(client: client))
                 sendClient(client, $json)
+                Debug.Connection.write "connect fd=", fd, " wid=", client.wallets, " count=", clients.len
 
               elif cmd == "unused":
                 StreamCommand.Unused.send(StreamDataUnused(wallet_id: client.wallets[0]))
@@ -465,16 +466,16 @@ proc stream_main() {.thread.} =
         of Opcode.Pong:
           if fd in pingclients:
             pingclients[fd] = false
+          Debug.Connection.write "pong fd=", fd, " wid=", client.wallets
 
         of Opcode.Close:
-          let (closeCode, reason) = extractCloseData(data)
-          debug "client close code=", closeCode, " reason=", reason
+          Debug.Connection.write "close fd=", fd, " wid=", client.wallets, " count=", clients.len - 1, " ", extractCloseData(data)
           break
 
         else: discard
       except:
         let e = getCurrentException()
-        debug e.name, ": ", e.msg
+        Debug.Connection.write e.name, ": ", e.msg
         break
 
     try:
@@ -492,7 +493,7 @@ proc stream_main() {.thread.} =
       clientDelete(fd)
       waitFor ws.close()
     except:
-      debug "close error"
+      Debug.Connection.write "close error"
       discard
 
   proc deleteClosedClient() =
