@@ -97,6 +97,13 @@ function goSection(selector, cb) {
 
 function reloadSection(cb) {
   if(lastSection) {
+    if(lastSection == '#section4') {
+      var tradelogs_section = document.getElementById('section4');
+      var rect = tradelogs_section.getBoundingClientRect();
+      if(rect.top < 0) {
+        return;
+      }
+    }
     goSection(lastSection, cb);
   }
 }
