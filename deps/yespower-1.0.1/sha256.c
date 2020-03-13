@@ -25,7 +25,7 @@
  * SUCH DAMAGE.
  */
 
-#include <assert.h>
+//#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -549,7 +549,7 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 	size_t clen;
 
 	/* Sanity-check. */
-	assert(dkLen <= 32 * (size_t)(UINT32_MAX));
+	//assert(dkLen <= 32 * (size_t)(UINT32_MAX));
 
 	if (c == 1 && (dkLen & 31) == 0 && (saltlen & 63) <= 51) {
 		uint32_t oldcount;
