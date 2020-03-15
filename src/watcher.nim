@@ -150,13 +150,13 @@ proc walletRollback(rollbacked_sequence: uint64) =
   for d in db.getWallets(""):
     var tbd_addrs: seq[tuple[change: uint32, index: uint32, address: string]] = @[]
     var addrs: seq[string] = @[]
-    for a in getAddrlogs_gt(d.wallet_id, rollbacked_sequence):
+    for a in db.getAddrlogs_gt(d.wallet_id, rollbacked_sequence):
       tbd_addrs.add((a.change, a.index, a.address))
     tbd_addrs = deduplicate(tbd_addrs)
     for a in tbd_addrs:
       addrs.add(a.address)
 
-    delUnspents_gt(d.wallet_id, rollbacked_sequence)
+    db.delUnspents_gt(d.wallet_id, rollbacked_sequence)
 
     let balance = blockstor.getAddress(addrs)
     if addrs.len != balance.resLen:
@@ -177,7 +177,7 @@ proc walletRollback(rollbacked_sequence: uint64) =
 
     for a in tbd_addrs:
       db.setAddress(a.address, a.change, a.index, d.wallet_id, rollbacked_sequence)
-    delAddrlogs_gt(d.wallet_id, rollbacked_sequence)
+    db.delAddrlogs_gt(d.wallet_id, rollbacked_sequence)
 
 type
   UpdateAddrInfo = ref object
@@ -443,7 +443,7 @@ proc cmd_main() {.thread.} =
       var client = StreamDataBalance(cdata.data)
       var balance: uint64 = 0'u64
       for wid in client.wallets:
-        for addrval in getAddrvals(wid):
+        for addrval in db.getAddrvals(wid):
           balance += addrval.value
       var json = %*{"type": "balance", "data": j_uint64(balance)}
       stream.send(client.wallets[0], $json)
@@ -451,7 +451,7 @@ proc cmd_main() {.thread.} =
       var client = StreamDataAddresses(cdata.data)
       var json = %*{"type": "addresses", "data": []}
       for wid in client.wallets:
-        for addrval in getAddrvals(wid):
+        for addrval in db.getAddrvals(wid):
           if addrval.value > 0'u64:
             var v = newJObject()
             v["change"] = newJInt(addrval.change.BiggestInt)
@@ -472,7 +472,7 @@ proc cmd_main() {.thread.} =
       if used_0.err == DbStatus.Success:
         unused_index = used_0.res + 1
       block searchUnused:
-        for addrval in getAddrvals(client.wallet_id):
+        for addrval in db.getAddrvals(client.wallet_id):
           if addrval.change != 0:
             break
           for i in index..<addrval.index.ord:
@@ -645,12 +645,12 @@ proc ball_main() {.thread.} =
                   j_addrs[a].add("xpub_idx", newJInt(idx.BiggestInt))
                   if j_addrs[a].hasKey("spents"):
                     for spent in j_addrs[a]["spents"]:
-                      let dt = getTxtime(spent["txid"].getStr)
+                      let dt = db.getTxtime(spent["txid"].getStr)
                       if dt.err == DbStatus.Success:
                         spent.add("trans_time", j_uint64(dt.res))
                   if j_addrs[a].hasKey("txouts"):
                     for txout in j_addrs[a]["txouts"]:
-                      let dt = getTxtime(txout["txid"].getStr)
+                      let dt = db.getTxtime(txout["txid"].getStr)
                       if dt.err == DbStatus.Success:
                         txout.add("trans_time", j_uint64(dt.res))
                   break
@@ -658,7 +658,7 @@ proc ball_main() {.thread.} =
             for m in mempool:
               if m["txid"].getStr == t:
                 j_txs[t] = %*{"data": m["addrs"]}
-                let dt = getTxtime(t)
+                let dt = db.getTxtime(t)
                 if dt.err == DbStatus.Success:
                   j_txs[t].add("trans_time", j_uint64(dt.res))
 
