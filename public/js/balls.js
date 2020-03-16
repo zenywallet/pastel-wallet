@@ -1043,6 +1043,7 @@ var UtxoBalls = function() {
       var new_ball;
       if(ball.ballType == ballType.too_much) {
         new_ball = create_too_much_ball({fluffy: ball.fluffy, x: x, y: y, angle: ball.angle});
+        too_much_balls = new_ball;
       } else {
         new_ball = create_ball(ball.ballType, ball.ballData, {fluffy: ball.fluffy, x: x, y: y, angle: ball.angle});
       }
