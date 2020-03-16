@@ -582,6 +582,9 @@ i.receive {
   min-height: 482px;
   bottom: 7px;
 }
+.ui.attached.buttons.settings {
+  margin-top: -3px;
+}
 .ui.buttons.settings > .button {
   font-weight: 400;
   background-color: transparent;
