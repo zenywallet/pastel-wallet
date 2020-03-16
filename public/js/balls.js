@@ -375,9 +375,7 @@ var UtxoBalls = function() {
           }
         }
         _ballTask.push({type: taskType.unconfs_end});
-        if(too_much) {
-          _ballTask.push({type: taskType.too_much_unconfs});
-        }
+        _ballTask.push({type: taskType.too_much_unconfs, data: too_much});
         break;
       case taskType.utxos_start:
         for(var i in _ballBodies) {
@@ -520,6 +518,19 @@ var UtxoBalls = function() {
         if(utxo_update) {
           console.log('request unspents');
           pastel.send({cmd: 'unspents'});
+        }
+        break;
+      case taskType.too_much_unconfs:
+        if(task.data) {
+          too_much_balls_fluffy = fluffy1;
+          if(too_much_balls) {
+            setFluffy(too_much_balls, fluffy1);
+          }
+        } else {
+          too_much_balls_fluffy = fluffy3;
+          if(too_much_balls) {
+            setFluffy(too_much_balls, fluffy3);
+          }
         }
         break;
       default:
