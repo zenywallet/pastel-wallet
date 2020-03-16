@@ -150,7 +150,7 @@ var UtxoBalls = function() {
 
   function calc_ball_diameter(data) {
     var s = Math.ceil(cur_balls_r * data.cr);
-    var s_max = _canvas.width > _canvas.height ? _canvas.height / 6 : _canvas.width / 6;
+    var s_max = _canvas.width > _canvas.height ? _canvas.height / 12 : _canvas.width / 12;
     if(s > s_max) {
       s = s_max;
     }
