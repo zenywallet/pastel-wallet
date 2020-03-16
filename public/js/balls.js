@@ -752,12 +752,26 @@ var UtxoBalls = function() {
     if(_ballBodies.length - (too_much_balls_enable ? 1 : 0) >= 140) {
       if(!too_much_balls_enable) {
         too_much_balls_enable = true;
-        var fluffy = too_much_balls_fluffy || fluffy3;
+        var fluffy = fluffy3;
         var ball = create_too_much_ball({fluffy: fluffy});
         _ballBodies.push(ball);
         add_bodies_idx(ball);
         too_much_balls = ball;
         World.add(_world, ball);
+        if(too_much_balls_fluffy != null && too_much_balls_fluffy != fluffy3) {
+          var retry = 0;
+          function worker() {
+            if(ball.position.y > 120) {
+              setFluffy(ball, too_much_balls_fluffy);
+            } else {
+              if(retry < 30) {
+                setTimeout(worker, 100);
+                retry++;
+              }
+            }
+          }
+          worker();
+        }
       }
     } else {
       if(too_much_balls_enable) {
