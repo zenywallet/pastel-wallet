@@ -7,7 +7,7 @@ proc layout_debug*(): string =
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="description" content="Pastel WALLET">
+  <meta name="description" content="Pastel Wallet">
   <meta name="author" content="zenywallet">
   <meta name="keywords" content="wallet">
   <meta name="format-detection" content="telephone=no">
@@ -43,7 +43,7 @@ proc layout_debug*(): string =
   <script type="text/javascript" src="/js/wallet.js"></script>
   <script type="text/javascript" src="/js/ui.js"></script>
   <script type="text/javascript" src="/js/pastel.js"></script>
-  <title>Pastel WALLET</title>
+  <title>Pastel Wallet</title>
 </head>
 <body>
   <div id="main">
@@ -65,7 +65,7 @@ proc layout_release*(): string =
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="description" content="Pastel WALLET">
+  <meta name="description" content="Pastel Wallet">
   <meta name="author" content="zenywallet">
   <meta name="keywords" content="wallet">
   <meta name="format-detection" content="telephone=no">
@@ -81,7 +81,7 @@ proc layout_release*(): string =
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
   <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-  <title>Pastel WALLET</title>
+  <title>Pastel Wallet</title>
 </head>
 <body>
   <div id="main">
@@ -103,7 +103,7 @@ proc layout_maintenance*(): string =
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="description" content="Pastel WALLET">
+  <meta name="description" content="Pastel Wallet">
   <meta name="author" content="zenywallet">
   <meta name="keywords" content="wallet">
   <meta name="format-detection" content="telephone=no">
@@ -123,7 +123,7 @@ proc layout_maintenance*(): string =
   <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
   <script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
   <script type="text/javascript" src="/semantic/compact.js"></script>
-  <title>Pastel WALLET</title>
+  <title>Pastel Wallet</title>
 </head>
 <body>
   <div id="main">
