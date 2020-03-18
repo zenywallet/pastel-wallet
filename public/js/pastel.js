@@ -507,6 +507,7 @@ var Stream = (function() {
     this.ws.onmessage = this.onMessage;
     this.ws.onclose = function() {
       self.showStatus(false);
+      status = 0;
       console.log('onclose');
       clearTimeout(reconnect_timer);
       if(reconnect_count > 0) {
@@ -530,7 +531,6 @@ var Stream = (function() {
   }
 
   Stream.prototype.stop = function() {
-    status = 0;
     reconnect_count = 0;
     clearTimeout(reconnect_timer);
     if(this.ws) {
@@ -546,9 +546,7 @@ var Stream = (function() {
       this.monitor = document.body.appendChild(elm);
       var self = this;
       elm.addEventListener('click', function() {
-        if(status) {
-          self.stop();
-        } else {
+        if(!status) {
           self.start();
         }
       });
