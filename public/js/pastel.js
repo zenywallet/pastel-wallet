@@ -651,20 +651,16 @@ pastel.ready = function() {
 
   pastel.secure_recv = function(json) {
     var type = json['type'];
+    var data = json['data'];
+    console.log('recv ' + (data ? (type + ': ' + JSON.stringify(data)) : type));
     if(type == 'xpubs') {
-      var xpubs = json['data'];
-      if(!wallet.checkXpubs(xpubs)) {
+      if(!wallet.checkXpubs(data)) {
         throw new Error('check xpubs');
       }
-      console.log('xpubs: ' + JSON.stringify(xpubs));
     } else if(type == 'unspents') {
-      var utxos = json['data'];
-      console.log('unspents: ' + JSON.stringify(utxos));
-      wallet.setUtxos(utxos);
-      pastel.utxoballs.setUtxos(utxos);
+      wallet.setUtxos(data);
+      pastel.utxoballs.setUtxos(data);
     } else if(type == 'unconfs') {
-      console.log('unconfs: ' + JSON.stringify(json));
-      var data = json.data;
       var send = UINT64(0);
       var recv = UINT64(0);
       var recv_change = UINT64(0);
@@ -746,46 +742,39 @@ pastel.ready = function() {
       TradeLogs.unconfs(data);
       pastel.utxoballs.setUnconfs(data);
     } else if(type == 'balance') {
-      console.log('balance: ' + JSON.stringify(json));
-      $('#wallet-balance .balance').text(conv_coin(json.data));
+      $('#wallet-balance .balance').text(conv_coin(data));
       var el = document.getElementById('wallet-balance');
       if(!el.style.display) {
         fadeIn(el, 800);
       }
     } else if(type == 'addresses') {
-      console.log('addresses: ' + JSON.stringify(json));
     } else if(type == 'unused') {
-      console.log('unused: ' + JSON.stringify(json));
-      var changed = wallet.setUnusedAddress(json.data);
+      var changed = wallet.setUnusedAddress(data);
       if(changed) {
         showRecvAddress(function() {
           showRecvAddressAfterEffect();
         });
       }
     } else if(type == 'change') {
-      console.log('change: ' + JSON.stringify(json));
-      wallet.setChange(json.data);
+      wallet.setChange(data);
     } else if(type == 'height') {
-      TradeLogs.update_height(json.data);
+      TradeLogs.update_height(data);
     } else if(type == 'rollback') {
       console.log('rollback');
     } else if(type == 'rollbacked') {
-      TradeLogs.rollbacked(json.data);
+      TradeLogs.rollbacked(data);
       pastel.send({cmd: 'unspents'});
     } else if(type == 'txlogs') {
-      if(json.data) {
-        TradeLogs.get_txlogs_cb(json.data);
+      if(data) {
+        TradeLogs.get_txlogs_cb(data);
       }
     } else if(type == 'rawtx') {
-      console.log('rawtx=', json.data);
-      pastel.wallet.rawtxResult(json.data);
+      pastel.wallet.rawtxResult(data);
     } else if(type == 'time') {
-      if(json.data) {
-        TradeLogs.server_time(json.data);
-        console.log('server time=', json.data);
+      if(data) {
+        TradeLogs.server_time(data);
       }
     } else if(type == 'ready') {
-      console.log('server ready');
       var xpubs = wallet.getXpubs();
       pastel.send({cmd: 'xpubs', data: xpubs});
     } else {
