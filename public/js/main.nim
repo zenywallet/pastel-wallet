@@ -1209,7 +1209,7 @@ asm """
   }
   function sendrecv_select(val) {
     clearTimeout(sendrecv_switch_tval);
-    if(val != 1) {
+    if(sendrecv_switch == 1 && val != 1) {
       pastel.utxoballs.setSend(0);
     }
     sendrecv_switch = val;
