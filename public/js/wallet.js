@@ -257,7 +257,6 @@ function Wallet() {
         datatmp.push(last + i);
       }
     }
-    console.log('datatmp=', datatmp);
     for(var i in datatmp) {
       var child = _nodes[xpub].derive(0).derive(datatmp[i]);
       var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network});
