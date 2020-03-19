@@ -583,7 +583,6 @@ pastel.ready = function() {
     shared = null;
     stage = 0;
     stream.send(kp.publicKey);
-    console.log('client publicKey=' + JSON.stringify(kp.publicKey));
   }
 
   pastel.stream_ready = function() {
@@ -596,7 +595,6 @@ pastel.ready = function() {
     }
     var d = JSON.stringify(json);
     var comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
-    console.log(comp.length);
     var sdata = new Uint8Array(comp.length);
     var pos = 0, next_pos = 16;
     while(next_pos < comp.length) {
@@ -613,8 +611,6 @@ pastel.ready = function() {
       var enc = cipher.enc(buf).slice(0, plen);
       sdata.set(enc, pos);
     }
-    console.log('sdata=', sdata);
-    console.log(cipher.buf2hex(sdata));
     return stream.send(sdata);
   }
 
@@ -809,7 +805,6 @@ pastel.ready = function() {
   stream.onMessage = function(evt) {
     if(typeof evt.data == 'object') {
       var data = new Uint8Array(evt.data, 0, evt.data.length);
-      console.log('object=', data);
       if(stage == 1) {
         var rdata = new Uint8Array(data.length);
         var pos = 0, next_pos = 16;
@@ -827,22 +822,14 @@ pastel.ready = function() {
           var dec = cipher.dec(buf).slice(0, plen);
           rdata.set(dec, pos);
         }
-        console.log('rdata=', rdata);
         var decomp = new Zlib.RawInflate(rdata, {verify: true}).decompress();
-        console.log('decomp=', decomp);
         var json = JSON.parse(new TextDecoder().decode(decomp));
         pastel.secure_recv(json);
       } else if(stage == 0 && !shared && data.length == 96) {
-        console.log('stage=0, length=96');
         var pub = data.slice(0, 32);
-        console.log('server publicKey=' + JSON.stringify(pub));
         shared = cipher.keyExchange(pub, kp.secretKey);
-        console.log('shared=' + JSON.stringify(shared));
         var shared_key = cipher.yespower(coin.crypto.sha256(shared), 32);
         var shared_key_uint8array = new Uint8Array(shared_key);
-        console.log('shared hash=' + JSON.stringify(shared_key));
-        console.log('shared hash=' + JSON.stringify(shared_key_uint8array));
-        console.log('shared hash=' + shared_key.toString('hex'));
         shared = shared_key_uint8array;
 
         var seed_srv = data.slice(32, 64);
@@ -855,9 +842,6 @@ pastel.ready = function() {
         }
         var iv_srv = cipher.yespower(coin.crypto.sha256(rs), 32);
         var iv_cli = cipher.yespower(coin.crypto.sha256(rc), 32);
-        console.log(cipher.buf2hex(shared));
-        console.log(cipher.buf2hex(iv_srv));
-        console.log(cipher.buf2hex(iv_cli));
         cipher.init(shared, iv_cli, iv_srv);
 
         stage = 1;
