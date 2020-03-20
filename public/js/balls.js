@@ -296,7 +296,9 @@ var UtxoBalls = function() {
         ss += cr * cr;
       }
       var prev = cur_balls_r;
-      cur_balls_r = Math.sqrt(((_canvas.width * _canvas.height) / 3) / ss);
+      var a = len > 140 ? 140 : len;
+      var v = -9 / 140 * a + 12;
+      cur_balls_r = Math.sqrt(((_canvas.width * _canvas.height) / v) / ss);
       if(prev != cur_balls_r) {
         return true;
       }
