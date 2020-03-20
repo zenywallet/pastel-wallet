@@ -96,6 +96,7 @@ var UtxoBalls = function() {
   var fluffy1 = 0x0002;
   var fluffy2 = 0x0004;
   var fluffy3 = 0x0008;
+  var fluffy4 = 0x0010;
   function setFluffy(ball, fluffy) {
     ball.fluffy = fluffy;
     ball.collisionFilter.category = fluffy;
@@ -110,6 +111,11 @@ var UtxoBalls = function() {
     ball.fluffy_all = false;
     ball.collisionFilter.category = ball.fluffy;
     ball.collisionFilter.mask = defaultCategory | ball.fluffy;
+  }
+  function setFluffyFree(ball, fluffy) {
+    ball.fluffy = fluffy;
+    ball.collisionFilter.category = defaultCategory;
+    ball.collisionFilter.mask = fluffy;
   }
 
   var _ballInfos = {};
@@ -224,10 +230,14 @@ var UtxoBalls = function() {
     return ball;
   }
 
+  var utxo_ball_max = 140;
+  var unconf_ball_max = 160;
+
   var valid_utxos = [];
   var valid_unconfs = [];
   var full_utxos = [];
   var full_unconfs = [];
+  var full_unconfs_idx = {};
   var cur_balls_r = 0;
   var calc_balls_r = function() {
     if(valid_utxos.length > 0 || valid_unconfs.length > 0) {
@@ -296,8 +306,8 @@ var UtxoBalls = function() {
         ss += cr * cr;
       }
       var prev = cur_balls_r;
-      var a = len > 140 ? 140 : len;
-      var v = -9 / 140 * a + 12;
+      var a = len > utxo_ball_max ? utxo_ball_max : len;
+      var v = -9 / utxo_ball_max * a + 12;
       cur_balls_r = Math.sqrt(((_canvas.width * _canvas.height) / v) / ss);
       if(prev != cur_balls_r) {
         return true;
@@ -317,7 +327,8 @@ var UtxoBalls = function() {
     unconf: 7,
     unconfs_end: 8,
     too_much_utxos: 9,
-    too_much_unconfs: 10
+    too_much_unconfs: 10,
+    absorb: 11
   };
   var create_balls_worker_tval = null;
   function create_balls_worker() {
@@ -332,9 +343,17 @@ var UtxoBalls = function() {
       case taskType.utxos:
         _ballTask.push({type: taskType.utxos_start});
         var count = 0;
-        var too_much = (task.data.length > 140);
-        valid_utxos = task.data.slice(0, 140);
+        var left = utxo_ball_max;
+        if(valid_unconfs.length > utxo_ball_max) {
+          left -= valid_unconfs.length - utxo_ball_max;
+        }
+        if(left > 0) {
+          valid_utxos = task.data.slice(0, left);
+        } else {
+          valid_utxos = [];
+        }
         full_utxos = task.data;
+        var too_much = full_utxos.length > utxo_ball_max;
         for(var i in valid_utxos) {
           var utxo = valid_utxos[Number(i)];
           utxo.value_d = conv_coin(sanitize(utxo.value))
@@ -358,9 +377,15 @@ var UtxoBalls = function() {
       case taskType.unconfs:
         _ballTask.push({type: taskType.unconfs_start});
         var count = 0;
-        var too_much = (task.data.length > 160);
-        valid_unconfs = task.data.slice(0, 160);
+        valid_unconfs = task.data.slice(-unconf_ball_max);
         full_unconfs = task.data;
+        full_unconfs_idx = {};
+        for(var i in full_unconfs) {
+          var data = full_unconfs[i];
+          var idx = data.txid + '-' + data.n + '-' + data.address + '-' + data.value;
+          full_unconfs_idx[idx] = data;
+        }
+        var too_much = full_unconfs.length > unconf_ball_max;
         for(var i in valid_unconfs) {
           var unconf = valid_unconfs[Number(i)];
           unconf.value_d = conv_coin(sanitize(unconf.value))
@@ -427,9 +452,7 @@ var UtxoBalls = function() {
         for(var i = _ballBodies.length - 1; i >= 0; i--) {
           var ball = _ballBodies[Number(i)];
           if(ball.ballType == ballType.utxo && ball.mark_utxo == 1) {
-            Matter.Composite.remove(_world, ball);
-            remove_bodies_idx(ball);
-            _ballBodies.splice(i, 1);
+            setFluffyFree(ball, fluffy4);
           }
         }
         break;
@@ -507,7 +530,12 @@ var UtxoBalls = function() {
               ball.mark_utxo = 0;
               ball.ballType = ballType.utxo;
               if(ball.fluffy == fluffy1) {
-                setFluffy(ball, fluffy3);
+                var idx = create_bodies_idx(ball);
+                if(full_unconfs_idx[idx]) {
+                  setFluffyFree(ball, fluffy4);
+                } else {
+                  setFluffy(ball, fluffy3);
+                }
               }
             } else {
               _ballBodiesAway.push(ball);
@@ -524,8 +552,10 @@ var UtxoBalls = function() {
           pastel.send({cmd: 'unspents'});
         }
         break;
+      case taskType.too_much_utxos:
+        break;
       case taskType.too_much_unconfs:
-        if(task.data) {
+        if(task.data && full_unconfs.length > unconf_ball_max) {
           too_much_balls_fluffy = fluffy1;
           if(too_much_balls) {
             setFluffy(too_much_balls, fluffy1);
@@ -534,6 +564,17 @@ var UtxoBalls = function() {
           too_much_balls_fluffy = fluffy3;
           if(too_much_balls) {
             setFluffy(too_much_balls, fluffy3);
+          }
+        }
+        break;
+      case taskType.absorb:
+        var ball = task.data;
+        Matter.Composite.remove(_world, ball);
+        remove_bodies_idx(ball);
+        for(var i = _ballBodies.length - 1; i >= 0; i--) {
+          if(ball == _ballBodies[i]) {
+            _ballBodies.splice(i, 1);
+            break;
           }
         }
         break;
@@ -775,7 +816,7 @@ var UtxoBalls = function() {
   var too_much_balls_fluffy = null;
   var check_too_much_balls_tval = null;
   function check_too_much_balls() {
-    if(_ballBodies.length - (too_much_balls_enable ? 1 : 0) >= 140) {
+    if(full_utxos.length > utxo_ball_max || full_unconfs.length > unconf_ball_max) {
       if(!too_much_balls_enable) {
         too_much_balls_enable = true;
         var fluffy = fluffy3;
@@ -912,7 +953,7 @@ var UtxoBalls = function() {
       Events.on(_render.engine, 'beforeUpdate', function(event) {
         var time = _render.engine.timing.timestamp;
         var rect = {y: 137}; //_render.element.getBoundingClientRect();
-        for(var i in _ballBodies) {
+        for(var i = _ballBodies.length - 1; i >= 0; i--) {
           var b = _ballBodies[Number(i)];
           if(!b.rnd) {
             b.rnd = Math.random();
@@ -939,6 +980,27 @@ var UtxoBalls = function() {
                 Body.setVelocity(b, {x: 0, y: vy});
                 Body.setAngularVelocity(b, (b.rnd * 2 - 1) / 20);
                 break;
+            }
+          }
+          if(b.fluffy == fluffy4 && too_much_balls) {
+            var vx = too_much_balls.position.x - b.position.x;
+            var vy = too_much_balls.position.y - b.position.y;
+            var vxa = Math.abs(vx);
+            var vya = Math.abs(vy);
+            var ratio = vxa > vya ? vxa : vya;
+            var ratio2 = ratio / 6;
+            var accel = ratio > 300 ? 1 : 300 / ratio;
+            if(ratio > too_much_balls.circleRadius) {
+              Body.setVelocity(b, {x: vx / ratio2 * accel, y: vy / ratio2 * accel});
+            } else {
+              if(ratio > too_much_balls.circleRadius / 2) {
+                Body.setVelocity(b, {x: vx / ratio, y: vy / ratio});
+              } else {
+                _ballTask.push({type: taskType.absorb, data: b});
+                create_balls_worker();
+                Body.setVelocity(too_much_balls, {x: vx / ratio, y: vy / ratio + 4});
+                Body.setAngularVelocity(too_much_balls, (vx > 0 ? 1 : -1) / 30);
+              }
             }
           }
         }
