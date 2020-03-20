@@ -623,6 +623,28 @@ var UtxoBalls = function() {
       }
     }
     unconf_list = unconf_list.concat(unconf_pop_list);
+    unconf_list.sort(function(a, b) {
+      var cmp = a.trans_time - b.trans_time;
+      if(cmp == 0) {
+        cmp = a.xpub_idx - b.xpub_idx;
+        if(cmp == 0) {
+          cmp = a.txtype - b.txtype;
+          if(cmp == 0) {
+            cmp = a.change - b.change;
+            if(cmp == 0) {
+              cmp = a.index - b.index;
+              if(cmp == 0) {
+                cmp = a.txid - b.txid;
+                if(cmp == 0) {
+                  cmp = a.n - b.n;
+                }
+              }
+            }
+          }
+        }
+      }
+      return cmp;
+    });
     _unconfs = unconf_list;
     _ballTask.push({type: taskType.unconfs, data: unconf_list});
     self.start();
