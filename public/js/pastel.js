@@ -649,6 +649,8 @@ pastel.ready = function() {
     });
   }
 
+  pastel.unspents_after_actions = [];
+
   pastel.secure_recv = function(json) {
     var type = json['type'];
     var data = json['data'];
@@ -660,6 +662,10 @@ pastel.ready = function() {
     } else if(type == 'unspents') {
       wallet.setUtxos(data);
       pastel.utxoballs.setUtxos(data);
+      var action;
+      while(action = pastel.unspents_after_actions.shift()) {
+        action();
+      }
     } else if(type == 'unconfs') {
       var send = UINT64(0);
       var recv = UINT64(0);

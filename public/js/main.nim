@@ -1036,6 +1036,11 @@ asm """
             switch(result.err) {
             case ErrSend.SUCCESS:
               Notify.show('', 'Coins sent successfully.', Notify.msgtype.info);
+              pastel.unspents_after_actions.push(function() {
+                if(sendrecv_switch == 1) {
+                  setSendUtxo(value);
+                }
+              });
               break;
             case ErrSend.FAILED:
               Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
