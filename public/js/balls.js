@@ -722,9 +722,9 @@ var UtxoBalls = function() {
       } else {
         text = ball.address + '<br>' + ball.value;
       }
-      $('#ball-info').html(text).css({left: ball.position.x + 28, top: ball.position.y + 100 - ball.circleRadius * 2 / 3}).stop(true, true).fadeTo(400, 1);
+      $('#ball-info').html(text).css({left: ball.position.x + 28, top: ball.position.y + 120 + (20 + ball.circleRadius * 2 / 3) * (ball.position.y < 100 ? 1 : -1)}).stop(true, true).fadeTo(400, 1);
     } else if(cur_ball_id == ball.id) {
-      $('#ball-info').css({left: ball.position.x + 28, top: ball.position.y + 100 - ball.circleRadius * 2 / 3});
+      $('#ball-info').css({left: ball.position.x + 28, top: ball.position.y + 120 + (20 + ball.circleRadius * 2 / 3) * (ball.position.y < 100 ? 1 : -1)});
     }
   }
   function hide_ball_info() {
