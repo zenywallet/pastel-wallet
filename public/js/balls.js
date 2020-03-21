@@ -377,8 +377,29 @@ var UtxoBalls = function() {
       case taskType.unconfs:
         _ballTask.push({type: taskType.unconfs_start});
         var count = 0;
-        valid_unconfs = task.data.slice(-unconf_ball_max);
+        var valid_unconfs_tmp = [];
+        var add_list = {};
         full_unconfs = task.data;
+        for(var i in full_unconfs) {
+          var idx = create_bodies_idx({ballType: ballType.utxo, ballData: full_unconfs[i]});
+          var ball = _ballBodiesIdx[idx];
+          if(ball) {
+            valid_unconfs_tmp.push(full_unconfs[i]);
+            add_list[i] = 1;
+          }
+          if(valid_unconfs_tmp.length >= unconf_ball_max) {
+            break;
+          }
+        }
+        for(var i = full_unconfs.length - 1; i >= 0; i--) {
+          if(valid_unconfs_tmp.length >= unconf_ball_max) {
+            break;
+          }
+          if(!add_list[i]) {
+            valid_unconfs_tmp.push(full_unconfs[i]);
+          }
+        }
+        valid_unconfs = valid_unconfs_tmp;
         full_unconfs_idx = {};
         for(var i in full_unconfs) {
           var data = full_unconfs[i];
