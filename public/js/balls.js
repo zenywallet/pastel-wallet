@@ -532,6 +532,10 @@ var UtxoBalls = function() {
               }, 1000);
               _ballBodies.push(ball);
               add_bodies_idx(ball);
+            } else {
+              _ballBodies.push(ball);
+              add_bodies_idx(ball);
+              World.add(_world, ball);
             }
           } else {
             _ballBodies.push(ball);
