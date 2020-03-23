@@ -495,11 +495,9 @@ proc cmd_main() {.thread.} =
       var json = %*{"type": "rawtx", "data": ret_rawtx}
       stream.send(client.wallet_id, $json)
     of StreamCommand.BsStream:
-      echo "StreamCommand.BsStream"
       try:
         var json = StreamDataBsStream(cdata.data).data
         if json.hasKey("height"):
-          echo "height"
           var mempool_tmp: JsonNode = newJArray()
           let j_mempool = blockstor.getMempool()
           if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
@@ -508,7 +506,6 @@ proc cmd_main() {.thread.} =
           mempool = mempool_tmp
 
         elif json.hasKey("mempool"):
-          echo "mempool"
           for m in json["mempool"]:
             mempool.add(m)
       except:
