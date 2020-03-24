@@ -633,6 +633,7 @@ var UtxoBalls = function() {
         mytxs[txid] = send_addrs;
       }
     }
+
     var unconf_list = [];
     var unconf_pop_list = [];
     for(var addr in data.addrs) {
@@ -661,6 +662,34 @@ var UtxoBalls = function() {
         }
       }
     }
+
+    var myaddrs = {};
+    for(var addr in data.addrs) {
+      myaddrs[addr] = 1;
+    }
+    for(var txid in data.txs) {
+      var tx = data.txs[txid];
+      var mycnt = 0;
+      var external_tx_addrs = [];
+      for(var txa in tx.data) {
+        var v = tx.data[txa];
+        for(var i in v) {
+          if(myaddrs[txa]) {
+            if(i == 0) {
+              mycnt++;
+            }
+          } else {
+            if(i == 1) {
+              external_tx_addrs.push({txtype: i, address: txa, txid: txid, value: v[i], trans_time: tx.trans_time});
+            }
+          }
+        }
+      }
+      if(mycnt > 0) {
+        unconf_pop_list = unconf_pop_list.concat(external_tx_addrs);
+      }
+    }
+
     var mark = {};
     for(var i in unconf_pop_list) {
       var itemp = unconf_pop_list[Number(i)];
@@ -694,19 +723,32 @@ var UtxoBalls = function() {
     unconf_list.sort(function(a, b) {
       var cmp = a.trans_time - b.trans_time;
       if(cmp == 0) {
-        cmp = a.xpub_idx - b.xpub_idx;
-        if(cmp == 0) {
-          cmp = a.txtype - b.txtype;
+        if(a.xpub_idx != null && b.xpub_idx != null) {
+          cmp = a.xpub_idx - b.xpub_idx;
           if(cmp == 0) {
-            cmp = a.change - b.change;
+            cmp = a.txtype - b.txtype;
             if(cmp == 0) {
-              cmp = a.index - b.index;
+              cmp = a.change - b.change;
               if(cmp == 0) {
-                cmp = a.txid - b.txid;
+                cmp = a.index - b.index;
                 if(cmp == 0) {
-                  cmp = a.n - b.n;
+                  cmp = a.txid - b.txid;
+                  if(cmp == 0) {
+                    cmp = a.n - b.n;
+                  }
                 }
               }
+            }
+          }
+        } else if(a.xpub_idx == null && b.xpub_idx != null) {
+          cmp = -1;
+        } else if(a.xpub_idx != null && b.xpub_idx == null) {
+          cmp = 1;
+        } else {
+          if(cmp == 0) {
+            cmp = a.txtype - b.txtype;
+            if(cmp == 0) {
+              cmp = a.txid - b.txid;
             }
           }
         }
