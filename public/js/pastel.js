@@ -2,7 +2,7 @@ var pastel = pastel || {};
 pastel.config = pastel.config || {
   ws_url: 'ws://localhost:5001/',
   ws_protocol: 'pastel-v0.1',
-  network: 'testnet_bitzeny'
+  network: 'bitzeny'
 };
 pastel.utxoballs = new UtxoBalls();
 

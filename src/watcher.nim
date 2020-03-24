@@ -7,7 +7,7 @@ import blockstor, db, events, logs, stream
 
 const gaplimit: uint32 = 20
 const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
-var chain = testnet_bitzeny_chain
+var chain = bitzeny_chain
 
 var
   threads: array[5, Thread[void]]
