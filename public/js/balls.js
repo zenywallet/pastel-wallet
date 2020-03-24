@@ -622,7 +622,7 @@ var UtxoBalls = function() {
       var tx = data.txs[txid];
       var send_addrs = {};
       for(var txa in tx.data) {
-        var v = tx.data[txa]
+        var v = tx.data[txa];
         for(var i in v) {
           if(i == 0) {
             send_addrs[txa] = 1;
