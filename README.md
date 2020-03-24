@@ -27,4 +27,12 @@ nimble install
 ```bash
 pastel
 ```
-http://localhost:5000/
+- http://localhost:5000/
+- WebSocket port is 5001
+
+
+### Release Build without installing and Launch
+```bash
+nim c -d:release src/pastel.nim
+src/pastel
+```
