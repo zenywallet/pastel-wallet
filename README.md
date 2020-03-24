@@ -18,13 +18,13 @@ cd ../..
 nimble build
 ```
 
+### Installation
+```bash
+nimble install
+```
+
 ### Launch
 ```bash
-bin/pastel
+pastel
 ```
 http://localhost:5000/
-
-### Debug
-```bash
-nim c -r src/pastel.nim
-```
