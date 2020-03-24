@@ -96,6 +96,7 @@ type
     Rollback
     Rollbacked
     BsStream
+    UpdateWallets
 
   BallData* = ref object of RootObj
   BallDataAddClient* = ref object of BallData
@@ -119,6 +120,12 @@ type
     sequence*: uint64
   BallDataBsStream* = ref object of BallData
     data*: JsonNode
+  BallDataUpdateWalletsStatus* {.pure.} = enum
+    Continue
+    Done
+  BallDataUpdateWallets* = ref object of BallData
+    wallets*: WalletIds
+    status*: BallDataUpdateWalletsStatus
 
 var ballChannel*: Channel[tuple[cmd: BallCommand, data: BallData]]
 ballChannel.open()

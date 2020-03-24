@@ -50,12 +50,14 @@ type
     balance: uint64
     utxo_count: uint32
 
-proc addressFinder(sequence: uint64, last_sequence: uint64) =
+var prev_update_wallets {.threadvar.}: WalletIds
+var update_wallets {.threadvar.}: WalletIds
+
+proc addressFinder(sequence: uint64, last_sequence: uint64): bool =
   var walletInfos = initTable[uint64, WalletInfo]()
   var addrInfos: seq[AddrInfo]
   for d in db.getWallets(""):
     if sequence > d.sequence or d.sequence == 0'u64:
-
       var used_0_index: uint32 = 0
       var used_0 = db.getLastUsedAddrIndex(d.wallet_id, 0)
       if used_0.err == DbStatus.Success:
@@ -82,7 +84,6 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
                                   sequence: d.sequence,
                                   next_0_index: new_0_index,
                                   next_1_index: new_1_index)
-
   if addrInfos.len > 0:
     var addrs: seq[string]
     for a in addrInfos:
@@ -102,6 +103,7 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
                                               utxo_count: b["utxo_count"].getUint32)
           inc(i)
 
+    update_wallets = @[]
     for a in addrInfos:
       if not addrBalances.hasKey(a.address):
         db.setAddress(a.address, a.change, a.index, a.wid, 0)
@@ -141,10 +143,22 @@ proc addressFinder(sequence: uint64, last_sequence: uint64) =
         db.setAddrval(a.wid, a.change, a.index, a.address, b.balance, b.utxo_count)
         db.setAddress(a.address, a.change, a.index, a.wid, cur_log_sequence)
         walletInfos[a.wid].sequence = max(walletInfos[a.wid].sequence, cur_log_sequence)
+        update_wallets.add(a.wid)
 
     for wid in walletInfos.keys:
       var w = walletInfos[wid]
       db.setWallet(w.xpubkey, wid, w.sequence, w.next_0_index, w.next_1_index)
+
+    update_wallets = deduplicate(update_wallets)
+    var target_wallets = prev_update_wallets.filter(proc(x: WalletId): bool = not update_wallets.contains(x))
+    prev_update_wallets = update_wallets
+    if target_wallets.len > 0:
+      BallCommand.UpdateWallets.send(BallDataUpdateWallets(wallets: target_wallets, status: BallDataUpdateWalletsStatus.Done))
+    if update_wallets.len > 0:
+      BallCommand.UpdateWallets.send(BallDataUpdateWallets(wallets: update_wallets, status: BallDataUpdateWalletsStatus.Continue))
+      result = true
+    else:
+      result = false
 
 proc walletRollback(rollbacked_sequence: uint64) =
   for d in db.getWallets(""):
@@ -293,7 +307,8 @@ proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
     if wids.contains(w.wallet_id):
       db.setWallet(w.xpubkey, w.wallet_id, last_sequence, w.next_0_index, w.next_1_index)
 
-proc main() =
+proc main(): bool =
+  result = false
   let j_marker = blockstor.getMarker(blockstor_apikey)
   if j_marker.kind == JNull:
     echo "error: getMarker is null"
@@ -306,7 +321,7 @@ proc main() =
       let marker_sequence = res["sequence"].getUint64
       let last_sequence = res["last"].getUint64
       applyBlockData(marker_sequence, last_sequence)
-      addressFinder(marker_sequence, last_sequence)
+      result = addressFinder(marker_sequence, last_sequence)
       let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
       if smarker.kind == JNull:
         debug "error: setmarker is null"
@@ -340,9 +355,9 @@ proc main() =
 proc threadWorkerFunc() {.thread.} =
   while active:
     ready = false
-    main()
-    ready = true
-    waitFor event
+    if not main():
+      ready = true
+      waitFor event
 
 proc doWork*() =
   event.setEvent()
@@ -921,6 +936,22 @@ proc ball_main() {.thread.} =
             break
         if not find:
           active_wids.excl(data.client.wallets.toHashSet())
+
+    of BallCommand.UpdateWallets:
+      var data = BallDataUpdateWallets(ch_data.data)
+      let wallets: WalletIds = data.wallets
+      if data.status == BallDataUpdateWalletsStatus.Continue:
+        for ids in wallet_ids:
+          for id in ids:
+            if wallets.contains(id):
+              StreamCommand.Balance.send(StreamDataBalance(wallets: ids))
+              break
+      elif data.status == BallDataUpdateWalletsStatus.Done:
+        for ids in wallet_ids:
+          for id in ids:
+            if wallets.contains(id):
+              BallCommand.Unspents.send(BallDataUnspents(wallets: ids))
+              break
 
     of BallCommand.Abort:
       return
