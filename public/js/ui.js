@@ -395,7 +395,7 @@ function showRecvAddress(cb) {
         modal_recv_addrs[5] = addr;
         $('#receive-address .used .ball').stop(true, true).animate({opacity: 0}, 200, function() {
           $('#receive-address .used').animate({width: 0, 'margin-right': 0}, 100, function() {
-            $('#receive-address .used .ball img').replaceWith('<img src="' + Ball.getImage(addr, 28) + '">');
+            $('#receive-address .used .ball img').attr('src', Ball.getImage(addr, 28));
             $('#receive-address .used').animate({width: 42, 'margin-right': 7}, 100, function() {
               $('#receive-address .ball').animate({opacity: 1}, 400);
               if($('#receive-address .used .ball').hasClass('active')) {
