@@ -8,7 +8,7 @@ type Page* {.pure.} = enum
   Maintenance
   Debug
 
-var page*: Page = Page.Debug
+var page*: Page = Page.Release
 
 proc main() {.thread.} =
   routes:
