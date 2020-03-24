@@ -654,7 +654,7 @@ pastel.ready = function() {
   pastel.secure_recv = function(json) {
     var type = json['type'];
     var data = json['data'];
-    console.log('recv ' + (data ? (type + ': ' + JSON.stringify(data)) : type));
+    console.log('recv ' + (data ? (type + ': ' + JSON.stringify(data)) : (type ? type : 'unknown')));
     if(type == 'xpubs') {
       if(!wallet.checkXpubs(data)) {
         throw new Error('check xpubs');
