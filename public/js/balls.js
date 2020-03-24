@@ -476,6 +476,7 @@ var UtxoBalls = function() {
             setFluffyFree(ball, fluffy4);
           }
         }
+        updateSend_cb();
         break;
       case taskType.unconfs_start:
         for(var i in _ballBodies) {
@@ -1133,6 +1134,11 @@ var UtxoBalls = function() {
   var click_cb = function() {};
   this.click = function(cb) {
     click_cb = cb;
+  }
+
+  var updateSend_cb = function() {};
+  this.updateSend = function(cb) {
+    updateSend_cb = cb;
   }
 
   var prev_setsend_count = 0;

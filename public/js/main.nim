@@ -808,6 +808,45 @@ asm """
     pastel.utxoballs.setSend(0);
   }
 
+  function check_amount_elm() {
+    var amount_elm = $('#send-coins input[name="amount"]');
+    var amount = amount_elm.val().trim();
+    if(amount.length > 0) {
+      amount = amount.replace(/,/g, '');
+      var amounts = amount.split('.');
+      if(amount.match(/^\d+(\.\d{1,8})?$/)) {
+        amount_elm.closest('.field').removeClass('error');
+        var value = '';
+        if(amounts.length == 1) {
+          if(amounts[0] != '0') {
+            value = amounts[0] + '00000000';
+          } else {
+            value = amounts[0];
+          }
+        } else if(amounts.length == 2) {
+          value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
+        }
+        if(value.length > 0) {
+          setSendUtxo(value);
+        } else {
+          resetSendBallCount();
+        }
+      } else {
+        amount_elm.closest('.field').addClass('error');
+      }
+    } else {
+      amount_elm.closest('.field').removeClass('error');
+      resetSendBallCount();
+    }
+  }
+
+  function updateBallCount() {
+    if(sendrecv_switch == 1) {
+      check_amount_elm();
+    }
+  }
+  pastel.utxoballs.updateSend(updateBallCount);
+
   function setSendUtxo(value) {
     var ret = pastel.wallet.calcSendUtxo(value);
     cur_calc_send_utxo = ret;
@@ -1310,6 +1349,7 @@ proc recvAddressModal(): VNode =
           tdiv(class="field"):
             label: text "Message"
             textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
+
 
 proc checkSendAmount(ev: Event; n: VNode) =
   var s = n.value
