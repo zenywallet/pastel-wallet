@@ -130,7 +130,7 @@ var TradeLogs = (function() {
       + '</div>'
       + '<div class="description">'
       + '<span class="right floated">' + amount + ' ZNY</span>'
-      + data.address
+      + '<div>' + data.address + '</div>'
       + '<div class="meta txid">'
       + data.txid
       + '</div>'
