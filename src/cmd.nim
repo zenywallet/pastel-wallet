@@ -10,7 +10,7 @@ usage:
     1 - enable, 0 - disable
   wallet [ xpub | wallet_id | * ]
     * - all
-  delwallet [ xpub | wallet_id | * ]
+  delwallet { xpub | wallet_id | * }
     * - all
   addrvals { wallet_id }
   addrlogs { wallet_id }
