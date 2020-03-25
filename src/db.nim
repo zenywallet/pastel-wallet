@@ -4,7 +4,7 @@ import sequtils, endians, algorithm, locks, logs
 import rocksdblib
 export rocksdblib.RocksDbErr
 
-type Prefix {.pure.} = enum
+type Prefix* {.pure.} = enum
   params = 0  # param_id = value
               # 1 - last_wallet_id'u64 = value
               # 2 - last_hashcash_id'u64 = value
@@ -180,6 +180,14 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
   else:
     (DbStatus.NotFound, cast[string](nil))
 
+proc delTable*(prefix: Prefix): uint64 {.discardable.} =
+  let key = prefix.toByte
+  var count = 0'u64
+  for d in db.gets(key):
+    db.del(d.key)
+    inc(count)
+  count
+
 proc setXpub(wid: uint64, xpub: string) =
   let key = concat(Prefix.xpubs.toByte, wid.toByte)
   let val = xpub.toByte
@@ -260,10 +268,8 @@ iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
     yield (xpubkey, wid, sequence, next_0_index, next_1_index)
 
 proc delWallets*() =
-  let key = Prefix.wallets.toByte
-  for d in db.gets(key):
-    db.del(d.key)
-  delXpubs()
+  delTable(Prefix.wallets)
+  delTable(Prefix.xpubs)
 
 var createWalletLock: Lock
 initLock(createWalletLock)
