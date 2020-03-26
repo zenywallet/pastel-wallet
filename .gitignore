@@ -5,4 +5,5 @@ nimcache/
 .pasteldb*/
 *.a
 *.o
+bin/
 
