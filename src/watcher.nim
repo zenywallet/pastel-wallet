@@ -410,7 +410,7 @@ proc cmd_main() {.thread.} =
 
   while true:
     let cdata = cmdChannel.recv()
-    debug "cmdManager cmd=", cdata.cmd
+    Debug.Stream.write "cmdManager cmd=", cdata.cmd
     case cdata.cmd
     of StreamCommand.Unconfs:
       var client = StreamDataUnconfs(cdata.data)
@@ -450,9 +450,9 @@ proc cmd_main() {.thread.} =
             for i, a in addrs_array:
               json["data"]["unconfs"][a] = j_unconfs["res"][i]
         except:
-          echo "EXCEPTION: StreamCommand.Unconfs ", j_unconfs
+          Debug.StreamError.write "EXCEPTION: StreamCommand.Unconfs ", j_unconfs
           let e = getCurrentException()
-          debug e.name, ": ", e.msg
+          Debug.StreamError.write e.name, ": ", e.msg
       stream.send(client.wallets[0], $json)
     of StreamCommand.Balance:
       var client = StreamDataBalance(cdata.data)
@@ -504,9 +504,9 @@ proc cmd_main() {.thread.} =
       stream.send(client.wallet_id, $json)
     of StreamCommand.RawTx:
       var client = StreamDataRawTx(cdata.data)
-      echo "RawTx ", client.rawtx
+      Debug.Stream.write "RawTx ", client.rawtx
       let ret_rawtx = blockstor.send(client.rawtx)
-      echo "RawTx ret=", ret_rawtx
+      Debug.Stream.write "RawTx ret=", ret_rawtx
       var json = %*{"type": "rawtx", "data": ret_rawtx}
       stream.send(client.wallet_id, $json)
     of StreamCommand.BsStream:
@@ -525,7 +525,7 @@ proc cmd_main() {.thread.} =
             mempool.add(m)
       except:
         let e = getCurrentException()
-        echo e.name, ": ", e.msg
+        Debug.StreamError.write e.name, ": ", e.msg
 
     of StreamCommand.BsStreamInit:
       let j_mempool = blockstor.getMempool()
