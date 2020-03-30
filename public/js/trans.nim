@@ -1,14 +1,14 @@
 # Copyright (c) 2019 zenywallet
 
-include karax / i18n
+import karax / [i18n, languages]
 
 template trans*(x: string): cstring = cstring(i18n(x))
 template trans*(x: string, param: openarray[cstring]): cstring = i18n(x) % param
 proc jstrans(x: cstring, param: openarray[cstring] = []): cstring =
   if param.len > 0:
-    TranslatedString(translate(cstring x)) % param
+    i18n($x) % param
   else:
-    cstring(TranslatedString(translate(cstring x)))
+    cstring(i18n($x))
 
 proc setlang(lang: cstring) =
   if lang.startsWith("ja"):
