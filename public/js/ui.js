@@ -709,7 +709,7 @@ var qrReader = (function() {
           scan_done = true;
           qr_stop();
           showing = false;
-          cb_done(data);
+          cb_done(0, data);
         }
       }, 50);
     }
@@ -865,7 +865,11 @@ var qrReader = (function() {
         video_status_change();
         showing = true;
         requestAnimationFrame(tick);
+      }).catch(function(err) {
+        cb_done(2, null);
       });
+    } else {
+      cb_done(1, null);
     }
   }
 
@@ -963,7 +967,7 @@ var qrReaderModal = (function() {
           scan_done = true;
           qr_stop();
           showing = false;
-          cb_done(data);
+          cb_done(0, data);
         }
       }, 50);
     }
@@ -1127,7 +1131,11 @@ var qrReaderModal = (function() {
         video_status_change();
         showing = true;
         requestAnimationFrame(tick);
+      }).catch(function(err) {
+        cb_done(2, null);
       });
+    } else {
+      cb_done(1, null);
     }
   }
 
@@ -1140,10 +1148,18 @@ var qrReaderModal = (function() {
       closable: false,
       autofocus: false,
       onShow: function() {
-        qrShow(function(data) {
-          cb(data);
-          hide();
-          $('#qrcode-modal').modal('hide');
+        qrShow(function(err, data) {
+          function worker() {
+            var flag = $('#qrcode-modal').hasClass('active');
+            if(flag) {
+              cb(err, data);
+              hide();
+              $('#qrcode-modal').modal('hide');
+            } else {
+              setTimeout(worker, 300);
+            }
+          }
+          worker();
         });
       },
       onApprove: function() {
@@ -1341,7 +1357,8 @@ var PhraseLock = (function() {
   Module.PLOCK_SUCCESS = 0;
   Module.PLOCK_FAILED_QR = 1;
   Module.PLOCK_FAILED_PHRASE = 2;
-  Module.PLOCK_CANCEL = 3;
+  Module.PLOCK_FAILED_CAMERA = 3;
+  Module.PLOCK_CANCEL = 4;
 
   function notify(msg, timeout) {
     var btn_lock = $('#btn-send-lock');
@@ -1382,8 +1399,10 @@ var PhraseLock = (function() {
     var wallet = pastel.wallet;
     var lock_type = wallet.getLockShieldedType();
     if(lock_type == 1) {
-      qrReaderModal.show(function(phrase) {
-        if(pastel.wallet.unlockShieldedKeys(phrase)) {
+      qrReaderModal.show(function(err, phrase) {
+        if(err) {
+          cb(Module.PLOCK_FAILED_CAMERA);
+        } else if(pastel.wallet.unlockShieldedKeys(phrase)) {
           cb(Module.PLOCK_SUCCESS);
         } else {
           cb(Module.PLOCK_FAILED_QR);

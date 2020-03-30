@@ -132,6 +132,8 @@ addTranslation(Language.jaJP, "Try to use [Advanced Check]", "[高度な確認] 
 addTranslation(Language.jaJP, "Failed to lock your wallet with the passphrase.", "パスフレーズによるウォレットのロックに失敗しました。")
 addTranslation(Language.jaJP, "Failed to unlock. Wrong key card was scanned.", "ロック解除に失敗しました。 キーカードが間違えています。")
 addTranslation(Language.jaJP, "Failed to unlock. Passphrase is incorrect.", "ロック解除に失敗しました。 パスフレーズが間違えています。")
+addTranslation(Language.jaJP, "Failed to unlock. Camera error.", "ロック解除に失敗しました。 カメラが利用できませんでした。")
+addTranslation(Language.jaJP, "Camera error.", "カメラが利用できませんでした。")
 addTranslation(Language.jaJP, "Coins sent successfully.", "コインを送信しました。")
 addTranslation(Language.jaJP, "Failed to send coins.", "コインの送信に失敗しました。")
 addTranslation(Language.jaJP, "Address is invalid.", "アドレスが不正です。")

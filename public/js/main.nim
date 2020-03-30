@@ -274,70 +274,82 @@ asm """
 
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
-proc cbSeedQrDone(data: cstring) =
-  echo "cbQrDone:", data
-  var escape_data = escape_html(data)
-  var sdata = $escape_data
-  var ds = sdata.split(',')
-  var seedCardInfo: SeedCardInfo = new SeedCardInfo
-  for d in ds:
-    if d.startsWith("seed:"):
-      seedCardInfo.seed = d[5..^1]
-      echo seedCardInfo.seed
-    elif d.startsWith("tag:"):
-      seedCardInfo.tag = d[4..^1]
-      echo seedCardInfo.tag
-    elif d.startsWith("gen:"):
-      seedCardInfo.gen = d[4..^1]
-      echo seedCardInfo.gen
-  seedCardInfo.orig = data
-  echo repr(seedCardInfo)
-
-  asm """
-    var seed_valid = false;
-    if(`seedCardInfo`.seed) {
-      var dec = base58.dec(`seedCardInfo`.seed);
-      if(dec && dec.length == 32) {
-        seed_valid = true;
-      }
-    }
-    if(!seed_valid) {
-      Notify.show(__t('Warning'), __t('Unsupported seed card was scanned.'), Notify.msgtype.warning);
-    }
-
-  """
-
-  var dupcheck = false
-  for s in seedCardInfos:
-    if s.seed.isNil and seedCardInfo.seed.isNil:
-      if s.orig == seedCardInfo.orig:
-        dupcheck = true
-        break
-    elif s.seed == seedCardInfo.seed or s.tag == seedCardInfo.tag:
-      dupcheck = true
-      break
-
-  if dupcheck:
+proc cbSeedQrDone(err: int, data: cstring) =
+  if err != 0:
     asm """
-      Notify.show(__t('Error'), __t('The seed card has already been scanned.'), Notify.msgtype.error);
+      Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
+      qrReader.hide();
     """
   else:
-    seedCardInfos.add(seedCardInfo)
+    echo "cbQrDone:", data
+    var escape_data = escape_html(data)
+    var sdata = $escape_data
+    var ds = sdata.split(',')
+    var seedCardInfo: SeedCardInfo = new SeedCardInfo
+    for d in ds:
+      if d.startsWith("seed:"):
+        seedCardInfo.seed = d[5..^1]
+        echo seedCardInfo.seed
+      elif d.startsWith("tag:"):
+        seedCardInfo.tag = d[4..^1]
+        echo seedCardInfo.tag
+      elif d.startsWith("gen:"):
+        seedCardInfo.gen = d[4..^1]
+        echo seedCardInfo.gen
+    seedCardInfo.orig = data
+    echo repr(seedCardInfo)
 
-  asm """
-    qrReader.hide();
-  """
-  viewSelector(SeedAfterScan)
+    asm """
+      var seed_valid = false;
+      if(`seedCardInfo`.seed) {
+        var dec = base58.dec(`seedCardInfo`.seed);
+        if(dec && dec.length == 32) {
+          seed_valid = true;
+        }
+      }
+      if(!seed_valid) {
+        Notify.show(__t('Warning'), __t('Unsupported seed card was scanned.'), Notify.msgtype.warning);
+      }
+
+    """
+
+    var dupcheck = false
+    for s in seedCardInfos:
+      if s.seed.isNil and seedCardInfo.seed.isNil:
+        if s.orig == seedCardInfo.orig:
+          dupcheck = true
+          break
+      elif s.seed == seedCardInfo.seed or s.tag == seedCardInfo.tag:
+        dupcheck = true
+        break
+
+    if dupcheck:
+      asm """
+        Notify.show(__t('Error'), __t('The seed card has already been scanned.'), Notify.msgtype.error);
+      """
+    else:
+      seedCardInfos.add(seedCardInfo)
+
+    asm """
+      qrReader.hide();
+    """
+    viewSelector(SeedAfterScan)
 
 var keyCardVal: cstring = ""
 
-proc cbKeyQrDone(data: cstring) =
-  echo "cbQrDone:", data
-  keyCardVal = data
-  asm """
-    qrReader.hide();
-  """
-  viewSelector(KeyAfterScan)
+proc cbKeyQrDone(err: int, data: cstring) =
+  if err != 0:
+    asm """
+      Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
+      qrReader.hide();
+    """
+  else:
+    echo "cbQrDone:", data
+    keyCardVal = data
+    asm """
+      qrReader.hide();
+    """
+    viewSelector(KeyAfterScan)
 
 proc showSeedQr(): proc() =
   result = proc() =
@@ -893,21 +905,25 @@ asm """
     });
     $('#btn-send-qrcode').off('click').click(function() {
       if(!`showPage4`) {
-        qrReaderModal.show(function(uri) {
-          var data = bip21reader(uri);
-          $('#send-coins input[name="address"]').val(data.address || '');
-          $('#send-coins input[name="amount"]').val(data.amount || '');
-          uriOptions = [];
-          for(var k in data) {
-            var p = data[k];
-            if(k == 'address' || k == 'amount') {
-              continue;
+        qrReaderModal.show(function(err, uri) {
+          if(!err) {
+            var data = bip21reader(uri);
+            $('#send-coins input[name="address"]').val(data.address || '');
+            $('#send-coins input[name="amount"]').val(data.amount || '');
+            uriOptions = [];
+            for(var k in data) {
+              var p = data[k];
+              if(k == 'address' || k == 'amount') {
+                continue;
+              }
+              var key = crlftab_to_html(k);
+              key = key.charAt(0).toUpperCase() + key.slice(1);
+              uriOptions.push({key: key, value: crlftab_to_html(p)});
             }
-            var key = crlftab_to_html(k);
-            key = key.charAt(0).toUpperCase() + key.slice(1);
-            uriOptions.push({key: key, value: crlftab_to_html(p)});
+            jsViewSelector(12);
+          } else {
+            Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
           }
-          jsViewSelector(12);
         });
       }
       $(this).blur();
@@ -935,6 +951,8 @@ asm """
             Notify.show(__t('Error'), __t('Failed to unlock. Wrong key card was scanned.'), Notify.msgtype.error);
           } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
             Notify.show(__t('Error'), __t('Failed to unlock. Passphrase is incorrect.'), Notify.msgtype.error);
+          } else if(status == PhraseLock.PLOCK_FAILED_CAMERA) {
+            Notify.show(__t('Error'), __t('Failed to unlock. Camera error.'), Notify.msgtype.error);
           }
           setTimeout(function() {
             elm.focus();
