@@ -21,6 +21,7 @@ requires "byteutils", "karax"
 
 task minify, "Minifies the JS using Google's closure compiler":
   exec """
+nim js -d:release -o:public/js/main.js public/js/main.nim
 java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
 --js_output_file=public/js/app.js \
 public/js/cipher.js \
