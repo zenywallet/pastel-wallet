@@ -336,8 +336,11 @@ html::-webkit-scrollbar {
 .method-selector .title {
   color: #fff;
   font : normal 400 14px/1 'Josefin Sans', sans-serif;
-  padding: 10px 10px 8px 10px;
+  padding: 4px 10px 8px 10px;
   height: 65px;
+  display: flex;
+  justify-content: center;
+  text-align: left;
 }
 .method-selector .button {
   width: 160px;
