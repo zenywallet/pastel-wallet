@@ -220,7 +220,7 @@ var UtxoBalls = function() {
       },
       render: {
         sprite: {
-          texture: Ball.getImage(String(200), 160, 'Too Much Balls', true),
+          texture: Ball.getImage(String(200), 160, __t('Too Much Balls'), true),
           xScale: s2 / 160,
           yScale: s2 / 160,
           imgsize: 160
@@ -853,7 +853,7 @@ var UtxoBalls = function() {
       var data = ball.ballData;
       var text = '';
       if(data && data.change == 1) {
-        text = 'Change-' + Number(data.index) + '<br>' + ball.value;
+        text = __t('Change-') + Number(data.index) + '<br>' + ball.value;
       } else {
         text = ball.address + '<br>' + ball.value;
       }

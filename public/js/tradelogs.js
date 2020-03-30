@@ -77,16 +77,14 @@ var TradeLogs = (function() {
         diff_month--;
       }
     }
-    if(diff_year != 0 || diff_month != 0) {
-      var ret = '';
-      if(diff_year > 0) {
-        ret += diff_year + (diff_year > 1 ? ' years ' : ' year ');
-      }
+    if(diff_year > 0) {
       if(diff_month > 0) {
-        ret += diff_month + (diff_month > 1 ? ' months ' : ' month ');
+        return __t('$#$ year' + (diff_year > 1 ? 's' : '') + ' $#$ month' + (diff_month > 1 ? 's' : '') + ' ago', [String(diff_year, String(diff_month))]);
+      } else {
+        return __t('$#$ year' + (diff_year > 1 ? 's' : '') + ' ago', [String(diff_year)]);
       }
-      ret += 'ago';
-      return ret;
+    } else if(diff_month > 0) {
+      return __t('$#$ month' + (diff_month > 1 ? 's' : '') + ' ago', [String(diff_month)])
     } else {
       var cur_time = expected_server_time(cur_dt);
       var diff = cur_time - unix_time;
@@ -98,11 +96,11 @@ var TradeLogs = (function() {
         var d = diff / t.val;
         if(d >= 1) {
           d = Math.round(d);
-          return d + ' ' + t.key + (d > 1 ? 's' : '') + ' ago';
+          return __t('$#$ ' + t.key + (d > 1 ? 's' : '') + ' ago', [String(d)]);
           break;
         }
       }
-      return 'just now';
+      return __t('just now');
     }
   }
 
@@ -113,7 +111,7 @@ var TradeLogs = (function() {
     var confirm = (_height >= data.height);
     var confirm_count = _height - data.height + 1;
     var extra = confirm ? '<div class="extra content confirmed">' : '<div class="extra content unconfirmed">';
-    var confirm_msg = confirm ? '<i class="paw icon"></i> Confirmed (<span class="tx-confirm" data-height="' + data.height + '">' + confirm_count + '</span>)' : '<i class="red dont icon"></i> Unconfirmed';
+    var confirm_msg = confirm ? '<i class="paw icon"></i> ' + __t('Confirmed') + ' (<span class="tx-confirm" data-height="' + data.height + '">' + confirm_count + '</span>)' : '<i class="red dont icon"></i> ' + __t('Unconfirmed');
     var amount = conv_coin(data.value);
     var local_time = confirm ? conv_time(data.time) : '';
     var trans_time = data.trans_time ? conv_time(data.trans_time) : local_time;
@@ -122,7 +120,7 @@ var TradeLogs = (function() {
       + '<div class="content">'
       + '<img class="right floated mini ui image" src="' + imgsrc + '">'
       + '<div class="header">'
-      + '<i class="' + (send ? 'counterclockwise rotated sign-out icon send' : 'clockwise rotated sign-in icon receive') + '"></i> ' + (send ? 'SEND' : 'RECEIVE')
+      + '<i class="' + (send ? 'counterclockwise rotated sign-out icon send' : 'clockwise rotated sign-in icon receive') + '"></i> ' + __t(send ? 'SEND' : 'RECEIVE')
       + '</div>'
       + '<div class="meta">'
       + trans_time + '<br>'

@@ -2,6 +2,7 @@
 # nim js -d:release main.nim
 
 include karax / prelude
+include trans
 import jsffi except `&`
 import strutils
 import unicode
@@ -301,7 +302,7 @@ proc cbSeedQrDone(data: cstring) =
       }
     }
     if(!seed_valid) {
-      Notify.show("Warning", "Unsupported seed card was scanned.", Notify.msgtype.warning);
+      Notify.show(__t('Warning'), __t('Unsupported seed card was scanned.'), Notify.msgtype.warning);
     }
 
   """
@@ -318,7 +319,7 @@ proc cbSeedQrDone(data: cstring) =
 
   if dupcheck:
     asm """
-      Notify.show("Error", "The seed card has already been scanned.", Notify.msgtype.error);
+      Notify.show(__t('Error'), __t('The seed card has already been scanned.'), Notify.msgtype.error);
     """
   else:
     seedCardInfos.add(seedCardInfo)
@@ -364,7 +365,7 @@ proc confirmKeyCard(ev: Event; n: VNode) =
     viewUpdate()
   else:
     asm """
-      Notify.show("Error", "Failed to lock your wallet with the key card.", Notify.msgtype.error);
+      Notify.show(__t('Error'), __t('Failed to lock your wallet with the key card.'), Notify.msgtype.error);
     """
 
 proc camChange(): proc() =
@@ -548,7 +549,7 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
           if(bip39.validateMnemonic(`inputWords`, `bip39_wordlist`)) {
             `mnemonicFulfill` = true
           } else {
-            Notify.show('Warning', 'There are no misspellings, but some words seem to be wrong.' + (`advance` ? '' : ' Try to use [Advanced Check]'), Notify.msgtype.warning);
+            Notify.show(__t('Warning'), __t('There are no misspellings, but some words seem to be wrong.') + (`advance` ? '' : ' ' + __t('Try to use [Advanced Check]')), Notify.msgtype.warning);
           }
         """
         if mnemonicFulfill:
@@ -615,25 +616,25 @@ proc mnemonicEditor(): VNode =
       tdiv(class="ui form"):
         tdiv(class="field"):
           label:
-            text "Select mnemonic language"
+            text trans"Select mnemonic language"
           tdiv(class="ui selection dropdown"):
             input(type="hidden", name="mnemonic-language", value="1", onchange=changeLanguage)
             italic(class="dropdown icon")
             tdiv(class="default text"):
-              text "Mnemonic Language"
+              text trans"Mnemonic Language"
             tdiv(class="menu"):
               tdiv(class="item", data-value="1"):
-                text "Japanese"
+                text trans"Japanese"
               tdiv(class="item", data-value="0"):
-                text "English"
+                text trans"English"
         tdiv(class="field minput-field"):
           label:
-            text "Import your mnemonic you already have"
+            text trans"Import your mnemonic you already have"
           textarea(id=input_id, value=editingWords, onkeyup=checkMnemonic, onmouseup=checkMnemonic, spellcheck="false")
       button(class="ui right floated primary button", onclick=confirmMnemonic(input_id, false)):
-        text "Check"
+        text trans"Check"
       button(class="ui right floated default button", onclick=confirmMnemonic(input_id, true)):
-        text "Advanced Check"
+        text trans"Advanced Check"
     tdiv(class="medit-autocomp"):
       for word in autocompleteWords:
         button(class="ui mini teal label", onclick=selectWord(input_id, word)):
@@ -663,9 +664,9 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
     tdiv(class="content"):
       if not cardInfo.tag.isNil:
         tdiv(class="ui tag label mini tag"): text cardInfo.tag
-      tdiv(class="header"): text "Seed"
+      tdiv(class="header"): text trans"Seed"
       tdiv(class="meta"):
-        span(class="date"): text if not cardInfo.gen.isNil: cardInfo.gen else: "unknown"
+        span(class="date"): text if not cardInfo.gen.isNil: cardInfo.gen else: trans"unknown"
       var clen = cardInfo.seed.len
       if clen > 0:
         var half = toInt(clen / 2)
@@ -689,9 +690,9 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
             tdiv(class="seed"): text cardInfo.orig
     tdiv(class="extra content"):
       tdiv(class="inline field"):
-        tdiv(class="vector-label"): text "Seed Vector:"
+        tdiv(class="vector-label"): text trans"Seed Vector:"
         tdiv(class="ui mini input vector-input"):
-          input(type="text", placeholder="Type your seed vector", spellcheck="false"):
+          input(type="text", placeholder=trans"Type your seed vector", spellcheck="false"):
             proc onkeyup(ev: Event; n: Vnode) =
               seedCardInfos[idx].sv = n.value
     tdiv(class="bt-seed-del"):
@@ -718,21 +719,21 @@ proc confirmPassphrase(ev: Event; n: VNode) =
     viewUpdate()
   else:
     asm """
-      Notify.show("Error", "Failed to lock your wallet with the passphrase.", Notify.msgtype.error);
+      Notify.show(__t('Error'), __t('Failed to lock your wallet with the passphrase.'), Notify.msgtype.error);
     """
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
     tdiv(class="ui clearing segment passphrase-seg"):
       tdiv(class="ui inverted segment"):
-        h4(class="ui grey inverted header center"): text "Input passphrase"
+        h4(class="ui grey inverted header center"): text trans"Input passphrase"
         tdiv(class="ui form"):
           tdiv(class="field"):
             input(class="center", type="password", name="input-passphrase", value=passPhrase,
-                  placeholder="Passphrase", onkeyup=changePassphrase,
+                  placeholder=trans"Passphrase", onkeyup=changePassphrase,
                   onkeyupenter=confirmPassphrase, spellcheck="false")
       button(class="ui right floated olive button", onclick=confirmPassphrase):
-        text "Apply"
+        text trans"Apply"
 
 proc goSettings(): proc() =
   result = proc() =
@@ -928,12 +929,12 @@ asm """
         PhraseLock.showPhraseInput(function(status) {
           if(status == PhraseLock.PLOCK_SUCCESS) {
             icon.addClass('open');
-            elm.attr('title', 'Unlocked');
+            elm.attr('title', __t('Unlocked'));
             PhraseLock.notify_unlocked();
           } else if(status == PhraseLock.PLOCK_FAILED_QR) {
-            Notify.show("Error", "Failed to unlock. Wrong key card was scanned.", Notify.msgtype.error);
+            Notify.show(__t('Error'), __t('Failed to unlock. Wrong key card was scanned.'), Notify.msgtype.error);
           } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
-            Notify.show("Error", "Failed to unlock. Passphrase is incorrect.", Notify.msgtype.error);
+            Notify.show(__t('Error'), __t('Failed to unlock. Passphrase is incorrect.'), Notify.msgtype.error);
           }
           setTimeout(function() {
             elm.focus();
@@ -1074,7 +1075,7 @@ asm """
             var ErrSend = pastel.wallet.ERR_SEND;
             switch(result.err) {
             case ErrSend.SUCCESS:
-              Notify.show('', 'Coins sent successfully.', Notify.msgtype.info);
+              Notify.show('', __t('Coins sent successfully.'), Notify.msgtype.info);
               pastel.unspents_after_actions.push(function() {
                 if(sendrecv_switch == 1) {
                   setSendUtxo(value);
@@ -1082,42 +1083,42 @@ asm """
               });
               break;
             case ErrSend.FAILED:
-              Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Failed to send coins.'), Notify.msgtype.error);
               break;
             case ErrSend.INVALID_ADDRESS:
-              Notify.show('Error', 'Address is invalid.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Address is invalid.'), Notify.msgtype.error);
               break;
             case ErrSend.INSUFFICIENT_BALANCE:
-              Notify.show('Error', 'Balance is insufficient.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Balance is insufficient.'), Notify.msgtype.error);
               break;
             case ErrSend.DUST_VALUE:
               if(value == '0') {
-                Notify.show('Error', 'Amount is zero.', Notify.msgtype.error);
+                Notify.show(__t('Error'), __t('Amount is zero.'), Notify.msgtype.error);
               } else {
-                Notify.show('Error', 'Amount is too small.' + value, Notify.msgtype.error);
+                Notify.show(__t('Error'), __t('Amount is too small.'), Notify.msgtype.error);
               }
               break;
             case ErrSend.BUSY:
-              Notify.show('Error', 'Failed to send coins. Busy.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Failed to send coins. Busy.'), Notify.msgtype.error);
               break;
             case ErrSend.TX_FAILED:
               var msg = '';
               if(result.res && result.res.message) {
                 msg = '<br> [' + result.res.message + ']';
               }
-              Notify.show('Error', 'Failed to send coins.' + msg, Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Failed to send coins.') + msg, Notify.msgtype.error);
               break;
             case ErrSend.TX_TIMEOUT:
-              Notify.show('Error', 'Server is not responding. Coins may have been sent.', Notify.msgtype.warning);
+              Notify.show(__t('Warning'), __t('Server is not responding. Coins may have been sent.'), Notify.msgtype.warning);
               break;
             case ErrSend.SERVER_ERROR:
-              Notify.show('Error', 'Failed to send coins. Server error.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Failed to send coins. Server error.'), Notify.msgtype.error);
               break;
             case ErrSend.SERVER_TIMEOUT:
-              Notify.show('Error', 'Failed to send coins. Server is not responding.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Failed to send coins. Server is not responding.'), Notify.msgtype.error);
               break;
             default:
-              Notify.show('Error', 'Failed to send coins.', Notify.msgtype.error);
+              Notify.show(__t('Error'), __t('Failed to send coins.'), Notify.msgtype.error);
             }
             $('#btn-tx-send').removeClass('loading');
             self.blur();
@@ -1125,9 +1126,9 @@ asm """
           });
         } else {
           if(amounts.length > 1 && amounts[1].length > 8) {
-            Notify.show('Error', 'Amount is invalid. The decimal places is too long. Please set it 8 or less.', Notify.msgtype.error);
+            Notify.show(__t('Error'), __t('Amount is invalid. The decimal places is too long. Please set it 8 or less.'), Notify.msgtype.error);
           } else {
-            Notify.show('Error', 'Amount is invalid.', Notify.msgtype.error);
+            Notify.show(__t('Error'), __t('Amount is invalid.'), Notify.msgtype.error);
           }
           send_busy = false;
           $(this).blur();
@@ -1300,13 +1301,13 @@ proc btnRecvClose: proc() =
 proc recvAddressSelector(): VNode =
   result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment hidden")):
     tdiv(class="ui top attached label recvaddress"):
-      text "Receive Address "
+      text trans"Receive Address" & " "
       span:
         italic(class="close icon btn-close", onclick=btnRecvClose())
     tdiv(class="ui mini basic icon buttons"):
-      button(id="btn-recv-copy", class="ui button", title="Copy"):
+      button(id="btn-recv-copy", class="ui button", title=trans"Copy"):
         italic(class="paperclip icon")
-      button(id="btn-recv-qrcode", class="ui button", title="QR Code"):
+      button(id="btn-recv-qrcode", class="ui button", title=trans"Create QR Code"):
         italic(class="qrcode icon")
     tdiv(id="address-text", class="address"): text ""
     tdiv(class="balls"):
@@ -1329,7 +1330,7 @@ proc recvAddressModal(): VNode =
       tdiv(class="ui form"):
         tdiv(class="two fields"):
           tdiv(class="field"):
-            label: text "Receive Address"
+            label: text trans"Receive Address"
             tdiv(class="ui selection dropdown addr-selection", tabindex="0"):
               input(type="hidden", name="address", value="")
               italic(class="dropdown icon")
@@ -1338,17 +1339,17 @@ proc recvAddressModal(): VNode =
                 text ""
               tdiv(class="menu", tabindex="-1")
           tdiv(class="field"):
-            label: text "Amount"
+            label: text trans"Amount"
             tdiv(class="ui right labeled input"):
-              input(class="right", type="text", name="amount", placeholder="Amount", spellcheck="false")
+              input(class="right", type="text", name="amount", placeholder=trans"Amount", spellcheck="false")
               tdiv(class="ui basic label"): text "ZNY"
         tdiv(class="two fields"):
           tdiv(class="field"):
-            label: text "Label"
-            input(class="ui input", type="text", name="label", placeholder="Label")
+            label: text trans"Label"
+            input(class="ui input", type="text", name="label", placeholder=trans"Label")
           tdiv(class="field"):
-            label: text "Message"
-            textarea(class="ui textarea", rows="2", name="message", placeholder="Message")
+            label: text trans"Message"
+            textarea(class="ui textarea", rows="2", name="message", placeholder=trans"Message")
 
 
 proc checkSendAmount(ev: Event; n: VNode) =
@@ -1392,33 +1393,33 @@ var uriOptions {.importc, nodecl.}: JsObject
 proc sendForm(): VNode =
   result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment hidden")):
     tdiv(class="ui top attached label sendcoins"):
-      text "Send Coins "
+      text trans"Send Coins" & " "
       span:
         italic(class="close icon btn-close", onclick=btnSendClose())
     tdiv(class="ui right floated mini basic icon buttons"):
-      button(id="btn-send-lock", class="ui button", title="Locked"):
+      button(id="btn-send-lock", class="ui button", title=trans"Locked"):
         italic(class="lock icon")
     tdiv(class="ui mini basic icon buttons btn-send-tools"):
-      button(id="btn-send-clear", class="ui button", title="Clear"):
+      button(id="btn-send-clear", class="ui button", title=trans"Clear"):
         italic(class="eraser icon")
-      button(id="btn-send-qrcode", class="ui button", title="Scan QR Code"):
+      button(id="btn-send-qrcode", class="ui button", title=trans"Scan QR Code"):
         italic(class="camera icon")
     tdiv(class="ui form"):
       tdiv(class="field"):
-        label: text "Send Address"
+        label: text trans"Send Address"
         tdiv(class="ui small input"):
-          input(class="center", type="text", name="address", placeholder="Address", spellcheck="false")
+          input(class="center", type="text", name="address", placeholder=trans"Address", spellcheck="false")
       tdiv(class="field"):
-        label: text "Amount"
+        label: text trans"Amount"
         tdiv(class="ui small input"):
-          input(class="center", type="text", name="amount", placeholder="Amount",
+          input(class="center", type="text", name="amount", placeholder=trans"Amount",
                 onkeyup=checkSendAmount, spellcheck="false")
           tdiv(class="ui mini basic icon buttons utxoctrl"):
-            button(id="btn-utxo-minus", class="ui button", title="-1 Ball"):
+            button(id="btn-utxo-minus", class="ui button", title=trans"-1 Ball"):
               italic(class="minus circle icon")
             button(id="btn-utxo-count", class="ui button sendutxos"):
               text "..."
-            button(id="btn-utxo-plus", class="ui button", title="+1 Ball"):
+            button(id="btn-utxo-plus", class="ui button", title=trans"+1 Ball"):
               italic(class="plus circle icon")
       tdiv(class="ui list uri-options"):
         for d in uriOptions:
@@ -1428,7 +1429,7 @@ proc sendForm(): VNode =
               tdiv(class="description"): text cast[cstring](d.value)
       tdiv(class="fluid ui buttons"):
         button(id="btn-tx-send", class="ui inverted olive button center btn-tx-send"):
-          text "Send"
+          text trans"Send"
 
 #[
 proc qrCodeModal(): Vnode =
@@ -1460,30 +1461,30 @@ proc settingsModal(): VNode =
   result = buildHtml(tdiv(id="settings-modal", class="ui basic modal")):
     tdiv(class="ui icon header"):
       italic(class="trash icon")
-      text "Reset Wallet"
+      text trans"Reset Wallet"
     tdiv(class="content"):
-      p: text "Are you sure to reset your wallet?"
+      p: text trans"Are you sure to reset your wallet?"
     tdiv(class="actions"):
       tdiv(class="ui basic cancel inverted button"):
         italic(class="remove icon")
-        text "Cancel"
+        text trans"Cancel"
       tdiv(class="ui red ok inverted button"):
         italic(class="checkmark icon")
-        text "Reset"
+        text trans"Reset"
 
 proc settingsPage(): VNode =
   result = buildHtml(tdiv(id="settings", class="ui container")):
-    h3(class="ui dividing header"): text "Settings"
-    button(id="btn-reset", class="ui inverted red button"): text "Reset Wallet"
+    h3(class="ui dividing header"): text trans"Settings"
+    button(id="btn-reset", class="ui inverted red button"): text trans"Reset Wallet"
     tdiv(class="ui pink inverted segment"):
-      text """
-        Delete all your wallet data in your web browser, including your encrypted secret keys.
-         If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards
-         or mnemonics before deleting it. Otherwise you may lost your coins forever.
-      """
+      text trans"""
+Delete all your wallet data in your web browser, including your encrypted secret keys.
+ If you have coins in your wallet or waiting for receiving coins, make sure you have the seed cards
+ or mnemonics before deleting it. Otherwise you may lost your coins forever.
+"""
     tdiv(class="ui checkbox"):
       input(type="checkbox", name="confirm")
-      label: text "I confirmed that I have the seed cards or mnemonics or no coins in my wallet."
+      label: text trans"I confirmed that I have the seed cards or mnemonics or no coins in my wallet."
 
 proc appMain(data: RouterData): VNode =
   result = buildHtml(tdiv):
@@ -1493,15 +1494,15 @@ proc appMain(data: RouterData): VNode =
           tdiv(class="intro-head"):
             tdiv(class="caption"): text "Pastel Wallet"
             tdiv(class="ui container method-selector"):
-              tdiv(class="title"): text "Scan your seed cards or input your mnemonic to start."
+              tdiv(class="title"): text trans"Scan your seed cards or input your mnemonic to start."
               tdiv(class="ui buttons"):
                 button(id="seedselector", class="ui olive button", onclick=importSelector(ImportType.SeedCard)):
                   italic(class="qrcode icon")
-                  text "Seed card"
+                  text trans"Seed card"
                 tdiv(class="or")
                 button(id="mnemonicselector", class="ui grey button", onclick=importSelector(ImportType.Mnemonic)):
                   italic(class="list alternate icon")
-                  text "Mnemonic"
+                  text trans"Mnemonic"
           tdiv(class="intro-body"):
             if currentImportType == ImportType.SeedCard:
               tdiv(id="seed-seg", class="ui left aligned segment seed-seg"):
@@ -1514,14 +1515,14 @@ proc appMain(data: RouterData): VNode =
                         italic(class="plus icon")
                   a(class="pagenext", href="#section2"):
                     span()
-                    text "Next"
+                    text trans"Next"
                 if showScanning:
                   tdiv(class="qr-scanning"):
                     tdiv()
                     tdiv()
                 if showScanSeedBtn:
                   tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showSeedQr()):
-                    text "Scan seed card with camera"
+                    text trans"Scan seed card with camera"
                     italic(class="camera icon")
                 if showCamTools:
                   tdiv(class="ui small basic icon buttons camtools"):
@@ -1532,7 +1533,7 @@ proc appMain(data: RouterData): VNode =
                 canvas(id="qrcanvas")
                 tdiv(class="ui dimmer qrcamera-loader"):
                   tdiv(class="ui indeterminate text loader"):
-                    text "Preparing Camera"
+                    text trans"Preparing Camera"
                 tdiv(class="ui dimmer qrcamera-shutter")
             else:
               tdiv(class="ui left aligned segment mnemonic-seg"):
@@ -1540,7 +1541,7 @@ proc appMain(data: RouterData): VNode =
                 if mnemonicFulfill:
                   a(class="pagenext", href="#section2"):
                       span()
-                      text "Next"
+                      text trans"Next"
     if showPage2:
       section(id="section2", class="section"):
         tdiv(class="intro"):
@@ -1548,41 +1549,41 @@ proc appMain(data: RouterData): VNode =
             tdiv(class="caption"): text "Pastel Wallet"
             tdiv(class="ui container method-selector"):
               tdiv(class="title"):
-                text """
-                  A key card or passphrase is required to encrypt and save the private key in your browser.
-                   You will need it before sending your coins.
-                """
+                text trans"""
+A key card or passphrase is required to encrypt and save the private key in your browser.
+ You will need it before sending your coins.
+"""
               tdiv(class="ui buttons"):
                 button(id="keyselector", class="ui olive button", onclick=protectSelector(ProtectType.KeyCard)):
                   italic(class="qrcode icon")
-                  text "Key card"
+                  text trans"Key card"
                 tdiv(class="or")
                 button(id="passselector", class="ui grey button", onclick=protectSelector(ProtectType.Passphrase)):
                   italic(class="list alternate icon")
-                  text "Passphrase"
+                  text trans"Passphrase"
           tdiv(class="intro-body"):
             if currentProtectType == ProtectType.KeyCard:
               tdiv(id="seed-seg", class="ui left aligned segment seed-seg"):
                 if showScanResult2:
                   tdiv(class="ui clearing segment keycard-seg"):
                     tdiv(class="ui inverted segment"):
-                      h4(class="ui grey inverted header center"): text "Scanned key card"
+                      h4(class="ui grey inverted header center"): text trans"Scanned key card"
                       p(class="center"): text keyCardVal
                     button(class="ui right floated olive button", onclick=confirmKeyCard):
-                      text "Apply"
+                      text trans"Apply"
                     button(class="ui right floated grey button", onclick=showKeyQr()):
-                      text "Rescan"
+                      text trans"Rescan"
                 if keyCardFulfill:
                   a(class="pagenext", href="#section3"):
                     span()
-                    text "Next"
+                    text trans"Next"
                 if showScanning2:
                   tdiv(class="qr-scanning"):
                     tdiv()
                     tdiv()
                 if showScanSeedBtn2:
                   tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showKeyQr()):
-                    text "Scan key card with camera"
+                    text trans"Scan key card with camera"
                     italic(class="camera icon")
                 if showCamTools2:
                   tdiv(class="ui small basic icon buttons camtools"):
@@ -1593,7 +1594,7 @@ proc appMain(data: RouterData): VNode =
                 canvas(id="qrcanvas")
                 tdiv(class="ui dimmer qrcamera-loader"):
                   tdiv(class="ui indeterminate text loader"):
-                    text "Preparing Camera"
+                    text trans"Preparing Camera"
                 tdiv(class="ui dimmer qrcamera-shutter")
             else:
               tdiv(class="ui left aligned segment mnemonic-seg"):
@@ -1601,7 +1602,7 @@ proc appMain(data: RouterData): VNode =
                 if passphraseFulfill:
                   a(class="pagenext", href="#section3"):
                       span()
-                      text "Next"
+                      text trans"Next"
     if showPage3:
       section(id="section3", class="section"):
         tdiv(class="intro"):
@@ -1611,10 +1612,10 @@ proc appMain(data: RouterData): VNode =
               tdiv(class="two ui basic buttons sendrecv"):
                 button(id="btn-send", class="ui small button send", onclick=btnSend()):
                   italic(class="counterclockwise rotated sign-out icon send")
-                  text " Send"
+                  text " " & trans"Send"
                 button(id="btn-receive", class="ui small button receive", onclick=btnReceive()):
                   italic(class="clockwise rotated sign-in icon receive")
-                  text " Receive"
+                  text " " & trans"Receive"
           tdiv(class="intro-body wallet-body"):
             tdiv(id="wallet-balance", class="ui center aligned segment"):
               tdiv(class="ui top left attached tiny label send"):
@@ -1644,11 +1645,11 @@ proc appMain(data: RouterData): VNode =
           tdiv(class="ui two bottom attached buttons settings"):
             tdiv(class="ui button", onclick=goSettings()):
               italic(class="cog icon")
-              text "Settings"
+              text trans"Settings"
               span: italic(class="chevron down icon")
             tdiv(class="ui button", onclick=goLogs()):
               italic(class="list alternate outline icon")
-              text "Logs"
+              text trans"Logs"
               span: italic(class="chevron down icon")
             tdiv(id="bottom-blink")
         textarea(id="clipboard", rows="1", tabindex="-1", readOnly="true", spellcheck="false")
@@ -1658,7 +1659,7 @@ proc appMain(data: RouterData): VNode =
         tdiv(class="ui buttons settings backpage"):
           tdiv(class="ui button backwallet", onclick=backWallet()):
             italic(class="dot circle icon")
-            text "Back"
+            text trans"Back"
             span: italic(class="chevron up icon")
         if showTradeLogs:
           tdiv(class="ui container"):
@@ -1749,7 +1750,7 @@ proc afterScript(data: RouterData) =
         var wallet = pastel.wallet;
         var ret = wallet.lockShieldedKeys();
         if(!ret) {
-          Notify.show("Error", "Failed to lock keys.", Notify.msgtype.error);
+          Notify.show(__t('Error'), __t('Failed to lock keys.'), Notify.msgtype.error);
         }
         jsClearSensitive();
         $('a.pagenext').css('visibility', 'hidden');

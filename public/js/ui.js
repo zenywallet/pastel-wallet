@@ -521,7 +521,7 @@ function showRecvAddress(cb) {
             var copied = $('#address-text');
             clearTimeout(copied_popup_tval);
             copied.popup({
-              title: 'Copied to clipboard',
+              title: __t('Copied to clipboard'),
               content: copydata,
               on: 'manual',
               variation: 'inverted',
@@ -1133,9 +1133,9 @@ var qrReaderModal = (function() {
 
   function show(cb, title) {
     if(!$('#qrcode-modal').length) {
-      $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header"></div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">Preparing Camera</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div></div></div>');
+      $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header"></div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">' + __t('Preparing Camera') + '</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</div></div></div>');
     }
-    $('#qrcode-modal .ui.header').text(title || 'Scan QR code');
+    $('#qrcode-modal .ui.header').text(title || __t('Scan QR Code'));
     $('#qrcode-modal').modal("setting", {
       closable: false,
       autofocus: false,
@@ -1217,8 +1217,8 @@ var Settings = (function() {
       var confirm = $('#settings input[name="confirm"]');
       clearTimeout(confirm_popup_tval);
       confirm.popup({
-        title: 'Confirmation',
-        content: 'Please read and check here before resetting your wallet.',
+        title: __t('Confirmation'),
+        content: __t('Please read and check here before resetting your wallet.'),
         on: 'manual',
         variation: 'inverted',
         position: 'bottom left',
@@ -1364,18 +1364,18 @@ var PhraseLock = (function() {
   Module.notify_if_need_unlock = function() {
     var locked = !($('#btn-send-lock i').hasClass('open'));
     if(locked) {
-      notify('Please unlock your wallet before sending coins.');
+      notify(__t('Please unlock your wallet before sending coins.'));
       return true;
     }
     return false;
   }
 
   Module.notify_locked = function() {
-    notify('Locked', 2000);
+    notify(__t('Locked'), 2000);
   }
 
   Module.notify_unlocked = function() {
-    notify('Unlocked', 2000);
+    notify(__t('Unlocked'), 2000);
   }
 
   Module.showPhraseInput = function(cb) {
@@ -1388,23 +1388,23 @@ var PhraseLock = (function() {
         } else {
           cb(Module.PLOCK_FAILED_QR);
         }
-      }, 'Scan your key card');
+      }, __t('Scan your key card'));
     } else if(lock_type == 2) {
       $.fn.transition.settings.silent = true;
       if(!$('#passphrase-modal').length) {
         $('body').append(
           '<div id="passphrase-modal" class="ui basic modal"><i class="close icon def-close"></i>' +
-            '<div class="ui icon header">Input your passphrase</div>' +
+            '<div class="ui icon header">' + __t('Input your passphrase') + '</div>' +
             '<div class="scrolling content">' +
               '<div id="passphrase-modal-seg" class="ui center aligned segment">' +
                   '<div class="ui form">' +
-                    '<div class="field"><input class="center" type="password" name="input-passphrase" placeholder="Passphrase" spellcheck="false"></div>' +
+                    '<div class="field"><input class="center" type="password" name="input-passphrase" placeholder="' + __t('Passphrase') + '" spellcheck="false"></div>' +
                   '</div>' +
               '</div>' +
             '</div>' +
             '<div class="actions">' +
-              '<div class="ui basic cancel inverted button"><i class="remove icon"></i>Cancel</div>' +
-              '<div class="ui basic ok inverted button"><i class="check icon"></i>OK</div>' +
+              '<div class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</div>' +
+              '<div class="ui basic ok inverted button"><i class="check icon"></i>' + __t('OK') + '</div>' +
             '</div>' +
           '</div>');
       }
