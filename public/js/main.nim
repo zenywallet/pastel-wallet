@@ -1860,8 +1860,8 @@ proc afterScript(data: RouterData) =
 
 var walletSetup = false
 asm """
-  var stor  = new Stor()
-  var xpubs = stor.get_xpubs()
+  var stor  = new Stor();
+  var xpubs = stor.get_xpubs();
   stor = null;
   if(xpubs.length > 0) {
     `walletSetup` = true;
