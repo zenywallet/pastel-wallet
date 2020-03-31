@@ -1132,12 +1132,12 @@ i.receive {
 #selectlang {
   position: absolute;
   top: 0;
-  right: 12px;
+  right: 24px;
   z-index: 3;
-  width: 72px;
+  width: 62px;
 }
 #selectlang .title, #selectlang .content, #selectlang .ui.checkbox label {
-  color: rgba(145, 118, 54, .9);
+  color: #eee;
   font-size: 11px;
   line-height: 11px;
 }
