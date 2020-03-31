@@ -1129,3 +1129,32 @@ i.receive {
   right: 0;
   color: rgba(145, 118, 54, .7);
 }
+#selectlang {
+  position: absolute;
+  top: 0;
+  right: 12px;
+  z-index: 3;
+  width: 72px;
+}
+#selectlang .title, #selectlang .content, #selectlang .ui.checkbox label {
+  color: rgba(145, 118, 54, .9);
+  font-size: 11px;
+  line-height: 11px;
+}
+#selectlang .content {
+  margin-left: 4px;
+}
+#selectlang .title .icon {
+  line-height: 9px;
+}
+#selectlang .ui.checkbox label {
+  padding-top: 3px;
+}
+#selectlang .content {
+  margin-top: -10px;
+}
+#selectlang .title .dropdown.small.icon {
+  font-size: 9px;
+  line-height: 9px;
+  margin-right: 0;
+}

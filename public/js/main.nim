@@ -157,6 +157,10 @@ proc viewUpdate() =
   if not supressRedraw:
     appInst.redraw()
 
+asm """
+  var jsViewUpdate = `viewUpdate`;
+"""
+
 #proc importTypeButtonClass(importType: ImportType): cstring =
 #  if importType == currentImportType:
 #    "ui olive button"

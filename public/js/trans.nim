@@ -18,13 +18,6 @@ proc setlang(lang: cstring) =
   else:
     setCurrentLanguage(Language.enUS)
 
-{.emit: """
-var __t = `jstrans`;
-var setlang = `setlang`;
-var navlang = window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage;
-setlang(navlang || 'en');
-""".}
-
 addTranslation(Language.jaJP, "Scan your seed cards or input your mnemonic to start.", "はじめるにはSeedカードを読み取るか、またはニーモニックを入力してしてください。")
 addTranslation(Language.jaJP, "Seed card", "Seedカード")
 addTranslation(Language.jaJP, "Mnemonic", "ニーモニック")
@@ -147,3 +140,19 @@ addTranslation(Language.jaJP, "Failed to send coins. Server is not responding.",
 addTranslation(Language.jaJP, "Amount is invalid. The decimal places is too long. Please set it 8 or less.", "数量が不正です。 小数点以下が長すぎます。 小数点以下の桁数は8以内にしてください。")
 addTranslation(Language.jaJP, "Amount is invalid.", "数量が不正です。")
 addTranslation(Language.jaJP, "Failed to lock keys.", "ロックに失敗しました。")
+addTranslation(Language.jaJP, "Language", "言語選択")
+
+{.emit: """
+var __t = `jstrans`;
+var setlang = `setlang`;
+var navlang = window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage;
+(function() {
+  var stor  = new Stor();
+  var lang = stor.get_lang();
+  stor = null;
+  lang = lang || navlang || 'en';
+  lang = lang.substring(0, 2);
+  setlang(lang);
+  LangSelector.show(lang);
+})();
+""".}

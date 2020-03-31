@@ -109,5 +109,13 @@ var Stor = (function() {
     return db['locktype'];
   }
 
+  Stor.prototype.set_lang = function(lang) {
+    db['lang'] = lang;
+  }
+
+  Stor.prototype.get_lang = function() {
+    return db['lang'];
+  }
+
   return Stor;
 }());

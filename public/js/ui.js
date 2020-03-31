@@ -1461,6 +1461,74 @@ var PhraseLock = (function() {
   return Module;
 })();
 
+var LangSelector = (function() {
+  function show(sellang) {
+    var elm_langsel = document.getElementById('lang-selector');
+    if(!elm_langsel) {
+      var elm = document.createElement('div');
+      elm.id = 'lang-selector';
+      elm_langsel = document.body.appendChild(elm);
+      elm_langsel.innerHTML =
+      '<div id="selectlang" class="ui accordion">' +
+        '<div class="title">' +
+          '<i class="dropdown ui small icon"></i><span class="langtitle">' + __t('Language') + '</span>' +
+        '</div>' +
+        '<div class="content">' +
+          '<div class="ui form">' +
+            '<div class="grouped fields">' +
+              '<div class="field">' +
+                '<div class="ui radio checkbox">' +
+                  '<input type="radio" name="lang" value="en">' +
+                  '<label>English</label>' +
+                '</div>' +
+              '</div>' +
+              '<div class="field">' +
+                '<div class="ui radio checkbox">' +
+                  '<input type="radio" name="lang" value="ja">' +
+                  '<label>日本語</label>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+      $('#selectlang').accordion({
+        selector: {
+          trigger: '.title'
+        }
+      });
+      $('#selectlang .checkbox').checkbox({
+        onChecked: function() {
+          var lang = $('#selectlang input[name="lang"]:checked').val();
+          var stor  = new Stor();
+          stor.set_lang(lang);
+          stor = null;
+          if(jsViewUpdate && setlang) {
+            setlang(lang);
+            $('#selectlang .langtitle').text(__t('Language'));
+            jsViewUpdate();
+            $('#selectlang').accordion('close', 0);
+          } else {
+            location.reload();
+          }
+        }
+      });
+      if(sellang) {
+        checklang(sellang);
+      }
+    }
+  }
+  function checklang(lang) {
+    $('#selectlang input[name="lang"]').val([lang]);
+  }
+  var Module = {
+    show: show,
+    checklang: checklang
+  }
+  return Module;
+
+})();
+
 var registerEventList = [];
 ready(function() {
   var elms = document.querySelectorAll('a');
