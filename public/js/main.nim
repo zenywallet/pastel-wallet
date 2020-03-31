@@ -924,6 +924,7 @@ asm """
               key = key.charAt(0).toUpperCase() + key.slice(1);
               uriOptions.push({key: key, value: crlftab_to_html(p)});
             }
+            check_amount_elm();
             jsViewSelector(12);
           } else {
             Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
