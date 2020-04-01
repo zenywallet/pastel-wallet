@@ -1188,12 +1188,12 @@ var UtxoBalls = function() {
     return valid_cnt;
   }
 
-  function reset_balls_position() {
+  function reset_balls_position(force) {
     var prev_w = _canvas.width;
     var prev_h = _canvas.height;
     var w = _render.element.clientWidth - 14 * 2;
     var h = _render.element.clientHeight - 14 * 2;
-    if(prev_w == w && prev_h == h) {
+    if(prev_w == w && prev_h == h && force != true) {
       return;
     }
     self.stop();
@@ -1227,6 +1227,12 @@ var UtxoBalls = function() {
       add_bodies_idx(new_ball);
       Matter.Composite.remove(_world, ball);
       World.add(_world, new_ball);
+    }
+  }
+
+  this.update = function() {
+    if(_active) {
+      reset_balls_position(true);
     }
   }
 

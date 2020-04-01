@@ -17,6 +17,18 @@ proc setlang(lang: cstring) =
     setCurrentLanguage(Language.enUS)
   else:
     setCurrentLanguage(Language.enUS)
+  asm """
+    if(pastel && pastel.utxoballs) {
+      pastel.utxoballs.update();
+    }
+  """
+
+proc getlang(): cstring =
+  var lang = getCurrentLanguage()
+  if lang == Language.jaJP:
+    "ja"
+  else:
+    "en"
 
 addTranslation(Language.jaJP, "Scan your seed cards or input your mnemonic to start.", "はじめるにはSeedカードを読み取るか、またはニーモニックを入力してしてください。")
 addTranslation(Language.jaJP, "Seed card", "Seedカード")
@@ -145,6 +157,7 @@ addTranslation(Language.jaJP, "Language", "言語選択")
 {.emit: """
 var __t = `jstrans`;
 var setlang = `setlang`;
+var getlang = `getlang`;
 var navlang = window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage;
 (function() {
   var stor  = new Stor();

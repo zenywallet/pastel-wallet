@@ -1139,9 +1139,33 @@ var qrReaderModal = (function() {
     }
   }
 
+  var qrcode_modal_html = function() {
+    return  '<div id="qrcode-modal" class="ui basic modal" data-lang="' + getlang() + '">' +
+              '<i class="close icon def-close"></i><div class="ui icon header"></div>' +
+              '<div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment">' +
+                '<div class="qr-scanning"><div></div><div></div></div>' +
+                '<div class="ui small basic icon buttons camtools">' +
+                  '<button class="ui button btn-camera"><i class="camera icon"></i></button>' +
+                '</div>' +
+                '<canvas id="qrcanvas-modal" width="0" height="0"></canvas>' +
+                '<div class="ui active dimmer qrcamera-loader">' +
+                  '<div class="ui indeterminate text loader">' + __t('Preparing Camera') + '</div>' +
+                '</div>' +
+                '<div class="ui dimmer qrcamera-shutter"></div>' +
+              '</div></div>' +
+              '<div class="actions"><div class="ui basic cancel inverted button">' +
+                '<i class="remove icon"></i>' + __t('Cancel') +
+              '</div></div>' +
+            '</div>';
+  }
+
   function show(cb, title) {
     if(!$('#qrcode-modal').length) {
-      $('body').append('<div id="qrcode-modal" class="ui basic modal"><i class="close icon def-close"></i><div class="ui icon header"></div><div class="scrolling content"><div id="qrreader-seg" class="ui center aligned segment"><div class="qr-scanning"><div></div><div></div></div><div class="ui small basic icon buttons camtools"><button class="ui button btn-camera"><i class="camera icon"></i></button></div><canvas id="qrcanvas-modal" width="0" height="0"></canvas><div class="ui active dimmer qrcamera-loader"><div class="ui indeterminate text loader">' + __t('Preparing Camera') + '</div></div><div class="ui dimmer qrcamera-shutter"></div></div></div><div class="actions"><div class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</div></div></div>');
+      $('body').append(qrcode_modal_html());
+    } else {
+      if($('#qrcode-modal').data() != getlang()) {
+        $('#qrcode-modal').replaceWith(qrcode_modal_html());
+      }
     }
     $('#qrcode-modal .ui.header').text(title || __t('Scan QR Code'));
     $('#qrcode-modal').modal("setting", {
@@ -1395,6 +1419,23 @@ var PhraseLock = (function() {
     notify(__t('Unlocked'), 2000);
   }
 
+  var passphrasse_modal_html = function() {
+    return '<div id="passphrase-modal" class="ui basic modal" data-lang="' + getlang() + '"><i class="close icon def-close"></i>' +
+      '<div class="ui icon header">' + __t('Input your passphrase') + '</div>' +
+      '<div class="scrolling content">' +
+        '<div id="passphrase-modal-seg" class="ui center aligned segment">' +
+            '<div class="ui form">' +
+              '<div class="field"><input class="center" type="password" name="input-passphrase" placeholder="' + __t('Passphrase') + '" spellcheck="false"></div>' +
+            '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="actions">' +
+        '<div class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</div>' +
+        '<div class="ui basic ok inverted button"><i class="check icon"></i>' + __t('OK') + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   Module.showPhraseInput = function(cb) {
     var wallet = pastel.wallet;
     var lock_type = wallet.getLockShieldedType();
@@ -1411,21 +1452,11 @@ var PhraseLock = (function() {
     } else if(lock_type == 2) {
       $.fn.transition.settings.silent = true;
       if(!$('#passphrase-modal').length) {
-        $('body').append(
-          '<div id="passphrase-modal" class="ui basic modal"><i class="close icon def-close"></i>' +
-            '<div class="ui icon header">' + __t('Input your passphrase') + '</div>' +
-            '<div class="scrolling content">' +
-              '<div id="passphrase-modal-seg" class="ui center aligned segment">' +
-                  '<div class="ui form">' +
-                    '<div class="field"><input class="center" type="password" name="input-passphrase" placeholder="' + __t('Passphrase') + '" spellcheck="false"></div>' +
-                  '</div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="actions">' +
-              '<div class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</div>' +
-              '<div class="ui basic ok inverted button"><i class="check icon"></i>' + __t('OK') + '</div>' +
-            '</div>' +
-          '</div>');
+        $('body').append(passphrasse_modal_html());
+      } else {
+        if($('#passphrase-modal').data() != getlang()) {
+          $('#passphrase-modal').replaceWith(passphrasse_modal_html());
+        }
       }
       $('#passphrase-modal').modal("setting", {
         closable: false,
