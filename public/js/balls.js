@@ -493,6 +493,12 @@ var UtxoBalls = function() {
           ball.mark_utxo = 0;
           ball.mark_unconf = 0;
           ball.ballType = ballType.unconf;
+          if(task.data.txid_out) {
+            ball.ballData.txid_out = task.data.txid_out;
+          }
+          if(task.data.ref) {
+            ball.ballData.ref = task.data.ref;
+          }
           if(ball.circleRadius != calc_ball_radius(task.data)) {
             ball.ballData.cr = task.data.cr;
             var new_ball = create_ball(ball.ballType, ball.ballData, {fluffy: fluffy1, x: ball.position.x, y: ball.position.y, angle: ball.angle});
@@ -552,7 +558,7 @@ var UtxoBalls = function() {
           if(ball.ballType == ballType.unconf && ball.mark_unconf == 1) {
             ball.mark_unconf = 0;
             utxo_update = true;
-            if(ball.ballData.txtype == 1) {
+            if(ball.ballData.txtype == 1 && !ball.ballData.txid_out) {
               ball.mark_utxo = 0;
               ball.ballType = ballType.utxo;
               if(ball.fluffy == fluffy1) {
@@ -637,6 +643,7 @@ var UtxoBalls = function() {
 
     var unconf_list = [];
     var unconf_pop_list = [];
+    var spents_unconfs = {};
     for(var addr in data.addrs) {
       var val = data.addrs[addr];
       if(val.spents) {
@@ -647,14 +654,22 @@ var UtxoBalls = function() {
             xpub_idx: val.xpub_idx, trans_time: spent.trans_time,
             txid_out: spent.txid_out};
           unconf_list.push(item);
+          spents_unconfs[spent.txid + '-' + spent.n] = spent.txid_out;
         }
       }
+    }
+    for(var addr in data.addrs) {
+      var val = data.addrs[addr];
       if(val.txouts) {
         for(i in val.txouts) {
           var txout = val.txouts[Number(i)];
           var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n,
             value: txout.value, change: val.change, index: val.index,
             xpub_idx: val.xpub_idx, trans_time: txout.trans_time};
+          var unconf_tx = spents_unconfs[txout.txid + '-' + txout.n];
+          if(unconf_tx) {
+            item.txid_out = unconf_tx;
+          }
           if(mytxs[txout.txid]) {
             unconf_pop_list.push(item);
           } else {
