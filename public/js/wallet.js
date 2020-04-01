@@ -103,6 +103,7 @@ function Wallet() {
 
   var _xpubs = [];
   var _utxos = [];
+  var _unconfs = [];
   var _nodes = {};
 
   this.getXpubs = function() {
@@ -214,6 +215,76 @@ function Wallet() {
 
   this.getUtxos = function() {
     return _utxos;
+  }
+
+  this.setUnconfs = function(data) {
+    var mytxs = {};
+    for(var txid in data.txs) {
+      var tx = data.txs[txid];
+      var send_addrs = {};
+      for(var txa in tx.data) {
+        var v = tx.data[txa];
+        for(var i in v) {
+          if(i == 0) {
+            send_addrs[txa] = 1;
+          }
+        }
+      }
+      if(Object.keys(send_addrs).length > 0) {
+        mytxs[txid] = send_addrs;
+      }
+    }
+
+    var spents_unconfs = {};
+    for(var addr in data.addrs) {
+      var val = data.addrs[addr];
+      if(val.spents) {
+        for(i in val.spents) {
+          var spent = val.spents[Number(i)];
+          spents_unconfs[spent.txid + '-' + spent.n] = 1;
+        }
+      }
+    }
+
+    var unconf_list = [];
+    for(var addr in data.addrs) {
+      var val = data.addrs[addr];
+      if(val.txouts) {
+        for(i in val.txouts) {
+          var txout = val.txouts[Number(i)];
+          if(!spents_unconfs[txout.txid + '-' + txout.n]) {
+            var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n,
+              value: txout.value, change: val.change, index: val.index,
+              xpub_idx: val.xpub_idx, trans_time: txout.trans_time, mytxs: mytxs[txout.txid] ? 1 : 0};
+            unconf_list.push(item);
+          }
+        }
+      }
+    }
+
+    unconf_list.sort(function(a, b) {
+      var cmp = b.mytxs - a.mytxs;
+      if(cmp == 0) {
+        cmp = b.change - a.change;
+        if(cmp == 0) {
+          cmp = a.trans_time - b.trans_time;
+          if(cmp == 0) {
+            cmp = a.xpub_idx - b.xpub_idx;
+            if(cmp == 0) {
+              cmp = a.index - b.index;
+              if(cmp == 0) {
+                cmp = a.txid - b.txid;
+                if(cmp == 0) {
+                  cmp = a.n - b.n;
+                }
+              }
+            }
+          }
+        }
+      }
+      return cmp;
+    });
+    _unconfs = unconf_list;
   }
 
   var _unusedList = [];
@@ -757,6 +828,8 @@ function Wallet() {
     }
 
     var utxos = JSON.parse(JSON.stringify(_utxos));
+    utxos = utxos.concat(JSON.parse(JSON.stringify(_unconfs)));
+    console.log('send target utxos', JSON.stringify(utxos));
     function addinput_worker() {
       var utxo = utxos.shift();
       if(utxo) {

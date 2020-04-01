@@ -746,6 +746,7 @@ pastel.ready = function() {
         $('#wallet-balance .receive').fadeOut(400);
       }
       TradeLogs.unconfs(data);
+      wallet.setUnconfs(data);
       pastel.utxoballs.setUnconfs(data);
     } else if(type == 'balance') {
       $('#wallet-balance .balance').text(conv_coin(data));
