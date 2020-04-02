@@ -1538,11 +1538,13 @@ var LangSelector = (function() {
             setlang(lang);
             $('#selectlang .langtitle').text(__t('Language'));
             jsViewUpdate();
-            $('#selectlang').accordion('close', 0);
           } else {
             location.reload();
           }
         }
+      });
+      $('#selectlang .checkbox').click(function() {
+        $('#selectlang').accordion('close', 0);
       });
       if(sellang) {
         checklang(sellang);
