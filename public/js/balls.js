@@ -558,7 +558,7 @@ var UtxoBalls = function() {
           if(ball.ballType == ballType.unconf && ball.mark_unconf == 1) {
             ball.mark_unconf = 0;
             utxo_update = true;
-            if(ball.ballData.txtype == 1 && !ball.ballData.txid_out) {
+            if(ball.ballData.txtype == 1 && !ball.ballData.txid_out && ball.ballData.n != null) {
               ball.mark_utxo = 0;
               ball.ballType = ballType.utxo;
               if(ball.fluffy == fluffy1) {
