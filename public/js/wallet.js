@@ -827,8 +827,7 @@ function Wallet() {
       }
     }
 
-    var utxos = JSON.parse(JSON.stringify(_utxos));
-    utxos = utxos.concat(JSON.parse(JSON.stringify(_unconfs)));
+    var utxos = _utxos.concat(_unconfs);
     console.log('send target utxos', JSON.stringify(utxos));
     function addinput_worker() {
       var utxo = utxos.shift();
