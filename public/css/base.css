@@ -1158,3 +1158,11 @@ i.receive {
   line-height: 9px;
   margin-right: 0;
 }
+.ui.form .field.warning input[type="text"] {
+  background: #a4831e;
+  border-color: #ffe78f;
+  color: #f5eccb;
+  border-radius: '';
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}

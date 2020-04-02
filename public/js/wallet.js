@@ -937,10 +937,15 @@ function Wallet() {
   var safe_utxo_count = get_safecount();
 
   this.calcSendValue = function(utxo_count) {
+    var unconfs = Object.assign([], _unconfs);
+    var utxos = _utxos.concat(unconfs);
+    var conf_count = utxos.length - unconfs.length;
+    var unconf_count = unconfs.length;
+    var all_count = utxos.length;
     var in_value = UINT64(0);
     var count = 0;
     for(var i = 0; i < utxo_count; i++) {
-      var utxo = _utxos[i];
+      var utxo = utxos[i];
       if(utxo) {
         in_value.add(UINT64(String(utxo.value)));
         count++;
@@ -950,24 +955,29 @@ function Wallet() {
     }
     if(in_value.gt(UINT64(0))) {
       var fee = UINT64(String(148 * count + 34 + 10));
-      return {err: 0, value: in_value.subtract(fee).toString(), count: count, all: _utxos.length, max: safe_utxo_count};
+      return {err: 0, value: in_value.subtract(fee).toString(), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
     } else {
-      return {err: 0, value: "0", count: count, all: _utxos.length, max: safe_utxo_count};
+      return {err: 0, value: "0", count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
     }
   }
 
   this.calcSendUtxo = function(value_str) {
+    var unconfs = Object.assign([], _unconfs);
+    var utxos = _utxos.concat(unconfs);
+    var conf_count = utxos.length - unconfs.length;
+    var unconf_count = unconfs.length;
+    var all_count = utxos.length;
     var value = UINT64(String(value_str));
     if(value.eq(UINT64(0))) {
-      return {err: 0, count: 0, sign: 0, all: _utxos.length, max: safe_utxo_count};
+      return {err: 0, count: 0, sign: 0, all: utxos.length, max: safe_utxo_count};
     }
     var in_value = UINT64(0);
     var sign_utxos = [];
     var utxo_count = 0;
     var result_out = 0;
     var eq = false;
-    for(var i in _utxos) {
-      var utxo = _utxos[i];
+    for(var i in utxos) {
+      var utxo = utxos[i];
       in_value.add(UINT64(String(utxo.value)));
       utxo_count++;
       if(in_value.gt(value)) {
@@ -993,9 +1003,9 @@ function Wallet() {
       }
     }
     if(result_out != 0) {
-      return {err: 0, count: utxo_count, sign: eq ? 0 : -1, all: _utxos.length, max: safe_utxo_count};
+      return {err: 0, count: utxo_count, sign: eq ? 0 : -1, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
     } else {
-      return {err: 1, sign: 1, all: _utxos.length, max: safe_utxo_count};
+      return {err: 1, sign: 1, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
     }
   }
 }

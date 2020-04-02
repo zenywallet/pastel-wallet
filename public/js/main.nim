@@ -832,7 +832,7 @@ asm """
       amount = amount.replace(/,/g, '');
       var amounts = amount.split('.');
       if(amount.match(/^\d+(\.\d{1,8})?$/)) {
-        amount_elm.closest('.field').removeClass('error');
+        amount_elm.closest('.field').removeClass('error warning');
         var value = '';
         if(amounts.length == 1) {
           if(amounts[0] != '0') {
@@ -852,7 +852,7 @@ asm """
         amount_elm.closest('.field').addClass('error');
       }
     } else {
-      amount_elm.closest('.field').removeClass('error');
+      amount_elm.closest('.field').removeClass('error warning');
       resetSendBallCount();
     }
   }
@@ -878,15 +878,22 @@ asm """
         pastel.utxoballs.setSend(ret.all);
         send_balls_count = ret.all;
       }
+      amount_elm.closest('.field').removeClass('warning');
       amount_elm.closest('.field').addClass('error');
     } else {
       if(ret.count > ret.max) {
         $('#btn-utxo-count').text('>' + String(ret.max) + ' max');
         pastel.utxoballs.setSend(ret.max);
         send_balls_count = ret.max;
+        amount_elm.closest('.field').removeClass('warning');
         amount_elm.closest('.field').addClass('error');
       } else {
         amount_elm.closest('.field').removeClass('error');
+        if(ret.conf != null && ret.count > ret.conf && ret.count > 0) {
+          amount_elm.closest('.field').addClass('warning');
+        } else {
+          amount_elm.closest('.field').removeClass('warning');
+        }
         $('#btn-utxo-count').text((ret.sign == 0 ? '' : '≤') + String(ret.count) + (ret.count == ret.all ? ' all' : ''));
         pastel.utxoballs.setSend(ret.count);
         send_balls_count = ret.count;
@@ -993,6 +1000,11 @@ asm """
       send_balls_count = cur.count;
       pastel.utxoballs.setSend(send_balls_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
+      if(sendval.conf != null && cur.count > sendval.conf && cur.count > 0) {
+        $('#send-coins input[name="amount"]').closest('.field').addClass('warning');
+      } else {
+        $('#send-coins input[name="amount"]').closest('.field').removeClass('warning');
+      }
       var exinfo = '';
       if(sendval.count == sendval.all) {
         exinfo = ' all';
@@ -1029,6 +1041,11 @@ asm """
       send_balls_count = cur.count;
       pastel.utxoballs.setSend(send_balls_count);
       $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
+      if(sendval.conf != null && cur.count > sendval.conf && cur.count > 0) {
+        $('#send-coins input[name="amount"]').closest('.field').addClass('warning');
+      } else {
+        $('#send-coins input[name="amount"]').closest('.field').removeClass('warning');
+      }
       var exinfo = '';
       if(sendval.count == sendval.all) {
         exinfo = ' all';
@@ -1384,7 +1401,7 @@ proc checkSendAmount(ev: Event; n: VNode) =
       amount = amount.replace(/,/g, '');
       var amounts = amount.split('.');
       if(amount.match(/^\d+(\.\d{1,8})?$/)) {
-        amount_elm.closest('.field').removeClass('error');
+        amount_elm.closest('.field').removeClass('error warning');
         var value = '';
         if(amounts.length == 1) {
           if(amounts[0] != '0') {
@@ -1404,7 +1421,7 @@ proc checkSendAmount(ev: Event; n: VNode) =
         amount_elm.closest('.field').addClass('error');
       }
     } else {
-      amount_elm.closest('.field').removeClass('error');
+      amount_elm.closest('.field').removeClass('error warning');
       resetSendBallCount();
     }
   """
