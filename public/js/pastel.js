@@ -851,5 +851,9 @@ pastel.ready = function() {
   }
 
   pastel.stream = stream;
+
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
 }
 pastel.load();
