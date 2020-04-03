@@ -155,12 +155,7 @@ var UtxoBalls = function() {
   }
 
   function calc_ball_diameter(data) {
-    var s = Math.ceil(cur_balls_r * data.cr);
-    var s_max = _canvas.width > _canvas.height ? _canvas.height / 12 : _canvas.width / 12;
-    if(s > s_max) {
-      s = s_max;
-    }
-    return s;
+    return Math.ceil(cur_balls_r * data.cr);
   }
   function calc_ball_radius(data) {
     return calc_ball_diameter(data) / 2;
@@ -245,47 +240,84 @@ var UtxoBalls = function() {
       var sd = 0.0;
       var len = valid_utxos.length + valid_unconfs.length;
       if(len > 1) {
+        var min_r = null;
+        var max_r = null;
         for(var i in valid_utxos) {
-          ave += valid_utxos[Number(i)].r;
+          var r = valid_utxos[Number(i)].r;
+          ave += r;
+          if(min_r == null || r < min_r) {
+            min_r = r;
+          }
+          if(max_r == null || r > max_r) {
+            max_r = r;
+          }
         }
         for(var i in valid_unconfs) {
-          ave += valid_unconfs[Number(i)].r;
+          var r = valid_unconfs[Number(i)].r;
+          ave += r;
+          if(min_r == null || r < min_r) {
+            min_r = r;
+          }
+          if(max_r == null || r > max_r) {
+            max_r = r;
+          }
         }
         ave /= len;
-        for(var i in valid_utxos) {
-          var d = valid_utxos[Number(i)].r - ave;
-          sd += d * d;
-        }
-        for(var i in valid_unconfs) {
-          var d = valid_unconfs[Number(i)].r - ave;
-          sd += d * d;
-        }
-        sd = Math.sqrt(sd / (len - 1));
-        if(sd > 0) {
+        if(max_r / min_r > 64 / 16) {
           for(var i in valid_utxos) {
-            var cr = 36 + 28 * (valid_utxos[Number(i)].r - ave) / (1.5 * sd);
+            var d = valid_utxos[Number(i)].r - ave;
+            sd += d * d;
+          }
+          for(var i in valid_unconfs) {
+            var d = valid_unconfs[Number(i)].r - ave;
+            sd += d * d;
+          }
+          sd = Math.sqrt(sd / (len - 1));
+          if(sd > 0) {
+            for(var i in valid_utxos) {
+              var cr = 36 + 20 * (valid_utxos[Number(i)].r - ave) / (1.5 * sd);
+              if(cr > 64) {
+                cr = 64;
+              } else if(cr < 16) {
+                cr = 16;
+              }
+              valid_utxos[Number(i)].cr = cr;
+            }
+            for(var i in valid_unconfs) {
+              var cr = 36 + 20 * (valid_unconfs[Number(i)].r - ave) / (1.5 * sd);
+              if(cr > 64) {
+                cr = 64;
+              } else if(cr < 16) {
+                cr = 16;
+              }
+              valid_unconfs[Number(i)].cr = cr;
+            }
+          } else {
+            for(var i in valid_utxos) {
+              valid_utxos[Number(i)].cr = 36;
+            }
+            for(var i in valid_unconfs) {
+              valid_unconfs[Number(i)].cr = 36;
+            }
+          }
+        } else {
+          for(var i in valid_utxos) {
+            var cr = 36 * (valid_utxos[Number(i)].r / ave);
             if(cr > 64) {
               cr = 64;
-            } else if(cr < 8) {
-              cr = 8;
+            } else if(cr < 16) {
+              cr = 16;
             }
             valid_utxos[Number(i)].cr = cr;
           }
           for(var i in valid_unconfs) {
-            var cr = 36 + 28 * (valid_unconfs[Number(i)].r - ave) / (1.5 * sd);
+            var cr = 36 * (valid_unconfs[Number(i)].r / ave);
             if(cr > 64) {
               cr = 64;
-            } else if(cr < 8) {
-              cr = 8;
+            } else if(cr < 16) {
+              cr = 16;
             }
             valid_unconfs[Number(i)].cr = cr;
-          }
-        } else {
-          for(var i in valid_utxos) {
-            valid_utxos[Number(i)].cr = 36;
-          }
-          for(var i in valid_unconfs) {
-            valid_unconfs[Number(i)].cr = 36;
           }
         }
       } else {
