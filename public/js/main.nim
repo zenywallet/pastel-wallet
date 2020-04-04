@@ -1465,7 +1465,7 @@ proc sendForm(): VNode =
         for d in uriOptions:
           tdiv(class="item"):
             tdiv(class="content"):
-              tdiv(class="header"): text cast[cstring](d.key)
+              tdiv(class="header"): text trans($cast[cstring](d.key))
               tdiv(class="description"): text cast[cstring](d.value)
       tdiv(class="fluid ui buttons"):
         button(id="btn-tx-send", class="ui inverted olive button center btn-tx-send"):
