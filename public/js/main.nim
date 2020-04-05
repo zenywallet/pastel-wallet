@@ -920,7 +920,9 @@ asm """
           if(!err) {
             var data = bip21reader(uri);
             $('#send-coins input[name="address"]').val(data.address || '');
-            $('#send-coins input[name="amount"]').val(data.amount || '');
+            if(data.amount != null) {
+              $('#send-coins input[name="amount"]').val(data.amount || '');
+            }
             uriOptions = [];
             for(var k in data) {
               var p = data[k];
