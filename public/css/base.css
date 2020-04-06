@@ -894,6 +894,14 @@ i.receive {
   right: 0.3em;
   top: 0.3em;
 }
+@media print {
+  .close-arc {
+    display: none;
+  }
+  .ui.popup.transition {
+    visibility: hidden !important;
+  }
+}
 #recv-modal .qrcode {
   margin-top: 3em;
 }
