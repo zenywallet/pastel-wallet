@@ -107,6 +107,9 @@ html::-webkit-scrollbar {
 .section a.pagenext:hover {
   opacity: .5;
 }
+.section a.pagenext:focus {
+  opacity: .5;
+}
 .section a.pagenext {
   padding-top: 50px;
 }
@@ -277,6 +280,9 @@ html::-webkit-scrollbar {
 .intro-body .passphrase-seg .ui.form input[type="text"], .intro-body .passphrase-seg .ui.form input[type="password"] {
   background: rgba(128, 128, 128, 0.6);
   color: #f0f0f0;
+}
+intro-body .passphrase-seg .ui.form input[type="text"]:focus, .intro-body .passphrase-seg .ui.form input[type="password"]:focus, intro-body .passphrase-seg .ui.form input[type="text"]::selection, .intro-body .passphrase-seg .ui.form input[type="password"]::selection {
+  color: #fafafa;
 }
 .intro .caption {
   color: #fff;
@@ -596,6 +602,9 @@ i.receive {
 .ui.buttons.settings > .button:hover {
   background: rgba(167,225,226,0.1);
 }
+.ui.buttons.settings > .button:focus {
+  background: rgba(177,235,236,0.1);
+}
 #wallet-balance {
   position: absolute;
   top: 152px;
@@ -627,8 +636,8 @@ i.receive {
 .ui.basic.button:active, .ui.basic.buttons .button:active {
   background: rgba(190,190,190,0.6) !important;
 }
-.ui.basic.button:focus, .ui.basic.buttons .button:focus, .ui.basic.buttons > .ui.button.send:focus, .ui.basic.buttons > .ui.button.receive:focus {
-  background: rgba(190,190,190,0.6) !important;
+.ui.basic.button:focus, .ui.basic.buttons > .ui.button:focus, .ui.basic.buttons > .ui.button.send:focus, .ui.basic.buttons > .ui.button.receive:focus {
+  background: rgba(200,200,200,0.6) !important;
 }
 .ui.buttons.settings > .ui.button {
   padding-left: 30px;
@@ -673,6 +682,18 @@ i.receive {
   background-color: rgba(35, 177, 149, 0.5);
   color: #eee;
   padding: 5px 6px 5px 6px;
+}
+#receive-address .ui.active.button {
+  background: rgba(180,180,180,.8) !important;
+}
+#receive-address .ui.active.button:active {
+  background: rgba(180,180,180,.8) !important;
+}
+#receive-address .ui.active.button:hover {
+  background: rgba(190,190,190,.8) !important;
+}
+#receive-address .ui.active.button:focus {
+  background: rgba(200,200,200,.8) !important;
 }
 #ball-info {
   position: absolute;
@@ -860,9 +881,13 @@ i.receive {
   right: 0;
   top: 0;
   cursor: pointer;
+  outline: none;
 }
 #recv-modal .close-arc:hover {
   background-color: rgba(210, 210, 210, 0.5);
+}
+#recv-modal .close-arc:focus {
+  background-color: rgba(220, 220, 220, 0.5);
 }
 #recv-modal .btn-close-arc {
   position: absolute;
@@ -1075,6 +1100,9 @@ i.receive {
 #passphrase-modal-seg .ui.form input[type="text"], #passphrase-modal-seg .ui.form input[type="password"] {
     background: rgba(43, 51, 45, 0.6);
     color: #f0f0f0;
+}
+#passphrase-modal-seg .ui.form input[type="text"]:focus, #passphrase-modal-seg .ui.form input[type="password"]:focus, #passphrase-modal-seg .ui.form input[type="text"]::selection, #passphrase-modal-seg .ui.form input[type="password"]::selection {
+    color: #fafafa;
 }
 #passphrase-modal.ui.modal {
   min-width: 324px;

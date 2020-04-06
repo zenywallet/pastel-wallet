@@ -716,27 +716,33 @@ proc seedCard(cardInfo: SeedCardInfo, idx: int): VNode =
         italic(class="close icon")
 
 proc changePassphrase(ev: Event; n: VNode) =
-  passphraseFulfill = false
-  showPage3 = false
-  passPhrase = n.value
-  viewUpdate()
-  discard
+  if passPhrase != n.value:
+    passphraseFulfill = false
+    showPage3 = false
+    passPhrase = n.value
+    viewUpdate()
 
 proc confirmPassphrase(ev: Event; n: VNode) =
   var ret_lock: bool = false
+  var passlen = 0
   asm """
-    $('input[name="input-passphrase"]').blur();
-    var wallet = pastel.wallet;
-    `ret_lock` = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
+    var val = $('input[name="input-passphrase"]').val();
+    if(val) {
+      `passlen` = val.length;
+      $('input[name="input-passphrase"]').blur();
+      var wallet = pastel.wallet;
+      `ret_lock` = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
+    }
   """
-  if ret_lock:
-    passphraseFulfill = true
-    showPage3 = true
-    viewUpdate()
-  else:
-    asm """
-      Notify.show(__t('Error'), __t('Failed to lock your wallet with the passphrase.'), Notify.msgtype.error);
-    """
+  if passlen > 0:
+    if ret_lock:
+      passphraseFulfill = true
+      showPage3 = true
+      viewUpdate()
+    else:
+      asm """
+        Notify.show(__t('Error'), __t('Failed to lock your wallet with the passphrase.'), Notify.msgtype.error);
+      """
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
@@ -1302,6 +1308,23 @@ asm """
     sendrecv_switch = val;
     sendrecv_switch_worker();
   }
+
+  function enable_caret_browsing(elm) {
+    elm.find('.tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)').each(function() {
+      $(this).attr('tabindex', $(this).data('tabindex') || 0);
+    });
+    $('#selectlang .tabindex, #receive-address .tabindex').each(function() {
+      $(this).attr('tabindex', $(this).data('tabindex') || 0);
+    });
+  }
+  function disable_caret_browsing(elm) {
+    elm.find('.tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)').each(function() {
+      $(this).attr('tabindex', -1);
+    });
+    $('#selectlang .tabindex, #receive-address .tabindex').each(function() {
+      $(this).attr('tabindex', -1);
+    });
+  }
 """
 
 proc btnSend: proc() =
@@ -1365,7 +1388,7 @@ proc recvAddressSelector(): VNode =
 proc recvAddressModal(): VNode =
   result = buildHtml(tdiv(id="recv-modal", class="ui")):
     italic(class="close icon btn-close-arc")
-    tdiv(class="close-arc")
+    tdiv(class="close-arc", tabindex="0")
     tdiv(id="recv-qrcode", class="qrcode", title=""):
       canvas(width="0", height="0")
     tdiv(id="recvaddr-form", class="ui container"):
@@ -1379,7 +1402,7 @@ proc recvAddressModal(): VNode =
               tdiv(class="text"):
                 img(clsss="ui mini avatar image", src="")
                 text ""
-              tdiv(class="menu", tabindex="-1")
+              tdiv(class="menu", tabindex="-1", data-tabindex="-1")
           tdiv(class="field"):
             label: text trans"Amount"
             tdiv(class="ui right labeled input"):
@@ -1459,7 +1482,7 @@ proc sendForm(): VNode =
           tdiv(class="ui mini basic icon buttons utxoctrl"):
             button(id="btn-utxo-minus", class="ui button", title=trans"-1 Ball"):
               italic(class="minus circle icon")
-            button(id="btn-utxo-count", class="ui button sendutxos"):
+            button(id="btn-utxo-count", class="ui button sendutxos", tabindex="-1", data-tabindex="-1"):
               text "..."
             button(id="btn-utxo-plus", class="ui button", title=trans"+1 Ball"):
               italic(class="plus circle icon")
@@ -1507,10 +1530,10 @@ proc settingsModal(): VNode =
     tdiv(class="content"):
       p: text trans"Are you sure to reset your wallet?"
     tdiv(class="actions"):
-      tdiv(class="ui basic cancel inverted button"):
+      button(class="ui basic cancel inverted button"):
         italic(class="remove icon")
         text trans"Cancel"
-      tdiv(class="ui red ok inverted button"):
+      button(class="ui red ok inverted button"):
         italic(class="checkmark icon")
         text trans"Reset"
 
@@ -1563,7 +1586,7 @@ proc appMain(data: RouterData): VNode =
                     tdiv()
                     tdiv()
                 if showScanSeedBtn:
-                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showSeedQr()):
+                  button(class="ui teal labeled icon button bt-scan-seed", onclick=showSeedQr()):
                     text trans"Scan seed card with camera"
                     italic(class="camera icon")
                 if showCamTools:
@@ -1624,7 +1647,7 @@ A key card or passphrase is required to encrypt and save the private key in your
                     tdiv()
                     tdiv()
                 if showScanSeedBtn2:
-                  tdiv(class="ui teal labeled icon button bt-scan-seed", onclick=showKeyQr()):
+                  button(class="ui teal labeled icon button bt-scan-seed", onclick=showKeyQr()):
                     text trans"Scan key card with camera"
                     italic(class="camera icon")
                 if showCamTools2:
@@ -1685,21 +1708,21 @@ A key card or passphrase is required to encrypt and save the private key in your
             tdiv(id="wallet-seg", class="ui center aligned segment seed-seg"):
               canvas(width="0", height="0")
           tdiv(class="ui two bottom attached buttons settings"):
-            tdiv(class="ui button", onclick=goSettings()):
+            button(class="ui button", onclick=goSettings()):
               italic(class="cog icon")
               text trans"Settings"
               span: italic(class="chevron down icon")
-            tdiv(class="ui button", onclick=goLogs()):
+            button(class="ui button", onclick=goLogs()):
               italic(class="list alternate outline icon")
               text trans"Logs"
               span: italic(class="chevron down icon")
             tdiv(id="bottom-blink")
-        textarea(id="clipboard", rows="1", tabindex="-1", readOnly="true", spellcheck="false")
+        textarea(id="clipboard", rows="1", tabindex="-1", data-tabindex="-1", readOnly="true", spellcheck="false")
 
     if showPage3 or showPage4:
       section(id="section4", class="tradelogs-section"):
         tdiv(class="ui buttons settings backpage"):
-          tdiv(class="ui button backwallet", onclick=backWallet()):
+          button(class="ui button backwallet", onclick=backWallet()):
             italic(class="dot circle icon")
             text trans"Back"
             span: italic(class="chevron up icon")
@@ -1775,10 +1798,12 @@ proc afterScript(data: RouterData) =
 
   if showScanResult or mnemonicFulfill:
     asm """
+      disable_caret_browsing($('#section2'));
       target_page_scroll = '#section2';
       page_scroll_done = function() {
         $('a.pagenext').css('visibility', 'hidden');
         $('#section1').hide();
+        enable_caret_browsing($('#section2'));
         window.scrollTo(0, 0);
         jsSeedToKeys();
         jsViewSelector(5);
@@ -1787,6 +1812,7 @@ proc afterScript(data: RouterData) =
     """
   if keyCardFulfill or passphraseFulfill:
     asm """
+      disable_caret_browsing($('#section3'));
       target_page_scroll = '#section3';
       page_scroll_done = function() {
         var wallet = pastel.wallet;
@@ -1797,8 +1823,9 @@ proc afterScript(data: RouterData) =
         jsClearSensitive();
         $('a.pagenext').css('visibility', 'hidden');
         $('#section2').hide();
+        enable_caret_browsing($('#section3'));
         window.scrollTo(0, 0);
-        jsViewSelector(9);
+        jsViewSelector(12);
         if(pastel.stream && !pastel.stream.status()) {
           pastel.stream.start();
         }
@@ -1854,6 +1881,7 @@ proc afterScript(data: RouterData) =
       """
     asm """
       goSection('#section4', function() {
+        disable_caret_browsing($('#section3'));
         target_page_scroll = '#section3';
         page_scroll_done = function() {
           TradeLogs.stop();
@@ -1861,6 +1889,7 @@ proc afterScript(data: RouterData) =
           $('#tradeunconfs').empty();
           $('#tradelogs').empty();
           $('#section4').hide();
+          enable_caret_browsing($('#section3'));
           window.scrollTo(0, 0);
           setSupressRedraw(false);
           reloadViewSafeStart();

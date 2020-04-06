@@ -321,10 +321,16 @@ function initRecvModal() {
     hideRecvModal();
     setAutoScroll(true);
   });
+  $('#recv-modal .close-arc').keydown(function(evt) {
+    if(evt.which == 13 || evt.keyCode == 13) {
+      $(this).click();
+    }
+  });
 }
 
 var recvModalViewState = false;
 function showRecvModal() {
+  disable_caret_browsing($('#section3'));
   recvModalViewState = true;
   $('html').css('background-color', '#fff');
   $('#recv-modal').fadeIn(600);
@@ -340,6 +346,7 @@ function hideRecvModal() {
   $('#recvaddr-form .menu').empty();
   $('html').css('background-color', '#444');
   $('#btn-recv-qrcode').blur();
+  enable_caret_browsing($('#section3'));
 }
 
 var save_view_state = {recv_modal_menu: null};
@@ -366,7 +373,7 @@ function showRecvAddress(cb) {
     $('#receive-address .new').hide();
     for(var i in modal_recv_addrs) {
       var addr = modal_recv_addrs[i];
-      $('#receive-address .new .ball').eq(i).replaceWith('<div class="circular ui icon mini button ball" data-idx="' + i + '"><img src="' + Ball.getImage(addr, 28) + '"></div>');
+      $('#receive-address .new .ball').eq(i).replaceWith('<div class="circular ui icon mini button ball tabindex" data-idx="' + i + '" tabindex="0"><img src="' + Ball.getImage(addr, 28) + '"></div>');
     }
     function ball_selector_event(sel) {
       $(sel).off('click').click(function() {
@@ -385,6 +392,11 @@ function showRecvAddress(cb) {
               });
             }
           });
+        }
+      });
+      $(sel).off('keydown').on('keydown', function(evt) {
+        if(evt.which == 13 || evt.keyCode == 13) {
+          $(this).click();
         }
       });
     }
@@ -411,7 +423,7 @@ function showRecvAddress(cb) {
       } else {
         modal_recv_addrs[5] = addr;
         $('#receive-address .used').stop().css("opacity", 0).animate({width: 42, 'margin-right': 7}, 100, function() {
-          $('#receive-address .used .ball').replaceWith('<div class="circular ui icon mini button ball" data-idx="5"><img src="' + Ball.getImage(addr, 28) + '"></div>');
+          $('#receive-address .used .ball').replaceWith('<div class="circular ui icon mini button ball tabindex" data-idx="5" tabindex="0"><img src="' + Ball.getImage(addr, 28) + '"></div>');
           $('#receive-address .used').stop().css("visibility", "visible").animate({opacity: 1}, 400);
           ball_selector_event('#receive-address .used .ball');
         });
@@ -1153,9 +1165,9 @@ var qrReaderModal = (function() {
                 '</div>' +
                 '<div class="ui dimmer qrcamera-shutter"></div>' +
               '</div></div>' +
-              '<div class="actions"><div class="ui basic cancel inverted button">' +
+              '<div class="actions"><button class="ui basic cancel inverted button">' +
                 '<i class="remove icon"></i>' + __t('Cancel') +
-              '</div></div>' +
+              '</button></div>' +
             '</div>';
   }
 
@@ -1430,8 +1442,8 @@ var PhraseLock = (function() {
         '</div>' +
       '</div>' +
       '<div class="actions">' +
-        '<div class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</div>' +
-        '<div class="ui basic ok inverted button"><i class="check icon"></i>' + __t('OK') + '</div>' +
+        '<button class="ui basic cancel inverted button"><i class="remove icon"></i>' + __t('Cancel') + '</button>' +
+        '<button class="ui basic ok inverted button"><i class="check icon"></i>' + __t('OK') + '</button>' +
       '</div>' +
     '</div>';
   }
@@ -1502,7 +1514,7 @@ var LangSelector = (function() {
       elm_langsel.innerHTML =
       '<div id="selectlang" class="ui accordion">' +
         '<div class="title">' +
-          '<i class="dropdown ui small icon"></i><span class="langtitle">' + __t('Language') + '</span>' +
+          '<i class="dropdown ui small icon tabindex" tabindex="-1" data-tabindex="-1"></i><span class="langtitle">' + __t('Language') + '</span>' +
         '</div>' +
         '<div class="content">' +
           '<div class="ui form">' +
