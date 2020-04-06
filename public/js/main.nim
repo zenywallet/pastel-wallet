@@ -1393,28 +1393,26 @@ proc recvAddressModal(): VNode =
       canvas(width="0", height="0")
     tdiv(id="recvaddr-form", class="ui container"):
       tdiv(class="ui form"):
-        tdiv(class="two fields"):
-          tdiv(class="field"):
-            label: text trans"Receive Address"
-            tdiv(class="ui selection dropdown addr-selection", tabindex="0"):
-              input(type="hidden", name="address", value="")
-              italic(class="dropdown icon")
-              tdiv(class="text"):
-                img(clsss="ui mini avatar image", src="")
-                text ""
-              tdiv(class="menu", tabindex="-1", data-tabindex="-1")
-          tdiv(class="field"):
-            label: text trans"Amount"
-            tdiv(class="ui right labeled input"):
-              input(class="right", type="text", name="amount", placeholder=trans"Amount", spellcheck="false")
-              tdiv(class="ui basic label"): text "ZNY"
-        tdiv(class="two fields"):
-          tdiv(class="field"):
-            label: text trans"Label"
-            input(class="ui input", type="text", name="label", placeholder=trans"Label")
-          tdiv(class="field"):
-            label: text trans"Message"
-            textarea(class="ui textarea", rows="2", name="message", placeholder=trans"Message")
+        tdiv(class="field"):
+          label: text trans"Receive Address"
+          tdiv(class="ui selection dropdown addr-selection", tabindex="0"):
+            input(type="hidden", name="address", value="")
+            italic(class="dropdown icon")
+            tdiv(class="text"):
+              img(clsss="ui mini avatar image", src="")
+              text ""
+            tdiv(class="menu", tabindex="-1", data-tabindex="-1")
+        tdiv(class="field"):
+          label: text trans"Amount"
+          tdiv(class="ui right labeled input"):
+            input(class="right", type="text", name="amount", placeholder=trans"Amount", spellcheck="false")
+            tdiv(class="ui basic label"): text "ZNY"
+        tdiv(class="field"):
+          label: text trans"Label"
+          input(class="ui input", type="text", name="label", placeholder=trans"Label")
+        tdiv(class="field"):
+          label: text trans"Message"
+          textarea(class="ui textarea", rows="2", name="message", placeholder=trans"Message")
 
 
 proc checkSendAmount(ev: Event; n: VNode) =
