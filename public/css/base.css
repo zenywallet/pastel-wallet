@@ -971,7 +971,7 @@ i.receive {
   display: none;
   pointer-events: none;
 }
-#send-coins .ui.label, #send-coins .ui.buttons, #send-coins .ui.input {
+#send-coins .ui.label, #send-coins .ui.buttons, #send-coins .ui.input, #send-coins label, #send-coins .content .header, #send-coins .description {
   pointer-events: auto;
 }
 #send-coins input::selection {
