@@ -6,6 +6,7 @@ A sample wallet using Blockstor API
 - Nim https://nim-lang.org/
 - rocksdb (librocksdb-dev)
 - apache or nginx for web proxy and SSL
+- Google Closure Compiler https://github.com/google/closure-compiler
 
 ### Build Instructions
 ```bash
@@ -16,6 +17,14 @@ cd pastel-wallet/deps/libbtc
 make
 cd ../..
 nimble build
+mkdir bin/closure-compiler
+cd bin/closure-compiler
+wget https://dl.google.com/closure-compiler/compiler-latest.zip
+unzip compiler-latest.zip
+cd ..
+ln -s closure-compiler/closure-compiler-*.jar closure-compiler.jar
+cd ..
+nimble minify
 ```
 
 ### Installation
@@ -33,6 +42,7 @@ pastel
 
 ### Release Build without installing and Launch
 ```bash
+nimble minify
 nim c -d:release src/pastel.nim
 src/pastel
 ```
