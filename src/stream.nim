@@ -44,26 +44,19 @@ type UnspentsData* = object
 
 type StreamCommand* {.pure.} = enum
   Abort
-  Unconfs
   Balance
   Addresses
   Unused
-  BsStream
-  BsStreamInit
   RawTx
 
 type
   StreamData* = ref object of RootObj
-  StreamDataUnconfs* = ref object of StreamData
-    wallets*: WalletIds
   StreamDataBalance* = ref object of StreamData
     wallets*: WalletIds
   StreamDataAddresses* = ref object of StreamData
     wallets*: WalletIds
   StreamDataUnused* = ref object of StreamData
     wallet_id*: WalletId
-  StreamDataBsStream* = ref object of StreamData
-    data*: JsonNode
   StreamDataRawTx* = ref object of StreamData
     wallet_id*: WalletId
     rawtx*: string

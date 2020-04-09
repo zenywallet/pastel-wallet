@@ -388,18 +388,11 @@ proc stream_main() {.thread.} =
           var json = parseJson(data)
           block_reader(json)
           BallCommand.BsStream.send(BallDataBsStream(data: json))
-
-          # test send
-          StreamCommand.BsStream.send(StreamDataBsStream(data: json))
-          for d in db.getWallets(""):
-            stream.send(d.wallet_id, data)
-
         except:
           let e = getCurrentException()
           echo e.name, ": ", e.msg
 
   asyncCheck read()
-  StreamCommand.BsStreamInit.send()
   while true:
     if not active:
       break
@@ -412,48 +405,6 @@ proc cmd_main() {.thread.} =
     let cdata = cmdChannel.recv()
     Debug.Stream.write "cmdManager cmd=", cdata.cmd
     case cdata.cmd
-    of StreamCommand.Unconfs:
-      var client = StreamDataUnconfs(cdata.data)
-      var json = %*{"type": "unconfs"}
-      #let j_mempool = blockstor.getMempool()
-      #if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
-      json.add("data", newJObject())
-      json["data"].add("mempool", newJObject())
-      var addresses = initHashSet[string]()
-      var addrbalances = initTable[string, uint64]()
-      for m in mempool:
-        for a in m["addrs"].pairs:
-          var find = false
-          for ba in db.getAddresses(a.key):
-            for wid in client.wallets:
-              if ba.wid == wid:
-                find = true
-                addresses.incl(a.key)
-                var jd_mempool = json["data"]["mempool"]
-                if jd_mempool.hasKey(a.key):
-                  for v in a.val.pairs:
-                    if jd_mempool[a.key].hasKey(v.key):
-                      jd_mempool[a.key][v.key] = j_uint64(jd_mempool[a.key][v.key].getUint64 + v.val.getUint64)
-                    else:
-                      jd_mempool[a.key].add(v.key, v.val)
-                else:
-                  jd_mempool.add(a.key, a.val)
-      if addresses.len > 0:
-        var addrs_array: seq[string]
-        for a in addresses:
-          addrs_array.add(a)
-        var j_unconfs: JsonNode
-        try:
-          j_unconfs = blockstor.getUnconf(addrs_array)
-          if j_unconfs.kind != JNull:
-            json["data"].add("unconfs", newJObject())
-            for i, a in addrs_array:
-              json["data"]["unconfs"][a] = j_unconfs["res"][i]
-        except:
-          Debug.StreamError.write "EXCEPTION: StreamCommand.Unconfs ", j_unconfs
-          let e = getCurrentException()
-          Debug.StreamError.write e.name, ": ", e.msg
-      stream.send(client.wallets[0], $json)
     of StreamCommand.Balance:
       var client = StreamDataBalance(cdata.data)
       var balance: uint64 = 0'u64
@@ -509,30 +460,6 @@ proc cmd_main() {.thread.} =
       Debug.Stream.write "RawTx ret=", ret_rawtx
       var json = %*{"type": "rawtx", "data": ret_rawtx}
       stream.send(client.wallet_id, $json)
-    of StreamCommand.BsStream:
-      try:
-        var json = StreamDataBsStream(cdata.data).data
-        if json.hasKey("height"):
-          var mempool_tmp: JsonNode = newJArray()
-          let j_mempool = blockstor.getMempool()
-          if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
-            for m in j_mempool["res"]:
-              mempool_tmp.add(m)
-          mempool = mempool_tmp
-
-        elif json.hasKey("mempool"):
-          for m in json["mempool"]:
-            mempool.add(m)
-      except:
-        let e = getCurrentException()
-        Debug.StreamError.write e.name, ": ", e.msg
-
-    of StreamCommand.BsStreamInit:
-      let j_mempool = blockstor.getMempool()
-      if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
-        for m in j_mempool["res"]:
-          mempool.add(m)
-
     of StreamCommand.Abort:
       return
 
