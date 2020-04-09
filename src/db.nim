@@ -36,40 +36,30 @@ type DbStatus* {.pure.} = enum
 
 var db: RocksDb
 
-proc toByte(val: Prefix): seq[byte] = @[cast[byte](val)]
+proc toByte[T](x: var T): seq[byte] {.inline.} =
+  when T is uint8:
+    @[byte x]
+  else:
+    result = newSeq[byte](sizeof(T))
+    when T is uint16:
+      bigEndian16(addr result[0], addr x)
+    elif T is uint32:
+      bigEndian32(addr result[0], addr x)
+    elif T is uint64:
+      bigEndian64(addr result[0], addr x)
+    else:
+      raiseAssert("unsupported type")
 
-proc toByte(val: var uint8): seq[byte] = @[cast[byte](val)]
+proc toByte[T](x: T): seq[byte] {.inline.} =
+  when T is uint8:
+    @[byte x]
+  else:
+    var v = x
+    v.toByte
 
-proc toByte(val: uint8): seq[byte] = @[cast[byte](val)]
+proc toByte(val: Prefix): seq[byte] {.inline.} = @[byte val]
 
-proc toByte(s: string): seq[byte] = cast[seq[byte]](toSeq(s))
-
-proc toByte(val: var uint16): seq[byte] =
-  result = newSeq[byte](2)
-  bigEndian16(addr result[0], addr val)
-
-proc toByte(val: uint16): seq[byte] =
-  result = newSeq[byte](2)
-  var v: uint16 = val
-  bigEndian16(addr result[0], addr v)
-
-proc toByte(val: var uint32): seq[byte] =
-  result = newSeq[byte](4)
-  bigEndian32(addr result[0], addr val)
-
-proc toByte(val: uint32): seq[byte] =
-  result = newSeq[byte](4)
-  var v: uint32 = val
-  bigEndian32(addr result[0], addr v)
-
-proc toByte(val: var uint64): seq[byte] =
-  result = newSeq[byte](8)
-  bigEndian64(addr result[0], addr val)
-
-proc toByte(val: uint64): seq[byte] =
-  result = newSeq[byte](8)
-  var v: uint64 = val
-  bigEndian64(addr result[0], addr v)
+proc toByte(s: string): seq[byte] {.inline.} = cast[seq[byte]](s.toSeq)
 
 proc toString(s: openarray[byte]): string =
   result = newStringOfCap(len(s))
