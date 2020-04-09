@@ -76,25 +76,6 @@ proc toString(s: openarray[byte]): string =
   for c in s:
     result.add(cast[char](c))
 
-proc toUint(s: var seq[byte]): uint8 or uint16 or uint32 or uint64 =
-  if s.len == 8:
-    var b = newSeq[byte](8)
-    bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
-    result = cast[ptr uint64](addr b[0])[]
-  elif s.len == 4:
-    debug "s=4"
-    var r32: uint32
-    var b = newSeq[byte](4)
-    bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
-    r32 = cast[ptr uint32](addr b[0])[]
-    result = r32
-  elif s.len == 2:
-    var b = newSeq[byte](2)
-    bigEndian16(addr b[0], cast[ptr uint16](addr s[0]))
-    result = cast[ptr uint16](addr b[0])[]
-  elif s.len == 1:
-    result = cast[uint8](s[0])
-
 proc toUint64(s: var seq[byte]): uint64 =
   var b = newSeq[byte](8)
   bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
