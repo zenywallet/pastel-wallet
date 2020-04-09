@@ -36,7 +36,7 @@ type DbStatus* {.pure.} = enum
 
 var db: RocksDb
 
-proc toByte[T](x: var T): seq[byte] {.inline.} =
+proc toBytes[T](x: var T): seq[byte] {.inline.} =
   when T is uint8:
     @[byte x]
   else:
@@ -50,16 +50,16 @@ proc toByte[T](x: var T): seq[byte] {.inline.} =
     else:
       raiseAssert("unsupported type")
 
-proc toByte[T](x: T): seq[byte] {.inline.} =
+proc toBytes[T](x: T): seq[byte] {.inline.} =
   when T is uint8:
     @[byte x]
   else:
     var v = x
-    v.toByte
+    v.toBytes
 
-proc toByte(val: Prefix): seq[byte] {.inline.} = @[byte val]
+proc toBytes(val: Prefix): seq[byte] {.inline.} = @[byte val]
 
-proc toByte(s: string): seq[byte] {.inline.} = cast[seq[byte]](s.toSeq)
+proc toBytes(s: string): seq[byte] {.inline.} = cast[seq[byte]](s.toSeq)
 
 proc toString(s: openarray[byte]): string =
   result = newStringOfCap(len(s))
@@ -109,22 +109,22 @@ proc toUint8(b: byte): uint8 =
   result = cast[uint8](b)
 
 proc setParam*(param_id: uint32, value: uint32) =
-  let key = concat(Prefix.params.toByte, param_id.toByte)
-  let value = value.toByte
+  let key = concat(Prefix.params.toBytes, param_id.toBytes)
+  let value = value.toBytes
   db.put(key, value)
 
 proc setParam*(param_id: uint32, value: uint64) =
-  let key = concat(Prefix.params.toByte, param_id.toByte)
-  let value = value.toByte
+  let key = concat(Prefix.params.toBytes, param_id.toBytes)
+  let value = value.toBytes
   db.put(key, value)
 
 proc setParam*(param_id: uint32, value: string) =
-  let key = concat(Prefix.params.toByte, param_id.toByte)
-  let value = value.toByte
+  let key = concat(Prefix.params.toBytes, param_id.toBytes)
+  let value = value.toBytes
   db.put(key, value)
 
 proc getParamUint32*(param_id: uint32): tuple[err: DbStatus, res: uint32] =
-  let key = concat(Prefix.params.toByte, param_id.toByte)
+  let key = concat(Prefix.params.toBytes, param_id.toBytes)
   var d = db.get(key)
   if d.len == 4:
     var b = newSeq[byte](4)
@@ -134,7 +134,7 @@ proc getParamUint32*(param_id: uint32): tuple[err: DbStatus, res: uint32] =
     (DbStatus.NotFound, cast[uint32](nil))
 
 proc getParamUint64*(param_id: uint32): tuple[err: DbStatus, res: uint64] =
-  let key = concat(Prefix.params.toByte, param_id.toByte)
+  let key = concat(Prefix.params.toBytes, param_id.toBytes)
   var d = db.get(key)
   if d.len == 8:
     var b = newSeq[byte](8)
@@ -144,7 +144,7 @@ proc getParamUint64*(param_id: uint32): tuple[err: DbStatus, res: uint64] =
     (DbStatus.NotFound, cast[uint64](nil))
   
 proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
-  let key = concat(Prefix.params.toByte, param_id.toByte)
+  let key = concat(Prefix.params.toBytes, param_id.toBytes)
   var d = db.get(key)
   if d.len > 0:
     (DbStatus.Success, d.toString)
@@ -152,7 +152,7 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
     (DbStatus.NotFound, cast[string](nil))
 
 proc delTable*(prefix: Prefix): uint64 {.discardable.} =
-  let key = prefix.toByte
+  let key = prefix.toBytes
   var count = 0'u64
   for d in db.gets(key):
     db.del(d.key)
@@ -160,12 +160,12 @@ proc delTable*(prefix: Prefix): uint64 {.discardable.} =
   count
 
 proc setXpub(wid: uint64, xpub: string) =
-  let key = concat(Prefix.xpubs.toByte, wid.toByte)
-  let val = xpub.toByte
+  let key = concat(Prefix.xpubs.toBytes, wid.toBytes)
+  let val = xpub.toBytes
   db.put(key, val)
 
 proc getXpub*(wid: uint64): tuple[err: DbStatus, res: string] =
-  let key = concat(Prefix.xpubs.toByte, wid.toByte)
+  let key = concat(Prefix.xpubs.toBytes, wid.toBytes)
   var d = db.get(key)
   if d.len > 0:
     result = (DbStatus.Success, d.toString)
@@ -173,29 +173,29 @@ proc getXpub*(wid: uint64): tuple[err: DbStatus, res: string] =
     result = (DbStatus.NotFound, cast[string](nil))
 
 proc delXpub(wid: uint64) =
-  let key = concat(Prefix.xpubs.toByte, wid.toByte)
+  let key = concat(Prefix.xpubs.toBytes, wid.toBytes)
   db.del(key)
 
 proc delXpubs() =
-  let key = Prefix.xpubs.toByte
+  let key = Prefix.xpubs.toBytes
   for d in db.gets(key):
     db.del(d.key)
 
 proc setWallet*(xpubkey: string, wid: uint64, sequence: uint64,
                 next_0_index: uint32, next_1_index: uint32) =
-  let key = concat(Prefix.wallets.toByte,
-                  xpubkey.toByte,
-                  wid.toByte)
-  let val = concat(sequence.toByte,
-                  next_0_index.toByte,
-                  next_1_index.toByte)
+  let key = concat(Prefix.wallets.toBytes,
+                  xpubkey.toBytes,
+                  wid.toBytes)
+  let val = concat(sequence.toBytes,
+                  next_0_index.toBytes,
+                  next_1_index.toBytes)
   db.put(key, val)
   setXpub(wid, xpubkey)
 
 proc getWallet*(xpubkey: string): tuple[err: DbStatus,
                 res: tuple[wallet_id: uint64, sequence: uint64,
                 next_0_index: uint32, next_1_index: uint32]] =
-  let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
+  let key = concat(Prefix.wallets.toBytes, xpubkey.toBytes)
   var d = db.gets(key)
   if d.len > 0:
     let wid = d[0].key[^8..^1].toUint64
@@ -213,7 +213,7 @@ proc getWallet*(wid: uint64): tuple[err: DbStatus,
   let ret_xpub = getXpub(wid)
   if ret_xpub.err == DbStatus.Success:
     let xpubkey = ret_xpub.res
-    let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
+    let key = concat(Prefix.wallets.toBytes, xpubkey.toBytes)
     var d = db.gets(key)
     if d.len > 0:
       let chk_wid = d[0].key[^8..^1].toUint64
@@ -229,7 +229,7 @@ proc getWallet*(wid: uint64): tuple[err: DbStatus,
 iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
                     wallet_id: uint64, sequence: uint64,
                     next_0_index: uint32, next_1_index: uint32] =
-  let key = concat(Prefix.wallets.toByte, xpubkey.toByte)
+  let key = concat(Prefix.wallets.toBytes, xpubkey.toBytes)
   for d in db.gets(key):
     let xpubkey = d.key[1..^9].toString
     let wid = d.key[^8..^1].toUint64
@@ -274,17 +274,17 @@ proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
 
 proc setHdaddr(wid: uint64, change: uint32, index: uint32,
               address: string, sequence: uint64) =
-  let key = concat(Prefix.hdaddrs.toByte,
-                  wid.toByte,
-                  change.toByte,
-                  index.toByte,
-                  address.toByte)
-  let val = sequence.toByte
+  let key = concat(Prefix.hdaddrs.toBytes,
+                  wid.toBytes,
+                  change.toBytes,
+                  index.toBytes,
+                  address.toBytes)
+  let val = sequence.toBytes
   db.put(key, val)
 
 iterator getHdaddrs*(wid: uint64): tuple[change: uint32,
                     index: uint32, address: string, sequence: uint64] =
-  let key = concat(Prefix.hdaddrs.toByte, wid.toByte)
+  let key = concat(Prefix.hdaddrs.toBytes, wid.toBytes)
   for d in db.gets(key):
     let change = d.key[9..12].toUint32
     let index = d.key[13..16].toUint32
@@ -294,18 +294,18 @@ iterator getHdaddrs*(wid: uint64): tuple[change: uint32,
 
 proc setAddress*(address: string, change: uint32, index: uint32,
                 wid: uint64, sequence: uint64) =
-  let key = concat(Prefix.addresses.toByte,
-                  address.toByte,
-                  change.toByte,
-                  index.toByte,
-                  wid.toByte)
-  let val = sequence.toByte
+  let key = concat(Prefix.addresses.toBytes,
+                  address.toBytes,
+                  change.toBytes,
+                  index.toBytes,
+                  wid.toBytes)
+  let val = sequence.toBytes
   db.put(key, val)
   setHdaddr(wid, change, index, address, sequence)
 
 iterator getAddresses*(address: string): tuple[change: uint32,
                       index: uint32, wid: uint64, sequence: uint64] =
-  let key = concat(Prefix.addresses.toByte, address.toByte)
+  let key = concat(Prefix.addresses.toBytes, address.toBytes)
   for d in db.gets(key):
     let change = d.key[^16..^13].toUint32
     let index = d.key[^12..^9].toUint32
@@ -315,7 +315,7 @@ iterator getAddresses*(address: string): tuple[change: uint32,
 
 iterator getAddresses*(wid: uint64): tuple[change: uint32,
                       index: uint32, address: string, sequence: uint64] =
-  let key = concat(Prefix.hdaddrs.toByte, wid.toByte)
+  let key = concat(Prefix.hdaddrs.toBytes, wid.toBytes)
   for d in db.gets(key):
     let change = d.key[9..12].toUint32
     let index = d.key[13..16].toUint32
@@ -325,7 +325,7 @@ iterator getAddresses*(wid: uint64): tuple[change: uint32,
 
 iterator getAddresses*(): tuple[address: string, change: uint32,
                       index: uint32, wid: uint64, sequence: uint64] =
-  let key = Prefix.addresses.toByte
+  let key = Prefix.addresses.toBytes
   for d in db.gets(key):
     let address = d.key[1..^17].toString
     let change = d.key[^16..^13].toUint32
@@ -336,15 +336,15 @@ iterator getAddresses*(): tuple[address: string, change: uint32,
 
 proc setAddrval*(wid: uint64, change: uint32, index: uint32,
                 address: string, value: uint64, utxo_count: uint32) =
-  let key = concat(Prefix.addrvals.toByte, wid.toByte,
-                  change.toByte, index.toByte, address.toByte)
-  let val = concat(value.toByte, utxo_count.toByte)
+  let key = concat(Prefix.addrvals.toBytes, wid.toBytes,
+                  change.toBytes, index.toBytes, address.toBytes)
+  let val = concat(value.toBytes, utxo_count.toBytes)
   db.put(key, val)
 
 iterator getAddrvals*(wid: uint64): tuple[change: uint32,
                       index: uint32, address: string,
                       value: uint64, utxo_cunt: uint32] =
-  let key = concat(Prefix.addrvals.toByte, wid.toByte)
+  let key = concat(Prefix.addrvals.toBytes, wid.toBytes)
   for d in db.gets(key):
     let change = d.key[9..12].toUint32
     let index = d.key[13..16].toUint32
@@ -354,23 +354,23 @@ iterator getAddrvals*(wid: uint64): tuple[change: uint32,
     yield (change, index, address, value, utxo_count)
 
 proc delAddrval*(wid: uint64, change: uint32, index: uint32, address: string) =
-  let key = concat(Prefix.addrvals.toByte, wid.toByte,
-                  change.toByte, index.toByte, address.toByte)
+  let key = concat(Prefix.addrvals.toBytes, wid.toBytes,
+                  change.toBytes, index.toBytes, address.toBytes)
   db.del(key)
 
 proc setAddrlog*(wid: uint64, sequence: uint64, txtype: uint8,
                 change: uint32, index: uint32, address: string,
                 value: uint64, txid: string, height: uint32, time: uint32) =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte,
-                  sequence.toByte, txtype.toByte,
-                  change.toByte, index.toByte, address.toByte)
-  let val = concat(value.toByte, txid.toByte, height.toByte, time.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes,
+                  sequence.toBytes, txtype.toBytes,
+                  change.toBytes, index.toBytes, address.toBytes)
+  let val = concat(value.toBytes, txid.toBytes, height.toBytes, time.toBytes)
   db.put(key, val)
 
 iterator getAddrlogs*(wid: uint64): tuple[sequence: uint64, txtype: uint8,
                 change: uint32, index: uint32, address: string,
                 value: uint64, txid: string, height: uint32, time: uint32] =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes)
   for d in db.gets(key):
     let sequence = d.key[9..16].toUint64
     let txtype = d.key[17].toUint8
@@ -387,7 +387,7 @@ iterator getAddrlogs_gt*(wid: uint64, sequence: uint64): tuple[
                         sequence: uint64, txtype: uint8, change: uint32,
                         index: uint32, address: string, value: uint64,
                         txid: string, height: uint32, time: uint32] =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes, sequence.toBytes)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
@@ -410,7 +410,7 @@ iterator getAddrlogsReverse*(wid: uint64): tuple[
                             sequence: uint64, txtype: uint8, change: uint32,
                             index: uint32, address: string, value: uint64,
                             txid: string, height: uint32, time: uint32] =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes)
   for d in db.getsReverse(key):
     let sequence = d.key[9..16].toUint64
     let txtype = d.key[17].toUint8
@@ -427,7 +427,7 @@ iterator getAddrlogsReverse_lt*(wid: uint64, sequence: uint64): tuple[
                                 sequence: uint64, txtype: uint8, change: uint32,
                                 index: uint32, address: string, value: uint64,
                                 txid: string, height: uint32, time: uint32] =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes, sequence.toBytes)
   for d in db.getsReverse_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
@@ -447,11 +447,11 @@ iterator getAddrlogsReverse_lt*(wid: uint64, sequence: uint64): tuple[
             d_txid, d_height, d_time)
 
 proc delAddrlogs*(wid: uint64, sequence: uint64) =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes, sequence.toBytes)
   db.dels(key)
 
 proc delAddrlogs_gt*(wid: uint64, sequence: uint64) =
-  let key = concat(Prefix.addrlogs.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.addrlogs.toBytes, wid.toBytes, sequence.toBytes)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
@@ -459,24 +459,24 @@ proc delAddrlogs_gt*(wid: uint64, sequence: uint64) =
       break
     let d_sequence = d.key[9..16]
     if d_sequence.toUint64 > sequence:
-      let d_txtype = d.key[17].toByte
+      let d_txtype = d.key[17].toBytes
       let d_change = d.key[18..21]
       let d_index = d.key[22..25]
       let d_address = d.key[26..^1]
-      let d_key = concat(Prefix.addrlogs.toByte, d_wid, d_sequence,
+      let d_key = concat(Prefix.addrlogs.toBytes, d_wid, d_sequence,
                         d_txtype, d_change, d_index, d_address)
       db.del(d_key)
 
 proc setUnspent*(wid: uint64, sequence: uint64, txid: string, n: uint32,
                 address: string, value: uint64) =
-  let key = concat(Prefix.unspents.toByte, wid.toByte,
-                  sequence.toByte, txid.toByte, n.toByte)
-  let val = concat(address.toByte, value.toByte)
+  let key = concat(Prefix.unspents.toBytes, wid.toBytes,
+                  sequence.toBytes, txid.toBytes, n.toBytes)
+  let val = concat(address.toBytes, value.toBytes)
   db.put(key, val)
 
 iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
                       n: uint32, address: string, value: uint64] =
-  let key = concat(Prefix.unspents.toByte, wid.toByte)
+  let key = concat(Prefix.unspents.toBytes, wid.toBytes)
   for d in db.gets(key):
     let sequence = d.key[9..16].toUint64
     let txid = d.key[17..^5].toString
@@ -488,7 +488,7 @@ iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
 iterator getUnspents_gt*(wid: uint64, sequence: uint64): tuple[
                         sequence: uint64, txid: string, n: uint32,
                         address: string, value: uint64] =
-  let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.unspents.toBytes, wid.toBytes, sequence.toBytes)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
@@ -503,11 +503,11 @@ iterator getUnspents_gt*(wid: uint64, sequence: uint64): tuple[
       yield (d_sequence, d_txid, d_n, d_address, d_value)
 
 proc delUnspents*(wid: uint64, sequence: uint64) =
-  let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.unspents.toBytes, wid.toBytes, sequence.toBytes)
   db.dels(key)
 
 proc delUnspents_gt*(wid: uint64, sequence: uint64) =
-  let key = concat(Prefix.unspents.toByte, wid.toByte, sequence.toByte)
+  let key = concat(Prefix.unspents.toBytes, wid.toBytes, sequence.toBytes)
   for d in db.gets_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
@@ -517,19 +517,19 @@ proc delUnspents_gt*(wid: uint64, sequence: uint64) =
     if d_sequence.toUint64 > sequence:
       let txid = d.key[17..^5]
       let n = d.key[^4..^1]
-      let d_key = concat(Prefix.unspents.toByte, d_wid, d_sequence, txid, n)
+      let d_key = concat(Prefix.unspents.toBytes, d_wid, d_sequence, txid, n)
       db.del(d_key)
 
 proc setBalance*(wid: uint64, value: uint64, utxo_count: uint32,
                 address_count: uint32) =
-  let key = concat(Prefix.balances.toByte, wid.toByte)
-  let val = concat(value.toByte, utxo_count.toByte, address_count.toByte)
+  let key = concat(Prefix.balances.toBytes, wid.toBytes)
+  let val = concat(value.toBytes, utxo_count.toBytes, address_count.toBytes)
   db.put(key, val)
 
 proc getBalance*(wid: uint64): tuple[err: DbStatus,
                 res: tuple[value: uint64, utxo_cunt: uint32,
                 address_count: uint32]] =
-  let key = concat(Prefix.balances.toByte, wid.toByte)
+  let key = concat(Prefix.balances.toBytes, wid.toBytes)
   var d = db.get(key)
   if d.len > 0:
     let value = d[0..7].toUint64
@@ -541,16 +541,16 @@ proc getBalance*(wid: uint64): tuple[err: DbStatus,
               cast[uint32](nil)))
 
 proc delBalance*(wid: uint64) =
-  let key = concat(Prefix.balances.toByte, wid.toByte)
+  let key = concat(Prefix.balances.toBytes, wid.toBytes)
   db.del(key)
 
 proc setTxtime*(txid: string, trans_time: uint64) =
-  let key = concat(Prefix.txtimes.toByte, txid.toByte)
-  let val = trans_time.toByte
+  let key = concat(Prefix.txtimes.toBytes, txid.toBytes)
+  let val = trans_time.toBytes
   db.put(key, val)
 
 proc getTxtime*(txid: string): tuple[err: DbStatus, res: uint64] =
-  let key = concat(Prefix.txtimes.toByte, txid.toByte)
+  let key = concat(Prefix.txtimes.toBytes, txid.toBytes)
   var d = db.get(key)
   if d.len > 0:
     let trans_time = d.toUint64
@@ -559,12 +559,12 @@ proc getTxtime*(txid: string): tuple[err: DbStatus, res: uint64] =
     result = (DbStatus.NotFound, cast[uint64](nil))
 
 proc delTxtime*(txid: string) =
-  let key = concat(Prefix.txtimes.toByte, txid.toByte)
+  let key = concat(Prefix.txtimes.toBytes, txid.toBytes)
   db.del(key)
 
 proc getLastUsedAddrIndex*(wid: uint64, change: uint32): tuple[err: DbStatus, res: uint32] =
   result = (DbStatus.NotFound, cast[uint32](nil))
-  let key = concat(Prefix.addrvals.toByte, wid.toByte, change.toByte)
+  let key = concat(Prefix.addrvals.toBytes, wid.toBytes, change.toBytes)
   for d in db.getsReverse(key):
     result = (DbStatus.Success, d.key[13..16].toUint32)
     break
@@ -607,8 +607,8 @@ when isMainModule:
   for d in getUnspents(1):
     echo d
 
-  let key1 = concat(Prefix.rewards.toByte, 10'u64.toByte)
-  let val1 = 5'u64.toByte
+  let key1 = concat(Prefix.rewards.toBytes, 10'u64.toBytes)
+  let val1 = 5'u64.toBytes
   db.put(key1, val1)
   echo db.get(key1)
   db.del(key1)
@@ -616,18 +616,18 @@ when isMainModule:
   db.put(key1, val1)
 
   for i in 1..10:
-    let k = concat(Prefix.rewards.toByte, cast[uint64](i * 10).toByte)
-    let v = cast[uint64](i * 10).toByte
+    let k = concat(Prefix.rewards.toBytes, cast[uint64](i * 10).toBytes)
+    let v = cast[uint64](i * 10).toBytes
     db.put(k, v)
 
   var i = 0
-  for d in db.gets_nobreak(Prefix.rewards.toByte):
+  for d in db.gets_nobreak(Prefix.rewards.toBytes):
     echo "d=", d
     inc(i)
     if i > 3:
       break
 
-  let key2 = Prefix.rewards.toByte
+  let key2 = Prefix.rewards.toBytes
   echo db.gets(key2)
   db.dels(key2)
   echo db.gets(key2)
