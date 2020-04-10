@@ -651,6 +651,8 @@ pastel.ready = function() {
 
   pastel.unspents_after_actions = [];
 
+  var cur_balance = null;
+  var cur_unconfs = null;
   pastel.secure_recv = function(json) {
     var type = json['type'];
     var data = json['data'];
@@ -745,15 +747,31 @@ pastel.ready = function() {
       } else {
         $('#wallet-balance .receive').fadeOut(400);
       }
+      cur_unconfs = {
+        send: send,
+        fee: fee,
+        recv: recv
+      };
+      if(cur_balance) {
+        var balance_unconfs = cur_balance.clone().add(recv).subtract(send).subtract(fee);
+        $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
+      }
       TradeLogs.unconfs(data);
       wallet.setUnconfs(data);
       pastel.utxoballs.setUnconfs(data);
     } else if(type == 'balance') {
-      $('#wallet-balance .balance').text(conv_coin(data));
+      cur_balance = UINT64(String(data));
+      if(cur_unconfs) {
+        var balance_unconfs = cur_balance.clone().add(cur_unconfs.recv).subtract(cur_unconfs.send).subtract(cur_unconfs.fee);
+        $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
+      } else {
+        $('#wallet-balance .balance').text(conv_coin(data));
+      }
       var el = document.getElementById('wallet-balance');
       if(!el.style.display) {
         fadeIn(el, 800);
       }
+      cur_balance = UINT64(String(data));
     } else if(type == 'addresses') {
     } else if(type == 'unused') {
       var changed = wallet.setUnusedAddress(data);
