@@ -517,16 +517,6 @@ function Wallet() {
     }
   }
 
-  var stime, etime;
-  function time_start(label) {
-    stime = new Date();
-    console.log('start time ' + label, stime);
-  }
-  function time_end() {
-    etime = new Date();
-    console.log('end time', etime, etime - stime);
-  }
-
   var cb_set_change = function(data) {}
   this.setChange = function(data) {
     console.log('wallet change', data);
