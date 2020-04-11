@@ -55,7 +55,6 @@ function Wallet() {
     seeds.push({seed: seed, type: password ? 2 : 1});
     var nonstd_seeds = this.getNonStandardMnemonicToSeeds(mnemonic, mlang);
     seeds = seeds.concat(nonstd_seeds);
-    console.log('seeds:', seeds);
     return seeds;
   }
 
@@ -397,7 +396,6 @@ function Wallet() {
       if(!prelock && shieldedKeys.unlock) {
         shieldedKeys.priv = [];
         delete shieldedKeys.unlock;
-        console.log('after prelock: ' + JSON.stringify(shieldedKeys));
         return true;
       }
       return false;
@@ -415,10 +413,8 @@ function Wallet() {
     p = cipher.yespower_n4r32(sha256d(p), 32);
     var enc = cipher.enc_json(p, shieldedKeys.priv);
 
-    console.log(enc);
     stor.set_shield(enc);
     stor.set_lock_type(lock_type);
-    console.log('get_shield=', stor.get_shield());
 
     if(stor.get_lock_type() != lock_type) {
       return false;
@@ -437,7 +433,6 @@ function Wallet() {
     } else {
       shieldedKeys.priv = [];
     }
-    console.log('after lock: ' + JSON.stringify(shieldedKeys));
     return true;
   }
 
@@ -467,7 +462,6 @@ function Wallet() {
         return false;
       }
       shieldedKeys.unlock = true;
-      console.log('after unlock: ' + JSON.stringify(shieldedKeys));
       return true;
     } catch(ex) {
       console.log(ex);
@@ -481,7 +475,6 @@ function Wallet() {
     var mix;
     for(var i in cardInfos) {
       var s = cardInfos[i];
-      console.log('cardInfos', JSON.stringify(s));
       var sbuf = base58.dec(s.seed || s.orig);
       if(!sbuf && !s.seed && s.orig) {
         sbuf = cipher.yespower_n4r32(sha256d(s.orig), 32);
@@ -509,7 +502,6 @@ function Wallet() {
   this.setMnemonic = function(words, lang_id) {
     this.initShieldedKeys();
     var sds = this.getMnemonicToSeeds(words, lang_id);
-    console.log(sds);
     for(var i in sds) {
       var sd = sds[i];
       var kp = this.getHdNodeKeyPairs(sd.seed);
@@ -519,7 +511,6 @@ function Wallet() {
 
   var cb_set_change = function(data) {}
   this.setChange = function(data) {
-    console.log('wallet change', data);
     cb_set_change(data);
   }
 
@@ -580,12 +571,10 @@ function Wallet() {
 
     for(var i in _utxos) {
       var utxo = _utxos[i];
-      console.log('addInput', tx.addInput(utxo.txid, utxo.n));
-      console.log(utxo.address, utxo.value.toString());
+      tx.addInput(utxo.txid, utxo.n);
       in_value.add(UINT64(String(utxo.value)));
       sign_utxos.push(utxo);
       utxo_count++;
-      console.log(in_value.toString(), value.toString());
 
       if(in_value.gt(value)) {
         var sub = in_value.clone().subtract(value);
@@ -637,7 +626,6 @@ function Wallet() {
       var rawtx = tx.build().toHex();
       var total_bytes = rawtx.length / 2;
       var fee = in_value.clone().subtract(value);
-      console.log('tx1', fee.toString(), total_bytes, rawtx);
       send_tx(rawtx, function(result) {
         cb(result);
       });
@@ -666,7 +654,6 @@ function Wallet() {
       }
       var rawtx = tx.build().toHex();
       var total_bytes = rawtx.length / 2;
-      console.log('tx2', fee, total_bytes, rawtx);
 
       if(fee >= total_bytes) {
         better_tx = rawtx;
@@ -678,7 +665,6 @@ function Wallet() {
       tx.removeSign();
     }
     if(better_tx != null) {
-      console.log('tx2 best', better_fee, better_size, better_tx);
       send_tx(better_tx, function(result) {
         cb(result);
       });
@@ -712,13 +698,11 @@ function Wallet() {
       } else {
         var rawtx = tx.build().toHex();
         var total_bytes = rawtx.length / 2;
-        console.log('tx2', sign_fee, total_bytes, rawtx);
 
         if(sign_fee >= total_bytes) {
           better_tx = rawtx;
           better_size = total_bytes;
           better_fee = sign_fee;
-          console.log('tx2 best', better_fee, better_size, better_tx);
           send_tx(better_tx, function(result) {
             cb(result);
           });
@@ -730,7 +714,6 @@ function Wallet() {
             sign_worker3();
           } else {
             if(better_tx != null) {
-              console.log('tx2 best', better_fee, better_size, better_tx);
               send_tx(better_tx, function(result) {
                 cb(result);
               });
@@ -776,7 +759,6 @@ function Wallet() {
         var rawtx = tx.build().toHex();
         var total_bytes = rawtx.length / 2;
         var fee = in_value.clone().subtract(value);
-        console.log('tx1', fee.toString(), total_bytes, rawtx);
         send_tx(rawtx, function(result) {
           cb(result);
         });
@@ -818,16 +800,13 @@ function Wallet() {
     }
 
     var utxos = _utxos.concat(_unconfs);
-    console.log('send target utxos', JSON.stringify(utxos));
     function addinput_worker() {
       var utxo = utxos.shift();
       if(utxo) {
-        console.log('addInput', tx.addInput(utxo.txid, utxo.n));
-        console.log(utxo.address, utxo.value.toString());
+        tx.addInput(utxo.txid, utxo.n);
         in_value.add(UINT64(String(utxo.value)));
         sign_utxos.push(utxo);
         utxo_count++;
-        console.log(in_value.toString(), value.toString());
 
         if(in_value.gt(value)) {
           var sub = in_value.clone().subtract(value);
@@ -870,7 +849,6 @@ function Wallet() {
       return;
     }
     send_busy = true;
-    console.log('send', address, value_str);
     var value = UINT64(String(value_str));
     if(value.lt(UINT64(String(546)))) {
       send_busy = false;
