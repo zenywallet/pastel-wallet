@@ -275,7 +275,6 @@ proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
     var height = json["height"].getUint32
     var time = json["time"].getUint32
     if block_header_prev_height + 1 == height:
-      var addresses = json["addrs"]
       for b in json["addrs"].pairs:
         var address = b.key
         var val = b.val
