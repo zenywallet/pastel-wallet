@@ -956,6 +956,7 @@ asm """
           icon.removeClass('open');
           elm.attr('title', 'Locked');
           PhraseLock.notify_locked();
+          PhraseLock.disableInactivity();
         }
         setTimeout(function() {
           elm.focus();
@@ -967,6 +968,27 @@ asm """
             icon.addClass('open');
             elm.attr('title', __t('Unlocked'));
             PhraseLock.notify_unlocked();
+            var locked_flag = false;
+            PhraseLock.enableInactivity(function() {
+              if(icon.hasClass('open')) {
+                if(pastel.wallet && pastel.wallet.lockShieldedKeys()) {
+                  locked_flag = true;
+                }
+              }
+            }, function() {
+              if(icon.hasClass('open') && locked_flag) {
+                icon.removeClass('open');
+                elm.attr('title', 'Locked');
+                if(sendrecv_switch == 1) {
+                  PhraseLock.notify_locked();
+                } else {
+                  sendrecv_switch_sendafter = function() {
+                    PhraseLock.notify_locked();
+                  }
+                }
+                PhraseLock.disableInactivity();
+              }
+            });
           } else if(status == PhraseLock.PLOCK_FAILED_QR) {
             Notify.show(__t('Error'), __t('Failed to unlock. Wrong key card was scanned.'), Notify.msgtype.error);
           } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
@@ -1193,6 +1215,7 @@ asm """
   var sendrecv_switch_tval;
   var sendrecv_last = null;
   var sendrecv_wait = 0;
+  var sendrecv_switch_sendafter = function() {}
   function send_switch() {
     sendrecv_switch_busy = true;
     if(sendrecv_last == 2) {
@@ -1204,6 +1227,7 @@ asm """
             onComplete : function() {
               sendrecv_last = 1;
               sendrecv_switch_busy = false;
+              sendrecv_switch_sendafter();
             }
           });
           initSendForm();
@@ -1215,6 +1239,7 @@ asm """
         onComplete : function() {
           sendrecv_last = 1;
           sendrecv_switch_busy = false;
+          sendrecv_switch_sendafter();
         }
       });
       initSendForm();

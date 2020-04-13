@@ -1501,6 +1501,85 @@ var PhraseLock = (function() {
       }).modal('show');
     }
   }
+
+  var inactivity_time = 600000;
+  var _inactivity_cb = function() {}
+  var _notify_cb = function() {}
+  var notify_postpone = false;
+
+  var inactivity_called = false;
+  var inactivity_internal = function() {
+    if(inactivity_called) {
+      return;
+    }
+    inactivity_called = true;
+    _inactivity_cb();
+    if(document.hidden) {
+      notify_postpone = true;
+    } else {
+      notify_postpone = false;
+      _notify_cb();
+    }
+  }
+  var activity_tval = null;
+  function reset_timer() {
+    clearTimeout(activity_tval);
+    activity_tval = null;
+    inactivity_called = false;
+    activity_tval = setTimeout(inactivity_internal, inactivity_time);
+  }
+
+  var stime, etime;
+  function visibility_func() {
+    if(document.hidden) {
+      stime = new Date();
+    } else {
+      if(notify_postpone) {
+        notify_postpone = false;
+        _notify_cb();
+      } else {
+        etime = new Date();
+        if(stime) {
+          if(etime - stime >= inactivity_time) {
+            inactivity_internal();
+          }
+        }
+      }
+    }
+  }
+
+  Module.enableInactivity = function(cb, notify_cb) {
+    _inactivity_cb = cb;
+    _notify_cb = notify_cb;
+    clearTimeout(activity_tval);
+    stime = null;
+    etime = null;
+    notify_postpone = false;
+    var evts = ['mousemove', 'keypress'];
+    for(var i in evts) {
+      var evt = evts[i];
+      window.removeEventListener(evt, reset_timer, true);
+      window.addEventListener(evt, reset_timer, true);
+    }
+    window.removeEventListener('visibilitychange', visibility_func, true);
+    window.addEventListener('visibilitychange', visibility_func, true);
+  }
+
+  Module.disableInactivity = function() {
+    _inactivity_cb = function() {}
+    _notify_cb = function() {}
+    clearTimeout(activity_tval);
+    stime = null;
+    etime = null;
+    notify_postpone = false;
+    var evts = ['mousemove', 'keypress'];
+    for(var i in evts) {
+      var evt = evts[i];
+      window.removeEventListener(evt, reset_timer, true);
+    }
+    window.removeEventListener('visibilitychange', visibility_func, true);
+  }
+
   return Module;
 })();
 
