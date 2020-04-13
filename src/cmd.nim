@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import terminal, parseopt, db, blockstor, logs, strutils, server
-const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
+import config
 
 proc usage() =
   stdout.styledWriteLine(styleBright, fgCyan, """

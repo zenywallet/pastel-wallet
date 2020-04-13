@@ -249,38 +249,3 @@ func var_uint*(n: uint64): seq =
   elif n <= 0xffff: concat(@[uint8(0xfd)], toSeq(cast[array[2, byte]](uint16(n))))
   elif n <= 0xffffffff'u64: concat(@[uint8(0xfe)], toSeq(cast[array[4, byte]](uint32(n))))
   else: concat(@[uint8(0xff)], toSeq(cast[array[8, byte]](uint64(n))))
-
-var bitzeny_chainparams = chainparams(
-  chainname: "main",
-  b58prefix_pubkey_address: 0x51,
-  b58prefix_script_address: 0x05,
-  bech32_hrp: "sz",
-  b58prefix_secret_address: 0x80,
-  b58prefix_bip32_privkey: 0x0488ade4,
-  b58prefix_bip32_pubkey: 0x0488b21e,
-  netmagic: [byte 0xda, 0xad, 0xbe, 0xf9],
-  genesisblockhash: [byte 0xce, 0xf5, 0xb8, 0x9f, 0x4e, 0xbf, 0x38, 0xa7,
-                    0x3c, 0xd4, 0x40, 0x43, 0x9e, 0xda, 0xca, 0x4a,
-                    0xfa, 0x7c, 0x7a, 0xd8, 0x2b, 0xe2, 0x81, 0x47,
-                    0x3b, 0x9e, 0x5e, 0xe5, 0xf7, 0x09, 0x00, 0x00],
-  default_port: 9253,
-  dnsseeds: @["seed.bitzeny.jp"])
-
-var testnet_bitzeny_chainparams = chainparams(
-  chainname: "test",
-  b58prefix_pubkey_address: 0x6f,
-  b58prefix_script_address: 0xc4,
-  bech32_hrp: "tz",
-  b58prefix_secret_address: 0xef,
-  b58prefix_bip32_privkey: 0x04358394,
-  b58prefix_bip32_pubkey: 0x043587cf,
-  netmagic: [byte 0x59, 0x45, 0x4e, 0x59],
-  genesisblockhash: [byte 0x5c, 0x22, 0xde, 0x9b, 0x02, 0xe7, 0x15, 0x02,
-                    0xfd, 0x7e, 0xdd, 0xa7, 0xb6, 0x1a, 0x54, 0x3c,
-                    0xd2, 0x3f, 0xb6, 0x2e, 0xa2, 0x37, 0x7f, 0xdb,
-                    0xbd, 0x95, 0xf5, 0x79, 0x0c, 0x3a, 0x00, 0x00],
-  default_port: 19253,
-  dnsseeds: @["testnet-seed.bitzeny.jp"])
-
-var bitzeny_chain*: btc_chainparams = set_chainparams(bitzeny_chainparams)
-var testnet_bitzeny_chain*: btc_chainparams = set_chainparams(testnet_bitzeny_chainparams)

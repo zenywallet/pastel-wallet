@@ -4,10 +4,7 @@ import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hash
 import ../deps/"websocket.nim"/websocket
 import libbtc
 import blockstor, db, events, logs, stream
-
-const gaplimit: uint32 = 20
-const blockstor_apikey = "sample-969a6d71-a259-447c-a486-90bac964992b"
-var chain = bitzeny_chain
+import config
 
 var
   threads: array[5, Thread[void]]
