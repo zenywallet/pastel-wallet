@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, byteutils, marshal, sequtils, logs
+import os, byteutils, marshal, sequtils, logs, strutils
 
 const libbtcPath = splitPath(currentSourcePath()).head & "/../deps/libbtc"
 {.passL: libbtcPath & "/.libs/libbtc.a".}
@@ -171,11 +171,35 @@ type
     b58prefix_secret_address*: uint8
     b58prefix_bip32_privkey*: uint32
     b58prefix_bip32_pubkey*: uint32
-    netmagic*: array[4, byte]
-    genesisblockhash*: array[32, byte]
+    netmagic*: seq[byte] # 4 bytes
+    genesisblockhash*: seq[byte] # 32 bytes
     default_port*: int32
     dnsseeds*: seq[string]
 
+proc toBytesFromHexBE*(s: string): seq[byte] =
+  result = @[]
+  var s2: string
+  if s.startsWith("0x"):
+    if s.len mod 2 == 0:
+      s2 = s[2..s.high]
+    else:
+      s2 = "0" & s[2..s.high]
+  else:
+    if s.len mod 2 == 0:
+      s2 = s
+    else:
+      s2 = "0" & s
+  for i in countdown(s2.len - 2, 0, 2):
+    result.add(fromHex[byte](s2[i..i+1]))
+
+proc toBytesFromHex*(s: string): seq[byte] =
+  result = @[]
+  if s.startsWith("0x"):
+    result = s.toBytesFromHexBE
+  else:
+    assert s.len mod 2 == 0, "invalid hex string length"
+    for i in countup(0, s.len - 2, 2):
+      result.add(fromHex[byte](s[i..i+1]))
 
 proc set_chainparams*(params: chainparams): btc_chainparams =
   var chain: btc_chainparams = btc_chainparams(
