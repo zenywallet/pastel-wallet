@@ -365,6 +365,8 @@ function reloadViewSafeEnd() {
 }
 
 var modal_recv_addrs = [];
+var active_recv_addr = null;
+var active_recv_idx = 0;
 function showRecvAddress(cb) {
   var wallet = pastel.wallet;
   wallet.getUnusedAddressList(5, function(addrs) {
@@ -383,6 +385,8 @@ function showRecvAddress(cb) {
             $(this).removeClass('active');
           });
           $(this).addClass('active');
+          active_recv_idx = idx;
+          active_recv_addr = modal_recv_addrs[idx];
           $('#receive-address .address').stop(true, true).fadeOut(200, function() {
             $(this).text(modal_recv_addrs[idx]).fadeIn(400);
             if(idx != 5 && modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
@@ -431,10 +435,24 @@ function showRecvAddress(cb) {
     }
 
     ball_selector_event('#receive-address .new .ball');
-    $('#receive-address .used').css("visibility", "hidden");
-    $('#receive-address .used').css({width: 0, 'margin-right': 0});
-    $('#receive-address .used .ball').removeClass('active');
-    $('#receive-address .address').css("visibility", "hidden").css("opacity", 0).text(modal_recv_addrs[0]);
+    $('#receive-address .used').css("visibility", "hidden").css("opacity", 0);
+    if(active_recv_idx == 5) {
+      modal_recv_addrs[5] = active_recv_addr;
+      $('#receive-address .used').css({width: 42, 'margin-right': 7});
+      $('#receive-address .used .ball').replaceWith('<div class="circular ui icon mini button ball tabindex" data-idx="5" tabindex="0"><img src="' + Ball.getImage(active_recv_addr, 28) + '"></div>');
+      ball_selector_event('#receive-address .used .ball');
+    } else {
+      $('#receive-address .used').css({width: 0, 'margin-right': 0});
+      $('#receive-address .used .ball').removeClass('active');
+      active_recv_idx = 0;
+      for(var i in modal_recv_addrs) {
+        if(active_recv_addr == modal_recv_addrs[i]) {
+          active_recv_idx = i;
+        }
+      }
+      active_recv_addr = modal_recv_addrs[active_recv_idx];
+    }
+    $('#receive-address .address').css("visibility", "hidden").css("opacity", 0).text(active_recv_addr);
     if(pastel.utxoballs) {
       pastel.utxoballs.click(utxoballs_click);
     }
@@ -554,8 +572,15 @@ function showRecvAddress(cb) {
 }
 
 function showRecvAddressAfterEffect() {
+  if(active_recv_idx == 5) {
+    $('#receive-address .used').css("visibility", "visible").animate({opacity: 1}, 400);
+  }
   $('#receive-address .new').fadeIn(400, function() {
-    $('#receive-address .new .ball:first').addClass('active');
+    if(active_recv_idx < 5) {
+      $('#receive-address .new .ball').eq(active_recv_idx).addClass('active');
+    } else {
+      $('#receive-address .used .ball').addClass('active');
+    }
     $('#receive-address .address').css("visibility", "visible").animate({opacity: 1}, 400);
   });
 }

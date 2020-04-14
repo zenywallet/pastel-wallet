@@ -666,6 +666,9 @@ i.receive {
 #receive-address .used .ui.ball img {
   pointer-events: none;
 }
+#receive-address .used .ui.ball, #receive-address .new .ui.ball {
+  pointer-events: auto;
+}
 #receive-address .btn-close {
   position: absolute;
   right: 0em;
