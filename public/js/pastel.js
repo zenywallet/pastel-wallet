@@ -649,6 +649,25 @@ pastel.ready = function() {
     });
   }
 
+  function update_unconfs(send, fee ,recv) {
+    if(send.greaterThan(UINT64(0))) {
+      if(fee.eq(0)) {
+        $('#wallet-balance .send span').text(conv_coin(send));
+      } else {
+        $('#wallet-balance .send span').text(conv_coin(send) + ' / ' + conv_coin(fee));
+      }
+      $('#wallet-balance .send').fadeIn(400);
+    } else {
+      $('#wallet-balance .send').fadeOut(400);
+    }
+    if(recv.greaterThan(UINT64(0))) {
+      $('#wallet-balance .receive span').text(conv_coin(recv));
+      $('#wallet-balance .receive').fadeIn(400);
+    } else {
+      $('#wallet-balance .receive').fadeOut(400);
+    }
+  }
+
   pastel.unspents_after_actions = [];
 
   var cur_balance = null;
@@ -730,39 +749,28 @@ pastel.ready = function() {
           }
         }
       }
-      if(send.greaterThan(UINT64(0))) {
-        if(fee.eq(0)) {
-          $('#wallet-balance .send span').text(conv_coin(send));
-        } else {
-          send.subtract(fee);
-          $('#wallet-balance .send span').text(conv_coin(send) + ' / ' + conv_coin(fee));
-        }
-        $('#wallet-balance .send').fadeIn(400);
-      } else {
-        $('#wallet-balance .send').fadeOut(400);
-      }
-      if(recv.greaterThan(UINT64(0))) {
-        $('#wallet-balance .receive span').text(conv_coin(recv));
-        $('#wallet-balance .receive').fadeIn(400);
-      } else {
-        $('#wallet-balance .receive').fadeOut(400);
+      send.subtract(fee);
+      update_unconfs(send, fee, recv);
+      if(!cur_unconfs || (send >= cur_unconfs.send && fee >= cur_unconfs.fee && recv >= cur_unconfs.recv)) {
+        var balance_unconfs = cur_balance.clone().add(recv).subtract(send).subtract(fee);
+        $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
       }
       cur_unconfs = {
         send: send,
         fee: fee,
         recv: recv
       };
-      if(cur_balance) {
-        var balance_unconfs = cur_balance.clone().add(recv).subtract(send).subtract(fee);
-        $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
-      }
       TradeLogs.unconfs(data);
       wallet.setUnconfs(data);
       pastel.utxoballs.setUnconfs(data);
     } else if(type == 'balance') {
       cur_balance = UINT64(String(data));
       if(cur_unconfs) {
-        var balance_unconfs = cur_balance.clone().add(cur_unconfs.recv).subtract(cur_unconfs.send).subtract(cur_unconfs.fee);
+        var send = cur_unconfs.send;
+        var fee = cur_unconfs.fee;
+        var recv = cur_unconfs.recv;
+        var balance_unconfs = cur_balance.clone().add(recv).subtract(send).subtract(fee);
+        update_unconfs(send, fee, recv);
         $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
       } else {
         $('#wallet-balance .balance').text(conv_coin(data));
