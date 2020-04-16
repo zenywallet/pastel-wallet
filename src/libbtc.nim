@@ -213,39 +213,39 @@ proc set_chainparams*(params: chainparams): btc_chainparams =
   zeroMem(addr chain.chainname, chain.chainname.len)
   for i, c in params.chainname:
     if i > chain.chainname.high:
-      debug "ERROR[set_chainparams]: chainname too long"
+      Debug.CommonError.write "ERROR[set_chainparams]: chainname too long"
       break
     chain.chainname[i] = c
 
   zeroMem(addr chain.bech32_hrp, chain.bech32_hrp.len)
   for i, c in params.bech32_hrp:
     if i > chain.bech32_hrp.high:
-      debug "ERROR[set_chainparams]: bech32_hrp too long"
+      Debug.CommonError.write "ERROR[set_chainparams]: bech32_hrp too long"
       break
     chain.bech32_hrp[i] = c
 
   zeroMem(addr chain.netmagic, chain.netmagic.len)
   for i, c in params.netmagic:
     if i > chain.netmagic.high:
-      debug "ERROR[set_chainparams]: netmagic too long"
+      Debug.CommonError.write "ERROR[set_chainparams]: netmagic too long"
       break
     chain.netmagic[i] = cast[cuchar](c)
 
   zeroMem(addr chain.genesisblockhash, chain.genesisblockhash.len)
   for i, c in params.genesisblockhash:
     if i > chain.genesisblockhash.high:
-      debug "ERROR[set_chainparams]: genesisblockhash too long"
+      Debug.CommonError.write "ERROR[set_chainparams]: genesisblockhash too long"
       break
     chain.genesisblockhash[i] = c
 
   zeroMem(addr chain.dnsseeds, btc_dns_seed.domain.len * chain.dnsseeds.len)
   for i, seed in params.dnsseeds:
     if i > chain.dnsseeds.high:
-      debug "ERROR[set_chainparams]: dnsseeds too long"
+      Debug.CommonError.write "ERROR[set_chainparams]: dnsseeds too long"
       break
     for j, c in seed:
       if j > chain.dnsseeds[i].domain.high:
-        debug "ERROR[set_chainparams]: domain too long"
+        Debug.CommonError.write "ERROR[set_chainparams]: domain too long"
         break
       chain.dnsseeds[i].domain[j] = c
   chain
