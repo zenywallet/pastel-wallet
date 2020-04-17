@@ -171,7 +171,7 @@ proc walletRollback(rollbacked_sequence: uint64) =
 
     let balance = blockstor.getAddress(addrs)
     if addrs.len != balance.resLen:
-      debug "error: getaddress len=", addrs.len, " reslen=", balance.resLen
+      Debug.CommonError.write "error: getaddress len=", addrs.len, " reslen=", balance.resLen
       return
 
     var pos = 0
@@ -307,7 +307,7 @@ proc main(): bool =
   result = false
   let j_marker = blockstor.getMarker(blockstor_apikey)
   if j_marker.kind == JNull:
-    echo "error: getMarker is null"
+    Debug.CommonError.write "error: getMarker is null"
     return
   let marker_err = getBsErrorCode(j_marker["err"].getInt)
   case marker_err
@@ -320,22 +320,22 @@ proc main(): bool =
       result = addressFinder(marker_sequence, last_sequence)
       let smarker = blockstor.setMarker(blockstor_apikey, last_sequence)
       if smarker.kind == JNull:
-        debug "error: setmarker is null"
+        Debug.CommonError.write "error: setmarker is null"
         return
       let smarker_err = getBsErrorCode(smarker["err"].getInt)
       if smarker_err != BsErrorCode.SUCCESS:
         debug "info: setmarker err=", smarker_err
     except:
-        echo "EXCEPTION: BsErrorCode.SUCCESS ", j_marker
+        Debug.CommonError.write "EXCEPTION: BsErrorCode.SUCCESS ", j_marker
         let e = getCurrentException()
-        debug e.name, ": ", e.msg
+        Debug.CommonError.write e.name, ": ", e.msg
   of BsErrorCode.ROLLBACKED:
     let res = j_marker["res"]
     let rollbacked_sequence = res["sequence"].getUint64
     walletRollback(rollbacked_sequence)
     let smarker_update = blockstor.setMarker(blockstor_apikey, rollbacked_sequence)
     if smarker_update.kind == JNull:
-      debug "error: setmarker in rollback is null"
+      Debug.CommonError.write "error: setmarker in rollback is null"
       return
     BallCommand.Rollbacked.send(BallDataRollbacked(sequence: rollbacked_sequence))
     let smarker_update_err = getBsErrorCode(smarker_update["err"].getInt)
@@ -344,9 +344,9 @@ proc main(): bool =
   of BsErrorCode.ROLLBACKING:
     debug "info: blockstor rollbacking"
   of BsErrorCode.UNKNOWN_APIKEY:
-    echo "error: invalid apikey"
+    Debug.CommonError.write "error: invalid apikey"
   else:
-    echo "error: getMarker err=", marker_err
+    Debug.CommonError.write "error: getMarker err=", marker_err
 
 proc threadWorkerFunc() {.thread.} =
   while active:
@@ -386,7 +386,7 @@ proc stream_main() {.thread.} =
           BallCommand.BsStream.send(BallDataBsStream(data: json))
         except:
           let e = getCurrentException()
-          echo e.name, ": ", e.msg
+          Debug.CommonError.write e.name, ": ", e.msg
 
   asyncCheck read()
   while true:
@@ -697,7 +697,7 @@ proc ball_main() {.thread.} =
             BallCommand.Height.send(BallDataHeight(wallet_id: ids[0]))
       except:
         let e = getCurrentException()
-        echo e.name, ": ", e.msg
+        Debug.CommonError.write e.name, ": ", e.msg
 
     of BallCommand.MemPool:
       var data = BallDataMemPool(ch_data.data)
