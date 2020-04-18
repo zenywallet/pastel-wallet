@@ -12,8 +12,8 @@ var
   active = true
   ready* = true
 
-const extkeyout_size: csize = 128
-const address_size: csize = 128
+const extkeyout_size: csize_t = 128
+const address_size: csize_t = 128
 proc hdaddress(xpubkey: string, change, index: uint32): string =
   result = ""
   let keypath: cstring = "m/" & $change & "/" & $index

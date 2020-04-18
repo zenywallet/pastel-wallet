@@ -77,10 +77,10 @@ var btc_mainnet_checkpoint_array* {.importc.}: ptr btc_checkpoint
 
 #echo btc_chainparams_main.default_port
 
-proc hd_gen_master*(chain: ptr btc_chainparams; masterkeyhex: cstring; strsize: csize): btc_bool {.importc.}
+proc hd_gen_master*(chain: ptr btc_chainparams; masterkeyhex: cstring; strsize: csize_t): btc_bool {.importc.}
 
 proc hd_derive*(chain: ptr btc_chainparams; masterkey: cstring; keypath: cstring;
-               extkeyout: cstring; extkeyout_size: csize): btc_bool {.importc.}
+               extkeyout: cstring; extkeyout_size: csize_t): btc_bool {.importc.}
 
 #proc hd_print_node*(chain: ptr btc_chainparams; nodeser: cstring): btc_bool {.importc.}
 
@@ -108,7 +108,7 @@ proc btc_hdnode_get_p2pkh_address*(node: ptr btc_hdnode; chain: ptr btc_chainpar
 
 proc btc_hdnode_has_privkey*(node: ptr btc_hdnode): btc_bool {.importc.}
 
-proc btc_hdnode_get_pub_hex*(node: ptr btc_hdnode; str: cstring; strsize: ptr csize): btc_bool {.importc.}
+proc btc_hdnode_get_pub_hex*(node: ptr btc_hdnode; str: cstring; strsize: ptr csize_t): btc_bool {.importc.}
 
 proc btc_hdnode_serialize_public*(node: ptr btc_hdnode; chain: ptr btc_chainparams;
                                  str: cstring; strsize: cint) {.importc.}
@@ -120,22 +120,22 @@ proc btc_base58_encode_check*(data: ptr UncheckedArray[uint8_t]; datalen: cint; 
                              strsize: cint): cint {.importc.}
 
 #proc printf(formatstr: cstring) {.header: "<stdio.h>", importc: "printf", varargs.}
-#proc strncpy(s1: ptr UncheckedArray[char]; s2: cstring; n: csize): cstring {.importc.}
+#proc strncpy(s1: ptr UncheckedArray[char]; s2: cstring; n: csize_t): cstring {.importc.}
 
 proc hd_print_node*(chain: ptr btc_chainparams; nodeser: cstring): btc_bool =
   var node: btc_hdnode
   if not btc_hdnode_deserialize(nodeser, chain, addr(node)):
     return false
-  var strsize: csize = 128
+  var strsize: csize_t = 128
   var str: cstring = newString(strsize) #array[strsize, char]
   btc_hdnode_get_p2pkh_address(addr(node), chain, str, cast[cint](strsize))
   debug "ext key: ", nodeser
-  const privkey_wif_size_bin: csize = 34
+  const privkey_wif_size_bin: csize_t = 34
   var pkeybase58c: array[privkey_wif_size_bin, uint8_t]
   pkeybase58c[0] = chain.b58prefix_secret_address
   pkeybase58c[33] = 1
   ##  always use compressed keys
-  const privkey_wif_size: csize = 128
+  const privkey_wif_size: csize_t = 128
   var privkey_wif: cstring = newString(privkey_wif_size) #array[privkey_wif_size, char]
   #memcpy(addr(pkeybase58c[1]), node.private_key, BTC_ECKEY_PKEY_LENGTH)
   debug $$node.private_key
@@ -251,7 +251,7 @@ proc set_chainparams*(params: chainparams): btc_chainparams =
   chain
 
 proc btc_ecc_sign_compact_recoverable*(private_key: ptr cuchar; hash: uint256;
-                                      sigrec: ptr cuchar; outlen: ptr csize;
+                                      sigrec: ptr cuchar; outlen: ptr csize_t;
                                       #sigrec: ptr cuchar;
                                       recid: ptr cint): btc_bool {.importc.}
 
@@ -261,10 +261,10 @@ const
 #type
 #  sha2_byte = uint8_t
 
-proc sha256_Raw*(data: ptr cuchar; len: csize;
+proc sha256_Raw*(data: ptr cuchar; len: csize_t;
                 digest: array[SHA256_DIGEST_LENGTH, uint8_t]) {.importc.}
 
-proc btc_hash*(datain: ptr cuchar; length: csize; hashout: uint256) =
+proc btc_hash*(datain: ptr cuchar; length: csize_t; hashout: uint256) =
   sha256_Raw(datain, length, hashout)
   sha256_Raw(cast[ptr cuchar](unsafeAddr hashout), SHA256_DIGEST_LENGTH, hashout)
 
