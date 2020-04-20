@@ -281,7 +281,7 @@ proc escape_html(s: cstring): cstring {.importc, nodecl.}
 proc cbSeedQrDone(err: int, data: cstring) =
   if err != 0:
     asm """
-      Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
+      Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
       qrReader.hide();
     """
   else:
@@ -344,7 +344,7 @@ var keyCardVal: cstring = ""
 proc cbKeyQrDone(err: int, data: cstring) =
   if err != 0:
     asm """
-      Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
+      Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
       qrReader.hide();
     """
   else:
@@ -942,7 +942,7 @@ asm """
             check_amount_elm();
             jsViewSelector(12);
           } else {
-            Notify.show(__t('Error'), __t('Camera error.'), Notify.msgtype.error);
+            Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
           }
         });
       }
@@ -994,7 +994,7 @@ asm """
           } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
             Notify.show(__t('Error'), __t('Failed to unlock. Passphrase is incorrect.'), Notify.msgtype.error);
           } else if(status == PhraseLock.PLOCK_FAILED_CAMERA) {
-            Notify.show(__t('Error'), __t('Failed to unlock. Camera error.'), Notify.msgtype.error);
+            Notify.show(__t('Error'), __t('Failed to unlock. Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
           }
           setTimeout(function() {
             elm.focus();
