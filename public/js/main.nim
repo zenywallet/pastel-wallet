@@ -1,18 +1,14 @@
 # Copyright (c) 2019 zenywallet
 # nim js -d:release main.nim
 
-include karax / prelude
+import karax / [karax, karaxdsl, vdom, jstrutils]
 include trans
 import jsffi except `&`
 import strutils
-import unicode
-import sequtils
 
 var appInst: KaraxInstance
 var document {.importc, nodecl.}: JsObject
-#var console {.importc, nodecl.}: JsObject
 proc jq(selector: cstring): JsObject {.importcpp: "$$(#)".}
-#var camDevice {.importc, nodecl.}: JsObject
 
 type ImportType {.pure.} = enum
   SeedCard
@@ -142,7 +138,6 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
 {.emit: """
 var jsViewSelector = function() {}
 """.}
-var jsViewSelector {.importc, nodecl.}: JsObject
 asm """
   jsViewSelector = `viewSelector`;
   function setSupressRedraw(flag) {
