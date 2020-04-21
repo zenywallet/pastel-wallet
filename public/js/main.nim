@@ -1689,7 +1689,7 @@ A key card or passphrase is required to encrypt and save the private key in your
     if showPage3:
       section(id="section3", class="section"):
         tdiv(class="intro"):
-          tdiv(class="intro-head  wallet-head"):
+          tdiv(class="intro-head wallet-head"):
             tdiv(class="caption"): text "Pastel Wallet"
             tdiv(class="ui container wallet-btns"):
               tdiv(class="two ui basic buttons sendrecv"):
