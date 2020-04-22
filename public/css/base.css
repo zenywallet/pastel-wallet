@@ -1174,7 +1174,12 @@ i.receive {
   top: 0;
   right: 24px;
   z-index: 3;
-  width: 62px;
+  width: 70px;
+  padding: 0 4px;
+}
+#selectlang.active {
+  background-color: rgba(72,81,75,.4);
+  border-radius: 8px;
 }
 #selectlang .title, #selectlang .content, #selectlang .ui.checkbox label {
   color: #eee;

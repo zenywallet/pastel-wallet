@@ -1642,6 +1642,12 @@ var LangSelector = (function() {
       $('#selectlang').accordion({
         selector: {
           trigger: '.title'
+        },
+        onOpening: function() {
+          $('#selectlang').addClass('active');
+        },
+        onClose: function() {
+          $('#selectlang').removeClass('active');
         }
       });
       $('#selectlang .checkbox').checkbox({
