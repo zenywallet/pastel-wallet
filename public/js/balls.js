@@ -39,7 +39,6 @@ var UtxoBalls = function() {
   var coin = coinlibs.coin;
   var network = coin.networks[pastel.config.network];
   var crypto = window.crypto || window.msCrypto;
-  var pwa_mode = (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone) || document.referrer.includes('android-app://');
   var touch_device_flag = ('ontouchstart' in window);
   var self = this;
 
@@ -1272,7 +1271,7 @@ var UtxoBalls = function() {
 
   var resize_tval = null;
   function resize_func() {
-    if(pwa_mode || !_render) {
+    if(!_render) {
       return;
     }
     clearTimeout(resize_tval);
