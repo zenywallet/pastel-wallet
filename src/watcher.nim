@@ -886,13 +886,13 @@ proc stop*() =
   BallCommand.Abort.send()
   joinThreads(threads)
   btc_ecc_stop()
-  debug "watcher stop"
+  Debug.Common.write "watcher stop"
 
 proc quit() {.noconv.} =
   stop()
 
 proc start*(): Thread[void] =
-  debug "watcher start"
+  Debug.Common.write "watcher start"
   active = true
   btc_ecc_start()
   createThread(threads[0], threadWorkerFunc)
