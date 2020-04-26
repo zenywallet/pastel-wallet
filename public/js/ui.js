@@ -175,7 +175,6 @@ function showQrReader() {
         qr.stop();
         return;
       }
-      console.log(result);
     }
     qr.decodeFromCamera(video, resultHandler);
   }
@@ -229,7 +228,6 @@ function draw_qrcode(check_resize) {
           $('#recv-qrcode').stop(true, false).animate({opacity: 1}, 200);
         }
       } else {
-        console.log('qrcode error');
         $('#recv-qrcode').append('<div style="text-align:center;display:inline-block;">unable to display qrcode</div>');
       }
     }
@@ -309,11 +307,9 @@ function initRecvModal() {
   });
 
   $('#recvaddr-form input[name="address"]').change(function() {
-    console.log('change');
     recvform_change();
   });
   $('#recvaddr-form input[name="amount"],#recvaddr-form input[name="label"],#recvaddr-form textarea[name="message"]').keyup(function() {
-    console.log('keyup');
     recvform_change();
   });
 
@@ -406,7 +402,6 @@ function showRecvAddress(cb) {
     }
 
     var utxoballs_click = function(addr) {
-      console.log('address=' + addr);
       if(modal_recv_addrs[5] && modal_recv_addrs[5].length > 0) {
         modal_recv_addrs[5] = addr;
         $('#receive-address .used .ball').stop(true, true).animate({opacity: 0}, 200, function() {
@@ -754,7 +749,6 @@ var qrReader = (function() {
   }
 
   function zbar_result(symbol, data, polygon) {
-    console.log(symbol, data);
     if(symbol == 'QR-Code') {
       drawPoly(polygon, 4, 'rgba(255,59,88,.4)');
     } else {
@@ -935,8 +929,6 @@ var qrReader = (function() {
         $('.qrcamera-loader').removeClass('active');
       }
       $('.bt-scan-seed').css('visibility', 'visible');
-    } else {
-      console.log('hide mode_show', mode_show);
     }
   }
 
@@ -1012,7 +1004,6 @@ var qrReaderModal = (function() {
   }
 
   function zbar_result(symbol, data, polygon) {
-    console.log(symbol, data);
     if(symbol == 'QR-Code') {
       drawPoly(polygon, 4, 'rgba(255,59,88,.4)');
     } else {
@@ -1507,7 +1498,6 @@ var PhraseLock = (function() {
           });
         },
         onApprove: function() {
-          console.log('approve');
           var phrase = $('#passphrase-modal-seg input[name="input-passphrase"]').val();
           if(pastel.wallet.unlockShieldedKeys(phrase)) {
             cb(Module.PLOCK_SUCCESS);
@@ -1516,7 +1506,6 @@ var PhraseLock = (function() {
           }
         },
         onDeny: function() {
-          console.log('deny');
           cb(Module.PLOCK_CANCEL);
         },
         onHidden: function() {
