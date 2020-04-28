@@ -672,6 +672,7 @@ pastel.ready = function() {
 
   var cur_balance = null;
   var cur_unconfs = null;
+  var cur_recvs = null;
   pastel.secure_recv = function(json) {
     var type = json['type'];
     var data = json['data'];
@@ -692,6 +693,7 @@ pastel.ready = function() {
       var recv = UINT64(0);
       var recv_change = UINT64(0);
       var fee = UINT64(0);
+      var recvs = {};
       if(data) {
         for(var addr in data.addrs) {
           var txouts = data.addrs[addr].txouts;
@@ -699,7 +701,10 @@ pastel.ready = function() {
             if(data.addrs[addr].change == 0) {
               for(var i in txouts) {
                 var txout = txouts[i];
-                recv.add(UINT64(String(txout.value)));
+                var str_value = String(txout.value);
+                var value = UINT64(str_value);
+                recv.add(value);
+                recvs[txout.txid + '-' + addr + '-' + str_value] = {addr: addr, value: value};
               }
             } else {
               for(var i in txouts) {
@@ -763,6 +768,17 @@ pastel.ready = function() {
       TradeLogs.unconfs(data);
       wallet.setUnconfs(data);
       pastel.utxoballs.setUnconfs(data);
+      if(cur_recvs == null) {
+        cur_recvs = recvs;
+      } else {
+        for(var i in recvs) {
+          var r = recvs[i];
+          if(!cur_recvs[i]) {
+            cur_recvs[i] = r;
+            Notify.show(__t('Receive'), r.addr + '<br>' + conv_coin(r.value) + ' ZNY', Notify.msgtype.info);
+          }
+        }
+      }
     } else if(type == 'balance') {
       cur_balance = UINT64(String(data));
       if(cur_unconfs) {
