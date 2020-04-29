@@ -515,7 +515,7 @@ var Stream = (function() {
           console.log('reconnect');
           reconnect_count--;
           self.connect();
-        }, 5000);//10000 + Math.round(Math.random() * 20) * 1000);
+        }, 5000 + Math.round(Math.random() * 10) * 1000);
       }
     }
   }
