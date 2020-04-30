@@ -189,8 +189,6 @@ pastel.load = function() {
           }
           encdata.set(enc, pos);
         }
-        console.log('encdata=', encdata);
-        console.log(cipher.buf2hex(encdata));
         h.free();
         return encdata;
       }
@@ -223,13 +221,10 @@ pastel.load = function() {
           }
           decdata.set(dec, pos);
         }
-        console.log('decdata=', decdata);
         if(deflate) {
           decdata = new Zlib.RawInflate(decdata, {verify: true}).decompress();
-          console.log('decomp=', decdata);
         }
         var json = JSON.parse(new TextDecoder().decode(decdata));
-        console.log(JSON.stringify(json));
         h.free();
         return json;
       }
@@ -508,11 +503,9 @@ var Stream = (function() {
     this.ws.onclose = function() {
       self.showStatus(false);
       status = 0;
-      console.log('onclose');
       clearTimeout(reconnect_timer);
       if(reconnect_count > 0) {
         reconnect_timer = setTimeout(function() {
-          console.log('reconnect');
           reconnect_count--;
           self.connect();
         }, 5000 + Math.round(Math.random() * 10) * 1000);
@@ -564,8 +557,6 @@ var Stream = (function() {
 }());
 
 pastel.ready = function() {
-  console.log('pastel ready');
-  console.log(pastel);
   var cipher = pastel.cipher;
   var coin = pastel.coin;
 
@@ -676,7 +667,7 @@ pastel.ready = function() {
   pastel.secure_recv = function(json) {
     var type = json['type'];
     var data = json['data'];
-    console.log('recv ' + (data ? (type + ': ' + JSON.stringify(data)) : (type ? type : 'unknown')));
+    //console.log('recv ' + (data ? (type + ': ' + JSON.stringify(data)) : (type ? type : 'unknown')));
     if(type == 'xpubs') {
       if(!wallet.checkXpubs(data)) {
         throw new Error('check xpubs');
@@ -809,7 +800,6 @@ pastel.ready = function() {
     } else if(type == 'height') {
       TradeLogs.update_height(data);
     } else if(type == 'rollback') {
-      console.log('rollback');
     } else if(type == 'rollbacked') {
       TradeLogs.rollbacked(data);
       pastel.send({cmd: 'unspents'});
@@ -826,8 +816,6 @@ pastel.ready = function() {
     } else if(type == 'ready') {
       var xpubs = wallet.getXpubs();
       pastel.send({cmd: 'xpubs', data: xpubs});
-    } else {
-      console.log('unknown: ' + JSON.stringify(json));
     }
   }
 
