@@ -63,7 +63,6 @@ var showTradeLogs = false
 var showSettings = false
 
 proc viewSelector(view: ViewType, no_redraw: bool = false) =
-  echo "view", view
   case view
   of SeedNone:
     showScanSeedBtn = true
