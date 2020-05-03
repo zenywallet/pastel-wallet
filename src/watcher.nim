@@ -156,6 +156,13 @@ proc addressFinder(sequence: uint64, last_sequence: uint64): bool =
       result = true
     else:
       result = false
+  else:
+    var target_wallets = prev_update_wallets
+    if target_wallets.len > 0:
+      BallCommand.UpdateWallets.send(BallDataUpdateWallets(wallets: target_wallets, status: BallDataUpdateWalletsStatus.Done))
+    prev_update_wallets = @[]
+    result = false
+
 
 proc walletRollback(rollbacked_sequence: uint64) =
   for d in db.getWallets(""):
