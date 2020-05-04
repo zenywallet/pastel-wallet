@@ -279,7 +279,6 @@ proc cbSeedQrDone(err: int, data: cstring) =
       qrReader.hide();
     """
   else:
-    echo "cbQrDone:", data
     var escape_data = escape_html(data)
     var sdata = $escape_data
     var ds = sdata.split(',')
@@ -287,15 +286,11 @@ proc cbSeedQrDone(err: int, data: cstring) =
     for d in ds:
       if d.startsWith("seed:"):
         seedCardInfo.seed = d[5..^1]
-        echo seedCardInfo.seed
       elif d.startsWith("tag:"):
         seedCardInfo.tag = d[4..^1]
-        echo seedCardInfo.tag
       elif d.startsWith("gen:"):
         seedCardInfo.gen = d[4..^1]
-        echo seedCardInfo.gen
     seedCardInfo.orig = data
-    echo repr(seedCardInfo)
 
     asm """
       var seed_valid = false;
