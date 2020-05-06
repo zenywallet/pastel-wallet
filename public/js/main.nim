@@ -748,7 +748,6 @@ proc passphraseEditor(): VNode =
 
 proc goSettings(): proc() =
   result = proc() =
-    echo showPage4
     if not showPage4:
       viewSelector(WalletSettings, false)
       supressRedraw = true
