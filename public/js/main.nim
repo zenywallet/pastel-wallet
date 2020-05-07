@@ -337,7 +337,6 @@ proc cbKeyQrDone(err: int, data: cstring) =
       qrReader.hide();
     """
   else:
-    echo "cbQrDone:", data
     keyCardVal = data
     asm """
       qrReader.hide();
