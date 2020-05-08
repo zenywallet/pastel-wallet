@@ -1128,7 +1128,6 @@ asm """
           var self = $(this);
           $('#btn-tx-send').addClass('loading');
           pastel.wallet.send(address, value, function(result) {
-            console.log('send result', result);
             var ErrSend = pastel.wallet.ERR_SEND;
             switch(result.err) {
             case ErrSend.SUCCESS:
