@@ -822,9 +822,9 @@ pastel.ready = function() {
   pastel.unsecure_recv = function(data) {
     try {
       var json = JSON.parse(data);
-      console.log(JSON.stringify(json));
+      //console.log(JSON.stringify(json));
     } catch(ex) {
-      console.log(data);
+      //console.log(data);
     }
   }
 
@@ -873,7 +873,7 @@ pastel.ready = function() {
         stage = 1;
         pastel.send({cmd: 'ready'});
       } else {
-        console.log(data);
+        //console.log(data);
       }
     } else if(typeof evt.data == 'string') {
       pastel.unsecure_recv(evt.data);
