@@ -54,7 +54,6 @@ var TradeLogs = (function() {
   function set_expected_server_time(unix_time) {
     var local_dt = new Date();
     server_time_diff = unix_time - Math.floor(local_dt.getTime() / 1000);
-    console.log('server_time_diff=', server_time_diff);
   }
 
   function expected_server_time(local_dt) {
@@ -304,7 +303,6 @@ var TradeLogs = (function() {
       }
     });
 
-    console.log(JSON.stringify(unconf_list));
     $('#tradeunconfs').empty();
     for(var i in unconf_list) {
       var h = txlogs_item(unconf_list[i]);
@@ -325,7 +323,6 @@ var TradeLogs = (function() {
 
     start = true;
     abort = false;
-    console.log('start');
     eof = false;
     first_sequence = null;
     last_sequence = null;
@@ -340,7 +337,6 @@ var TradeLogs = (function() {
   }
 
   TradeLogs.stop = function() {
-    console.log('stop');
     start = false;
     abort = true;
     window.removeEventListener('scroll', scroll_listener);
@@ -352,7 +348,6 @@ var TradeLogs = (function() {
     if(!start) {
       return;
     }
-    console.log(JSON.stringify(data));
     var txlogs = data.txlogs;
     var rev_flag = data.rev;
     if(txlogs.length <= 0) {
