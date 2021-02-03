@@ -78,7 +78,7 @@ var TradeLogs = (function() {
     }
     if(diff_year > 0) {
       if(diff_month > 0) {
-        return __t('$#$ year' + (diff_year > 1 ? 's' : '') + ' $#$ month' + (diff_month > 1 ? 's' : '') + ' ago', [String(diff_year, String(diff_month))]);
+        return __t('$#$ year' + (diff_year > 1 ? 's' : '') + ' $#$ month' + (diff_month > 1 ? 's' : '') + ' ago', [String(diff_year), String(diff_month)]);
       } else {
         return __t('$#$ year' + (diff_year > 1 ? 's' : '') + ' ago', [String(diff_year)]);
       }
