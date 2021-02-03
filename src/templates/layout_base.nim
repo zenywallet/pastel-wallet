@@ -18,6 +18,12 @@ proc layout_debug*(): string =
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <meta name="twitter:card" content="summary">
+  <meta name="Twitter:site" content="@zenywallet">
+  <meta property="og:title" content="Pastel Wallet">
+  <meta property="og:description" content="Seedカードで鍵を管理するタイプの新しいBitZenyのウォレット">
+  <meta property="og:image" content="https://pastel.bitzeny.jp/img/og-image.png">
+  <meta property="og:url" content="https://pastel.bitzeny.jp/">
   <link rel="stylesheet" href="/semantic/compact.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -74,6 +80,12 @@ proc layout_release*(): string =
   <meta name="theme-color" content="#ffffff">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="twitter:card" content="summary">
+  <meta name="Twitter:site" content="@zenywallet">
+  <meta property="og:title" content="Pastel Wallet">
+  <meta property="og:description" content="Seedカードで鍵を管理するタイプの新しいBitZenyのウォレット">
+  <meta property="og:image" content="https://pastel.bitzeny.jp/img/og-image.png">
+  <meta property="og:url" content="https://pastel.bitzeny.jp/">
   <link rel="stylesheet" href="/semantic/compact.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
