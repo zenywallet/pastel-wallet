@@ -160,7 +160,7 @@ pastel.load = function() {
         var d = JSON.stringify(json);
         var comp;
         if(deflate) {
-          comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+          comp = new Zlib.RawDeflate(d.toByteArray(false)).compress();
         } else {
           comp = d.toByteArray(false);
         }
@@ -585,7 +585,7 @@ pastel.ready = function() {
       return false;
     }
     var d = JSON.stringify(json);
-    var comp = new Zopfli.RawDeflate(d.toByteArray(false)).compress();
+    var comp = new Zlib.RawDeflate(d.toByteArray(false)).compress();
     var sdata = new Uint8Array(comp.length);
     var pos = 0, next_pos = 16;
     while(next_pos < comp.length) {

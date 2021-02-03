@@ -28,7 +28,7 @@ public/js/cipher.js \
 public/js/base58.js \
 public/js/uint64.min.js \
 public/js/coinlibs.js \
-public/js/zopfli.raw.min.js \
+public/js/rawdeflate.min.js \
 public/js/rawinflate.min.js \
 public/js/jquery-3.4.1.min.js \
 public/semantic/compact.js \
