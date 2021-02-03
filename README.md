@@ -9,6 +9,10 @@ A sample wallet using Blockstor API
 - Google Closure Compiler https://github.com/google/closure-compiler
 
 ### Build Instructions
+Download [closure-compiler.jar](https://developers.google.com/closure/compiler) and copy to bin/closure-compiler/closure-compiler.jar
+
+
+
 ```bash
 git clone --recursive https://github.com/zenywallet/pastel-wallet
 cd pastel-wallet/deps/libbtc
@@ -17,13 +21,6 @@ cd pastel-wallet/deps/libbtc
 make
 cd ../..
 nimble build
-mkdir bin/closure-compiler
-cd bin/closure-compiler
-wget https://dl.google.com/closure-compiler/compiler-latest.zip
-unzip compiler-latest.zip
-cd ..
-ln -s closure-compiler/closure-compiler-*.jar closure-compiler.jar
-cd ..
 nimble minify
 ```
 
