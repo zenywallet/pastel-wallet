@@ -547,26 +547,30 @@ var UtxoBalls = function() {
           }
         } else {
           ball = create_ball(ballType.unconf, task.data, {fluffy: fluffy1});
+          var ballidx = create_bodies_idx(ball);
           if(task.data.ref) {
             var ref = task.data.ref;
             var idx_ref = create_bodies_idx({ballType: ballType.unconf, ballData: ref});
             var ball_ref = _ballBodiesIdx[idx_ref];
             if(ball_ref) {
               setTimeout(function() {
-                var rx = 3 * (Math.random() - 0.5);
-                var ry = Math.random() + 0.5;
-                ball.fluffy_free = true;
-                setFluffyCollisionAll(ball);
-                fluffy_frees.push(ball);
-                fluffy_free_worker_start();
-                var cur_ball_ref = _ballBodiesIdx[idx_ref];
-                if(cur_ball_ref) {
-                  ball_ref = cur_ball_ref;
+                var ball = _ballBodiesIdx[ballidx];
+                if(ball) {
+                  var rx = 3 * (Math.random() - 0.5);
+                  var ry = Math.random() + 0.5;
+                  ball.fluffy_free = true;
+                  setFluffyCollisionAll(ball);
+                  fluffy_frees.push(ball);
+                  fluffy_free_worker_start();
+                  var cur_ball_ref = _ballBodiesIdx[idx_ref];
+                  if(cur_ball_ref) {
+                    ball_ref = cur_ball_ref;
+                  }
+                  Body.setPosition(ball, {x: ball_ref.position.x, y: ball_ref.position.y + 5});
+                  Body.setVelocity(ball, {x: rx, y: ry});
+                  Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
+                  World.add(_world, ball);
                 }
-                Body.setPosition(ball, {x: ball_ref.position.x, y: ball_ref.position.y + 5});
-                Body.setVelocity(ball, {x: rx, y: ry});
-                Body.setAngularVelocity(ball, Math.PI / 6 * (Math.random() - 0.5));
-                World.add(_world, ball);
               }, 1000);
               _ballBodies.push(ball);
               add_bodies_idx(ball);
