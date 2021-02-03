@@ -266,7 +266,7 @@ proc stream_main() {.thread.} =
         case opcode
         of Opcode.Text:
           Debug.Stream.write "text: ", data
-        of Opcode.Binary:
+        of Opcode.Binary, Opcode.Cont:
           if not exchange:
             if not data.len == 32:
               Debug.StreamError.write "error: invalid data len=", data.len
