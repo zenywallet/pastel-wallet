@@ -135,8 +135,9 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
         yield kv
         rocksdb_iter_next(iter)
   finally:
-    irocksdb_iter_destroy(iter)
-
+    if not iter.isNil:
+      rocksdb_iter_destroy(iter)
+      iter = nil
 
 iterator gets_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
@@ -148,8 +149,9 @@ iterator gets_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
       yield kv
       rocksdb_iter_next(iter)
   finally:
-    rocksdb_iter_destroy(iter)
-
+    if not iter.isNil:
+      rocksdb_iter_destroy(iter)
+      iter = nil
 
 proc dels*(rocks: var RocksDb, key: KeyType) =
   for d in rocks.gets(key):
@@ -212,8 +214,9 @@ iterator getsReverse*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
         yield kv
         rocksdb_iter_prev(iter)
   finally:
-    rocksdb_iter_destroy(iter)
-
+    if not iter.isNil:
+      rocksdb_iter_destroy(iter)
+      iter = nil
 
 iterator getsReverse_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
@@ -230,4 +233,15 @@ iterator getsReverse_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue 
       yield kv
       rocksdb_iter_prev(iter)
   finally:
-    rocksdb_iter_destroy(iter)
+    #rocksdb_iter_destroy(iter)
+    # 1.4.2 don't work
+    # 1.2.8 don't work
+    # 1.2.6 work
+    # 1.2.0 work
+
+    # workaround
+    # destroy is called twice in nim 1.2.8 and above
+
+    if not iter.isNil:
+      rocksdb_iter_destroy(iter)
+      iter = nil
