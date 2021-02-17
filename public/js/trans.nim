@@ -4,11 +4,8 @@ import karax / [i18n, languages]
 
 template trans*(x: string): cstring = cstring(i18n(x))
 template trans*(x: string, param: openarray[cstring]): cstring = i18n(x) % param
-proc jstrans(x: cstring, param: openarray[cstring] = []): cstring =
-  if param.len > 0:
-    i18n($x) % param
-  else:
-    cstring(i18n($x))
+proc jstrans1(x: cstring): cstring = cstring(i18n($x))
+proc jstrans2(x: cstring, param: openarray[cstring]): cstring = i18n($x) % param
 
 proc setlang(lang: cstring) =
   if lang.startsWith("ja"):
@@ -155,7 +152,13 @@ addTranslation(Language.jaJP, "Failed to lock keys.", "ロックに失敗しま�
 addTranslation(Language.jaJP, "Language", "言語選択")
 
 {.emit: """
-var __t = `jstrans`;
+var __t = function(x, params) {
+  if(params) {
+    return `jstrans2`(x, params);
+  } else {
+    return `jstrans1`(x);
+  }
+};
 var setlang = `setlang`;
 var getlang = `getlang`;
 var navlang = window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage;
