@@ -66,15 +66,15 @@ proc close*(rocks: var RocksDb) =
 proc put*(rocks: var RocksDb, key: KeyType, val: ValueType) =
   rocksdb_put(rocks.db,
     rocks.writeOptions,
-    cast[cstring](unsafeAddr key[0]), key.len,
-    cast[cstring](if val.len > 0: unsafeAddr val[0] else: nil), val.len,
+    cast[cstring](unsafeAddr key[0]), key.len.csize_t,
+    cast[cstring](if val.len > 0: unsafeAddr val[0] else: nil), val.len.csize_t,
     rocks.err.addr)
   rocksdb_checkerr
 
 proc get*(rocks: var RocksDb, key: KeyType): seq[byte] =
-  var len: csize
+  var len: csize_t
   var data = rocksdb_get(rocks.db, rocks.readOptions,
-    cast[cstring](unsafeAddr key[0]), key.len,
+    cast[cstring](unsafeAddr key[0]), key.len.csize_t,
     addr len, rocks.err.addr)
   rocksdb_checkerr
   var s: seq[byte] = newSeq[byte](len)
@@ -84,12 +84,12 @@ proc get*(rocks: var RocksDb, key: KeyType): seq[byte] =
 
 proc del*(rocks: var RocksDb, key: KeyType) =
   rocksdb_delete(rocks.db, rocks.writeOptions, cast[cstring](unsafeAddr key[0]),
-                key.len, rocks.err.addr)
+                key.len.csize_t, rocks.err.addr)
   rocksdb_checkerr
 
 proc get_iter_key_value(iter: rocksdb_iterator_t): ResultKeyValue =
   var key_str, value_str: cstring
-  var key_len, value_len: csize
+  var key_len, value_len: csize_t
   key_str = rocksdb_iter_key(iter, addr key_len)
   value_str = rocksdb_iter_value(iter, addr value_len)
   var key_seq: seq[byte] = newSeq[byte](key_len)
@@ -102,7 +102,7 @@ proc get_iter_key_value(iter: rocksdb_iterator_t): ResultKeyValue =
 
 proc gets*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
   var iter: rocksdb_iterator_t = rocksdb_create_iterator(rocks.db, rocks.readOptions)
-  rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len)
+  rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len.csize_t)
   block next:
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
@@ -121,7 +121,7 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
   try:
     iter = rocksdb_create_iterator(rocks.db, rocks.readOptions)
-    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len)
+    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len.csize_t)
     block next:
       while cast[bool](rocksdb_iter_valid(iter)):
         let kv = get_iter_key_value(iter)
@@ -135,19 +135,21 @@ iterator gets*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
         yield kv
         rocksdb_iter_next(iter)
   finally:
-    rocksdb_iter_destroy(iter)
+    irocksdb_iter_destroy(iter)
+
 
 iterator gets_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
   try:
     iter = rocksdb_create_iterator(rocks.db, rocks.readOptions)
-    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len)
+    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len.csize_t)
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
       yield kv
       rocksdb_iter_next(iter)
   finally:
     rocksdb_iter_destroy(iter)
+
 
 proc dels*(rocks: var RocksDb, key: KeyType) =
   for d in rocks.gets(key):
@@ -171,9 +173,9 @@ proc getsReverse*(rocks: var RocksDb, key: KeyType): seq[ResultKeyValue] =
   var iter: rocksdb_iterator_t = rocksdb_create_iterator(rocks.db, rocks.readOptions)
   let (carry, lastkey) = key_countup(key)
   if carry:
-    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len.csize_t)
   else:
-    rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+    rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len.csize_t)
   block prev:
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
@@ -194,9 +196,9 @@ iterator getsReverse*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
     iter = rocksdb_create_iterator(rocks.db, rocks.readOptions)
     let (carry, lastkey) = key_countup(key)
     if carry:
-      rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+      rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len.csize_t)
     else:
-      rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+      rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len.csize_t)
     block prev:
       while cast[bool](rocksdb_iter_valid(iter)):
         let kv = get_iter_key_value(iter)
@@ -212,16 +214,17 @@ iterator getsReverse*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   finally:
     rocksdb_iter_destroy(iter)
 
+
 iterator getsReverse_nobreak*(rocks: var RocksDb, key: KeyType): ResultKeyValue =
   var iter: rocksdb_iterator_t
   try:
     iter = rocksdb_create_iterator(rocks.db, rocks.readOptions)
-    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len)
+    rocksdb_iter_seek(iter, cast[cstring](unsafeAddr key[0]), key.len.csize_t)
     let (carry, lastkey) = key_countup(key)
     if carry:
-      rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+      rocksdb_iter_seek(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len.csize_t)
     else:
-      rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len)
+      rocksdb_iter_seek_for_prev(iter, cast[cstring](unsafeAddr lastkey[0]), lastkey.len.csize_t)
     while cast[bool](rocksdb_iter_valid(iter)):
       let kv = get_iter_key_value(iter)
       yield kv
