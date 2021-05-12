@@ -197,7 +197,7 @@ proc getWallet*(xpubkey: string): tuple[err: DbStatus,
                 next_0_index: uint32, next_1_index: uint32]] =
   let key = concat(Prefix.wallets.toBytes, xpubkey.toBytes)
   var d = db.gets(key)
-  if d.len > 0:
+  if d.len > 0 and xpubkey == d[0].key[1..^9].toString:
     let wid = d[0].key[^8..^1].toUint64
     let sequence = d[0].value[0..7].toUint64
     let next_0_index = d[0].value[8..11].toUint32
