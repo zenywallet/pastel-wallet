@@ -830,7 +830,7 @@ pastel.ready = function() {
 
   stream.onMessage = function(evt) {
     if(typeof evt.data == 'object') {
-      var data = new Uint8Array(evt.data, 0, evt.data.length);
+      var data = new Uint8Array(evt.data);
       if(stage == 1) {
         var rdata = new Uint8Array(data.length);
         var pos = 0, next_pos = 16;
