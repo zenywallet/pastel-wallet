@@ -42,5 +42,5 @@ public/js/tradelogs.js \
 public/js/wallet.js \
 public/js/ui.js \
 public/js/pastel.js \
-public/js/main.js
+public/js/main.js 2>&1 | cut -c 1-240
 """
