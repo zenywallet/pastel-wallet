@@ -405,35 +405,10 @@ pastel.load = function() {
     }
   };
 
-  cipherMod = Cipher(cipherMod);
-
-  pastel.coin = coinlibs.coin;
-  ready_flag.coin = true;
-
-  var stime = new Date();
-  var check_ready = function() {
-    setTimeout(function() {
-      var check = true;
-      for(var i in ready_flag) {
-        if(ready_flag[i] == false) {
-          check = false;
-          break;
-        }
-      }
-      if(check) {
-        pastel.ready();
-      } else {
-        var etime = new Date();
-        var sec = (etime - stime) / 1000;
-        if(sec < 5 * 60) {
-          check_ready();
-        } else {
-          // giveup
-        }
-      }
-    }, 100);
-  }
-  check_ready();
+  Cipher(cipherMod).then(function() {
+    pastel.coin = coinlibs.coin;
+    pastel.ready();
+  });
 }
 
 var Stream = (function() {
