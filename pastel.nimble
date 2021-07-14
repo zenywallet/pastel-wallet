@@ -19,6 +19,25 @@ requires "byteutils", "karax"
 
 # Tasks
 
+task deps, "Build deps":
+  withDir "deps/libbtc":
+    exec "./autogen.sh"
+    exec "./configure --disable-wallet --disable-tools"
+    exec "make"
+  withDir "deps/zbar":
+    exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
+    exec "autoreconf -i"
+    exec """
+emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x \
+--without-jpeg --without-imagemagick --without-npapi \
+--without-gtk --without-python --without-qt --without-xshm \
+--disable-video --disable-pthread --enable-codes=all
+"""
+    exec "emmake make"
+
+task cipher, "Build cipher":
+  exec "nim c -d:release -d:emscripten --noMain:on -o:public/js/cipher.js src/cipher.nim"
+
 task minify, "Minifies the JS using Google's closure compiler":
   exec """
 nim js -d:release -o:public/js/main.js public/js/main.nim
