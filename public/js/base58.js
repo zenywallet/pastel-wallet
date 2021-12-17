@@ -47,45 +47,64 @@ var base58 = (function(base58_chars) {
       array = array || this;
       var size = Math.ceil(array.length * log58_256);
       var buf = new Uint8Array(size);
-      var carry;
+      var enc = '';
+      var zeroLen = 0;
       for(var i in array) {
+        if(array[i] != 0) {
+          break;
+        }
+        enc += '1';
+        zeroLen++;
+      }
+      var carry;
+      for(var i = zeroLen; i < array.length; i++) {
         carry = array[i];
-        for(var j = size - 1; j >= 0; j--) {
+        for(var j = size - 1; j >= zeroLen; j--) {
           carry += buf[j] * 256;
           buf[j] = carry % 58;
           carry /= 58;
         }
       }
-      var enc;
-      for(var i in buf) {
-        if(enc) {
-          enc += base58_chars[buf[i]];
-        } else if(buf[i] != 0) {
-          enc = base58_chars[buf[i]];
+      var skip = true;
+      for(var i = zeroLen; i < size; i++) {
+        if(skip) {
+          if(buf[i] == 0) {
+            continue;
+          } else {
+            skip = false;
+          }
         }
+        enc += base58_chars[buf[i]];
       }
       return obj_assign(new String(enc), methods);
     },
 
     dec: function(str) {
       str = str || this;
-      var size = Math.ceil(str.length * log256_58);
+      var zeroLen = 0;
+      for(var i in str) {
+        if(str[i] != '1') {
+          break;
+        }
+        zeroLen++;
+      }
+      var size = Math.ceil((str.length - zeroLen) * log256_58) + zeroLen;
       var dec = new Uint8Array(size);
       var carry;
-      for(var i in str) {
+      for(var i = zeroLen; i < str.length; i++) {
         carry = base58_map[str[i]];
         if(carry == null) {
           return null;
         }
-        for(var j = size - 1; j >= 0; j--) {
+        for(var j = size - 1; j >= zeroLen; j--) {
           carry += dec[j] * 58;
           dec[j] = carry % 256;
           carry /= 256;
         }
       }
-      for(var i in dec) {
+      for(var i = zeroLen; i < size; i++) {
         if(dec[i] != 0) {
-          dec = dec.slice(i);
+          dec = dec.slice(i - zeroLen);
           break;
         }
       }
