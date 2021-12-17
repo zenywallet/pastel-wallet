@@ -292,7 +292,8 @@ proc stream_main() {.thread.} =
               client.ctr.decrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
                                 cast[ptr UncheckedArray[byte]](addr dec[0]))
               copyMem(addr rdata[pos], addr dec[0], plen)
-            let uncomp = uncompress(rdata.toStr, stream = RAW_DEFLATE)
+            let sentinel = @[byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
+            let uncomp = uncompress(concat(rdata, sentinel).toStr, stream = RAW_DEFLATE)
             let json_cmd = parseJson(uncomp)
             debug json_cmd
 
