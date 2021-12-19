@@ -12,7 +12,7 @@ bin           = @["pastel"]
 
 # Dependencies
 
-requires "nim >= 0.20.0"
+requires "nim >= 0.20.0", "nim < 1.6.0"
 requires "jester >= 0.4.1"
 requires "templates", "nimcrypto", "ed25519", "rocksdb", "libcurl"
 requires "byteutils", "karax"
