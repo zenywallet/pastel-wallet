@@ -5,15 +5,6 @@ var base58 = (function(base58_chars) {
   for(var i in base58_chars) {
     base58_map[base58_chars[i]] = Number(i);
   }
-  var log58_256 = Math.log(256) / Math.log(58);
-  var log256_58 = 1 / log58_256;
-  function ceil_precision(x) {
-    var precision = String(x).replace('.', '').length - x.toFixed().length;
-    var multi = Number('1' + '0'.repeat(precision - 1));
-    return Math.ceil(x * multi) / multi;
-  }
-  log58_256 = ceil_precision(log58_256);
-  log256_58 = ceil_precision(log256_58);
 
   function obj_assign(obj, methods) {
     var o = Object.assign(obj, methods);
@@ -45,36 +36,30 @@ var base58 = (function(base58_chars) {
 
     enc: function(array) {
       array = array || this;
-      var size = Math.ceil(array.length * log58_256);
-      var buf = new Uint8Array(size);
       var enc = '';
-      var zeroLen = 0;
       for(var i in array) {
         if(array[i] != 0) {
           break;
         }
         enc += '1';
-        zeroLen++;
       }
-      var carry;
-      for(var i = zeroLen; i < array.length; i++) {
-        carry = array[i];
-        for(var j = size - 1; j >= zeroLen; j--) {
-          carry += buf[j] * 256;
-          buf[j] = carry % 58;
-          carry /= 58;
-        }
-      }
-      var skip = true;
-      for(var i = zeroLen; i < size; i++) {
-        if(skip) {
-          if(buf[i] == 0) {
-            continue;
+      var b = [];
+      for(var i = enc.length; i < array.length; i++) {
+        var c = array[i];
+        var j = 0;
+        while(c > 0 || j < b.length) {
+          if(j >= b.length) {
+            b.push(0);
           } else {
-            skip = false;
+            c += b[j] * 256;
           }
+          b[j] = c % 58
+          c = Math.floor(c / 58);
+          j++;
         }
-        enc += base58_chars[buf[i]];
+      }
+      for(var i = b.length - 1; i >= 0; i--) {
+        enc += base58_chars[b[i]];
       }
       return obj_assign(new String(enc), methods);
     },
@@ -88,25 +73,26 @@ var base58 = (function(base58_chars) {
         }
         zeroLen++;
       }
-      var size = Math.ceil((str.length - zeroLen) * log256_58) + zeroLen;
-      var dec = new Uint8Array(size);
-      var carry;
+      var b = [];
       for(var i = zeroLen; i < str.length; i++) {
-        carry = base58_map[str[i]];
-        if(carry == null) {
+        var c = base58_map[str[i]];
+        if(c == null) {
           return null;
         }
-        for(var j = size - 1; j >= zeroLen; j--) {
-          carry += dec[j] * 58;
-          dec[j] = carry % 256;
-          carry /= 256;
+        for(var j = 0; j < b.length; j++) {
+          c += b[j] * 58;
+          b[j] = c % 256;
+          c = Math.floor(c / 256);
+        }
+        if(c > 0) {
+          b.push(c);
         }
       }
-      for(var i = zeroLen; i < size; i++) {
-        if(dec[i] != 0) {
-          dec = dec.slice(i - zeroLen);
-          break;
-        }
+      var dec = new Uint8Array(zeroLen + b.length);
+      var j = zeroLen;
+      for(var i = b.length - 1; i >= 0; i--) {
+        dec[j] = b[i];
+        j++;
       }
       return obj_assign(dec, methods);
     }
