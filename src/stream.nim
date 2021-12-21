@@ -593,8 +593,7 @@ proc stream_main() {.thread.} =
     server.close()
     quit(QuitFailure)
 
-var stream_thread: Thread[void]
-
-proc start*(): Thread[void] =
-  createThread(stream_thread, stream_main)
+proc start*(): ref Thread[void] =
+  var stream_thread = new Thread[void]
+  createThread(stream_thread[], stream_main)
   stream_thread

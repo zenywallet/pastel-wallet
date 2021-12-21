@@ -146,9 +146,8 @@ proc cmd_main() {.thread.} =
       else:
         usage()
 
-var cmd_thread: Thread[void]
-
-proc start*(): Thread[void] =
-  createThread(cmd_thread, cmd_main)
+proc start*(): ref Thread[void] =
+  var cmd_thread = new Thread[void]
+  createThread(cmd_thread[], cmd_main)
   system.addQuitProc(resetAttributes)
   cmd_thread

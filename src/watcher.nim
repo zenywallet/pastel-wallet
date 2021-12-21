@@ -7,7 +7,7 @@ import blockstor, db, events, logs, stream
 import config
 
 var
-  threads: array[5, Thread[void]]
+  threads: array[5, ref Thread[void]]
   event = createEvent()
   active = true
   ready* = true
@@ -891,21 +891,23 @@ proc stop*() =
   event.setEvent()
   StreamCommand.Abort.send()
   BallCommand.Abort.send()
-  joinThreads(threads)
+  for i in 0..threads.high: joinThread(threads[i][])
   btc_ecc_stop()
   Debug.Common.write "watcher stop"
 
 proc quit() {.noconv.} =
   stop()
 
-proc start*(): Thread[void] =
+proc start*(): ref Thread[void] =
   Debug.Common.write "watcher start"
   active = true
   btc_ecc_start()
-  createThread(threads[0], threadWorkerFunc)
-  createThread(threads[1], ball_main)
-  createThread(threads[2], cmd_main)
-  createThread(threads[3], watcher_main)
-  createThread(threads[4], stream_main)
+  for i in 0..threads.high:
+    threads[i] = new Thread[void]
+  createThread(threads[0][], threadWorkerFunc)
+  createThread(threads[1][], ball_main)
+  createThread(threads[2][], cmd_main)
+  createThread(threads[3][], watcher_main)
+  createThread(threads[4][], stream_main)
   addQuitProc(quit)
   threads[3]

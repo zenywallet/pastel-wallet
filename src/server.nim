@@ -31,10 +31,9 @@ proc main() {.thread.} =
     error Exception:
       resp Http500, "Server error"
 
-var thread: Thread[void]
-
-proc start*(): Thread[void] =
-  createThread(thread, main)
+proc start*(): ref Thread[void] =
+  var thread = new Thread[void]
+  createThread(thread[], main)
   thread
 
 
