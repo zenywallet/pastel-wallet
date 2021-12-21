@@ -569,7 +569,7 @@ proc stream_main() {.thread.} =
     clients[fd] = clientdata;
     debug "client count=", clients.len
     waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
-    asyncCheck recvdata(fd, ws)
+    waitFor recvdata(fd, ws)
 
   #asyncCheck activecheck()
   #asyncCheck senddata()
