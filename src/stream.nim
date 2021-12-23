@@ -1,12 +1,12 @@
 # Copyright (c) 2019 zenywallet
 
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
-import nimcrypto, ed25519, sequtils, os, threadpool, tables, locks, strutils
+import nimcrypto, ed25519, sequtils, os, tables, locks, strutils
 import json, algorithm, hashes, times
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
-import db, events, yespower, logs, blockstor
+import db, yespower, logs, blockstor
 
 type
   WalletId* = uint64

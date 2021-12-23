@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import sequtils, endians, algorithm, locks, logs
+import sequtils, endians, locks, logs
 import rocksdblib
 export rocksdblib.RocksDbErr
 

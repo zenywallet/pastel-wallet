@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import os, locks, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times, strutils
+import os, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times, strutils
 import ../deps/"websocket.nim"/websocket
 import libbtc
 import blockstor, db, events, logs, stream

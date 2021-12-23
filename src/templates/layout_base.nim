@@ -1,4 +1,4 @@
-import templates, strutils
+import templates
 
 proc layout_debug*(): string =
   tmpli html"""

@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import bitops, strutils
+import bitops
 
 type Debug* {.pure.} = enum
   All
