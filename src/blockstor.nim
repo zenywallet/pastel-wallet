@@ -1,6 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import httpclient, json, asyncdispatch, strutils, logs, libcurl
+import std/exitprocs
 export json
 
 const baseurl = "http://localhost:8000/api/"
@@ -98,7 +99,7 @@ proc http_post(url: string, post_data: string): tuple[code: Code, data: string] 
 discard libcurl.global_init(GLOBAL_ALL);
 proc quit() {.noconv.} =
   libcurl.global_cleanup()
-addQuitProc(quit)
+exitprocs.addExitProc(quit)
 
 proc get(cmdurl: string): JsonNode =
   try:

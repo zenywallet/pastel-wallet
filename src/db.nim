@@ -3,6 +3,7 @@
 import sequtils, endians, locks, logs
 import rocksdblib
 export rocksdblib.RocksDbErr
+import std/exitprocs
 
 type Prefix* {.pure.} = enum
   params = 0  # param_id = value
@@ -577,7 +578,7 @@ block start:
     db.close()
     debug "db close"
 
-  addQuitProc(quit)
+  exitprocs.addExitProc(quit)
   loadWalletId()
 
 when isMainModule:

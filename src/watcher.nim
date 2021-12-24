@@ -4,6 +4,7 @@ import os, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, tim
 import ../deps/"websocket.nim"/websocket
 import libbtc
 import blockstor, db, events, logs, stream
+import std/exitprocs
 import config
 
 var
@@ -909,5 +910,5 @@ proc start*(): ref Thread[void] =
   createThread(threads[2][], cmd_main)
   createThread(threads[3][], watcher_main)
   createThread(threads[4][], stream_main)
-  addQuitProc(quit)
+  exitprocs.addExitProc(quit)
   threads[3]

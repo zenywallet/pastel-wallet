@@ -1,6 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import terminal, parseopt, db, blockstor, logs, strutils, server
+import std/exitprocs
 import config
 
 proc usage() =
@@ -149,5 +150,5 @@ proc cmd_main() {.thread.} =
 proc start*(): ref Thread[void] =
   var cmd_thread = new Thread[void]
   createThread(cmd_thread[], cmd_main)
-  system.addQuitProc(resetAttributes)
+  exitprocs.addExitProc(resetAttributes)
   cmd_thread
