@@ -62,7 +62,7 @@ type
     rawtx*: string
 
 type
-  StreamCriticalErr* = object of Exception
+  StreamCriticalErr* = object of CatchableError
 
 var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
 sendMesChannel.open()
