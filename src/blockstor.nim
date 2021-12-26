@@ -135,7 +135,7 @@ proc getAsync(cmdurl: string, cb: proc(data: JsonNode)) {.async.} =
       clientAsync = newAsyncHttpClient()
     let url = baseurl & cmdurl
     let res = await clientAsync.request(url)
-    if res.status == Http200:
+    if res.status == $Http200:
       cb(parseJson(await res.body))
     else:
       debug "blockstor-get: " & res.status & " " & cmdurl
@@ -152,7 +152,7 @@ proc postAsync(cmdurl: string, postdata: JsonNode, cb: proc(data: JsonNode)) {.a
     client.headers = newHttpHeaders({"Content-Type": "application/json"})
     let url = baseurl & cmdurl
     let res = await clientAsync.request(url, httpMethod = HttpMethod.HttpPost, body = $postdata)
-    if res.status == Http200:
+    if res.status == $Http200:
       debug res.status
       cb(parseJson(await res.body))
     else:
