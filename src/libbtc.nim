@@ -42,7 +42,7 @@ type
     b58prefix_secret_address*: uint8_t ## !private key
     b58prefix_bip32_privkey*: uint32_t
     b58prefix_bip32_pubkey*: uint32_t
-    netmagic*: array[4, cuchar]
+    netmagic*: array[4, uint8]
     genesisblockhash*: uint256
     default_port*: cint
     dnsseeds*: array[8, btc_dns_seed]
@@ -229,7 +229,7 @@ proc set_chainparams*(params: chainparams): btc_chainparams =
     if i > chain.netmagic.high:
       Debug.CommonError.write "ERROR[set_chainparams]: netmagic too long"
       break
-    chain.netmagic[i] = cast[cuchar](c)
+    chain.netmagic[i] = cast[uint8](c)
 
   zeroMem(addr chain.genesisblockhash, chain.genesisblockhash.len)
   for i, c in params.genesisblockhash:
@@ -250,9 +250,9 @@ proc set_chainparams*(params: chainparams): btc_chainparams =
       chain.dnsseeds[i].domain[j] = c
   chain
 
-proc btc_ecc_sign_compact_recoverable*(private_key: ptr cuchar; hash: uint256;
-                                      sigrec: ptr cuchar; outlen: ptr csize_t;
-                                      #sigrec: ptr cuchar;
+proc btc_ecc_sign_compact_recoverable*(private_key: ptr uint8; hash: uint256;
+                                      sigrec: ptr uint8; outlen: ptr csize_t;
+                                      #sigrec: ptr uint8;
                                       recid: ptr cint): btc_bool {.importc.}
 
 const
@@ -261,12 +261,12 @@ const
 #type
 #  sha2_byte = uint8_t
 
-proc sha256_Raw*(data: ptr cuchar; len: csize_t;
+proc sha256_Raw*(data: ptr uint8; len: csize_t;
                 digest: array[SHA256_DIGEST_LENGTH, uint8_t]) {.importc.}
 
-proc btc_hash*(datain: ptr cuchar; length: csize_t; hashout: uint256) =
+proc btc_hash*(datain: ptr uint8; length: csize_t; hashout: uint256) =
   sha256_Raw(datain, length, hashout)
-  sha256_Raw(cast[ptr cuchar](unsafeAddr hashout), SHA256_DIGEST_LENGTH, hashout)
+  sha256_Raw(cast[ptr uint8](unsafeAddr hashout), SHA256_DIGEST_LENGTH, hashout)
 
 func var_uint*(n: uint64): seq =
   if n < 0xfd: @[uint8(n)]
