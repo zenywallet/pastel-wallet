@@ -127,7 +127,7 @@ proc hd_print_node*(chain: ptr btc_chainparams; nodeser: cstring): btc_bool =
   if not btc_hdnode_deserialize(nodeser, chain, addr(node)):
     return false
   var strsize: csize_t = 128
-  var str: cstring = newString(strsize) #array[strsize, char]
+  var str = newString(strsize).cstring #array[strsize, char]
   btc_hdnode_get_p2pkh_address(addr(node), chain, str, cast[cint](strsize))
   debug "ext key: ", nodeser
   const privkey_wif_size_bin: csize_t = 34
@@ -136,7 +136,7 @@ proc hd_print_node*(chain: ptr btc_chainparams; nodeser: cstring): btc_bool =
   pkeybase58c[33] = 1
   ##  always use compressed keys
   const privkey_wif_size: csize_t = 128
-  var privkey_wif: cstring = newString(privkey_wif_size) #array[privkey_wif_size, char]
+  var privkey_wif = newString(privkey_wif_size).cstring #array[privkey_wif_size, char]
   #memcpy(addr(pkeybase58c[1]), node.private_key, BTC_ECKEY_PKEY_LENGTH)
   debug $$node.private_key
   debug node.private_key.toHex()

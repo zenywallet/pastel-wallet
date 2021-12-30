@@ -17,12 +17,12 @@ const extkeyout_size: csize_t = 128
 const address_size: csize_t = 128
 proc hdaddress(xpubkey: string, change, index: uint32): string =
   result = ""
-  let keypath: cstring = "m/" & $change & "/" & $index
-  var extkeyout: cstring = newString(extkeyout_size)
+  let keypath = ("m/" & $change & "/" & $index).cstring
+  var extkeyout = newString(extkeyout_size).cstring
   if hd_derive(addr chain, xpubkey, keypath, extkeyout, extkeyout_size):
     var node: btc_hdnode
     if btc_hdnode_deserialize(extkeyout, addr chain, addr node):
-      var address: cstring = newString(address_size)
+      var address = newString(address_size).cstring
       btc_hdnode_get_p2pkh_address(addr node, addr chain, address, cast[cint](address_size))
       result = $address
 
