@@ -540,7 +540,7 @@ proc clientUnspents(wallets: seq[uint64]): seq[UserUtxo] =
       inc(i)
   unspents.sort(UserUtxoCmp)
   if unspents.len > 1000:
-    unspents.delete(1000, unspents.high)
+    unspents.delete(1000..unspents.high)
   unspents
 
 proc ball_main() {.thread.} =

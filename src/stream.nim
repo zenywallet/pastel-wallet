@@ -448,7 +448,7 @@ proc stream_main() {.thread.} =
                 else:
                   txlogs.sort(TxLogCmp)
                 if txlogs.len > 200:
-                  txlogs.delete(200, txlogs.high)
+                  txlogs.delete(200..txlogs.high)
                 var json = %*{"type": "txlogs", "data": {"txlogs": txlogs, "rev": rev_flag}}
                 for j in json["data"]["txlogs"]:
                   j["value"] = j_uint64(j["value"].getUint64)
