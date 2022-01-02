@@ -518,7 +518,7 @@ proc stream_main() {.thread.} =
           deleteClosedClient()
           for fd, client in clients:
             debug "fd=", fd
-            pingclients.add(fd, true)
+            pingclients[fd] = true
             await client.ws.sendPing()
       except:
         let e = getCurrentException()

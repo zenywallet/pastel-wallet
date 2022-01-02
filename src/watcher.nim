@@ -516,7 +516,7 @@ proc clientUnspents(wallets: seq[uint64]): seq[UserUtxo] =
   var addrInfos = initTable[string, UserAddrInfo]()
   for i, wid in wallets:
     for a in db.getAddrvals(wid):
-      addrInfos.add(a.address, UserAddrInfo(change: a.change, index: a.index, xpub_idx: i))
+      addrInfos[a.address] = UserAddrInfo(change: a.change, index: a.index, xpub_idx: i)
 
   var addrs: seq[string]
   if addrInfos.len > 0:
