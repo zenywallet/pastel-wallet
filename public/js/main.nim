@@ -230,8 +230,8 @@ var passPhrase: cstring = ""
 var coinlibs {.importc, nodecl.}: JsObject
 var bip39 = coinlibs.bip39
 var bip39_wordlist = bip39.wordlists.japanese
-var wl_japanese = cast[seq[cstring]](bip39.wordlists.japanese.map(proc(x: JsObject): cstring = cast[cstring](x)))
-var wl_english = cast[seq[cstring]](bip39.wordlists.english.map(proc(x: JsObject): cstring = cast[cstring](x)))
+var wl_japanese = bip39.wordlists.japanese.to(seq[cstring])
+var wl_english = bip39.wordlists.english.to(seq[cstring])
 var wl_select = wl_japanese
 var wl_select_id = 1
 
