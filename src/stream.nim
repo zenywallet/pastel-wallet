@@ -580,7 +580,7 @@ proc stream_main() {.thread.} =
     if ws.isNil:
       Debug.ConnectionError.write "WS negotiation failed: ", error
       Debug.Connection.write %*req.headers
-      await req.respond(Http400, "Websocket negotiation failed: " & error)
+      await req.respond(Http400, "Websocket negotiation failed: " & $error)
       req.client.close()
       return
     asyncCheck clientStart(ws)
