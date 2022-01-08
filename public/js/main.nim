@@ -285,11 +285,11 @@ proc cbSeedQrDone(err: int, data: cstring) =
     var seedCardInfo: SeedCardInfo = new SeedCardInfo
     for d in ds:
       if d.startsWith("seed:"):
-        seedCardInfo.seed = d[5..^1]
+        seedCardInfo.seed = d[5..^1].cstring
       elif d.startsWith("tag:"):
-        seedCardInfo.tag = d[4..^1]
+        seedCardInfo.tag = d[4..^1].cstring
       elif d.startsWith("gen:"):
-        seedCardInfo.gen = d[4..^1]
+        seedCardInfo.gen = d[4..^1].cstring
     seedCardInfo.orig = data
 
     asm """

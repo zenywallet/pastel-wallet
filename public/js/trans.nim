@@ -23,9 +23,9 @@ proc setlang(lang: cstring) =
 proc getlang(): cstring =
   var lang = getCurrentLanguage()
   if lang == Language.jaJP:
-    "ja"
+    "ja".cstring
   else:
-    "en"
+    "en".cstring
 
 addTranslation(Language.jaJP, "Scan your seed cards or input your mnemonic to start.", "はじめるにはSeedカードを読み取るか、またはニーモニックを入力してしてください。")
 addTranslation(Language.jaJP, "Seed card", "Seedカード")
