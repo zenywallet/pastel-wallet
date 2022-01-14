@@ -33,6 +33,8 @@ proc open*(rocks: var RocksDb, dbpath: cstring, dbpathBackup: cstring,
   rocks.options = rocksdb_options_create()
   rocksdb_options_increase_parallelism(rocks.options, total_threads)
   rocksdb_options_set_create_if_missing(rocks.options, 1)
+  when not defined(ROCKSDB_DEFAULT_COMPRESSION):
+    rocksdb_options_set_compression(rocks.options, rocksdb_lz4_compression)
   rocks.readOptions = rocksdb_readoptions_create()
   rocks.writeOptions = rocksdb_writeoptions_create()
   rocks.dbpath = dbpath
