@@ -5,7 +5,7 @@ function Wallet() {
   var coin = coinlibs.coin;
   var network = coin.networks[pastel.config.network];
   var stor = new Stor();
-  var _hdpash = "m/44'/123'/0'";
+  var _hdpath = "m/44'/123'/0'";
   var self = this;
 
   function getWordList(mlang) {
@@ -59,30 +59,30 @@ function Wallet() {
   }
 
   this.setHdpath = function(hdpath) {
-    _hdpash = hdpath;
+    _hdpath = hdpath;
   }
 
   this.getHdNodeKeyPairs = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
-    var child = node.derivePath(hdpath || _hdpash);
+    var child = node.derivePath(hdpath || _hdpath);
     return {priv: child.toBase58(), pub: child.neutered().toBase58()};
   }
 
   this.getHdNodePrivate = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
-    var child = node.derivePath(hdpath || _hdpash);
+    var child = node.derivePath(hdpath || _hdpath);
     return child.toBase58();
   }
 
   this.getHdNodePublic = function(seed, hdpath) {
     var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
-    var child = node.derivePath(hdpath || _hdpash);
+    var child = node.derivePath(hdpath || _hdpath);
     return child.neutered().toBase58();
   }
 
   this.resetXpubFromSeed = function(seed, hdpath) {
     stor.del_xpubs();
-    var xpub = this.getHdNodePublic(seed, hdpath || _hdpash);
+    var xpub = this.getHdNodePublic(seed, hdpath || _hdpath);
     stor.add_xpub(xpub);
   }
 
@@ -91,7 +91,7 @@ function Wallet() {
     stor.del_xpubs();
     for(var i in seeds) {
       var seed = seeds[i].seed;
-      var xpub = this.getHdNodePublic(seed, hdpath || _hdpash);
+      var xpub = this.getHdNodePublic(seed, hdpath || _hdpath);
       stor.add_xpub(xpub);
     }
   }
