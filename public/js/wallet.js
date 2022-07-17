@@ -306,7 +306,7 @@ function Wallet() {
   this.getUnusedAddressList = function(count, cb) {
     var xpub = _xpubs[0];
     if(!xpub) {
-     xpub = this.getXpubs();
+     xpub = this.getXpubs()[0];
     }
     if(!_nodes[xpub]) {
       _nodes[xpub] = bip32.fromBase58(xpub, network);
