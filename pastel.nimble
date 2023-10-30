@@ -19,7 +19,7 @@ requires "byteutils", "karax"
 
 # Tasks
 
-task deps, "Build deps":
+task depsAll, "Build deps":
   withDir "deps/libbtc":
     exec "./autogen.sh"
     exec "./configure --disable-wallet --disable-tools"
