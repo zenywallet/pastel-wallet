@@ -2,6 +2,7 @@
 
 import unittest, byteutils, marshal, sequtils, base64
 import ../src/libbtc
+import ../src/config
 
 test "btc_random_bytes array":
   var buf: array[32, byte]
@@ -48,7 +49,7 @@ test "bip44-1":
   btc_ecc_start()
   let privkey: cstring = "xprv9s21ZrQH143K4KinPjY2wtbeAW62uSqNbc4UPGjt3cpyVc5Udzc5odqwZbN14qLCFkLdAezMrN2BvsYNjqS48GfKdijwfdXg9Jo8n8fQoYf"
   let keypath: cstring = "m/44'/0'/0'"
-  let extkeyout_size: csize = 128
+  let extkeyout_size: csize_t = 128
   let extkeyout: cstring = newString(extkeyout_size)
   var ret: bool = hd_derive(addr bitzeny_chain, privkey, keypath, extkeyout, extkeyout_size)
   echo "ret=", ret, " ", extkeyout
@@ -56,7 +57,7 @@ test "bip44-1":
 
   var node: btc_hdnode
   ret = btc_hdnode_deserialize(extkeyout, addr bitzeny_chain, addr node)
-  var strsize: csize = 128
+  var strsize: csize_t = 128
   var str: cstring = newString(strsize)
   ret = btc_hdnode_get_pub_hex(addr node, str, addr strsize)
   echo "pub hex: ", str, " ", strsize
@@ -70,7 +71,7 @@ test "bip44-2":
   btc_ecc_start()
   let privkey: cstring = "xprv9s21ZrQH143K4KinPjY2wtbeAW62uSqNbc4UPGjt3cpyVc5Udzc5odqwZbN14qLCFkLdAezMrN2BvsYNjqS48GfKdijwfdXg9Jo8n8fQoYf"
   let keypath: cstring = "m/44'/0'/0'/0"
-  let extkeyout_size: csize = 128
+  let extkeyout_size: csize_t = 128
   let extkeyout: cstring = newString(extkeyout_size)
   var ret: bool = hd_derive(addr bitzeny_chain, privkey, keypath, extkeyout, extkeyout_size)
   echo "ret=", ret, " ", extkeyout
@@ -78,7 +79,7 @@ test "bip44-2":
 
   var node: btc_hdnode
   ret = btc_hdnode_deserialize(extkeyout, addr bitzeny_chain, addr node)
-  var strsize: csize = 128
+  var strsize: csize_t = 128
   var str: cstring = newString(strsize)
   ret = btc_hdnode_get_pub_hex(addr node, str, addr strsize)
   echo "pub hex: ", str, " ", strsize
@@ -92,14 +93,14 @@ test "bip44-3":
   btc_ecc_start()
   let privkey: cstring = "xpub6D3KyTf3qKBMGWoRCF7JHkPdKUP2tYgAziBkikqhyhHxm4shdKHfC3L4RxdeNRDeFGpZGHEoEGoCorRcodbjKf7E6zAg7XkKUHfnrGNDz8q"
   let keypath: cstring = "m/0/0"
-  let extkeyout_size: csize = 128
+  let extkeyout_size: csize_t = 128
   let extkeyout: cstring = newString(extkeyout_size)
   var ret: bool = hd_derive(addr bitzeny_chain, privkey, keypath, extkeyout, extkeyout_size)
   echo "ret=", ret, " ", extkeyout
 
   var node: btc_hdnode
   ret = btc_hdnode_deserialize(extkeyout, addr bitzeny_chain, addr node)
-  var strsize: csize = 128
+  var strsize: csize_t = 128
   var str: cstring = newString(strsize)
   ret = btc_hdnode_get_pub_hex(addr node, str, addr strsize)
   echo "pub hex: ", str, " ", strsize
@@ -126,14 +127,14 @@ test "sign message":
   check(buf.len == 65)
   echo cast[seq[byte]](buf).toHex()
   var hashout: uint256
-  btc_hash(cast[ptr cuchar](addr buf[0]), buf.len, hashout)
+  btc_hash(cast[ptr uint8](addr buf[0]), buf.len.csize_t, hashout)
   echo "hashout hex=", hashout.toHex()
   var priv = @[byte 15, 201, 181, 158, 189, 105, 123, 206, 195, 117, 163, 4, 92, 59, 51, 84, 252, 111, 255, 47, 128, 169, 116, 196, 52, 6, 89, 49, 254, 163, 157, 173]
   var sigrec = newSeq[cuchar](buf.len)
-  var outlen: csize = -1
+  var outlen: csize_t = cast[csize_t](-1)
   var fCompressed = true
   var recid: cint
-  var ret = btc_ecc_sign_compact_recoverable(cast[ptr cuchar](addr priv[0]), hashout, cast[ptr cuchar](addr sigrec[1]), addr outlen, addr recid)
+  var ret = btc_ecc_sign_compact_recoverable(cast[ptr uint8](addr priv[0]), hashout, cast[ptr uint8](addr sigrec[1]), addr outlen, addr recid)
   check(ret == true)
   if fCompressed:
     sigrec[0] = (27 + recid + 4).cuchar
