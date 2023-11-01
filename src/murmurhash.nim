@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 # nim c -d:release -d:emscripten -o:murmurhash.js murmurhash.nim
 
-import byteutils, endians
+import endians
 
 {.compile: "../deps/murmurhash/PMurHash128x64.cpp".}
 
@@ -13,6 +13,9 @@ proc murmurhash*(key: ptr UncheckedArray[byte], key_size: cint, hash: ptr array[
   swapEndian64(addr hash[8], addr hash[8])
 
 when isMainModule:
+  import zenyjs
+  import zenyjs/core
+
   var s: cstring = "1"
   var a: array[16, byte]
   murmurhash(cast[ptr UncheckedArray[byte]](addr s[0]), cast[cint](s.len), cast[ptr array[16, byte]](addr a[0]))
