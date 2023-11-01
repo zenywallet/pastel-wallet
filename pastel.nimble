@@ -21,10 +21,6 @@ requires "https://github.com/zenywallet/zenyjs"
 # Tasks
 
 task depsAll, "Build deps":
-  withDir "deps/libbtc":
-    exec "./autogen.sh"
-    exec "./configure --disable-wallet --disable-tools --with-bignum=no"
-    exec "make"
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -i"
