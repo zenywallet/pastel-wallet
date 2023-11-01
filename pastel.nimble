@@ -22,7 +22,7 @@ requires "byteutils", "karax"
 task depsAll, "Build deps":
   withDir "deps/libbtc":
     exec "./autogen.sh"
-    exec "./configure --disable-wallet --disable-tools"
+    exec "./configure --disable-wallet --disable-tools --with-bignum=no"
     exec "make"
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
