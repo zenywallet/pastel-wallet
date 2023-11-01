@@ -16,6 +16,7 @@ requires "nim >= 0.20.0"
 requires "jester >= 0.4.1"
 requires "templates", "nimcrypto", "ed25519", "rocksdb", "libcurl"
 requires "byteutils", "karax"
+requires "https://github.com/zenywallet/zenyjs"
 
 # Tasks
 

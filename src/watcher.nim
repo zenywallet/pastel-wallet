@@ -2,9 +2,11 @@
 
 import os, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times, strutils
 import ../deps/"websocket.nim"/websocket
-import libbtc
 import blockstor, db, events, logs, stream
 import std/exitprocs
+import zenyjs
+import zenyjs/core except Hash
+import zenyjs/bip32
 import config
 
 var
@@ -13,18 +15,8 @@ var
   active = true
   ready* = true
 
-const extkeyout_size: csize_t = 128
-const address_size: csize_t = 128
 proc hdaddress(xpubkey: string, change, index: uint32): string =
-  result = ""
-  let keypath = ("m/" & $change & "/" & $index).cstring
-  var extkeyout = newString(extkeyout_size).cstring
-  if hd_derive(addr chain, xpubkey, keypath, extkeyout, extkeyout_size):
-    var node: btc_hdnode
-    if btc_hdnode_deserialize(extkeyout, addr chain, addr node):
-      var address = newString(address_size).cstring
-      btc_hdnode_get_p2pkh_address(addr node, addr chain, address, cast[cint](address_size))
-      result = $address
+  network.getAddress(bip32.node(xpubkey).derive(change).derive(index))
 
 proc timeseed() =
   let now = getTime()
@@ -893,7 +885,6 @@ proc stop*() =
   StreamCommand.Abort.send()
   BallCommand.Abort.send()
   for i in 0..threads.high: joinThread(threads[i][])
-  btc_ecc_stop()
   Debug.Common.write "watcher stop"
 
 proc quit() {.noconv.} =
@@ -902,7 +893,6 @@ proc quit() {.noconv.} =
 proc start*(): ref Thread[void] =
   Debug.Common.write "watcher start"
   active = true
-  btc_ecc_start()
   for i in 0..threads.high:
     threads[i] = new Thread[void]
   createThread(threads[0][], threadWorkerFunc)
