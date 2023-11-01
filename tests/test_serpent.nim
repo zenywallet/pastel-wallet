@@ -1,7 +1,9 @@
 # Copyright (c) 2019 zenywallet
 # nim c -d:release -d:emscripten -o:test_serpent.js test_serpent.nim
 
-import os, byteutils, algorithm
+import os, algorithm
+import zenyjs
+import zenyjs/core
 
 const libbtcPath = splitPath(currentSourcePath()).head & "/../deps/serpent"
 {.compile: libbtcPath & "/serpent.c".}
