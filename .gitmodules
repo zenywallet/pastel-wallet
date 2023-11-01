@@ -1,6 +1,3 @@
-[submodule "deps/libbtc"]
-	path = deps/libbtc
-	url = https://github.com/libbtc/libbtc
 [submodule "deps/websocket.nim"]
 	path = deps/websocket.nim
 	url = https://github.com/niv/websocket.nim
