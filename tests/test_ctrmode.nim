@@ -1,6 +1,8 @@
 # Copyright (c) 2019 zenywallet
 
-import ../src/ctrmode, algorithm, byteutils
+import ../src/ctrmode, algorithm
+import zenyjs
+import zenyjs/core
 
 when isMainModule:
   var ctr: CTR
