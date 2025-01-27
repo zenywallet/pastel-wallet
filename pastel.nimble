@@ -13,7 +13,7 @@ bin           = @["pastel"]
 # Dependencies
 
 requires "nim >= 0.20.0"
-requires "jester >= 0.4.1"
+requires "caprese"
 requires "templates", "nimcrypto", "ed25519", "libcurl"
 requires "karax"
 requires "https://github.com/zenywallet/zenyjs"
