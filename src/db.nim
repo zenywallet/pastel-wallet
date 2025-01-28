@@ -150,7 +150,7 @@ proc getParamString*(param_id: uint32): tuple[err: DbStatus, res: string] =
   if d.len > 0:
     (DbStatus.Success, d.toString)
   else:
-    (DbStatus.NotFound, cast[string](nil))
+    (DbStatus.NotFound, "")
 
 proc delTable*(prefix: Prefix): uint64 {.discardable.} =
   let key = prefix.toBytes
@@ -171,7 +171,7 @@ proc getXpub*(wid: uint64): tuple[err: DbStatus, res: string] =
   if d.len > 0:
     result = (DbStatus.Success, d.toString)
   else:
-    result = (DbStatus.NotFound, cast[string](nil))
+    result = (DbStatus.NotFound, "")
 
 proc delXpub(wid: uint64) =
   let key = concat(Prefix.xpubs.toBytes, wid.toBytes)
@@ -224,7 +224,7 @@ proc getWallet*(wid: uint64): tuple[err: DbStatus,
         let next_1_index = d[0].value[12..15].toUint32
         result = (DbStatus.Success, (xpubkey, sequence, next_0_index, next_1_index))
         return
-  result = (DbStatus.NotFound, (cast[string](nil), cast[uint64](nil),
+  result = (DbStatus.NotFound, ("", cast[uint64](nil),
             cast[uint32](nil), cast[uint32](nil)))
 
 iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
