@@ -30,12 +30,12 @@ type Prefix* {.pure.} = enum
   rewards     # wallet_id = hashcash_point, hashcash_total
 
 
-type DbStatus* {.pure.} = enum
-  Success = 0
-  Error
-  NotFound
-
 type
+  DbStatus* {.pure.} = enum
+    Success = 0
+    Error
+    NotFound
+
   DbResult*[T] = object
     case err*: DbStatus
     of DbStatus.Success:
