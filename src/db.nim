@@ -80,44 +80,42 @@ proc toString(s: openarray[byte]): string =
 proc toUint64(s: var seq[byte]): uint64 =
   var b = newSeq[byte](8)
   bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
-  result = cast[ptr uint64](addr b[0])[]
+  cast[ptr uint64](addr b[0])[]
 
 proc toUint32(s: var seq[byte]): uint32 =
   var b = newSeq[byte](4)
   bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
-  result = cast[ptr uint32](addr b[0])[]
+  cast[ptr uint32](addr b[0])[]
 
 proc toUint16(s: var seq[byte]): uint16 =
   var b = newSeq[byte](2)
   bigEndian16(addr b[0], cast[ptr uint16](addr s[0]))
-  result = cast[ptr uint16](addr b[0])[]
+  cast[ptr uint16](addr b[0])[]
 
 proc toUint8(s: var seq[byte]): uint8 =
-  result = cast[uint8](s[0])
+  cast[uint8](s[0])
 
 proc toUint64(a: openarray[byte]): uint64 =
   var s = a.toSeq
   var b = newSeq[byte](8)
   bigEndian64(addr b[0], cast[ptr uint64](addr s[0]))
-  result = cast[ptr uint64](addr b[0])[]
+  cast[ptr uint64](addr b[0])[]
 
 proc toUint32(a: openarray[byte]): uint32 =
   var s = a.toSeq
   var b = newSeq[byte](4)
   bigEndian32(addr b[0], cast[ptr uint32](addr s[0]))
-  result = cast[ptr uint32](addr b[0])[]
+  cast[ptr uint32](addr b[0])[]
 
 proc toUint16(a: openarray[byte]): uint16 =
   var s = a.toSeq
   var b = newSeq[byte](2)
   bigEndian16(addr b[0], cast[ptr uint16](addr s[0]))
-  result = cast[ptr uint16](addr b[0])[]
+  cast[ptr uint16](addr b[0])[]
 
-proc toUint8(a: openarray[byte]): uint8 =
-  result = cast[uint8](a[0])
+proc toUint8(a: openarray[byte]): uint8 = cast[uint8](a[0])
 
-proc toUint8(b: byte): uint8 =
-  result = cast[uint8](b)
+proc toUint8(b: byte): uint8 = cast[uint8](b)
 
 proc setParam*(param_id: uint32, value: uint32) =
   let key = concat(Prefix.params.toBytes, param_id.toBytes)
@@ -179,9 +177,9 @@ proc getXpub*(wid: uint64): DbResult[string] =
   let key = concat(Prefix.xpubs.toBytes, wid.toBytes)
   var d = db.get(key)
   if d.len > 0:
-    result = DbResult[string](err: DbStatus.Success, res: d.toString)
+    DbResult[string](err: DbStatus.Success, res: d.toString)
   else:
-    result = DbResult[string](err: DbStatus.NotFound)
+    DbResult[string](err: DbStatus.NotFound)
 
 proc delXpub(wid: uint64) =
   let key = concat(Prefix.xpubs.toBytes, wid.toBytes)
@@ -215,9 +213,9 @@ proc getWallet*(xpubkey: string): DbResult[WalletXpubkeyResult] =
     let sequence = d[0].value[0..7].toUint64
     let next_0_index = d[0].value[8..11].toUint32
     let next_1_index = d[0].value[12..15].toUint32
-    result = DbResult[WalletXpubkeyResult](err: DbStatus.Success, res: (wid, sequence, next_0_index, next_1_index))
+    DbResult[WalletXpubkeyResult](err: DbStatus.Success, res: (wid, sequence, next_0_index, next_1_index))
   else:
-    result = DbResult[WalletXpubkeyResult](err: DbStatus.NotFound)
+    DbResult[WalletXpubkeyResult](err: DbStatus.NotFound)
 
 type
   WalletWidResult* = tuple[xpubkey: string, sequence: uint64,
@@ -235,9 +233,8 @@ proc getWallet*(wid: uint64): DbResult[WalletWidResult] =
         let sequence = d[0].value[0..7].toUint64
         let next_0_index = d[0].value[8..11].toUint32
         let next_1_index = d[0].value[12..15].toUint32
-        result = DbResult[WalletWidResult](err: DbStatus.Success, res: (xpubkey, sequence, next_0_index, next_1_index))
-        return
-  result = DbResult[WalletWidResult](err: DbStatus.NotFound)
+        return DbResult[WalletWidResult](err: DbStatus.Success, res: (xpubkey, sequence, next_0_index, next_1_index))
+  DbResult[WalletWidResult](err: DbStatus.NotFound)
 
 iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
                     wallet_id: uint64, sequence: uint64,
@@ -271,7 +268,7 @@ proc loadWalletId() =
 proc acquireWalletId(): uint64 =
   inc(wallet_id)
   setParam(0, wallet_id)
-  result = wallet_id
+  wallet_id
 
 proc getOrCreateWallet*(xpubkey: string): tuple[wallet_id: uint64,
                         sequence: uint64, next_0_index: uint32,
@@ -549,9 +546,9 @@ proc getBalance*(wid: uint64): DbResult[BalanceResult] =
     let value = d[0..7].toUint64
     let utxo_count = d[8..11].toUint32
     let address_count = d[12..15].toUint32
-    result = DbResult[BalanceResult](err: DbStatus.Success, res: (value, utxo_count, address_count))
+    DbResult[BalanceResult](err: DbStatus.Success, res: (value, utxo_count, address_count))
   else:
-    result = DbResult[BalanceResult](err: DbStatus.NotFound)
+    DbResult[BalanceResult](err: DbStatus.NotFound)
 
 proc delBalance*(wid: uint64) =
   let key = concat(Prefix.balances.toBytes, wid.toBytes)
@@ -567,20 +564,20 @@ proc getTxtime*(txid: string): DbResult[uint64] =
   var d = db.get(key)
   if d.len > 0:
     let trans_time = d.toUint64
-    result = DbResult[uint64](err: DbStatus.Success, res: trans_time)
+    DbResult[uint64](err: DbStatus.Success, res: trans_time)
   else:
-    result = DbResult[uint64](err: DbStatus.NotFound)
+    DbResult[uint64](err: DbStatus.NotFound)
 
 proc delTxtime*(txid: string) =
   let key = concat(Prefix.txtimes.toBytes, txid.toBytes)
   db.del(key)
 
 proc getLastUsedAddrIndex*(wid: uint64, change: uint32): DbResult[uint32] =
-  result = DbResult[uint32](err: DbStatus.NotFound)
   let key = concat(Prefix.addrvals.toBytes, wid.toBytes, change.toBytes)
   for d in db.getsReverse(key):
-    result = DbResult[uint32](err: DbStatus.Success, res: d.key[13..16].toUint32)
-    break
+    return DbResult[uint32](err: DbStatus.Success, res: d.key[13..16].toUint32)
+  DbResult[uint32](err: DbStatus.NotFound)
+
 
 block start:
   debug "db open"
