@@ -1,12 +1,14 @@
 # Copyright (c) 2019 zenywallet
 
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
-import nimcrypto, ed25519, sequtils, os, tables, locks, strutils
+import ed25519, sequtils, os, tables, locks, strutils
 import json, algorithm, hashes, times
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
 import db, yespower, logs, blockstor
+import caprese/bearssl/bearssl_ssl
+import caprese/bearssl/bearssl_hash
 
 type
   WalletId* = uint64
@@ -205,6 +207,12 @@ proc stream_main() {.thread.} =
     if oa.len > 0:
       copyMem(addr result[0], unsafeAddr oa[0], result.len)
 
+  proc sha256s(data: openarray[byte]): array[32, byte] =
+    var sha256Context: br_sha256_context
+    br_sha256_init(addr sha256Context)
+    br_sha256_update(addr sha256Context, addr data[0], data.len.csize_t)
+    br_sha256_out(addr sha256Context, addr result)
+
   proc `xor`(a: array[32, byte], b: array[32, byte]): array[32, byte] =
     for i in a.low..a.high:
       result[i] = a[i] xor b[i]
@@ -222,14 +230,14 @@ proc stream_main() {.thread.} =
     var clientPublicKey: PublicKey
     copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
     let shared = keyExchange(clientPublicKey, client.kp.privateKey)
-    let shared_sha256 = sha256.digest(shared)
-    let shared_key = yespower(shared_sha256.data)
+    let shared_sha256 = sha256s(shared)
+    let shared_key = yespower(shared_sha256)
     let seed_srv = cast[ptr array[32, byte]](addr client.salt[0])
     let seed_cli = cast[ptr array[32, byte]](addr client.salt[32])
-    let iv_srv_sha256 = sha256.digest(shared_key xor seed_srv)
-    let iv_cli_sha256 = sha256.digest(shared_key xor seed_cli)
-    let iv_srv = yespower(iv_srv_sha256.data)
-    let iv_cli = yespower(iv_cli_sha256.data)
+    let iv_srv_sha256 = sha256s(shared_key xor seed_srv)
+    let iv_cli_sha256 = sha256s(shared_key xor seed_cli)
+    let iv_srv = yespower(iv_srv_sha256)
+    let iv_cli = yespower(iv_cli_sha256)
     debug "shared=", shared_key
     debug "iv_srv=", iv_srv
     debug "iv_cli=", iv_cli
