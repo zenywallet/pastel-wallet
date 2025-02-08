@@ -18,7 +18,7 @@ type
 
 type ClientData* = ref object
   ws: AsyncWebSocket
-  kp: KeyPair
+  kp: tuple[pubkey: Ed25519PublicKey, prvkey: Ed25519PrivateKey]
   ctr: ctrmode.CTR
   salt: array[64, byte]
   wallets*: WalletIds
@@ -227,9 +227,10 @@ proc stream_main() {.thread.} =
     b
 
   proc clientKeyExchange(client: ClientData, data: string) =
-    var clientPublicKey: PublicKey
+    var clientPublicKey: Ed25519PublicKey
     copyMem(addr clientPublicKey[0], unsafeAddr data[0], clientPublicKey.len)
-    let shared = keyExchange(clientPublicKey, client.kp.privateKey)
+    var shared: Ed25519SharedSecret
+    keyExchange(shared, clientPublicKey, client.kp.prvkey)
     let shared_sha256 = sha256s(shared)
     let shared_key = yespower(shared_sha256)
     let seed_srv = cast[ptr array[32, byte]](addr client.salt[0])
@@ -565,18 +566,22 @@ proc stream_main() {.thread.} =
       await sleepAsync(100)
 
   proc clientStart(ws: AsyncWebSocket) {.async.} =
-    let kp = createKeyPair(seed())
+    var kp: tuple[pubkey: Ed25519PublicKey, prvkey: Ed25519PrivateKey]
+    var kpSeed: array[32, byte]
+    var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)
+    if retSeed != 0: raise
+    createKeypair(kp.pubkey, kp.prvkey, kpSeed)
     var fd = cast[int](ws.sock.getFd)
     var ctr: ctrmode.CTR
     var salt: array[64, byte]
-    salt[0..31] = seed()
-    salt[32..63] = seed()
+    retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr salt), 64.cint)
+    if retSeed != 0: raise
     let clientdata = ClientData(ws: ws, kp: kp, ctr: ctr, salt: salt)
     if fd in clients:
       raise newException(StreamCriticalErr, "socket fd conflict")
     clients[fd] = clientdata;
     debug "client count=", clients.len
-    waitFor ws.sendBinary(kp.publicKey.toStr & salt.toStr)
+    waitFor ws.sendBinary(kp.pubkey.toStr & salt.toStr)
     waitFor recvdata(fd, ws)
 
   #asyncCheck activecheck()
