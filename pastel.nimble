@@ -14,7 +14,7 @@ bin           = @["pastel"]
 
 requires "nim >= 0.20.0"
 requires "caprese"
-requires "templates", "ed25519", "libcurl"
+requires "templates", "libcurl"
 requires "karax"
 requires "https://github.com/zenywallet/zenyjs"
 
