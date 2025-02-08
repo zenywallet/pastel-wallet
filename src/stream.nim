@@ -7,8 +7,8 @@ import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
 import db, yespower, logs, blockstor
-import caprese/bearssl/bearssl_ssl
-import caprese/bearssl/bearssl_hash
+import caprese/bearssl/ssl
+import caprese/bearssl/hash
 
 type
   WalletId* = uint64
