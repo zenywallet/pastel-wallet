@@ -35,7 +35,7 @@ proc layout_debug*(): string =
   <script type="text/javascript" src="/js/base58.js"></script>
   <script type="text/javascript" src="/js/uint64.min.js"></script>
   <script type="text/javascript" src="/js/coinlibs.js"></script>
-  <script type="text/javascript" src="/js/zopfli.raw.min.js"></script>
+  <script type="text/javascript" src="/js/rawdeflate.min.js"></script>
   <script type="text/javascript" src="/js/rawinflate.min.js"></script>
   <script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
   <script type="text/javascript" src="/semantic/compact.js"></script>
