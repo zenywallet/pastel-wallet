@@ -17,7 +17,12 @@ var
   ready* = true
 
 proc hdaddress(xpubkey: string, change, index: uint32): string =
-  network.getAddress(bip32.node(xpubkey).derive(change).derive(index))
+  result = ""
+  try:
+    result = network.getAddress(bip32.node(xpubkey).derive(change).derive(index))
+  except:
+    let e = getCurrentException()
+    Debug.CommonError.write e.name, ": ", e.msg
 
 proc timeseed() =
   let now = getTime()
