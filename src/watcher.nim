@@ -8,6 +8,7 @@ import zenyjs
 import zenyjs/core except Hash
 import zenyjs/bip32
 import config
+import caprese/queue
 
 var
   threads: array[5, ref Thread[void]]
@@ -262,12 +263,11 @@ proc updateBalance(wid: uint64) =
   discard
 
 var block_header_prev_height: uint32 = 0'u32
-var blockDataChannel*: Channel[JsonNode]
-blockDataChannel.open()
+var blockDataChannel* = queue.newQueue[JsonNode](0x10000)
 
 proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
   var wids = initHashSet[WalletId]()
-  while blockDataChannel.peek() > 0:
+  while blockDataChannel.count > 0:
     var json = blockDataChannel.recv()
     var height = json["height"].getUint32
     var time = json["time"].getUint32
@@ -289,7 +289,7 @@ proc applyBlockData(marker_sequence: uint64, last_sequence: uint64) =
     else:
       for w in db.getWallets(""):
         wids.incl(w.wallet_id)
-      while blockDataChannel.peek() > 0:
+      while blockDataChannel.count > 0:
         json = blockDataChannel.recv()
       height = json["height"].getUint32
       updateAddresses()
@@ -369,7 +369,8 @@ proc watcher_main() {.thread.} =
 
 proc block_reader(json: JsonNode) =
   if json.hasKey("height"):
-    blockDataChannel.send(json)
+    if not blockDataChannel.send(json):
+      Debug.CommonError.write "error: blockDataChannel is null"
     doWork()
 
 proc stream_main() {.thread.} =
@@ -695,6 +696,7 @@ proc ball_main() {.thread.} =
         if height_flag:
           for ids in wallet_ids:
             BallCommand.Height.send(BallDataHeight(wallet_id: ids[0]))
+
       except:
         let e = getCurrentException()
         Debug.CommonError.write e.name, ": ", e.msg

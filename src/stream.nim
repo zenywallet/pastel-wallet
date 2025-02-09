@@ -9,6 +9,7 @@ import ../src/ctrmode
 import db, yespower, logs, blockstor
 import caprese/bearssl/ssl
 import caprese/bearssl/hash
+import caprese/queue
 
 type
   WalletId* = uint64
@@ -66,17 +67,17 @@ type
 type
   StreamCriticalErr* = object of CatchableError
 
-var sendMesChannel: Channel[tuple[wallet_id: uint64, data: string]]
-sendMesChannel.open()
+var sendMesChannel = queue.newQueue[tuple[wallet_id: uint64, data: string]](0x10000)
 
 proc send*(wallet_id: uint64, data: string) =
-  sendMesChannel.send((wallet_id, data))
+  if not sendMesChannel.send((wallet_id, data)):
+    Debug.StreamError.write "error: sendMesChannel is full"
 
-var cmdChannel*: Channel[tuple[cmd: StreamCommand, data: StreamData]]
-cmdChannel.open()
+var cmdChannel* = queue.newQueue[tuple[cmd: StreamCommand, data: StreamData]](0x10000)
 
 proc send*(cmd: StreamCommand, data: StreamData = nil) =
-  cmdChannel.send((cmd, data))
+  if not cmdChannel.send((cmd, data)):
+    Debug.StreamError.write "error: cmdChannel is full"
 
 type
   BallCommand* {.pure.} = enum
@@ -122,11 +123,11 @@ type
     wallets*: WalletIds
     status*: BallDataUpdateWalletsStatus
 
-var ballChannel*: Channel[tuple[cmd: BallCommand, data: BallData]]
-ballChannel.open()
+var ballChannel* = queue.newQueue[tuple[cmd: BallCommand, data: BallData]](0x10000)
 
 proc send*(cmd: BallCommand, data: BallData = nil) =
-  ballChannel.send((cmd, data))
+  if not ballChannel.send((cmd, data)):
+    Debug.StreamError.write "error: ballChannel is full"
 
 type
   TxLog = ref object
@@ -552,7 +553,7 @@ proc stream_main() {.thread.} =
 
   proc sendManager() {.async.} =
     while true:
-      while sendMesChannel.peek() > 0:
+      while sendMesChannel.count > 0:
         let sdata = sendMesChannel.recv()
         Debug.Stream.write "sendManager wid=", sdata.wallet_id, " data=", sdata.data
         if walletmap.hasKey(sdata.wallet_id):
