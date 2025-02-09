@@ -137,7 +137,7 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
 {.emit: """
 var jsViewSelector = function() {}
 """.}
-asm """
+{.emit: """
   jsViewSelector = `viewSelector`;
   function setSupressRedraw(flag) {
     `supressRedraw` = flag;
@@ -145,15 +145,15 @@ asm """
   function getSupressRedraw() {
     return `supressRedraw`;
   }
-"""
+""".}
 
 proc viewUpdate() =
   if not supressRedraw:
     appInst.redraw()
 
-asm """
+{.emit: """
   var jsViewUpdate = `viewUpdate`;
-"""
+""".}
 
 #proc importTypeButtonClass(importType: ImportType): cstring =
 #  if importType == currentImportType:
@@ -163,9 +163,9 @@ asm """
 
 proc importSelector(importType: ImportType): proc() =
   result = proc() =
-    asm """
+    {.emit: """
       qrReader.hide();
-    """
+    """.}
     currentImportType = importType
 
     if currentImportType == ImportType.SeedCard:
@@ -174,22 +174,22 @@ proc importSelector(importType: ImportType): proc() =
       showPage2 = mnemonicFulfill
 
     if currentImportType == ImportType.SeedCard:
-      asm """
+      {.emit: """
         $('#seedselector').removeClass('grey').addClass('olive');
         $('#mnemonicselector').removeClass('olive').addClass('grey');
-      """
+      """.}
     else:
-      asm """
+      {.emit: """
         $('#mnemonicselector').removeClass('grey').addClass('olive');
         $('#seedselector').removeClass('olive').addClass('grey');
-      """
+      """.}
     viewUpdate()
 
 proc protectSelector(protectType: ProtectType): proc() =
   result = proc() =
-    asm """
+    {.emit: """
       qrReader.hide();
-    """
+    """.}
     currentProtectType = protectType
     showPage1 = false
     showPage2 = true
@@ -200,15 +200,15 @@ proc protectSelector(protectType: ProtectType): proc() =
     #  showPage2 = mnemonicFulfill
 
     if currentProtectType == ProtectType.KeyCard:
-      asm """
+      {.emit: """
         $('#keyselector').removeClass('grey').addClass('olive');
         $('#passselector').removeClass('olive').addClass('grey');
-      """
+      """.}
     else:
-      asm """
+      {.emit: """
         $('#passselector').removeClass('grey').addClass('olive');
         $('#keyselector').removeClass('olive').addClass('grey');
-      """
+      """.}
     viewUpdate()
 
 type SeedCardInfo = ref object
@@ -253,31 +253,31 @@ proc removeSeedCard(idx: int): proc() =
       viewUpdate()
 
 proc seedToKeys() =
-  asm """
+  {.emit: """
     var wallet = pastel.wallet;
-  """
+  """.}
   if currentImportType == ImportType.SeedCard:
-    asm """
+    {.emit: """
       wallet.setSeedCard(`seedCardInfos`);
-    """
+    """.}
   elif currentImportType == ImportType.Mnemonic:
-    asm """
+    {.emit: """
       wallet.setMnemonic(`inputWords`, `wl_select_id`);
-    """
+    """.}
 
-asm """
+{.emit: """
   var jsSeedToKeys = `seedToKeys`;
   var jsClearSensitive = `clearSensitive`;
-"""
+""".}
 
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
 proc cbSeedQrDone(err: int, data: cstring) =
   if err != 0:
-    asm """
+    {.emit: """
       Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
       qrReader.hide();
-    """
+    """.}
   else:
     var escape_data = escape_html(data)
     var sdata = $escape_data
@@ -292,7 +292,7 @@ proc cbSeedQrDone(err: int, data: cstring) =
         seedCardInfo.gen = d[4..^1].cstring
     seedCardInfo.orig = data
 
-    asm """
+    {.emit: """
       var seed_valid = false;
       if(`seedCardInfo`.seed) {
         var dec = base58.dec(`seedCardInfo`.seed);
@@ -304,7 +304,7 @@ proc cbSeedQrDone(err: int, data: cstring) =
         Notify.show(__t('Warning'), __t('Unsupported seed card was scanned.'), Notify.msgtype.warning);
       }
 
-    """
+    """.}
 
     var dupcheck = false
     for s in seedCardInfos:
@@ -317,73 +317,73 @@ proc cbSeedQrDone(err: int, data: cstring) =
         break
 
     if dupcheck:
-      asm """
+      {.emit: """
         Notify.show(__t('Error'), __t('The seed card has already been scanned.'), Notify.msgtype.error);
-      """
+      """.}
     else:
       seedCardInfos.add(seedCardInfo)
 
-    asm """
+    {.emit: """
       qrReader.hide();
-    """
+    """.}
     viewSelector(SeedAfterScan)
 
 var keyCardVal: cstring = ""
 
 proc cbKeyQrDone(err: int, data: cstring) =
   if err != 0:
-    asm """
+    {.emit: """
       Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
       qrReader.hide();
-    """
+    """.}
   else:
     keyCardVal = data
-    asm """
+    {.emit: """
       qrReader.hide();
-    """
+    """.}
     viewSelector(KeyAfterScan)
 
 proc showSeedQr(): proc() =
   result = proc() =
-    asm """
+    {.emit: """
       qrReader.show(`cbSeedQrDone`);
-    """
+    """.}
 
 proc showKeyQr(): proc() =
   result = proc() =
     keyCardFulfill = false
     showPage3 = false
-    asm """
+    {.emit: """
       qrReader.show(`cbKeyQrDone`);
-    """
+    """.}
 
 proc confirmKeyCard(ev: Event; n: VNode) =
   var ret_lock: bool = false
-  asm """
+  {.emit: """
     var wallet = pastel.wallet;
     `ret_lock` = wallet.lockShieldedKeys(`keyCardVal`, 1, true);
-  """
+  """.}
   if ret_lock:
     keyCardFulfill = true
     showPage3 = true
     viewUpdate()
   else:
-    asm """
+    {.emit: """
       Notify.show(__t('Error'), __t('Failed to lock your wallet with the key card.'), Notify.msgtype.error);
-    """
+    """.}
 
 proc camChange(): proc() =
   result = proc() =
-    asm """
+    {.emit: """
       $('.camtools button').blur();
       qrReader.next();
-    """
+    """.}
 
 proc camClose(): proc() =
   result = proc() =
-    asm """
+    {.emit: """
       qrReader.hide();
-    """
+    """.}
 
 const levenshtein_js = staticRead("levenshtein.js")
 {.emit: levenshtein_js.}
@@ -467,9 +467,9 @@ proc checkMnemonic(ev: Event; n: VNode) =
       viewSelector(MnemonicEdit)
     editingWords = s;
     var cur = document.getElementById(n.id).selectionStart
-    asm """
+    {.emit: """
       `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-    """
+    """.}
     if not s.isNil and s.len > 0:
       var tmplist: seq[cstring] = @[]
       for word in bip39_wordlist:
@@ -492,27 +492,27 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
       var cur = input_elm.selectionStart
       var newcur = cur
       if whole_replace:
-        asm """
+        {.emit: """
           var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
           if(t && t.length > 0) {
             `s` = `s`.substr(0, `cur` - t.length) + `word`;
             `newcur` = `s`.length;
           }
-        """
+        """.}
         x.setInputText(s)
         editingWords = s
         input_elm.focus()
         input_elm.selectionStart = newcur
         input_elm.selectionEnd = newcur
       else:
-        asm """
+        {.emit: """
           var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
           if(t && t.length > 0) {
             var tail = `s`.substr(`cur`) || '';
             `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
             `newcur` = `s`.length - tail.length;
           }
-        """
+        """.}
         x.setInputText(s)
         editingWords = s
         input_elm.focus()
@@ -528,10 +528,10 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
     var s = x.value
     if not s.isNil and s.len > 0:
       var words: seq[cstring]
-      asm """
+      {.emit: """
         `inputWords` = `s`.replace(/[ 　\n\r]+/g, ' ').trim();
         `words` = `inputWords`.split(' ');
-      """
+      """.}
       chklist = @[]
       var idx: int = 0
       var allvalid = true
@@ -548,14 +548,14 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
           allvalid = false
         inc(idx)
       if allvalid and idx >= 12 and idx mod 3 == 0:
-        asm """
+        {.emit: """
           var bip39 = coinlibs.bip39;
           if(bip39.validateMnemonic(`inputWords`, `bip39_wordlist`)) {
             `mnemonicFulfill` = true
           } else {
             Notify.show(__t('Warning'), __t('There are no misspellings, but some words seem to be wrong.') + (`advance` ? '' : ' ' + __t('Try to use [Advanced Check]')), Notify.msgtype.warning);
           }
-        """
+        """.}
         if mnemonicFulfill:
           viewSelector(MnemonicFulfill)
     else:
@@ -569,7 +569,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
     var s = x.value
     if not s.isNil and s.len > 0:
       var ret: cstring
-      asm """
+      {.emit: """
         `ret` = "";
         var count = 0;
         var find = false;
@@ -594,7 +594,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
             }
           }
         }
-      """
+      """.}
       x.setInputText(ret)
       editingWords = ret
       confirmMnemonic(input_id, confirm_mnemonic_advanced)()
@@ -713,7 +713,7 @@ proc changePassphrase(ev: Event; n: VNode) =
 proc confirmPassphrase(ev: Event; n: VNode) =
   var ret_lock: bool = false
   var passlen = 0
-  asm """
+  {.emit: """
     var val = $('input[name="input-passphrase"]').val();
     if(val) {
       `passlen` = val.length;
@@ -721,16 +721,16 @@ proc confirmPassphrase(ev: Event; n: VNode) =
       var wallet = pastel.wallet;
       `ret_lock` = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
     }
-  """
+  """.}
   if passlen > 0:
     if ret_lock:
       passphraseFulfill = true
       showPage3 = true
       viewUpdate()
     else:
-      asm """
+      {.emit: """
         Notify.show(__t('Error'), __t('Failed to lock your wallet with the passphrase.'), Notify.msgtype.error);
-      """
+      """.}
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
@@ -750,49 +750,49 @@ proc goSettings(): proc() =
     if not showPage4:
       viewSelector(WalletSettings, false)
       supressRedraw = true
-      asm """
+      {.emit: """
         $('#section4').show();
-      """
+      """.}
     else:
-      asm """
+      {.emit: """
         TradeLogs.stop();
         $('.backpage').visibility({silent: true});
         $('#tradeunconfs').empty();
         $('#tradelogs').empty();
-      """
+      """.}
       viewSelector(WalletSettings, false)
-      asm """
+      {.emit: """
         goSection('#section4');
-      """
+      """.}
 
 proc goLogs(): proc() =
   result = proc() =
     if not showPage4:
       viewSelector(WalletLogs, false)
       supressRedraw = true
-      asm """
+      {.emit: """
         $('#section4').show();
-      """
+      """.}
     else:
-      asm """
+      {.emit: """
         TradeLogs.stop();
         $('.backpage').visibility({silent: true});
         $('#tradeunconfs').empty();
         $('#tradelogs').empty();
-      """
+      """.}
       viewSelector(WalletLogs, false)
-      asm """
+      {.emit: """
         goSection('#section4');
-      """
+      """.}
 
 proc backWallet(): proc() =
   result = proc() =
     viewSelector(Wallet, true)
-    asm """
+    {.emit: """
       goSection('#section3', page_scroll_done);
-    """
+    """.}
 
-asm """
+{.emit: """
   var send_balls_count = 0;
   var cur_calc_send_utxo = null;
 
@@ -1336,43 +1336,43 @@ asm """
       $(this).attr('tabindex', -1);
     });
   }
-"""
+""".}
 
 proc btnSend: proc() =
   result = proc() =
-    asm """
+    {.emit: """
       if(!pastel.wallet || !pastel.utxoballs) {
         return;
       }
       sendrecv_select((sendrecv_switch == 1) ? 0 : 1);
       document.getElementById('btn-send').blur();
-    """
+    """.}
 
 proc btnReceive: proc() =
   result = proc() =
-    asm """
+    {.emit: """
       if(!pastel.wallet || !pastel.utxoballs) {
         return;
       }
       sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
       document.getElementById('btn-receive').blur();
-    """
+    """.}
 
 proc btnSendClose: proc() =
   result = proc() =
-    asm """
+    {.emit: """
       clearTimeout(sendrecv_switch_tval);
       sendrecv_switch = 0;
       reset_switch(1);
-    """
+    """.}
 
 proc btnRecvClose: proc() =
   result = proc() =
-    asm """
+    {.emit: """
       clearTimeout(sendrecv_switch_tval);
       sendrecv_switch = 0;
       reset_switch(2);
-    """
+    """.}
 
 proc recvAddressSelector(): VNode =
   result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment hidden")):
@@ -1428,7 +1428,7 @@ proc recvAddressModal(): VNode =
 
 proc checkSendAmount(ev: Event; n: VNode) =
   var s = n.value
-  asm """
+  {.emit: """
     var amount = String(`s`).trim();
     var amount_elm = $('#send-coins input[name="amount"]');
     if(amount.length > 0) {
@@ -1458,11 +1458,11 @@ proc checkSendAmount(ev: Event; n: VNode) =
       amount_elm.closest('.field').removeClass('error warning');
       resetSendBallCount();
     }
-  """
+  """.}
 
-asm """
+{.emit: """
   var uriOptions = [];
-"""
+""".}
 var uriOptions {.importc, nodecl.}: JsObject
 proc sendForm(): VNode =
   result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment hidden")):
@@ -1746,7 +1746,7 @@ A key card or passphrase is required to encrypt and save the private key in your
 proc afterScript(data: RouterData) =
   jq(".ui.dropdown").dropdown()
   if showScanResult:
-    asm """
+    {.emit: """
       function seedCardQrUpdate(vivid) {
         $('.seed-qrcode').each(function() {
           $(this).find('canvas').remove();
@@ -1803,10 +1803,10 @@ proc afterScript(data: RouterData) =
       if(holder) {
         holder.scrollLeft = holder.scrollWidth - holder.clientWidth;
       }
-    """
+    """.}
 
   if showScanResult or mnemonicFulfill:
-    asm """
+    {.emit: """
       disable_caret_browsing($('#section2'));
       target_page_scroll = '#section2';
       page_scroll_done = function() {
@@ -1818,9 +1818,9 @@ proc afterScript(data: RouterData) =
         jsViewSelector(5);
         page_scroll_done = function() {};
       }
-    """
+    """.}
   if keyCardFulfill or passphraseFulfill:
-    asm """
+    {.emit: """
       disable_caret_browsing($('#section3'));
       target_page_scroll = '#section3';
       page_scroll_done = function() {
@@ -1840,9 +1840,9 @@ proc afterScript(data: RouterData) =
         }
         page_scroll_done = function() {};
       }
-    """
+    """.}
   if showScanResult or mnemonicFulfill or keyCardFulfill or passphraseFulfill:
-    asm """
+    {.emit: """
       for(var i in registerEventList) {
         var ev = registerEventList[i];
         ev.elm.removeEventListener(ev.type, ev.cb);
@@ -1864,31 +1864,31 @@ proc afterScript(data: RouterData) =
           elm.addEventListener('click', cb);
         }
       });
-    """
+    """.}
 
   if showPage2 and not passphraseFulfill:
-    asm """
+    {.emit: """
       $('input[name="input-passphrase"]').focus();
-    """
+    """.}
 
   if showPage4:
-    asm """
+    {.emit: """
       pastel.utxoballs.pause();
       //$.fn.visibility.settings.silent = true;
       $('.backpage').visibility({
         type: 'fixed',
         offset: 0
       });
-    """
+    """.}
     if showTradeLogs:
-      asm """
+      {.emit: """
         TradeLogs.start();
-      """
+      """.}
     if showSettings:
-      asm """
+      {.emit: """
         Settings.init();
-      """
-    asm """
+      """.}
+    {.emit: """
       goSection('#section4', function() {
         disable_caret_browsing($('#section3'));
         target_page_scroll = '#section3';
@@ -1909,19 +1909,19 @@ proc afterScript(data: RouterData) =
           $('#bottom-blink').fadeIn(100).fadeOut(400);
         }
       });
-    """
+    """.}
   else:
-    asm """
+    {.emit: """
       $('#section4').hide();
-    """
+    """.}
 
   if showPage3 or showPage4:
-    asm """
+    {.emit: """
       reloadViewSafeEnd();
-    """
+    """.}
 
 var walletSetup = false
-asm """
+{.emit: """
   var stor  = new Stor();
   var xpubs = stor.get_xpubs();
   stor = null;
@@ -1938,7 +1938,7 @@ asm """
     }
     check_stream_ready();
   }
-"""
+""".}
 if walletSetup:
   viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)

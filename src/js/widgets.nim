@@ -60,9 +60,9 @@ proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
   if not s.isNil and s.len > 0:
     var cur = document.getElementById(n.id).selectionStart
-    asm """
+    {.emit: """
       `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-    """
+    """.}
     if not s.isNil and s.len > 0:
       var tmplist: seq[cstring] = @[]
       for word in bip39_wordlist:
@@ -87,14 +87,14 @@ proc selectWord(input_id: cstring, word: cstring): proc() =
       var input_elm = document.getElementById(input_id)
       var cur = input_elm.selectionStart
       var newcur = cur
-      asm """
+      {.emit: """
         var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
         if(t && t.length > 0) {
           var tail = `s`.substr(`cur`) || '';
           `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
           `newcur` = `s`.length - tail.length;
         }
-      """
+      """.}
       x.setInputText(s)
       input_elm.focus()
       input_elm.selectionEnd = newcur
@@ -111,9 +111,9 @@ proc confirmMnemonic(input_id: cstring): proc() =
     var s = x.value
     if not s.isNil and s.len > 0:
       var words: seq[cstring]
-      asm """
+      {.emit: """
         `words` = `s`.replace(/[ 　\n\r]+/g, ' ').trim().split(' ');
-      """
+      """.}
       chklist = @[]
       var idx: int = 0
       for word in words:
@@ -133,7 +133,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
     var s = x.value
     if not s.isNil and s.len > 0:
       var ret: cstring
-      asm """
+      {.emit: """
         `ret` = "";
         var count = 0;
         var find = false;
@@ -158,7 +158,7 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
             }
           }
         }
-      """
+      """.}
       x.setInputText(ret)
 
 proc changeLanguage(ev: Event; n: VNode) =

@@ -14,11 +14,11 @@ proc setlang(lang: cstring) =
     setCurrentLanguage(Language.enUS)
   else:
     setCurrentLanguage(Language.enUS)
-  asm """
+  {.emit: """
     if(pastel && pastel.utxoballs) {
       pastel.utxoballs.update();
     }
-  """
+  """.}
 
 proc getlang(): cstring =
   var lang = getCurrentLanguage()
