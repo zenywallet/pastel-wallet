@@ -39,6 +39,7 @@ emconfigure ./configure CPPFLAGS=-DNDEBUG=1 --without-x \
 
 task cipher, "Build cipher":
   exec "nim c -d:release -d:emscripten --noMain:on -o:public/js/cipher.js src/cipher.nim"
+  exec "nim c -r src/cipher_patch.nim"
 
 task minify, "Minifies the JS using Google's closure compiler":
   exec """
