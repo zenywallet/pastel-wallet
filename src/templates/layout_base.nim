@@ -53,7 +53,7 @@ proc layout_debug*(): string =
 </head>
 <body>
   <div id="main">
-    <div class ="intro">
+    <div class="intro">
       <div class="intro-head">
         <div class="caption">Pastel Wallet</div>
       </div>
@@ -97,7 +97,7 @@ proc layout_release*(): string =
 </head>
 <body>
   <div id="main">
-    <div class ="intro">
+    <div class="intro">
       <div class="intro-head">
         <div class="caption">Pastel Wallet</div>
       </div>
@@ -139,7 +139,7 @@ proc layout_maintenance*(): string =
 </head>
 <body>
   <div id="main">
-    <div class ="intro">
+    <div class="intro">
       <div class="intro-head">
         <div class="caption">Pastel Wallet</div>
       </div>
