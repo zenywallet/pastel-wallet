@@ -15,11 +15,11 @@ server(ip = "0.0.0.0", port = 5000):
     get "/":
       case page
       of Page.Release:
-        layout_release().addHeader.send
+        layout_release.addHeader.send
       of Page.Maintenance:
-        layout_maintenance().addHeader(Status503).send
+        layout_maintenance.addHeader(Status503).send
       of Page.Debug:
-        layout_debug().addHeader.send
+        layout_debug.addHeader.send
 
     public(importPath = "../public")
 
