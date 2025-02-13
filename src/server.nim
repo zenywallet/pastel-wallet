@@ -62,6 +62,8 @@ worker(1):
       let e = getCurrentException()
       echo e.name, ": ", e.msg
 
+const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
+
 server(ip = "0.0.0.0", port = 5000):
   routes:
     get "/":
@@ -113,7 +115,7 @@ server(ip = "0.0.0.0", port = 5000):
             SendResult.None
         else:
           echo "data=", content.toBytes
-          var rdata = newSeq[byte](size)
+          var rdata = newSeq[byte](size + deflateSentinel.len)
           var pos = 0
           var next_pos = 16
           while next_pos < size:
@@ -130,8 +132,8 @@ server(ip = "0.0.0.0", port = 5000):
             client.ctr.decrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
                               cast[ptr UncheckedArray[byte]](addr dec[0]))
             copyMem(addr rdata[pos], addr dec[0], plen)
-          let sentinel = @[byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
-          let uncomp = uncompress(concat(rdata, sentinel).toStr, stream = RAW_DEFLATE)
+          copyMem(addr rdata[size], addr deflateSentinel[0], deflateSentinel.len)
+          let uncomp = uncompress((cast[ptr char](addr rdata[0])).cstring, rdata.len, stream = RAW_DEFLATE)
           wsReqs.pending(PendingData(msg: uncomp))
 
       onClose:
