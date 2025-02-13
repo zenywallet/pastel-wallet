@@ -31,11 +31,6 @@ type
 var wsReqs: Pendings[PendingData]
 wsReqs.newPending(limit = 1000000)
 
-proc toStr(oa: openArray[byte]): string =
-  result = newString(oa.len)
-  if oa.len > 0:
-    copyMem(addr result[0], unsafeAddr oa[0], result.len)
-
 proc sha256s(data: openarray[byte]): array[32, byte] =
   var sha256Context: br_sha256_context
   br_sha256_init(addr sha256Context)
@@ -87,7 +82,7 @@ server(ip = "0.0.0.0", port = 5000):
         retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 64.cint)
         if retSeed != 0: raise
         client.exchange = false
-        wsSend(client.kp.pubkey.toStr & client.salt.toStr)
+        wsSend((client.kp.pubkey, client.salt).toBytes)
 
       onMessage:
         echo "onMessage"
