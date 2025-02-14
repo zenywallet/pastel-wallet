@@ -453,6 +453,43 @@ worker(1):
       let e = getCurrentException()
       echo e.name, ": ", e.msg
 
+worker(1):
+  proc sendClient(clientId: ClientId, data: string) =
+    let client = getClient(clientId)
+    if not client.isNil:
+      let comp = compress(data, stream = RAW_DEFLATE)
+      var sdata = newSeq[byte](comp.len)
+      var pos = 0
+      var next_pos = 16
+      while next_pos < comp.len:
+        client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
+                          cast[ptr UncheckedArray[byte]](addr sdata[pos]))
+        pos = next_pos
+        next_pos = next_pos + 16
+      if pos < comp.len:
+        var src: array[16, byte]
+        var enc: array[16, byte]
+        var plen = comp.len - pos
+        src.fill(cast[byte](plen))
+        copyMem(addr src[0], unsafeAddr comp[pos], plen)
+        client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                          cast[ptr UncheckedArray[byte]](addr enc[0]))
+        copyMem(addr sdata[pos], addr enc[0], plen)
+        clientId.wsSend(sdata)
+    else:
+      echo "ClientId=", clientId, " is Nil"
+
+  while active:
+    while sendMesChannel.count > 0:
+      let sdata = sendMesChannel.recv()
+      Debug.Stream.write "sendManager wid=", sdata.wallet_id, " data=", sdata.data
+      var wmdatas = walletmap.get(sdata.wallet_id)
+      if not wmdatas.isNil:
+        for wmdata in wmdatas.val:
+          wmdata.clientId.sendClient(sdata.data)
+      sleep(1)
+    sleep(100)
+
 const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
 
 server(ip = "0.0.0.0", port = 5000):
