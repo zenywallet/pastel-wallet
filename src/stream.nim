@@ -2,7 +2,7 @@
 
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
 import ed25519, sequtils, os, tables, locks, strutils
-import json, algorithm, hashes, times
+import json, algorithm, times
 import ../deps/zip/zip/zlib
 import unicode
 import ../src/ctrmode
@@ -24,12 +24,6 @@ type ClientData* = ref object
   salt: array[64, byte]
   wallets*: WalletIds
   xpubs*: WalletXPubs
-
-proc hash*(xs: WalletIds): Hash =
-  var s: string
-  for x in xs:
-    s.add("#" & $x)
-  result = s.hash
 
 type WalletMapData = ref object
   fd: int

@@ -498,6 +498,12 @@ proc UserUtxoCmp(x, y: UserUtxo): int =
     if result == 0:
       result = cmp(x.index, y.index)
 
+proc hash*(xs: WalletIds): Hash =
+  var s: string
+  for x in xs:
+    s.add("#" & $x)
+  result = s.hash
+
 proc hash*(x: UserUtxo): Hash =
   var s: string = $x.sequence & "-" & x.txid & "-" & $x.n
   result = s.hash
