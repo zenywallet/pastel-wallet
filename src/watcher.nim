@@ -2,13 +2,14 @@
 
 import os, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times, strutils
 import ../deps/"websocket.nim"/websocket
-import blockstor, db, events, logs, stream
+import blockstor, db, events, logs, server as stream
 import std/exitprocs
 import zenyjs
 import zenyjs/core except Hash
 import zenyjs/bip32
 import config
 import caprese/queue
+import caprese/server_types
 
 var
   threads: array[5, ref Thread[void]]
@@ -714,12 +715,14 @@ proc ball_main() {.thread.} =
 
     of BallCommand.MemPool:
       var data = BallDataMemPool(ch_data.data)
+      var client = getClient(data.client.ClientId)
+      if client.isNil: continue
       let j_mempool = blockstor.getMempool()
       if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
         var widinfos: TWidInfos = fullMempoolAddrsAndTxs(j_mempool["res"])
         full_wid_addrs = widinfos.addrs
         full_wid_txs = widinfos.txs
-        sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], @[data.client.wallets], true)
+        sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], @[client.wallets], true)
 
     of BallCommand.Unspents:
       var data = BallDataUnspents(ch_data.data)
@@ -849,29 +852,33 @@ proc ball_main() {.thread.} =
 
     of BallCommand.AddClient:
       var data = BallDataAddClient(ch_data.data)
-      debug "AddClient ", data.client.wallets
-      wallet_ids.incl(data.client.wallets)
-      active_wids.incl(data.client.wallets.toHashSet())
-      BallCommand.Unspents.send(BallDataUnspents(wallets: data.client.wallets))
-      BallCommand.MemPool.send(BallDataMemPool(client: data.client))
-      BallCommand.Height.send(BallDataHeight(wallet_id: data.client.wallets[0]))
-      BallCommand.Unused.send(BallDataUnused(wallet_id: data.client.wallets[0]))
-      StreamCommand.Balance.send(StreamDataBalance(wallets: data.client.wallets))
-      StreamCommand.Addresses.send(StreamDataAddresses(wallets: data.client.wallets))
+      var client = getClient(data.client.ClientId)
+      if client.isNil: continue
+      debug "AddClient ", client.wallets
+      wallet_ids.incl(client.wallets)
+      active_wids.incl(client.wallets.toHashSet())
+      BallCommand.Unspents.send(BallDataUnspents(wallets: client.wallets))
+      BallCommand.MemPool.send(BallDataMemPool(client: data.client.ClientId))
+      BallCommand.Height.send(BallDataHeight(wallet_id: client.wallets[0]))
+      BallCommand.Unused.send(BallDataUnused(wallet_id: client.wallets[0]))
+      StreamCommand.Balance.send(StreamDataBalance(wallets: client.wallets))
+      StreamCommand.Addresses.send(StreamDataAddresses(wallets: client.wallets))
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
-      debug "DelClient ", data.client.wallets
-      if data.client.wallets.len > 0:
-        let client_wid: WalletId = data.client.wallets[0]
-        wallet_ids.excl(data.client.wallets)
+      var client = getClient(data.client.ClientId)
+      if client.isNil: continue
+      debug "DelClient ", client.wallets
+      if client.wallets.len > 0:
+        let client_wid: WalletId = client.wallets[0]
+        wallet_ids.excl(client.wallets)
         var find = false
         for wallets in wallet_ids:
           if wallets[0] == client_wid:
             find = true
             break
         if not find:
-          active_wids.excl(data.client.wallets.toHashSet())
+          active_wids.excl(client.wallets.toHashSet())
 
     of BallCommand.UpdateWallets:
       var data = BallDataUpdateWallets(ch_data.data)
