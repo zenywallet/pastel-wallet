@@ -32,7 +32,14 @@ proc debug_status() =
 proc cmd_main() {.thread.} =
   while true:
     stdout.styledWrite(styleBright, fgCyan, "> ")
-    var cmd = stdin.readLine()
+    var cmd = try:
+      stdin.readLine()
+    except EOFError:
+      break
+    except:
+      let e = getCurrentException()
+      echo e.name, ": ", e.msg
+      break
     if cmd.len == 0 or cmd.contains(AllChars - IdentChars - Whitespace):
       continue
     stdout.styledWriteLine(styleBright, fgCyan, "cmd: ", cmd)
@@ -146,6 +153,8 @@ proc cmd_main() {.thread.} =
           stdout.styledWriteLine(styleBright, fgBlue, $page)
       else:
         usage()
+
+  quit(QuitSuccess)
 
 proc start*(): ref Thread[void] =
   var cmd_thread = new Thread[void]
