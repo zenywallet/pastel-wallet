@@ -5,10 +5,10 @@ import ../deps/"websocket.nim"/websocket
 import blockstor, db, events, logs, server as stream
 import std/exitprocs
 import zenyjs
-import zenyjs/core except Hash
+import zenyjs/core
 import zenyjs/bip32
 import config
-import caprese except Hash
+import caprese
 import caprese/queue
 import caprese/server_types
 
@@ -500,21 +500,21 @@ proc UserUtxoCmp(x, y: UserUtxo): int =
     if result == 0:
       result = cmp(x.index, y.index)
 
-proc hash*(xs: WalletIds): Hash =
+proc hash*(xs: WalletIds): hashes.Hash =
   var s: string
   for x in xs:
     s.add("#" & $x)
   result = s.hash
 
-proc hash*(x: UserUtxo): Hash =
+proc hash*(x: UserUtxo): hashes.Hash =
   var s: string = $x.sequence & "-" & x.txid & "-" & $x.n
   result = s.hash
 
-proc hash*(x: WidAddressPairs): Hash =
+proc hash*(x: WidAddressPairs): hashes.Hash =
   var s: string = $x.wid & "-" & x.address
   result = s.hash
 
-proc hash*(x: WidTxPairs): Hash =
+proc hash*(x: WidTxPairs): hashes.Hash =
   var s: string = $x.wid & "-" & x.txid
   result = s.hash
 
