@@ -19,6 +19,9 @@ import logs as patelog except debug
 import db
 import blockstor except send
 
+config:
+  sigTermQuit = false
+
 type Page* {.pure.} = enum
   Release
   Maintenance

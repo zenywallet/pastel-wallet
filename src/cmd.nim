@@ -3,6 +3,8 @@
 import terminal, parseopt, db, blockstor, logs, strutils, server
 import std/exitprocs
 import config
+import std/nativesockets
+import std/posix
 
 proc usage() =
   stdout.styledWriteLine(styleBright, fgCyan, """
@@ -29,9 +31,26 @@ proc debug_status() =
     var l = ($d).len
     echo "  ", ($d).toLowerAscii(), " ".repeat(maxlen - l + 1), d.check()
 
+proc eventfd(initval: cuint, flags: cint): cint {.importc.}
+var abortFd = eventfd(0, O_CLOEXEC or O_NONBLOCK)
+var fds: array[2, TPollfd]
+fds[0].events = posix.POLLIN
+fds[0].fd = STDIN_FILENO
+fds[1].events = posix.POLLIN
+fds[1].fd = abortFd
+
+onSignal(SIGINT, SIGTERM):
+  var value: uint64 = 1
+  var retWrite = write(fds[1].fd, addr value, sizeof(value))
+  if retWrite != sizeof(value):
+    echo "error: abort event write"
+
 proc cmd_main() {.thread.} =
   while true:
     stdout.styledWrite(styleBright, fgCyan, "> ")
+    var num = poll(addr fds[0], 2, -1)
+    if fds[1].revents == posix.POLLIN:
+      break
     var cmd = try:
       stdin.readLine()
     except EOFError:
