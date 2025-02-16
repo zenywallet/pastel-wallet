@@ -8,6 +8,7 @@ import zenyjs
 import zenyjs/core except Hash
 import zenyjs/bip32
 import config
+import caprese except Hash
 import caprese/queue
 import caprese/server_types
 
@@ -906,6 +907,7 @@ proc stop*() =
   BallCommand.Abort.send()
   for i in 0..threads.high: joinThread(threads[i][])
   Debug.Common.write "watcher stop"
+  serverStop()
 
 proc quit() {.noconv.} =
   stop()
