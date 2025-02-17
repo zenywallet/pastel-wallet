@@ -569,6 +569,21 @@ server(ip = "0.0.0.0", port = 5000):
 
       onClose:
         echo "onClose"
+        let clientId = client.markPending()
+        withLock workerClientsLock:
+          for wid in client.wallets:
+            var hdata = walletmap.get(wid)
+            if not hdata.isNil:
+              var wmdatas = hdata.val
+              wmdatas.keepIf(proc (x: WalletMapData): bool = x.clientId != clientId)
+              if wmdatas.len > 0:
+                walletmap.set(wid, wmdatas)
+              else:
+                walletmap.del(wid)
+                var hdata2 = walletmap.get(wid)
+        BallCommand.DelClient.send(BallDataDelClient(client: clientId))
+        client.wallets = @[]
+        client.xpubs = @[]
 
     get "/api/pub/:pubkey":
       var data = %*{"pub": sanitizeHtml(pubkey)}
