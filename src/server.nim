@@ -245,7 +245,7 @@ proc setEmpty*(pair: HashTableData) =
   else:
     pair.val = nil
 loadHashTableModules()
-var walletmap = newHashTable[uint64, seq[WalletMapData]](0x10000)
+var walletmap = newHashTable[WalletId, seq[WalletMapData]](0x10000)
 
 worker(1):
   proc sendClient(clientId: ClientId, data: string) =
