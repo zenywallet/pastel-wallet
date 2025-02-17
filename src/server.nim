@@ -582,7 +582,6 @@ server(ip = "0.0.0.0", port = 5000):
                 walletmap.del(wid)
                 var hdata2 = walletmap.get(wid)
         BallCommand.DelClient.send(BallDataDelClient(client: clientId))
-        client.wallets = @[]
         client.xpubs = @[]
 
     get "/api/pub/:pubkey":

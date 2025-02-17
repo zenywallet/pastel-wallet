@@ -880,6 +880,7 @@ proc ball_main() {.thread.} =
             break
         if not find:
           active_wids.excl(client.wallets.toHashSet())
+        client.wallets = @[]
 
     of BallCommand.UpdateWallets:
       var data = BallDataUpdateWallets(ch_data.data)
