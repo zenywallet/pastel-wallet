@@ -13,6 +13,7 @@ Object.defineProperty(String.prototype, 'toByteArray', {
 //function StringByteArray(s, e){for(var b=[],c=0,f=s.length;c<f;c++){var a=s.charCodeAt(c);if(55296<=a&&57343>=a&&c+1<f&&!(a&1024)){var d=s.charCodeAt(c+1);55296<=d&&57343>=d&&d&1024&&(a=65536+(a-55296<<10)+(d-56320),c++)}128>a?b.push(a):2048>a?b.push(192|a>>6,128|a&63):65536>a?(55296<=a&&57343>=a&&(a=e?65534:65533),b.push(224|a>>12,128|a>>6&63,128|a&63)):1114111<a?b.push(239,191,191^(e?1:2)):b.push(240|a>>18,128|a>>12&63,128|a>>6&63,128|a&63)}return b}
 
 var zbar_stream = function(symbol, data, polygon, polysize) {}
+var deflateSentinel = new Uint8Array([0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]);
 pastel.ready = function() {}
 pastel.load = function() {
   var ready_flag = {cipher: false, coin: false};
@@ -222,7 +223,10 @@ pastel.load = function() {
           decdata.set(dec, pos);
         }
         if(deflate) {
-          decdata = new Zlib.RawInflate(decdata, {verify: true}).decompress();
+          var rdataSentinel = new Uint8Array(decdata.length + deflateSentinel.length);
+          decdataSentinel.set(decdata);
+          decdataSentinel.set(deflateSentinel, decdata.length);
+          decdata = new Zlib.RawInflate(decdataSentinel, {verify: true}).decompress();
         }
         var json = JSON.parse(new TextDecoder().decode(decdata));
         h.free();
@@ -823,7 +827,10 @@ pastel.ready = function() {
           var dec = cipher.dec(buf).slice(0, plen);
           rdata.set(dec, pos);
         }
-        var decomp = new Zlib.RawInflate(rdata, {verify: true}).decompress();
+        var rdataSentinel = new Uint8Array(rdata.length + deflateSentinel.length);
+        rdataSentinel.set(rdata);
+        rdataSentinel.set(deflateSentinel, rdata.length);
+        var decomp = new Zlib.RawInflate(rdataSentinel, {verify: true}).decompress();
         var json = JSON.parse(new TextDecoder().decode(decomp));
         pastel.secure_recv(json);
       } else if(stage == 0 && !shared && data.length == 96) {
