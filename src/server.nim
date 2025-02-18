@@ -41,6 +41,7 @@ type
     ctr: ctrmode.CTR
     salt: array[64, byte]
     exchange: bool
+    cipherLock*: Lock
     wallets*: WalletIds
     xpubs*: WalletXPubs
 
@@ -255,6 +256,7 @@ worker(1):
       var sdata = newSeq[byte](comp.len)
       var pos = 0
       var next_pos = 16
+      acquire(client.cipherLock)
       while next_pos < comp.len:
         client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
                           cast[ptr UncheckedArray[byte]](addr sdata[pos]))
@@ -270,6 +272,7 @@ worker(1):
                           cast[ptr UncheckedArray[byte]](addr enc[0]))
         copyMem(addr sdata[pos], addr enc[0], plen)
       client.wsServerSend(sdata)
+      release(client.cipherLock)
     else:
       echo "ClientId=", clientId, " is Nil"
 
@@ -464,6 +467,7 @@ worker(1):
       var sdata = newSeq[byte](comp.len)
       var pos = 0
       var next_pos = 16
+      acquire(client.cipherLock)
       while next_pos < comp.len:
         client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
                           cast[ptr UncheckedArray[byte]](addr sdata[pos]))
@@ -479,6 +483,7 @@ worker(1):
                           cast[ptr UncheckedArray[byte]](addr enc[0]))
         copyMem(addr sdata[pos], addr enc[0], plen)
       client.wsServerSend(sdata)
+      release(client.cipherLock)
     else:
       echo "ClientId=", clientId, " is Nil"
 
@@ -518,6 +523,7 @@ server(ip = "0.0.0.0", port = 5000):
         retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 64.cint)
         if retSeed != 0: raise
         client.exchange = false
+        initLock(client.cipherLock)
         wsSend((client.kp.pubkey, client.salt).toBytes)
 
       onMessage:
