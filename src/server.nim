@@ -488,15 +488,12 @@ worker(1):
       echo "ClientId=", clientId, " is Nil"
 
   while active:
-    while sendMesChannel.count > 0:
-      let sdata = sendMesChannel.recv()
-      Debug.Stream.write "sendManager wid=", sdata.wallet_id, " data=", sdata.data
-      var wmdatas = walletmap.get(sdata.wallet_id)
-      if not wmdatas.isNil:
-        for wmdata in wmdatas.val:
-          wmdata.clientId.sendClient(sdata.data)
-      sleep(1)
-    sleep(100)
+    let sdata = sendMesChannel.recv()
+    Debug.Stream.write "sendManager wid=", sdata.wallet_id, " data=", sdata.data
+    var wmdatas = walletmap.get(sdata.wallet_id)
+    if not wmdatas.isNil:
+      for wmdata in wmdatas.val:
+        wmdata.clientId.sendClient(sdata.data)
 
 const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
 
