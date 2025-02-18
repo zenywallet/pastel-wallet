@@ -269,7 +269,7 @@ worker(1):
         client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
                           cast[ptr UncheckedArray[byte]](addr enc[0]))
         copyMem(addr sdata[pos], addr enc[0], plen)
-        clientId.wsSend(sdata)
+      clientId.wsSend(sdata)
     else:
       echo "ClientId=", clientId, " is Nil"
 
@@ -478,7 +478,7 @@ worker(1):
         client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
                           cast[ptr UncheckedArray[byte]](addr enc[0]))
         copyMem(addr sdata[pos], addr enc[0], plen)
-        clientId.wsSend(sdata)
+      clientId.wsSend(sdata)
     else:
       echo "ClientId=", clientId, " is Nil"
 
