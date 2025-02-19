@@ -909,6 +909,7 @@ proc stop*() =
   for i in 0..threads.high: joinThread(threads[i][])
   Debug.Common.write "watcher stop"
   serverStop()
+  sendMesChannel.drop()
 
 proc quit() {.noconv.} =
   stop()

@@ -83,7 +83,7 @@ type
 type
   StreamCriticalErr* = object of CatchableError
 
-var sendMesChannel = queue.newQueue[tuple[wallet_id: WalletId, data: string]](0x10000)
+var sendMesChannel* = queue.newQueue[tuple[wallet_id: WalletId, data: string]](0x10000)
 
 proc send*(wallet_id: WalletId, data: string) =
   if not sendMesChannel.send((wallet_id, data)):
