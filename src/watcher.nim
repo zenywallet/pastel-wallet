@@ -718,12 +718,13 @@ proc ball_main() {.thread.} =
       var data = BallDataMemPool(ch_data.data)
       var client = getClient(data.client.ClientId)
       if client.isNil: continue
+      var clientWallets = client.wallets
       let j_mempool = blockstor.getMempool()
       if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
         var widinfos: TWidInfos = fullMempoolAddrsAndTxs(j_mempool["res"])
         full_wid_addrs = widinfos.addrs
         full_wid_txs = widinfos.txs
-        sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], @[client.wallets], true)
+        sendUnconfs(full_wid_addrs, full_wid_txs, j_mempool["res"], @[clientWallets], true)
 
     of BallCommand.Unspents:
       var data = BallDataUnspents(ch_data.data)
@@ -855,31 +856,34 @@ proc ball_main() {.thread.} =
       var data = BallDataAddClient(ch_data.data)
       var client = getClient(data.client.ClientId)
       if client.isNil: continue
-      debug "AddClient ", client.wallets
-      wallet_ids.incl(client.wallets)
-      active_wids.incl(client.wallets.toHashSet())
-      BallCommand.Unspents.send(BallDataUnspents(wallets: client.wallets))
+      var clientWallets = client.wallets
+      debug "AddClient ", clientWallets
+      wallet_ids.incl(clientWallets)
+      active_wids.incl(clientWallets.toHashSet())
+      BallCommand.Unspents.send(BallDataUnspents(wallets: clientWallets))
       BallCommand.MemPool.send(BallDataMemPool(client: data.client.ClientId))
-      BallCommand.Height.send(BallDataHeight(wallet_id: client.wallets[0]))
-      BallCommand.Unused.send(BallDataUnused(wallet_id: client.wallets[0]))
-      StreamCommand.Balance.send(StreamDataBalance(wallets: client.wallets))
-      StreamCommand.Addresses.send(StreamDataAddresses(wallets: client.wallets))
+      BallCommand.Height.send(BallDataHeight(wallet_id: clientWallets[0]))
+      BallCommand.Unused.send(BallDataUnused(wallet_id: clientWallets[0]))
+      StreamCommand.Balance.send(StreamDataBalance(wallets: clientWallets))
+      StreamCommand.Addresses.send(StreamDataAddresses(wallets: clientWallets))
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
       var client = getClient(data.client.ClientId)
       if client.isNil: continue
-      debug "DelClient ", client.wallets
-      if client.wallets.len > 0:
-        let client_wid: WalletId = client.wallets[0]
-        wallet_ids.excl(client.wallets)
+      var clientWallets = client.wallets
+      debug "DelClient ", clientWallets
+      if clientWallets.len > 0:
+        client.wallets = @[]
+        let client_wid: WalletId = clientWallets[0]
+        wallet_ids.excl(clientWallets)
         var find = false
         for wallets in wallet_ids:
           if wallets[0] == client_wid:
             find = true
             break
         if not find:
-          active_wids.excl(client.wallets.toHashSet())
+          active_wids.excl(clientWallets.toHashSet())
         client.wallets = @[]
 
     of BallCommand.UpdateWallets:
