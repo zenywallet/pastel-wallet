@@ -2,9 +2,10 @@
 
 import httpclient, json, asyncdispatch, strutils, logs, libcurl
 import std/exitprocs
+import config
 export json
 
-const baseurl = "http://localhost:8000/api/"
+const baseurl = blockstor_apiurl
 
 type
   BsErrorCode* {.pure.} = enum

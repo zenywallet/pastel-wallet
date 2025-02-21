@@ -22,6 +22,7 @@ networks:
 
 var network* = BitZeny_mainnet
 
+const blockstor_apiurl* = "http://localhost:8000/api/"
 const blockstor_apikey* = "sample-969a6d71-a259-447c-a486-90bac964992b"
 const gaplimit*: uint32 = 20
 
