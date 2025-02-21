@@ -497,7 +497,7 @@ worker(1):
 
 const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
 
-server(ip = "0.0.0.0", port = 5000):
+server(ssl = true, ip = "0.0.0.0", port = 5002):
   routes:
     get "/":
       case page
@@ -592,6 +592,10 @@ server(ip = "0.0.0.0", port = 5000):
       ($data).addHeader("json").send
 
     "Not found".addHeader(Status404).send
+
+server(ip = "0.0.0.0", port = 5000):
+  routes:
+    send(redirect301("https://localhost:5002" & reqUrl))
 
 serverStart(wait = false)
 
