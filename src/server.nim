@@ -231,6 +231,8 @@ proc `xor`(a: array[32, byte], b: ptr array[32, byte]): array[32, byte] =
 proc yespower(a: array[32, byte]): array[32, byte] {.inline.} =
   discard yespower_hash(cast[ptr UncheckedArray[byte]](unsafeAddr a[0]), 32, cast[ptr UncheckedArray[byte]](addr result))
 
+proc `$`(data: array[32, byte]): string = data.toHex
+
 var workerClientsLock: Lock
 initLock(workerClientsLock)
 
