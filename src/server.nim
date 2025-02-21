@@ -18,6 +18,7 @@ import ../deps/zip/zip/zlib
 import logs as patelog except debug
 import db
 import blockstor except send
+import config
 
 config:
   sigTermQuit = false
@@ -497,8 +498,8 @@ worker(1):
 
 const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
 
-server(ssl = true, ip = "0.0.0.0", port = 5002):
-  routes:
+server(ssl = true, ip = "0.0.0.0", port = HttpsPort):
+  routes(host = HttpsHost):
     get "/":
       case page
       of Page.Release:
@@ -593,9 +594,9 @@ server(ssl = true, ip = "0.0.0.0", port = 5002):
 
     "Not found".addHeader(Status404).send
 
-server(ip = "0.0.0.0", port = 5000):
-  routes:
-    send(redirect301("https://localhost:5002" & reqUrl))
+server(ip = "0.0.0.0", port = HttpPort):
+  routes(host = HttpHost):
+    send(redirect301(HttpRedirect & reqUrl))
 
 serverStart(wait = false)
 
