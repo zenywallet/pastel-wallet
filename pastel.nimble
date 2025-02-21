@@ -43,6 +43,7 @@ task cipher, "Build cipher":
 
 task minify, "Minifies the JS using Google's closure compiler":
   exec """
+nim c -r src/js/config.nim
 nim js -d:release -o:public/js/main.js src/js/main.nim
 java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
 --js_output_file=public/js/app.js \
@@ -63,6 +64,7 @@ public/js/encoding.js \
 public/js/tradelogs.js \
 public/js/wallet.js \
 public/js/ui.js \
+public/js/config.js \
 public/js/pastel.js \
 public/js/main.js 2>&1 | cut -c 1-240
 """
