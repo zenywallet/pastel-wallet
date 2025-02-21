@@ -48,6 +48,7 @@ const layout_debug* = staticHtmlDocument:
       script(type="text/javascript", src="/js/tradelogs.js")
       script(type="text/javascript", src="/js/wallet.js")
       script(type="text/javascript", src="/js/ui.js")
+      script(type="text/javascript", src="/js/config.js")
       script(type="text/javascript", src="/js/pastel.js")
       title: text "Pastel Wallet"
     body:
