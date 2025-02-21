@@ -6,7 +6,6 @@ import std/locks
 import std/sequtils
 import std/times
 import std/cpuinfo
-#import std/tables
 import caprese
 import caprese/bearssl/hash
 import caprese/server_types
