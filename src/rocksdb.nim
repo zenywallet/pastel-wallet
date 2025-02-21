@@ -1635,7 +1635,7 @@ proc rocksdb_optimistictransactiondb_property_int*(
     out_val: ptr uint64_t): cint {.importc, cdecl.}
 ##  referring to convention (3), this should be used by client
 ##  to free memory that was malloc()ed
- ]#
+]#
 proc rocksdb_free*(`ptr`: pointer) {.importc, cdecl.}
 proc rocksdb_get_pinned*(db: rocksdb_t; options: rocksdb_readoptions_t;
                         key: cstring; keylen: csize_t; errptr: ptr cstring): rocksdb_pinnableslice_t {.importc, cdecl.}
