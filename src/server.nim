@@ -5,6 +5,7 @@ import std/algorithm
 import std/locks
 import std/sequtils
 import std/times
+import std/cpuinfo
 #import std/tables
 import caprese
 import caprese/bearssl/hash
@@ -462,7 +463,9 @@ worker(1):
       let e = getCurrentException()
       echo e.name, ": ", e.msg
 
-worker(1):
+let cpuCount = countProcessors()
+
+worker(num = cpuCount):
   proc sendClient(clientId: ClientId, data: string) =
     let client = getClient(clientId)
     if not client.isNil:
