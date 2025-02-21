@@ -502,8 +502,8 @@ worker(num = cpuCount):
 
 const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
 
-server(ssl = true, ip = "0.0.0.0", port = HttpsPort):
-  routes(host = HttpsHost):
+server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
+  routes(host = config.HttpsHost):
     get "/":
       case page
       of Page.Release:
@@ -598,9 +598,9 @@ server(ssl = true, ip = "0.0.0.0", port = HttpsPort):
 
     "Not found".addHeader(Status404).send
 
-server(ip = "0.0.0.0", port = HttpPort):
-  routes(host = HttpHost):
-    send(redirect301(HttpRedirect & reqUrl))
+server(ip = "0.0.0.0", port = config.HttpPort):
+  routes(host = config.HttpHost):
+    send(redirect301(config.HttpRedirect & reqUrl))
 
 serverStart(wait = false)
 
