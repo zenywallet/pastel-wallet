@@ -381,7 +381,7 @@ proc block_reader(json: JsonNode) =
     doWork()
 
 proc stream_main() {.thread.} =
-  let ws = waitFor newAsyncWebsocketClient("localhost", Port(8001),
+  let ws = waitFor newAsyncWebsocketClient(config.blockstor_wshost, Port(config.blockstor_wsport),
     path = "/api", ssl = false, protocols = @[], userAgent = "pastel-v0.1")
 
   proc read() {.async.} =
