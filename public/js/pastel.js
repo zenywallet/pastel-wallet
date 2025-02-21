@@ -1,6 +1,6 @@
 var pastel = pastel || {};
 pastel.config = pastel.config || {
-  ws_url: 'wss://pastel.bitzeny.jp/ws/',
+  ws_url: 'wss://pastel.bitzeny.jp/ws',
   ws_protocol: 'pastel-v0.1',
   network: 'bitzeny'
 };
