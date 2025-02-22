@@ -6,3 +6,8 @@ nimcache/
 *.a
 *.o
 bin/
+public/js/app.js
+public/js/cipher.js
+public/js/cipher.wasm
+public/js/config.js
+public/js/main.js
