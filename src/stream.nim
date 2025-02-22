@@ -1,5 +1,8 @@
 # Copyright (c) 2019 zenywallet
 
+# obsoleted
+
+#[
 import ../deps/"websocket.nim"/websocket, asynchttpserver, asyncnet, asyncdispatch
 import ed25519, sequtils, os, tables, locks, strutils
 import json, algorithm, times
@@ -605,3 +608,4 @@ proc start*(): ref Thread[void] =
   var stream_thread = new Thread[void]
   createThread(stream_thread[], stream_main)
   stream_thread
+]#
