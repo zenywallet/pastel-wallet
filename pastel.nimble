@@ -27,6 +27,7 @@ task rocksdb, "Build RocksDB":
     exec "CPLUS_INCLUDE_PATH=./$(basename lz4-*/)/lib ROCKSDB_DISABLE_SNAPPY=1 ROCKSDB_DISABLE_ZLIB=1 ROCKSDB_DISABLE_BZIP=1 ROCKSDB_DISABLE_ZSTD=1 make static_lib -j$(nproc)"
 
 task depsAll, "Build deps":
+  rocksdbTask()
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -i"
