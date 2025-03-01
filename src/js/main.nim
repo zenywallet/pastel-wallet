@@ -385,8 +385,7 @@ proc camClose(): proc() =
       qrReader.hide();
     """.}
 
-const levenshtein_js = staticRead("levenshtein.js")
-{.emit: levenshtein_js.}
+import zenyjs/jslevenshtein
 {.emit: """
 function levens(word, wordlist) {
   if(word.length == 0) {
@@ -396,7 +395,7 @@ function levens(word, wordlist) {
   for(var i in wordlist) {
     var wl = wordlist[i];
     var maxlen = Math.max(word.length, wl.length);
-    var lev = levenshtein(word, wl);
+    var lev = `levenshtein`(word, wl);
     var score = lev / maxlen;
     if(data[score]) {
       data[score].push(wl);
@@ -427,7 +426,7 @@ function levens_one(word, wordlist) {
   for(var i in wordlist) {
     var wl = wordlist[i];
     var maxlen = Math.max(word.length, wl.length);
-    var lev = levenshtein(word, wl);
+    var lev = `levenshtein`(word, wl);
     if(lev != 1) {
       continue;
     }
@@ -452,7 +451,6 @@ proc replace*(s, a, b: cstring): cstring {.importcpp, nodecl.}
 proc join*(s: cstring): cstring {.importcpp, nodecl.}
 proc includes*(s: seq[cstring], a: cstring): bool {.importcpp, nodecl.}
 
-#proc levenshtein(a, b: JsObject): JsObject {.importc, nodecl.}
 proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
 proc levens_one(word, wordlist: JsObject): JsObject {.importc, nodecl.}
 
