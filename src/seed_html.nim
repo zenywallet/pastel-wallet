@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <script type="text/javascript" src="/js/jquery-3.4.1.slim.min.js"></script>
-  <script type="text/javascript" src="/js/jquery-qrcode.min.js"></script>
-  <script type="text/javascript" src="/js/base58.js"></script>
-  <title>Seed Maker</title>
-</head>
-<body>
-<div id="qrcode"></div>
-<div id="seed"></div>
-<script>
+# Copyright (c) 2019 zenywallet
+
+import caprese/contents
+
+const SeedScript = """
 var crypto = window.crypto || window.msCrypto;
 if(crypto && crypto.getRandomValues) {
   var priv = new Uint8Array(32);
@@ -55,6 +47,17 @@ if(crypto && crypto.getRandomValues) {
 } else {
   throw new Error('Secure random number generation is not supported by this browser.');
 }
-</script>
-</body>
-</html>
+"""
+
+const SeedHtml* = staticHtmlDocument:
+  buildHtml(html):
+    head:
+      meta(charset="utf-8")
+      script(type="text/javascript", src="/js/jquery-3.4.1.slim.min.js")
+      script(type="text/javascript", src="/js/jquery-qrcode.min.js")
+      script(type="text/javascript", src="/js/base58.js")
+      title: text "Seed Maker"
+    body:
+      tdiv(id="qrcode")
+      tdiv(id="seed")
+      script: verbatim SeedScript
