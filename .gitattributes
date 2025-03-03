@@ -1,2 +1,9 @@
 public/fomantic/** linguist-vendored
 public/semantic/** linguist-vendored
+public/js/coinlibs.js linguist-vendored
+public/js/encoding.* linguist-vendored
+public/js/jquery-* linguist-vendored
+public/js/matter.* linguist-vendored
+public/js/rawdeflate.* linguist-vendored
+public/js/rawinflate.* linguist-vendored
+public/js/uint64.* linguist-vendored
