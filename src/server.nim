@@ -11,6 +11,7 @@ import caprese/bearssl/hash
 import caprese/server_types
 import caprese/hashtable
 import templates/layout_base
+import seed_html
 import ctrmode
 import ed25519
 import yespower
@@ -591,6 +592,9 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
                 var hdata2 = walletmap.get(wid)
         BallCommand.DelClient.send(BallDataDelClient(client: clientId))
         client.xpubs = @[]
+
+    get "/seed":
+      SeedHtml.content("html").response
 
     get "/api/pub/:pubkey":
       var data = %*{"pub": sanitizeHtml(pubkey)}
