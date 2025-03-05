@@ -596,6 +596,8 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
     get "/seed":
       SeedHtml.content("html").response
 
+    acme(path = config.AcmePath)
+
     get "/api/pub/:pubkey":
       var data = %*{"pub": sanitizeHtml(pubkey)}
       ($data).addHeader("json").send

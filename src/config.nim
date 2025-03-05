@@ -36,6 +36,7 @@ when defined(PASTEL_BITZENY_JP):
   const HttpHost* = "pastel.bitzeny.jp"
   const HttpRedirect* = "https://pastel.bitzeny.jp"
   const WebSocketUrl* = "wss://pastel.bitzeny.jp/ws"
+  const AcmePath* = "www/pastel.bitzeny.jp/"
 else:
   const HttpsPort* = 5002
   const HttpsHost* = "localhost:5002"
@@ -43,3 +44,4 @@ else:
   const HttpHost* = "localhost:5000"
   const HttpRedirect* = "https://localhost:5002"
   const WebSocketUrl* = "wss://localhost:5002/ws"
+  const AcmePath* = "www/localhost/"
