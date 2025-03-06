@@ -1,3 +1,6 @@
+# Copyright (c) 2019 zenywallet
+
+const BaseCss* = """
 @font-face {
   font-family: 'Josefin Sans';
   font-style: normal;
@@ -1338,3 +1341,4 @@ i.receive {
   right: -9px;
 }
 }
+"""

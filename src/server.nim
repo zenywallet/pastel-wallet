@@ -11,6 +11,7 @@ import caprese/bearssl/hash
 import caprese/server_types
 import caprese/hashtable
 import templates/layout_base
+import base_css
 import seed_html
 import ctrmode
 import ed25519
@@ -515,6 +516,9 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
         layout_debug.addHeader.send
 
     public(importPath = "../public")
+
+    get "/css/base.css":
+      BaseCss.content("css").response
 
     stream(path = "/ws", protocol = "pastel-v0.1"):
       onOpen:
