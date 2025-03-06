@@ -636,6 +636,7 @@ pastel.ready = function() {
   pastel.unspents_after_actions = [];
 
   var cur_balance = null;
+  var prev_balance = UINT64(0);
   var cur_unconfs = null;
   var cur_recvs = null;
   pastel.secure_recv = function(json) {
@@ -749,6 +750,7 @@ pastel.ready = function() {
         }
       }
     } else if(type == 'balance') {
+      prev_balance = cur_balance;
       cur_balance = UINT64(String(data));
       if(cur_unconfs) {
         var send = cur_unconfs.send;
@@ -759,6 +761,9 @@ pastel.ready = function() {
         $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
       } else {
         $('#wallet-balance .balance').text(conv_coin(data));
+        if(prev_balance && !cur_balance.eq(prev_balance)) {
+          pastel.send({cmd: 'unspents'});
+        }
       }
       var el = document.getElementById('wallet-balance');
       if(!el.style.display) {
