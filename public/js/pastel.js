@@ -721,15 +721,19 @@ pastel.ready = function() {
       }
       send.subtract(fee);
       update_unconfs(send, fee, recv);
-      if(!cur_unconfs || (send >= cur_unconfs.send && fee >= cur_unconfs.fee && recv >= cur_unconfs.recv)) {
+      var zeroUint64 = UINT64(0);
+      if(send.eq(zeroUint64) && fee.eq(zeroUint64) && recv.eq(zeroUint64)) {
+        cur_unconfs = null;
+        $('#wallet-balance .balance').text(conv_coin(cur_balance));
+      } else {
+        cur_unconfs = {
+          send: send,
+          fee: fee,
+          recv: recv
+        };
         var balance_unconfs = cur_balance.clone().add(recv).subtract(send).subtract(fee);
         $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
       }
-      cur_unconfs = {
-        send: send,
-        fee: fee,
-        recv: recv
-      };
       TradeLogs.unconfs(data);
       wallet.setUnconfs(data);
       pastel.utxoballs.setUnconfs(data);
