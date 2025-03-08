@@ -7,3 +7,4 @@ public/js/matter.* linguist-vendored
 public/js/rawdeflate.* linguist-vendored
 public/js/rawinflate.* linguist-vendored
 public/js/uint64.* linguist-vendored
+tests/** linguist-vendored
