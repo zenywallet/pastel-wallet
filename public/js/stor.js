@@ -97,7 +97,7 @@ var Stor = (function() {
     db['shield'] = buf2hex(data);
   }
 
-  Stor.prototype.get_shield = function(data) {
+  Stor.prototype.get_shield = function() {
     return hex2buf(db['shield']);
   }
 
