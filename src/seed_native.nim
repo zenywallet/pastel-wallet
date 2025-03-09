@@ -13,10 +13,10 @@ try {
   }
 } catch(e) {}
 try {
-  if(!global.crypto) {
-    global.crypto = require('crypto');
+  if(!global.cryptoMod) {
+    global.cryptoMod = require('crypto');
   }
-  var seed = crypto.randomBytes($1);
+  var seed = cryptoMod.randomBytes($1);
   HEAPU8.set(seed, $0);
   return 0;
 } catch(e) {
