@@ -1,9 +1,10 @@
 # Copyright (c) 2019 zenywallet
 # nim js -d:release main.nim
 
-import karax / [karax, karaxdsl, vdom, jstrutils]
+import karax / [karax, karaxdsl, vdom]
+import karax / jstrutils except `&`
 include trans
-import jsffi except `&`
+import jsffi
 import strutils
 
 var appInst: KaraxInstance
