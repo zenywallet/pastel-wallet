@@ -77,9 +77,8 @@ Stor.jsPrototype(get_salt):
       salt = db["salt"]
       if salt.to(bool):
         return hex2buf(salt)
-      return jsNull
-    else:
-      return jsNull
+
+    return jsNull
 
 Stor.jsPrototype(set_shield):
   proc(data: JsObject) =
