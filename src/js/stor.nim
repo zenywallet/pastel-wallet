@@ -69,15 +69,12 @@ Stor.jsPrototype(get_salt):
     var salt = db["salt"]
     if salt.to(bool):
       return hex2buf(salt)
-
     if create_no_exists:
       var buf = cryptSeedUint8Array(32)
       db["salt"] = buf2hex(buf)
-
       salt = db["salt"]
       if salt.to(bool):
         return hex2buf(salt)
-
     return jsNull
 
 Stor.jsPrototype(set_shield):
