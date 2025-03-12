@@ -7,7 +7,7 @@ template trans*(x: string, param: openarray[cstring]): cstring = i18n(x) % param
 proc jstrans1(x: cstring): cstring = cstring(i18n($x))
 proc jstrans2(x: cstring, param: openarray[cstring]): cstring = i18n($x) % param
 
-proc setlang(lang: cstring) =
+proc setlang*(lang: cstring) {.exportc.} =
   if lang.startsWith("ja"):
     setCurrentLanguage(Language.jaJP)
   elif lang.startsWith("en"):
@@ -20,7 +20,7 @@ proc setlang(lang: cstring) =
     }
   """.}
 
-proc getlang(): cstring =
+proc getlang*(): cstring {.exportc.} =
   var lang = getCurrentLanguage()
   if lang == Language.jaJP:
     "ja".cstring
@@ -151,24 +151,25 @@ addTranslation(Language.jaJP, "Amount is invalid.", "数量が不正です。")
 addTranslation(Language.jaJP, "Failed to lock keys.", "ロックに失敗しました。")
 addTranslation(Language.jaJP, "Language", "言語選択")
 
-{.emit: """
-var __t = function(x, params) {
-  if(params) {
-    return `jstrans2`(x, params);
-  } else {
-    return `jstrans1`(x);
-  }
-};
-var setlang = `setlang`;
-var getlang = `getlang`;
-var navlang = window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage;
-(function() {
-  var stor  = new Stor();
-  var lang = stor.get_lang();
-  stor = null;
-  lang = lang || navlang || 'en';
-  lang = lang.substring(0, 2);
-  setlang(lang);
-  LangSelector.show(lang);
-})();
-""".}
+import zenyjs
+import zenyjs/core
+import stor as storMod
+
+var LangSelector {.importc, nodecl.}: JsObject
+
+var tr* {.exportc.} = proc(x: cstring, params: openarray[cstring]): cstring =
+  if params.toJs.to(bool):
+    return jstrans2(x, params)
+  else:
+    return jstrans1(x)
+
+{.emit: "var __t = `tr`;".}
+
+var navlang {.exportc.}: JsObject = window.navigator.language or window.navigator.userLanguage or window.navigator.browserLanguage
+var stor = jsNew(Stor)
+var lang = stor.get_lang()
+stor = jsNull
+lang = lang or navlang or "en".toJs
+lang = lang.substring(0, 2)
+setlang(lang.to(cstring))
+LangSelector.show(lang)
