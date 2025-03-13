@@ -453,9 +453,6 @@ function Wallet() {
     p = cipher.yespower_n4r32(sha256d(p), 32);
     try {
       var dec = cipher.dec_json(p, stor.get_shield());
-      for(var i in dec) {
-        bip32.fromBase58(dec[i], network);
-      }
       shieldedKeys.priv = dec;
       shieldedKeys.pub = stor.get_xpubs();
       if(shieldedKeys.priv.length != shieldedKeys.pub.length) {
