@@ -272,7 +272,7 @@ function Wallet() {
             if(cmp == 0) {
               cmp = a.index - b.index;
               if(cmp == 0) {
-                cmp = a.txid - b.txid;
+                cmp = a.txid > b.txid;
                 if(cmp == 0) {
                   cmp = a.n - b.n;
                 }
