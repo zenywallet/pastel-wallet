@@ -1,976 +1,806 @@
-// Copyright (c) 2019 zenywallet
-function Wallet() {
-  var bip39 = coinlibs.bip39;
-  var bip32 = coinlibs.bip32;
-  var coin = coinlibs.coin;
-  var network = coin.networks[pastel.config.network];
-  var stor = new Stor();
-  var _hdpath = "m/44'/123'/0'";
-  var self = this;
+# Copyright (c) 2019 zenywallet
 
-  function getWordList(mlang) {
-    if(mlang == 1) {
-      return bip39.wordlists.japanese;
-    } else {
-      return bip39.wordlists.english;
-    }
-  }
+import std/os
+import zenyjs/contents
 
-  this.getMnemonicToSeed = function(mnemonic, password) {
-    var m = mnemonic.replace(/[ 　\n\r]+/g, ' ').trim();
-    return bip39.mnemonicToSeedSync(m, password);
-  }
+const srcDir = currentSourcePath().parentDir()
 
-  var MnemonicSeedType = {
-    "0": "Unknown",
-    "1": "Standard",
-    "2": "Standard with password",
-    "101": "Non-standard 1",
-    "102": "Non-standard 2"
-  };
+const walletJs = staticScript:
+  import std/jsffi
+  import std/macros
+  import zenyjs
+  import zenyjs/core
+  import zenyjs/bip32 as zenyjs_bip32
+  import zenyjs/jsuint64
 
-  this.getMnemonicSeedType = function(type) {
-    return MnemonicSeedType[type];
-  }
+  type
+    WalletError = object of CatchableError
 
-  this.getNonStandardMnemonicToSeeds = function(mnemonic, mlang) {
-    var seeds = [];
-    var m = mnemonic.replace(/[ 　\n\r]+/g, ' ').trim();
-    if(m.split(' ').length == 24) {
-      var entropy = bip39.mnemonicToEntropy(m, getWordList(mlang), true);
-      seeds.push({seed: entropy, type: 101});
-      if(mlang == 0) {
-        var m2 = bip39.entropyToMnemonic(entropy, getWordList(1));
-        var seed2 = bip39.mnemonicToSeedSync(m2);
-        seeds.push({seed: seed2, type: 102});
-      }
-    }
-    return seeds;
-  }
+  var coinlibs {.importc, nodecl.}: JsObject
+  var pastel {.importc, nodecl.}: JsObject
+  var Notify {.importc, nodecl.}: JsObject
+  var base58 {.importc, nodecl.}: JsObject
+  var network {.importc, nodecl.}: JsObject
 
-  this.getMnemonicToSeeds = function(mnemonic, mlang, password) {
-    var seeds = [];
-    var m = mnemonic.replace(/[ 　\n\r]+/g, ' ').trim();
-    var seed = bip39.mnemonicToSeedSync(m, password);
-    seeds.push({seed: seed, type: password ? 2 : 1});
-    var nonstd_seeds = this.getNonStandardMnemonicToSeeds(mnemonic, mlang);
-    seeds = seeds.concat(nonstd_seeds);
-    return seeds;
-  }
+  proc newStor(): JsObject {.importcpp: "new Stor()".}
+  proc mnemonic_replace_trim(s: cstring): JsObject {.importcpp: "#.replace(/[ 　\\n\\r]+/g, ' ').trim()".} # /[ \u3000\n\r]+/g
+  proc match_regexp2(s: cstring): JsObject {.importcpp: "#.match(/.{2}/g)".}
+  proc `^=`(x, y: JsObject): JsObject {.importjs: "(# ^= #)", discardable.}
+  proc newUint64*(val: SomeSignedInt): Uint64 = newUint64(cstring($val.uint))
+  proc newTransactionBuilder(coin, network: JsObject): JsObject {.importcpp: "new #.TransactionBuilder(#)".}
 
-  this.setHdpath = function(hdpath) {
-    _hdpath = hdpath;
-  }
+  proc Wallet*() {.exportc.} =
+    var self = this
+    var bip39 = coinlibs.bip39
+    var bip32 = coinlibs.bip32
+    var coin = coinlibs.coin
+    var network = coin.networks[pastel.config.network.to(cstring)]
+    var stor = newStor()
+    var u_hdpath = "m/44'/123'/0'".cstring
 
-  this.getHdNodeKeyPairs = function(seed, hdpath) {
-    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
-    var child = node.derivePath(hdpath || _hdpath);
-    return {priv: child.toBase58(), pub: child.neutered().toBase58()};
-  }
+    proc getWordList(mlang: int): JsObject =
+      if mlang == 1:
+        return bip39.wordlists.japanese
+      else:
+        return bip39.wordlists.english
 
-  this.getHdNodePrivate = function(seed, hdpath) {
-    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
-    var child = node.derivePath(hdpath || _hdpath);
-    return child.toBase58();
-  }
+    self.getMnemonicToSeed = proc(mnemonic, password: cstring): JsObject =
+      var m = mnemonic.mnemonic_replace_trim()
+      bip39.mnemonicToSeedSync(m, password)
 
-  this.getHdNodePublic = function(seed, hdpath) {
-    var node = (typeof seed === 'string') ? bip32.fromSeedHex(seed, network) : bip32.fromSeed(seed, network);
-    var child = node.derivePath(hdpath || _hdpath);
-    return child.neutered().toBase58();
-  }
-
-  this.resetXpubFromSeed = function(seed, hdpath) {
-    stor.del_xpubs();
-    var xpub = this.getHdNodePublic(seed, hdpath || _hdpath);
-    stor.add_xpub(xpub);
-  }
-
-  this.resetXpubFromMnemonic = function(mnemonic, mlang, password, hdpath) {
-    var seeds = this.getMnemonicToSeeds(mnemonic, mlang, password);
-    stor.del_xpubs();
-    for(var i in seeds) {
-      var seed = seeds[i].seed;
-      var xpub = this.getHdNodePublic(seed, hdpath || _hdpath);
-      stor.add_xpub(xpub);
-    }
-  }
-
-  function error(msg) {
-    console.log('ERROR: ' + msg);
-  }
-
-  var _xpubs = [];
-  var _utxos = [];
-  var _unconfs = [];
-  var _nodes = {};
-
-  this.getXpubs = function() {
-    _xpubs = stor.get_xpubs();
-    return _xpubs;
-  }
-
-  this.getXpub = function(xpub_idx) {
-    return _xpubs[xpub_idx];
-  }
-
-  this.checkXpubs = function(xpubs) {
-    for(var i in xpubs) {
-      if(_xpubs.indexOf(xpubs[i]) < 0) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  var address_caches = {};
-  function checkUtxo(utxo) {
-    var xpub = _xpubs[utxo.xpub_idx];
-    if(!xpub) {
-      error('xpub not found');
-      return false;
-    }
-    if(!_nodes[xpub]) {
-      _nodes[xpub] = bip32.fromBase58(xpub, network);
-    }
-    var idx = utxo.xpub_idx + '-' + utxo.change + '-' + utxo.index;
-    var cache = address_caches[idx];
-    if(cache) {
-      if(utxo.address != cache.p2pkh) {
-        var p2wpkh = address_caches[idx]['p2wpkh'];
-        if(!p2wpkh) {
-          var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
-          p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
-          address_caches[idx]['p2wpkh'] = p2wpkh;
-        }
-        if(utxo.address != p2wpkh) {
-          var p2sh = address_caches[idx]['p2sh'];
-          if(!p2sh) {
-            p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
-            address_caches[idx]['p2sh'] = p2sh;
-          }
-          if(utxo.address != p2sh) {
-            error('invalid utxo address');
-            return false;
-          }
-        }
-      }
-    } else {
-      var child = _nodes[xpub].derive(utxo.change).derive(utxo.index);
-      var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
-      address_caches[idx] = {child: child, p2pkh: p2pkh};
-      if(utxo.address != p2pkh) {
-        var p2wpkh = coin.payments.p2wpkh({pubkey: child.publicKey, network: network}).address;
-        address_caches[idx]['p2wpkh'] = p2wpkh;
-        if(utxo.address != p2wpkh) {
-          var p2sh = coin.payments.p2sh({redeem: p2wpkh, network: network}).address;
-          address_caches[idx]['p2sh'] = p2sh;
-          if(utxo.address != p2sh) {
-            error('invalid utxo address');
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
-  function checkUtxos(utxos) {
-    var tmp_utxos = [];
-    for(var i in utxos) {
-      tmp_utxos.push(utxos[i]);
+    var MnemonicSeedType = JsObject{
+      0: "Unknown".cstring,
+      1: "Standard".cstring,
+      2: "Standard with password".cstring,
+      101: "Non-standard 1".cstring,
+      102: "Non-standard 2".cstring
     }
 
-    function worker() {
-      var utxo = tmp_utxos.shift();
-      if(utxo) {
-        if(checkUtxo(utxo)) {
-          setTimeout(worker, 10);
-        } else {
-          Notify.show('Error', 'Server is invalid and unreliable. Stop using this wallet.', Notify.msgtype.error);
-        }
-      }
+    self.getMnemonicSeedType = proc(seedType: int): cstring =  MnemonicSeedType[seedType].to(cstring)
+
+    self.getNonStandardMnemonicToSeeds = proc(mnemonic: cstring, mlang: int): JsObject =
+      var seeds = [].toJs
+      var m = mnemonic.mnemonic_replace_trim()
+      if m.split(' ').length.to(int) == 24:
+        var entropy = bip39.mnemonicToEntropy(m, getWordList(mlang), true)
+        seeds.push(JsObject{seed: entropy, type: 101})
+        if mlang == 0:
+          var m2 = bip39.entropyToMnemonic(entropy, getWordList(1))
+          var seed2 = bip39.mnemonicToSeedSync(m2)
+          seeds.push(JsObject{seed: seed2, type: 102})
+      seeds
+
+    self.getMnemonicToSeeds = proc(mnemonic: cstring, mlang: int, password: cstring): JsObject =
+      var seeds = [].toJs
+      var m = mnemonic.mnemonic_replace_trim()
+      var seed = bip39.mnemonicToSeedSync(m, password)
+      seeds.push(JsObject{seed: seed, type: if password.toJs.to(bool): 2 else: 1})
+      var nonstd_seeds = self.getNonStandardMnemonicToSeeds(mnemonic, mlang)
+      seeds = seeds.concat(nonstd_seeds)
+      seeds
+
+    self.setHdpath = proc(hdpath: cstring) = u_hdpath = hdpath
+
+    self.getHdNodeKeyPairs = proc(seed: JsObject, hdpath: cstring): JsObject =
+      var node = if jsTypeof(seed) == "string": bip32.fromSeedHex(seed, network) else: bip32.fromSeed(seed, network)
+      var child = node.derivePath(hdpath.toJs or u_hdpath.toJs)
+      JsObject{priv: child.toBase58(), pub: child.neutered().toBase58()}
+
+    self.getHdNodePrivate = proc(seed: JsObject, hdpath: cstring): JsObject =
+      var node = if jsTypeof(seed) == "string": bip32.fromSeedHex(seed, network) else: bip32.fromSeed(seed, network)
+      var child = node.derivePath(hdpath.toJs or u_hdpath.toJs)
+      child.toBase58()
+
+    self.getHdNodePublic = proc(seed: JsObject, hdpath: cstring): JsObject =
+      var node = if jsTypeof(seed) == "string": bip32.fromSeedHex(seed, network) else: bip32.fromSeed(seed, network)
+      var child = node.derivePath(hdpath.toJs or u_hdpath.toJs)
+      child.neutered().toBase58()
+
+    self.resetXpubFromSeed = proc(seed: JsObject, hdpath: cstring) =
+      stor.del_xpubs()
+      var xpub = self.getHdNodePublic(seed, hdpath.toJs or u_hdpath.toJs)
+      stor.add_xpub(xpub)
+
+    self.resetXpubFromMnemonic = proc(mnemonic: cstring, mlang: int, password: cstring, hdpath: cstring) =
+      var seeds = self.getMnemonicToSeeds(mnemonic, mlang, password)
+      stor.del_xpubs()
+      for i in 0..<seeds.length.to(int):
+        var seed = seeds[i].seed
+        var xpub = self.getHdNodePublic(seed, hdpath.toJs or u_hdpath.toJs)
+        stor.add_xpub(xpub)
+
+    proc error(msg: cstring) = console.log("ERROR: ".cstring & msg)
+
+    var u_xpubs = [].toJs
+    var u_utxos = [].toJs
+    var u_unconfs = [].toJs
+    var u_nodes = JsObject{}
+
+    self.getXpubs = proc(): JsObject =
+      u_xpubs = stor.get_xpubs()
+      u_xpubs
+
+    self.getXpub = proc(xpub_idx: int): JsObject = u_xpubs[xpub_idx]
+
+    self.checkXpubs = proc(xpubs: JsObject): bool =
+      for i in 0..<xpubs.length.to(int):
+        if u_xpubs.indexOf(xpubs[i]).to(int) < 0:
+          return false
+      return true
+
+    var address_caches = JsObject{}
+    proc checkUtxo(utxo: JsObject): bool =
+      var xpub = u_xpubs[utxo.xpub_idx.to(int)]
+      if not xpub.to(bool):
+        error("xpub not found".cstring)
+        return false
+      if not u_nodes[xpub.to(cstring)].to(bool):
+        u_nodes[xpub.to(cstring)] = bip32.fromBase58(xpub, network)
+      var idx = (utxo.xpub_idx + "-".toJs + utxo.change + "-".toJs + utxo.index).to(cstring)
+      var cache = address_caches[idx]
+      if cache.toJs.to(bool):
+        if utxo.address != cache.p2pkh:
+          var p2wpkh = address_caches[idx]["p2wpkh".cstring]
+          if not p2wpkh.to(bool):
+            var child = u_nodes[xpub.to(cstring)].derive(utxo.change).derive(utxo.index)
+            p2wpkh = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network}).address
+            address_caches[idx]["p2wpkh".cstring] = p2wpkh
+          if utxo.address != p2wpkh:
+            var p2sh = address_caches[idx]["p2sh".cstring]
+            if not p2sh.to(bool):
+              p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh, network: network}).address
+              address_caches[idx]["p2sh".cstring] = p2sh
+            if utxo.address != p2sh:
+              error("invalid utxo address".cstring)
+              return false
+      else:
+        var child = u_nodes[xpub.to(cstring)].derive(utxo.change).derive(utxo.index)
+        var p2pkh = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network}).address
+        address_caches[idx] = JsObject{child: child, p2pkh: p2pkh}
+        if utxo.address != p2pkh:
+          var p2wpkh = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network}).address
+          address_caches[idx]["p2wpkh".cstring] = p2wpkh
+          if utxo.address != p2wpkh:
+            var p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh, network: network}).address
+            address_caches[idx]["p2sh".cstring] = p2sh
+            if utxo.address != p2sh:
+              error("invalid utxo address".cstring)
+              return false
+      return true
+
+    proc checkUtxos(utxos: JsObject): bool {.discardable.} =
+      var tmp_utxos = [].toJs
+      for i in 0..<utxos.length.to(int):
+        tmp_utxos.push(utxos[i])
+
+      proc worker() =
+        var utxo = tmp_utxos.shift()
+        if utxo.to(bool):
+          if checkUtxo(utxo):
+            setTimeout(worker, 10)
+          else:
+            discard Notify.show("Error".cstring, "Server is invalid and unreliable. Stop using this wallet.".cstring, Notify.msgtype.error)
+      worker()
+      true
+
+    self.setUtxos = proc(utxos: JsObject) =
+      u_utxos = utxos
+      checkUtxos(utxos)
+
+    self.addUtxos = proc(utxos: JsObject, deduplicate: bool = false): bool =
+      if checkUtxos(utxos):
+        if deduplicate:
+          error("unimplemented".cstring)
+          return false
+        else:
+          u_utxos.concat(utxos)
+        return true
+      return false
+
+    self.getUtxos = proc(): JsObject = u_utxos
+
+    self.setUnconfs = proc(data: JsObject) =
+      var mytxs = JsObject{}
+      for txid, tx in data.txs:
+        var send_addrs = JsObject{}
+        for txa, v in tx.data:
+          for i in 0..<v.length.to(int):
+            if i == 0:
+              send_addrs[txa] = 1
+        if Object.keys(send_addrs).length.to(int) > 0:
+          mytxs[txid] = send_addrs
+
+      var spents_unconfs = JsObject{}
+      for val in data.addrs:
+        if val.spents.to(bool):
+          for spent in val.spents:
+            spents_unconfs[(spent.txid + "-".toJs + spent.n).to(cstring)] = 1
+
+      var unconf_list = [].toJs
+      for a, val in data.addrs:
+        if val.txouts.to(bool):
+          for txout in val.txouts:
+            if not spents_unconfs[(txout.txid + "-".toJs + txout.n).to(cstring)].to(bool):
+              var item = JsObject{txtype: 1, address: a, txid: txout.txid, n: txout.n,
+                value: txout.value, change: val.change, index: val.index,
+                xpub_idx: val.xpub_idx, trans_time: txout.trans_time, mytxs: if mytxs[txout.txid.to(cstring)].to(bool): 1 else: 0}
+              unconf_list.push(item)
+
+      unconf_list.sort(proc(a, b: JsObject): JsObject =
+        var cmp = b.mytxs - a.mytxs
+        if cmp == 0.toJs:
+          cmp = b.change - a.change
+          if cmp == 0.toJs:
+            cmp = a.trans_time - b.trans_time
+            if cmp == 0.toJs:
+              cmp = a.xpub_idx - b.xpub_idx
+              if cmp == 0.toJs:
+                cmp = a.index - b.index
+                if cmp == 0.toJs:
+                  cmp = a.txid > b.txid
+                  if cmp == 0.toJs:
+                    cmp = a.n - b.n
+        return cmp
+      )
+      u_unconfs = unconf_list
+
+    var u_unusedList = [].toJs
+    self.setUnusedAddress = proc(data: JsObject): bool =
+      var changed = false
+      if u_unusedList.length == data.length:
+        for i in 0..<u_unusedList.length.to(int):
+          if u_unusedList[i] != data[i]:
+            changed = true
+            break
+      else:
+        changed = true
+      u_unusedList = data
+      return changed
+
+    self.getUnusedAddressList = proc(count: int, cb: proc(addrs: JsObject)) =
+      var xpub = u_xpubs[0]
+      if not xpub.to(bool):
+       xpub = self.getXpubs()[0]
+      if not u_nodes[xpub.to(cstring)].to(bool):
+        u_nodes[xpub.to(cstring)] = bip32.fromBase58(xpub, network)
+      var addrs = [].toJs
+      var data = u_unusedList
+      var datatmp = [].toJs
+      if data.length.to(int) == 0:
+        for i in 0..<count:
+          datatmp.push(i)
+      else:
+        for i in 0..<data.length.to(int):
+          datatmp.push(data[i]);
+        var last = data[data.length.to(int) - 1].to(int)
+        for i in 1..count - data.length.to(int):
+          datatmp.push(last + i)
+      for i in 0..<datatmp.length.to(int):
+        var child = u_nodes[xpub.to(cstring)].derive(0).derive(datatmp[i])
+        var p2pkh = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network})
+        addrs.push(p2pkh.address)
+      cb(addrs)
+
+    proc xc(b1, b2: JsObject) =
+      if b1.length == b2.length:
+        for i in 0..<b1.length.to(int):
+          b1[i] ^= b2[i]
+
+    proc sha256d(data: JsObject): JsObject = coin.crypto.sha256(coin.crypto.sha256(data))
+
+    proc buf2hex(buffer: JsObject): cstring =
+      Array.prototype.map.call(newUint8Array(buffer), proc(x: JsObject): JsObject = ("00".toJs + x.toString(16)).slice(-2)).join("").to(cstring)
+
+    proc hex2buf(hexstr: JsObject): JsObject =
+      if hexstr.length % 2.toJs != 0.toJs:
+        raise newException(WalletError, "no even number")
+      newUint8Array(hexstr.match_regexp2().map(proc(b: JsObject): JsObject = Number.parseInt(b, 16)))
+
+    var shieldedKeys = JsObject{priv: [].toJs, pub: [].toJs}
+    self.initShieldedKeys = proc(keys: JsObject) =
+      shieldedKeys = JsObject{priv: [].toJs, pub: [].toJs}
+
+    self.setShieldedKeys = proc(keys: JsObject) =
+      shieldedKeys = keys
+
+    self.addShieldedKey = proc(key: JsObject) =
+      shieldedKeys.priv.push(key.priv)
+      shieldedKeys.pub.push(key.pub)
+
+    self.getShieldedKeysCount = proc(): int = shieldedKeys.pub.length.to(int)
+
+    self.getLockShieldedType = proc(): JsObject = stor.get_lock_type()
+
+    self.getLockShieldedStatus = proc(): bool =
+      (shieldedKeys.pub.length.to(int) > 0 and shieldedKeys.priv.length.to(int) == 0)
+
+    self.lockShieldedKeys = proc(phrase: JsObject, lock_type: JsObject, prelock: bool): bool =
+      var cipher = pastel.cipher
+      if not cipher.to(bool):
+        return false
+      if not phrase.to(bool) or phrase.length.to(int) == 0:
+        if self.getLockShieldedStatus().to(bool):
+          return true
+        if not prelock and shieldedKeys.unlock.to(bool):
+          shieldedKeys.priv = [].toJs
+          discard jsDelete(shieldedKeys.unlock)
+          return true
+        return false
+      if shieldedKeys.priv.length.to(int) == 0 or shieldedKeys.pub.length.to(int) == 0 or
+        shieldedKeys.priv.length.to(int) != shieldedKeys.pub.length.to(int):
+        return false
+      var salt = stor.get_salt(true)
+      if not salt.to(bool):
+        return false
+      var p = cipher.yespower_n4r32(sha256d(phrase), 32)
+      xc(p, salt)
+      p = cipher.yespower_n4r32(sha256d(p), 32)
+      var enc = cipher.enc_json(p, shieldedKeys.priv)
+
+      stor.set_shield(enc)
+      stor.set_lock_type(lock_type)
+
+      if stor.get_lock_type() != lock_type:
+        return false
+      var dec = cipher.dec_json(p, stor.get_shield())
+      for i in 0..<shieldedKeys.priv.length.to(int):
+        if shieldedKeys.priv[i] != dec[i]:
+          return false
+
+      stor.set_xpubs(shieldedKeys.pub)
+
+      if prelock:
+        shieldedKeys.unlock = true
+      else:
+        shieldedKeys.priv = [].toJs
+      return true
+
+    self.unlockShieldedKeys = proc(phrase: JsObject): bool =
+      var cipher = pastel.cipher
+      if not cipher.to(bool):
+        return false
+      if not phrase.to(bool) or phrase.length.to(int) == 0:
+        return false
+      var salt = stor.get_salt(true)
+      if not salt.to(bool):
+        return false
+      var p = cipher.yespower_n4r32(sha256d(phrase), 32)
+      xc(p, salt)
+      p = cipher.yespower_n4r32(sha256d(p), 32)
+      try:
+        var dec = cipher.dec_json(p, stor.get_shield())
+        shieldedKeys.priv = dec
+        shieldedKeys.pub = stor.get_xpubs()
+        if shieldedKeys.priv.length != shieldedKeys.pub.length:
+          return false
+        shieldedKeys.unlock = true
+        return true
+      except:
+        let e = getCurrentException()
+        console.log(e.name & ": ".cstring & e.msg.cstring)
+        return false
+
+    self.setSeedCard = proc(cardInfos: JsObject) =
+      var cipher = pastel.cipher
+      self.initShieldedKeys()
+      var mix: JsObject
+      for i in 0..<cardInfos.length.to(int):
+        var s = cardInfos[i]
+        var sbuf = base58.dec(s.seed or s.orig)
+        if not sbuf.to(bool) and not s.seed.to(bool) and s.orig.to(bool):
+          sbuf = cipher.yespower_n4r32(sha256d(s.orig), 32)
+        if s.sv.to(bool) and s.sv.length.to(int) > 0:
+          var sv = cipher.yespower_n4r32(sha256d(s.sv), 32)
+          var sbuf_sv = newUint8Array(64)
+          sbuf_sv.set(sbuf)
+          sbuf_sv.set(sv, 32)
+          var sv2 = cipher.yespower_n4r32(sha256d(sbuf_sv), 32)
+          xc(sbuf, sv2)
+        if mix.to(bool):
+          xc(mix, sbuf)
+        else:
+          mix = sbuf
+        if mix.to(bool):
+          var kp = self.getHdNodeKeyPairs(buf2hex(mix))
+          self.addShieldedKey(kp)
+
+    self.setMnemonic = proc(words: cstring, lang_id: int) =
+      self.initShieldedKeys()
+      var sds = self.getMnemonicToSeeds(words, lang_id)
+      for i in 0..<sds.length.to(int):
+        var sd = sds[i]
+        var kp = self.getHdNodeKeyPairs(sd.seed)
+        self.addShieldedKey(kp)
+
+    var cb_set_change: proc(data: JsObject) = proc(data: JsObject) = discard
+    self.setChange = proc(data: JsObject) =
+      cb_set_change(data)
+
+    var ErrSend = JsObject{
+      SUCCESS: 0,
+      FAILED: 1,
+      INVALID_ADDRESS: 2,
+      INSUFFICIENT_VALUE: 3,
+      DUST_VALUE: 4,
+      BUSY: 5,
+      TX_FAILED: 6,
+      TX_TIMEOUT: 7,
+      SERVER_ERROR: 8,
+      SERVER_TIMEOUT: 9
     }
-    worker();
-  }
+    self.ERR_SEND = ErrSend
 
-  this.setUtxos = function(utxos) {
-    _utxos = utxos;
-    checkUtxos(utxos);
-  }
+    var cb_rawtx: proc(result_rawtx: JsObject) = proc(result_rawtx: JsObject) = discard
 
-  this.addUtxos = function(utxos, deduplicate) {
-    if(checkUtxos(utxos)) {
-      if(deduplicate) {
-        error('unimplemented');
-        return false;
-      } else {
-        _utxos.concat(utxos);
-      }
-      return true;
-    }
-    return false;
-  }
+    self.rawtxResult = proc(result_rawtx: JsObject) =
+      cb_rawtx(result_rawtx)
 
-  this.getUtxos = function() {
-    return _utxos;
-  }
+    proc send_tx(rawtx: JsObject, cb: proc(data: JsObject)) =
+      var tval: int = jsNull.to(int)
+      var result_cb = cb
+      cb_rawtx = proc(result_rawtx: JsObject) =
+        clearTimeout(tval)
+        if not result_rawtx.err.to(bool) and result_rawtx.res.to(bool):
+          result_cb(JsObject{err: ErrSend.SUCCESS, res: result_rawtx.res})
+        else:
+          if result_rawtx.res.to(bool):
+            result_cb(JsObject{err: ErrSend.TX_FAILED, res: result_rawtx.res})
+          else:
+            result_cb(JsObject{err: ErrSend.TX_FAILED, res: jsNull})
+        cb_rawtx = proc(result_rawtx: JsObject) = discard
+      var ret = pastel.send(JsObject{cmd: "rawtx".cstring, data: rawtx})
+      if ret.to(bool):
+        tval = setTimeout(proc() =
+          result_cb = proc(ignore: JsObject) = discard
+          cb(JsObject{err: ErrSend.TX_TIMEOUT, res: jsNull}), 30000)
+      else:
+        result_cb = proc(ignore: JsObject) = discard
+        cb(JsObject{err: ErrSend.TX_FAILED, res: jsNull})
 
-  this.setUnconfs = function(data) {
-    var mytxs = {};
-    for(var txid in data.txs) {
-      var tx = data.txs[txid];
-      var send_addrs = {};
-      for(var txa in tx.data) {
-        var v = tx.data[txa];
-        for(var i in v) {
-          if(i == 0) {
-            send_addrs[txa] = 1;
-          }
-        }
-      }
-      if(Object.keys(send_addrs).length > 0) {
-        mytxs[txid] = send_addrs;
-      }
-    }
+    proc send_internal(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
+      var tx = newTransactionBuilder(coin, network)
+      var in_value = newUint64(0)
+      var sign_utxos = [].toJs
+      var utxo_count = 0
+      var result_out = 0
 
-    var spents_unconfs = {};
-    for(var addr in data.addrs) {
-      var val = data.addrs[addr];
-      if(val.spents) {
-        for(i in val.spents) {
-          var spent = val.spents[Number(i)];
-          spents_unconfs[spent.txid + '-' + spent.n] = 1;
-        }
-      }
-    }
+      for i in 0..<u_utxos.length.to(int):
+        var utxo = u_utxos[i]
+        tx.addInput(utxo.txid, utxo.n)
+        in_value.add(newUint64(String(utxo.value)))
+        sign_utxos.push(utxo)
+        inc(utxo_count)
 
-    var unconf_list = [];
-    for(var addr in data.addrs) {
-      var val = data.addrs[addr];
-      if(val.txouts) {
-        for(i in val.txouts) {
-          var txout = val.txouts[Number(i)];
-          if(!spents_unconfs[txout.txid + '-' + txout.n]) {
-            var item = {txtype: 1, address: addr, txid: txout.txid, n: txout.n,
-              value: txout.value, change: val.change, index: val.index,
-              xpub_idx: val.xpub_idx, trans_time: txout.trans_time, mytxs: mytxs[txout.txid] ? 1 : 0};
-            unconf_list.push(item);
-          }
-        }
-      }
-    }
+        if in_value.gt(value).to(bool):
+          var sub = in_value.clone().subtract(value).to(Uint64)
+          var fee1 = newUint64(cstring($(148 * utxo_count + 34 * 2 + 10 + 546)))
+          if sub.gt(fee1).to(bool) or sub.eq(fee1).to(bool):
+            result_out = 2
+            break
+          else:
+            var fee2 = newUint64(cstring($(148 * utxo_count + 34 + 10)))
+            if sub.gt(fee2).to(bool) or sub.eq(fee2).to(bool):
+              result_out = 1
+              var fee3 = newUint64(cstring($(148 * utxo_count + 34 * 2 + 10 + 148)))
+              if sub.lt(fee3).to(bool):
+                break
+      if result_out == 0:
+        cb(JsObject{err: ErrSend.INSUFFICIENT_BALANCE})
+        return
 
-    unconf_list.sort(function(a, b) {
-      var cmp = b.mytxs - a.mytxs;
-      if(cmp == 0) {
-        cmp = b.change - a.change;
-        if(cmp == 0) {
-          cmp = a.trans_time - b.trans_time;
-          if(cmp == 0) {
-            cmp = a.xpub_idx - b.xpub_idx;
-            if(cmp == 0) {
-              cmp = a.index - b.index;
-              if(cmp == 0) {
-                cmp = a.txid > b.txid;
-                if(cmp == 0) {
-                  cmp = a.n - b.n;
-                }
-              }
-            }
-          }
-        }
-      }
-      return cmp;
-    });
-    _unconfs = unconf_list;
-  }
+      var priv_nodes = JsObject{}
+      var keys = JsObject{}
+      for i in 0..<sign_utxos.length.to(int):
+        var s = sign_utxos[i]
+        if not priv_nodes[s.xpub_idx.to(int)].to(bool):
+          priv_nodes[s.xpub_idx.to(int)] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx.to(int)], network)
+        var child = priv_nodes[s.xpub_idx.to(int)].derive(s.change).derive(s.index)
+        keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)] = child
 
-  var _unusedList = [];
-  this.setUnusedAddress = function(data) {
-    var changed = false;
-    if(_unusedList.length == data.length) {
-      for(var i in _unusedList) {
-        if(_unusedList[i] != data[i]) {
-          changed = true;
-          break;
-        }
-      }
-    } else {
-      changed = true;
-    }
-    _unusedList = data;
-    return changed;
-  }
+      try:
+        tx.addOutput(send_address, value)
+      except:
+        let e = getCurrentException()
+        console.log(e.name & ": ".cstring & e.msg.cstring)
+        cb(JsObject{err: ErrSend.INVALID_ADDRESS})
+        return
+      if result_out == 1:
+        for i in 0..<sign_utxos.length.to(int):
+          var s = sign_utxos[i]
+          var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
+          tx.sign(i, key)
+        var rawtx = tx.build().toHex()
+        var total_bytes = rawtx.length.to(int) div 2
+        var fee = in_value.clone().subtract(value).to(Uint64)
+        send_tx(rawtx, proc(resultData: JsObject) = cb(resultData))
+        return
 
-  this.getUnusedAddressList = function(count, cb) {
-    var xpub = _xpubs[0];
-    if(!xpub) {
-     xpub = this.getXpubs()[0];
-    }
-    if(!_nodes[xpub]) {
-      _nodes[xpub] = bip32.fromBase58(xpub, network);
-    }
-    var addrs = [];
-    var data = _unusedList;
-    var datatmp = [];
-    if(data.length == 0) {
-      for(var i = 0; i < count; i++) {
-        datatmp.push(i);
-      }
-    } else {
-      for(var i in data) {
-        datatmp.push(data[i]);
-      }
-      var last = data[data.length - 1];
-      for(var i = 1; i <= count - data.length; i++) {
-        datatmp.push(last + i);
-      }
-    }
-    for(var i in datatmp) {
-      var child = _nodes[xpub].derive(0).derive(datatmp[i]);
-      var p2pkh = coin.payments.p2pkh({pubkey: child.publicKey, network: network});
-      addrs.push(p2pkh.address);
-    }
-    cb(addrs);
-  }
+      var change_value = in_value.clone().subtract(value).to(Uint64)
+      var fee_low = 147 * utxo_count + 34 * 2 + 10
+      var fee_high = 148 * utxo_count + 34 * 2 + 10
+      var fee_mid = Math.round(147.5 * utxo_count.float64 + 34 * 2 + 10).to(int)
+      var fee_start = fee_mid - Math.ceil(1000 / utxo_count).to(int)
+      if fee_start < fee_low:
+        fee_start = fee_low
 
-  function xc(b1, b2) {
-    if(b1.length == b2.length) {
-      for(var i = 0; i < b1.length; i++) {
-        b1[i] ^= b2[i];
-      }
-    }
-  }
+      var better_tx = jsNull
+      var better_size = 0
+      var better_fee = 0
+      for fee in fee_start..fee_high:
+        var change_sub = change_value.clone().subtract(newUint64(fee.uint)).to(Uint64)
+        tx.addOutput(change_address, change_sub)
+        for i in 0..<sign_utxos.length.to(int):
+          var s = sign_utxos[i]
+          var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
+          tx.sign(i, key)
+        var rawtx = tx.build().toHex()
+        var total_bytes = rawtx.length.to(int) div 2
 
-  function sha256d(data) {
-    return coin.crypto.sha256(coin.crypto.sha256(data));
-  }
+        if fee >= total_bytes:
+          better_tx = rawtx
+          better_size = total_bytes
+          better_fee = fee
+          break
+        tx.removeOutput(1)
+        tx.removeSign()
+      if better_tx != jsNull:
+        send_tx(better_tx, proc(resultData: JsObject) = cb(resultData))
+        return
 
-  function buf2hex(buffer) {
-    return Array.prototype.map.call(new Uint8Array(buffer), function(x) {return ('00' + x.toString(16)).slice(-2)}).join('');
-  }
+      cb(JsObject{err: ErrSend.FAILED})
 
-  function hex2buf(hexstr) {
-    if(hexstr.length % 2) {
-      throw new Error('no even number');
-    }
-    return new Uint8Array(hexstr.match(/.{2}/g).map(function(byte) {return parseInt(byte, 16)}));
-  }
+    proc send_lazy_internal(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
+      var lazy_time = 2
+      var tx = newTransactionBuilder(coin, network)
+      var in_value = newUint64(0)
+      var sign_utxos = [].toJs
+      var utxo_count = 0
+      var result_out = 0
 
-  var shieldedKeys = {priv: [], pub: []};
-  this.initShieldedKeys = function(keys) {
-    shieldedKeys = {priv: [], pub: []};
-  }
+      var sign_worker_sign_utxos = [].toJs
+      var sign_i = 0
+      var better_tx = jsNull
+      var better_size = 0
+      var better_fee = 0
+      var sign_fee = 0
+      var sign_fee_high = 0
+      var keys = JsObject{}
+      proc sign_worker3()
 
-  this.setShieldedKeys = function(keys) {
-    shieldedKeys = keys;
-  }
+      proc sign_worker4() =
+        var s = sign_worker_sign_utxos.shift()
+        if s.to(bool):
+          var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
+          tx.sign(sign_i, key)
+          inc(sign_i)
+          setTimeout(sign_worker4, lazy_time)
+        else:
+          var rawtx = tx.build().toHex()
+          var total_bytes = rawtx.length.to(int) div 2
 
-  this.addShieldedKey = function(key) {
-    shieldedKeys.priv.push(key.priv);
-    shieldedKeys.pub.push(key.pub);
-  }
+          if sign_fee >= total_bytes:
+            better_tx = rawtx
+            better_size = total_bytes
+            better_fee = sign_fee
+            send_tx(better_tx, proc(resultData: JsObject) = cb(resultData))
+          else:
+            tx.removeOutput(1)
+            tx.removeSign()
+            inc(sign_fee)
+            if sign_fee <= sign_fee_high:
+              sign_worker3()
+            else:
+              if better_tx != jsNull:
+                send_tx(better_tx, proc(resultData: JsObject) = cb(resultData))
+              else:
+                cb(JsObject{err: ErrSend.FAILED})
 
-  this.getShieldedKeysCount = function() {
-    return shieldedKeys.pub.length;
-  }
+      var change_value = newUint64(0)
+      proc sign_worker3() =
+        var change_sub = change_value.clone().subtract(newUint64(sign_fee.uint)).to(Uint64)
+        tx.addOutput(change_address, change_sub)
+        sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
+        sign_i = 0
+        sign_worker4()
 
-  this.getLockShieldedType = function() {
-    return stor.get_lock_type();
-  }
+      proc sign_worker2() =
+        change_value = in_value.clone().to(Uint64).subtract(value).to(Uint64)
+        var fee_low = 147 * utxo_count + 34 * 2 + 10
+        var fee_high = 148 * utxo_count + 34 * 2 + 10
+        var fee_mid = Math.round(147.5 * utxo_count.float64 + 34 * 2 + 10)
+        var fee_start = (fee_mid - Math.ceil(1000 / utxo_count)).to(int)
+        if fee_start < fee_low:
+          fee_start = fee_low
+        sign_fee = fee_start
+        sign_fee_high = fee_high
+        sign_worker3()
 
-  this.getLockShieldedStatus = function() {
-    return (shieldedKeys.pub.length > 0 && shieldedKeys.priv.length == 0);
-  }
+      proc sign_worker() =
+        var s = sign_worker_sign_utxos.shift()
+        if s.to(bool):
+          var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
+          tx.sign(sign_i, key)
+          inc(sign_i)
+          setTimeout(sign_worker, lazy_time)
+        else:
+          var rawtx = tx.build().toHex()
+          var total_bytes = rawtx.length.to(int) div 2
+          var fee = in_value.clone().subtract(value).to(Uint64)
+          send_tx(rawtx, proc(resultData: JsObject) = cb(resultData))
 
-  this.lockShieldedKeys = function(phrase, lock_type, prelock) {
-    var cipher = pastel.cipher;
-    if(!cipher) {
-      return false;
-    }
-    if(!phrase || phrase.length == 0) {
-      if(self.getLockShieldedStatus()) {
-        return true;
-      }
-      if(!prelock && shieldedKeys.unlock) {
-        shieldedKeys.priv = [];
-        delete shieldedKeys.unlock;
-        return true;
-      }
-      return false;
-    }
-    if(shieldedKeys.priv.length == 0 || shieldedKeys.pub.length == 0 ||
-      shieldedKeys.priv.length != shieldedKeys.pub.length) {
-      return false;
-    }
-    var salt = stor.get_salt(true);
-    if(!salt) {
-      return false;
-    }
-    var p = cipher.yespower_n4r32(sha256d(phrase), 32);
-    xc(p, salt);
-    p = cipher.yespower_n4r32(sha256d(p), 32);
-    var enc = cipher.enc_json(p, shieldedKeys.priv);
+      proc addoutput_worker() =
+        try:
+          tx.addOutput(send_address, value)
+        except:
+          let e = getCurrentException()
+          console.log(e.name & ": ".cstring & e.msg.cstring)
+          cb(JsObject{err: ErrSend.INVALID_ADDRESS})
+          return
+        if result_out == 1:
+          sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
+          sign_i = 0
+          sign_worker()
+        else:
+          sign_worker2()
 
-    stor.set_shield(enc);
-    stor.set_lock_type(lock_type);
+      var priv_nodes = JsObject{}
+      var keys_worker_sign_utxos = [].toJs
+      proc keys_worker() =
+        var s = keys_worker_sign_utxos.shift()
+        if s.to(bool):
+          if not priv_nodes[s.xpub_idx.to(int)].to(bool):
+            priv_nodes[s.xpub_idx.to(int)] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx.to(int)], network)
+          var child = priv_nodes[s.xpub_idx.to(int)].derive(s.change).derive(s.index)
+          keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)] = child
+          setTimeout(keys_worker, lazy_time)
+        else:
+          addoutput_worker()
 
-    if(stor.get_lock_type() != lock_type) {
-      return false;
-    }
-    var dec = cipher.dec_json(p, stor.get_shield());
-    for(var i in shieldedKeys.priv) {
-      if(shieldedKeys.priv[i] != dec[i]) {
-        return false;
-      }
-    }
+      var utxos = u_utxos.concat(u_unconfs)
+      proc addinput_worker() =
+        var utxo = utxos.shift()
+        if utxo.to(bool):
+          tx.addInput(utxo.txid, utxo.n)
+          in_value.add(newUint64(String(utxo.value)))
+          sign_utxos.push(utxo)
+          inc(utxo_count)
 
-    stor.set_xpubs(shieldedKeys.pub);
+          if in_value.gt(value).to(bool):
+            var sub = in_value.clone().subtract(value).to(Uint64)
+            var fee1 = newUint64((148 * utxo_count + 34 * 2 + 10 + 546).uint)
+            if sub.gt(fee1).to(bool) or sub.eq(fee1).to(bool):
+              result_out = 2
+              keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
+              keys_worker()
+              return
+            else:
+              var fee2 = newUint64((148 * utxo_count + 34 + 10).uint)
+              if sub.gt(fee2).to(bool) or sub.eq(fee2).to(bool):
+                result_out = 1
+                var fee3 = newUint64((148 * utxo_count + 34 * 2 + 10 + 148).uint)
+                if sub.lt(fee3).to(bool):
+                  keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
+                  keys_worker()
+                  return
+          setTimeout(addinput_worker, lazy_time)
+        else:
+          if result_out == 0:
+            cb(JsObject{err: ErrSend.INSUFFICIENT_BALANCE})
+            return
+          keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
+          keys_worker()
+      addinput_worker()
 
-    if(prelock) {
-      shieldedKeys.unlock = true;
-    } else {
-      shieldedKeys.priv = [];
-    }
-    return true;
-  }
+    var send_busy = false
+    self.send = proc(address: cstring, value_str: cstring, cb: proc(data: JsObject)) =
+      if send_busy:
+        cb(JsObject{err: ErrSend.BUSY})
+        return
+      send_busy = true
+      var value = newUint64(String(value_str.toJs))
+      if value.lt(newUint64(String(546.toJs))).to(bool):
+        send_busy = false
+        cb(JsObject{err: ErrSend.DUST_VALUE})
+        return
+      var cb_set_change_called = false
+      var cb_set_tval: int = jsNull.to(int)
+      cb_set_change = proc(data: JsObject) =
+        cb_set_change_called = true
+        clearTimeout(cb_set_tval)
+        cb_set_change = proc(data: JsObject) = discard
+        if data.length.to(int) > 0:
+          var index = data[0]
+          var xpub = u_xpubs[0]
+          if xpub.to(bool) and not u_nodes[xpub.to(cstring)].to(bool):
+            u_nodes[xpub.to(cstring)] = bip32.fromBase58(xpub, network)
+          var child = u_nodes[xpub.to(cstring)].derive(1).derive(index)
+          var change_address = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network}).address.to(cstring)
+          send_lazy_internal(address, change_address, value, proc(ret: JsObject) =
+            send_busy = false
+            cb(ret)
+          )
+        else:
+          send_busy = false
+          cb(JsObject{err: ErrSend.SERVER_ERROR})
+      pastel.send(JsObject{cmd: "change".cstring})
+      cb_set_tval = setTimeout(proc() =
+        if not cb_set_change_called:
+          cb_set_change = proc(data: JsObject) = discard
+          send_busy = false
+          cb(JsObject{err: ErrSend.SERVER_TIMEOUT}), 30000)
 
-  this.unlockShieldedKeys = function(phrase) {
-    var cipher = pastel.cipher;
-    if(!cipher) {
-      return false;
-    }
-    if(!phrase || phrase.length == 0) {
-      return false;
-    }
-    var salt = stor.get_salt(true);
-    if(!salt) {
-      return false;
-    }
-    var p = cipher.yespower_n4r32(sha256d(phrase), 32);
-    xc(p, salt);
-    p = cipher.yespower_n4r32(sha256d(p), 32);
-    try {
-      var dec = cipher.dec_json(p, stor.get_shield());
-      shieldedKeys.priv = dec;
-      shieldedKeys.pub = stor.get_xpubs();
-      if(shieldedKeys.priv.length != shieldedKeys.pub.length) {
-        return false;
-      }
-      shieldedKeys.unlock = true;
-      return true;
-    } catch(ex) {
-      console.log(ex);
-      return false;
-    }
-  }
+    proc get_safecount(): int =
+      var safe_size = newUint64("100000".cstring)
+      var safe_utxo_count = 0
+      var size = newUint64(34 + 10)
+      while true:
+        size.add(newUint64(148))
+        if safe_size.gt(size).to(bool):
+          inc(safe_utxo_count)
+        else:
+          break
+      return safe_utxo_count
+    var safe_utxo_count = get_safecount()
 
-  this.setSeedCard = function(cardInfos) {
-    var cipher = pastel.cipher;
-    this.initShieldedKeys();
-    var mix;
-    for(var i in cardInfos) {
-      var s = cardInfos[i];
-      var sbuf = base58.dec(s.seed || s.orig);
-      if(!sbuf && !s.seed && s.orig) {
-        sbuf = cipher.yespower_n4r32(sha256d(s.orig), 32);
-      }
-      if(s.sv && s.sv.length > 0) {
-        var sv = cipher.yespower_n4r32(sha256d(s.sv), 32);
-        var sbuf_sv = new Uint8Array(64);
-        sbuf_sv.set(sbuf);
-        sbuf_sv.set(sv, 32);
-        var sv2 = cipher.yespower_n4r32(sha256d(sbuf_sv), 32);
-        xc(sbuf, sv2);
-      }
-      if(mix) {
-        xc(mix, sbuf);
-      } else {
-        mix = sbuf;
-      }
-      if(mix) {
-        var kp = this.getHdNodeKeyPairs(buf2hex(mix));
-        this.addShieldedKey(kp);
-      }
-    }
-  }
+    self.calcSendValue = proc(utxo_count: int): JsObject =
+      var unconfs = Object.assign([].toJs, u_unconfs)
+      var utxos = u_utxos.concat(unconfs)
+      var conf_count = utxos.length.to(int) - unconfs.length.to(int)
+      var unconf_count = unconfs.length.to(int)
+      var all_count = utxos.length.to(int)
+      var in_value = newUint64(0)
+      var count = 0
+      for i in 0..<utxo_count:
+        var utxo = utxos[i]
+        if utxo.to(bool):
+          in_value.add(newUint64(String(utxo.value)))
+          inc(count)
+        else:
+          break
+      if in_value.gt(newUint64(0)).to(bool):
+        var fee = newUint64((148 * count + 34 + 10).uint)
+        return JsObject{err: 0, value: in_value.subtract(fee).toString(), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
+      else:
+        return JsObject{err: 0, value: "0", count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
 
-  this.setMnemonic = function(words, lang_id) {
-    this.initShieldedKeys();
-    var sds = this.getMnemonicToSeeds(words, lang_id);
-    for(var i in sds) {
-      var sd = sds[i];
-      var kp = this.getHdNodeKeyPairs(sd.seed);
-      this.addShieldedKey(kp);
-    }
-  }
+    self.calcSendUtxo = proc(value_str: cstring): JsObject =
+      var unconfs = Object.assign([].toJs, u_unconfs)
+      var utxos = u_utxos.concat(unconfs)
+      var conf_count = utxos.length.to(int) - unconfs.length.to(int)
+      var unconf_count = unconfs.length.to(int)
+      var all_count = utxos.length.to(int)
+      var value = newUint64(String(value_str.toJs))
+      if value.eq(newUint64(0)).to(bool):
+        return JsObject{err: 0, count: 0, sign: 0, all: utxos.length, max: safe_utxo_count}
+      var in_value = newUint64(0)
+      var sign_utxos = [].toJs
+      var utxo_count = 0
+      var result_out = 0
+      var eq = false
+      for i in 0..<utxos.length.to(int):
+        var utxo = utxos[i]
+        in_value.add(newUint64(String(utxo.value)))
+        inc(utxo_count)
+        if in_value.gt(value).to(bool):
+          var sub = in_value.clone().subtract(value).to(Uint64)
+          var fee1 = newUint64((148 * utxo_count + 34 * 2 + 10 + 546).uint)
+          var chk_eq = sub.eq(fee1).to(bool)
+          if sub.gt(fee1).to(bool) or chk_eq:
+            result_out = 2
+            eq = chk_eq
+            break
+          else:
+            var fee2 = newUint64((148 * utxo_count + 34 + 10).uint)
+            var chk_eq2 = sub.eq(fee2).to(bool)
+            if sub.gt(fee2).to(bool) or chk_eq2:
+              result_out = 1
+              eq = chk_eq2
+              var fee3 = newUint64((148 * utxo_count + 34 * 2 + 10 + 148).uint)
+              if sub.lt(fee3).to(bool):
+                break
+      if result_out != 0:
+        return JsObject{err: 0, count: utxo_count, sign: if eq: 0 else: -1, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
+      else:
+        return JsObject{err: 1, sign: 1, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
 
-  var cb_set_change = function(data) {}
-  this.setChange = function(data) {
-    cb_set_change(data);
-  }
-
-  var ErrSend = {
-    SUCCESS: 0,
-    FAILED: 1,
-    INVALID_ADDRESS: 2,
-    INSUFFICIENT_VALUE: 3,
-    DUST_VALUE: 4,
-    BUSY: 5,
-    TX_FAILED: 6,
-    TX_TIMEOUT: 7,
-    SERVER_ERROR: 8,
-    SERVER_TIMEOUT: 9
-  }
-  this.ERR_SEND = ErrSend;
-
-  var cb_rawtx = function(result_rawtx) {}
-
-  this.rawtxResult = function(result_rawtx) {
-    cb_rawtx(result_rawtx);
-  }
-
-  function send_tx(rawtx, cb) {
-    var tval = null;
-    var result_cb = cb;
-    cb_rawtx = function(result) {
-      clearTimeout(tval);
-      if(!result.err && result.res) {
-        result_cb({err: ErrSend.SUCCESS, res: result.res});
-      } else {
-        if(result.res) {
-          result_cb({err: ErrSend.TX_FAILED, res: result.res});
-        } else {
-          result_cb({err: ErrSend.TX_FAILED, res: null});
-        }
-      }
-      cb_rawtx = function(result_rawtx) {}
-    }
-    var ret = pastel.send({cmd: 'rawtx', data: rawtx});
-    if(ret) {
-      tval = setTimeout(function() {
-        result_cb = function(ignore) {};
-        cb({err: ErrSend.TX_TIMEOUT, res: null});
-      }, 30000);
-    } else {
-      result_cb = function(ignore) {};
-      cb({err: ErrSend.TX_FAILED, res: null});
-    }
-  }
-
-  function send_internal(send_address, change_address, value, cb) {
-    var tx = new coin.TransactionBuilder(network);
-    var in_value = UINT64(0);
-    var sign_utxos = [];
-    var utxo_count = 0;
-    var result_out = 0;
-
-    for(var i in _utxos) {
-      var utxo = _utxos[i];
-      tx.addInput(utxo.txid, utxo.n);
-      in_value.add(UINT64(String(utxo.value)));
-      sign_utxos.push(utxo);
-      utxo_count++;
-
-      if(in_value.gt(value)) {
-        var sub = in_value.clone().subtract(value);
-        var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
-        if(sub.gt(fee1) || sub.eq(fee1)) {
-          result_out = 2;
-          break;
-        } else {
-          var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
-          if(sub.gt(fee2) || sub.eq(fee2)) {
-            result_out = 1;
-            var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
-            if(sub.lt(fee3)) {
-              break;
-            }
-          }
-        }
-      }
-    }
-    if(result_out == 0) {
-      cb({err: ErrSend.INSUFFICIENT_BALANCE});
-      return;
-    }
-
-    var priv_nodes = {};
-    var keys = {};
-    for(var i in sign_utxos) {
-      var s = sign_utxos[i];
-      if(!priv_nodes[s.xpub_idx]) {
-        priv_nodes[s.xpub_idx] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx], network);
-      }
-      var child = priv_nodes[s.xpub_idx].derive(s.change).derive(s.index);
-      keys[s.xpub_idx + '-' + s.change + '-' + s.index] = child;
-    }
-
-    try {
-      tx.addOutput(send_address, value);
-    } catch(ex) {
-      console.log(ex);
-      cb({err: ErrSend.INVALID_ADDRESS});
-      return;
-    }
-    if(result_out == 1) {
-      for(var i in sign_utxos) {
-        var s = sign_utxos[i];
-        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
-        tx.sign(Number(i), key);
-      }
-      var rawtx = tx.build().toHex();
-      var total_bytes = rawtx.length / 2;
-      var fee = in_value.clone().subtract(value);
-      send_tx(rawtx, function(result) {
-        cb(result);
-      });
-      return;
-    }
-
-    var change_value = in_value.clone().subtract(value);
-    var fee_low = 147 * utxo_count + 34 * 2 + 10;
-    var fee_high = 148 * utxo_count + 34 * 2 + 10;
-    var fee_mid = Math.round(147.5 * utxo_count + 34 * 2 + 10);
-    var fee_start = fee_mid - Math.ceil(1000 / utxo_count);
-    if(fee_start < fee_low) {
-      fee_start = fee_low;
-    }
-
-    var better_tx = null;
-    var better_size;
-    var better_fee;
-    for(var fee = fee_start; fee <= fee_high; fee++) {
-      var change_sub = change_value.clone().subtract(UINT64(String(fee)));
-      tx.addOutput(change_address, change_sub);
-      for(var i in sign_utxos) {
-        var s = sign_utxos[i];
-        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
-        tx.sign(Number(i), key);
-      }
-      var rawtx = tx.build().toHex();
-      var total_bytes = rawtx.length / 2;
-
-      if(fee >= total_bytes) {
-        better_tx = rawtx;
-        better_size = total_bytes;
-        better_fee = fee;
-        break;
-      }
-      tx.removeOutput(1);
-      tx.removeSign();
-    }
-    if(better_tx != null) {
-      send_tx(better_tx, function(result) {
-        cb(result);
-      });
-      return;
-    }
-
-    cb({err: ErrSend.FAILED});
-  }
-
-  function send_lazy_internal(send_address, change_address, value, cb) {
-    var lazy_time = 2;
-    var tx = new coin.TransactionBuilder(network);
-    var in_value = UINT64(0);
-    var sign_utxos = [];
-    var utxo_count = 0;
-    var result_out = 0;
-
-    var sign_worker_sign_utxos;
-    var sign_i;
-    var better_tx = null;
-    var better_size;
-    var better_fee;
-    var sign_fee, sign_fee_high;
-    function sign_worker4() {
-      var s = sign_worker_sign_utxos.shift();
-      if(s) {
-        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
-        tx.sign(Number(sign_i), key);
-        sign_i++;
-        setTimeout(sign_worker4, lazy_time);
-      } else {
-        var rawtx = tx.build().toHex();
-        var total_bytes = rawtx.length / 2;
-
-        if(sign_fee >= total_bytes) {
-          better_tx = rawtx;
-          better_size = total_bytes;
-          better_fee = sign_fee;
-          send_tx(better_tx, function(result) {
-            cb(result);
-          });
-        } else {
-          tx.removeOutput(1);
-          tx.removeSign();
-          sign_fee++;
-          if(sign_fee <= sign_fee_high) {
-            sign_worker3();
-          } else {
-            if(better_tx != null) {
-              send_tx(better_tx, function(result) {
-                cb(result);
-              });
-            } else {
-              cb({err: ErrSend.FAILED});
-            }
-          }
-        }
-      }
-    }
-
-    var change_value;
-    function sign_worker3() {
-      var change_sub = change_value.clone().subtract(UINT64(String(sign_fee)));
-      tx.addOutput(change_address, change_sub);
-      sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
-      sign_i = 0;
-      sign_worker4();
-    }
-
-    function sign_worker2() {
-      change_value = in_value.clone().subtract(value);
-      var fee_low = 147 * utxo_count + 34 * 2 + 10;
-      var fee_high = 148 * utxo_count + 34 * 2 + 10;
-      var fee_mid = Math.round(147.5 * utxo_count + 34 * 2 + 10);
-      var fee_start = fee_mid - Math.ceil(1000 / utxo_count);
-      if(fee_start < fee_low) {
-        fee_start = fee_low;
-      }
-      sign_fee = fee_start;
-      sign_fee_high = fee_high;
-      sign_worker3();
-    }
-
-    function sign_worker() {
-      var s = sign_worker_sign_utxos.shift();
-      if(s) {
-        var key = keys[s.xpub_idx + '-' + s.change + '-' + s.index];
-        tx.sign(Number(sign_i), key);
-        sign_i++;
-        setTimeout(sign_worker, lazy_time);
-      } else {
-        var rawtx = tx.build().toHex();
-        var total_bytes = rawtx.length / 2;
-        var fee = in_value.clone().subtract(value);
-        send_tx(rawtx, function(result) {
-          cb(result);
-        });
-      }
-    }
-
-    function addoutput_worker() {
-      try {
-        tx.addOutput(send_address, value);
-      } catch(ex) {
-        console.log(ex);
-        cb({err: ErrSend.INVALID_ADDRESS});
-        return;
-      }
-      if(result_out == 1) {
-        sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
-        sign_i = 0;
-        sign_worker();
-      } else {
-        sign_worker2();
-      }
-    }
-
-    var priv_nodes = {};
-    var keys = {};
-    var keys_worker_sign_utxos = [];
-    function keys_worker() {
-      var s = keys_worker_sign_utxos.shift();
-      if(s) {
-        if(!priv_nodes[s.xpub_idx]) {
-          priv_nodes[s.xpub_idx] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx], network);
-        }
-        var child = priv_nodes[s.xpub_idx].derive(s.change).derive(s.index);
-        keys[s.xpub_idx + '-' + s.change + '-' + s.index] = child;
-        setTimeout(keys_worker, lazy_time);
-      } else {
-        addoutput_worker();
-      }
-    }
-
-    var utxos = _utxos.concat(_unconfs);
-    function addinput_worker() {
-      var utxo = utxos.shift();
-      if(utxo) {
-        tx.addInput(utxo.txid, utxo.n);
-        in_value.add(UINT64(String(utxo.value)));
-        sign_utxos.push(utxo);
-        utxo_count++;
-
-        if(in_value.gt(value)) {
-          var sub = in_value.clone().subtract(value);
-          var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
-          if(sub.gt(fee1) || sub.eq(fee1)) {
-            result_out = 2;
-            keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
-            keys_worker();
-            return;
-          } else {
-            var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
-            if(sub.gt(fee2) || sub.eq(fee2)) {
-              result_out = 1;
-              var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
-              if(sub.lt(fee3)) {
-                keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
-                keys_worker();
-                return;
-              }
-            }
-          }
-        }
-        setTimeout(addinput_worker, lazy_time);
-      } else {
-        if(result_out == 0) {
-          cb({err: ErrSend.INSUFFICIENT_BALANCE});
-          return;
-        }
-        keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos));
-        keys_worker();
-      }
-    }
-    addinput_worker();
-  }
-
-  var send_busy = false;
-  this.send = function(address, value_str, cb) {
-    if(send_busy) {
-      cb({err: ErrSend.BUSY});
-      return;
-    }
-    send_busy = true;
-    var value = UINT64(String(value_str));
-    if(value.lt(UINT64(String(546)))) {
-      send_busy = false;
-      cb({err: ErrSend.DUST_VALUE});
-      return;
-    }
-    var cb_set_change_called = false;
-    var cb_set_tval = null;
-    cb_set_change = function(data) {
-      cb_set_change_called = true;
-      clearTimeout(cb_set_tval);
-      cb_set_change = function(data) {}
-      if(data.length > 0) {
-        var index = data[0];
-        var xpub = _xpubs[0];
-        if(xpub && !_nodes[xpub]) {
-          _nodes[xpub] = bip32.fromBase58(xpub, network);
-        }
-        var child = _nodes[xpub].derive(1).derive(index);
-        var change_address = coin.payments.p2pkh({pubkey: child.publicKey, network: network}).address;
-        send_lazy_internal(address, change_address, value, function(ret) {
-          send_busy = false;
-          cb(ret);
-        });
-      } else {
-        send_busy = false;
-        cb({err: ErrSend.SERVER_ERROR});
-      }
-    }
-    pastel.send({cmd: 'change'});
-    cb_set_tval = setTimeout(function() {
-      if(!cb_set_change_called) {
-        cb_set_change = function(data) {}
-        send_busy = false;
-        cb({err: ErrSend.SERVER_TIMEOUT});
-      }
-    }, 30000);
-  }
-
-  function get_safecount() {
-    var safe_size = UINT64(String("100000"));
-    var safe_utxo_count = 0;
-    var size = UINT64(34 + 10);
-    while(true) {
-      size.add(UINT64(148));
-      if(safe_size.gt(size)) {
-        safe_utxo_count++;
-      } else {
-        break;
-      }
-    }
-    return safe_utxo_count;
-  }
-  var safe_utxo_count = get_safecount();
-
-  this.calcSendValue = function(utxo_count) {
-    var unconfs = Object.assign([], _unconfs);
-    var utxos = _utxos.concat(unconfs);
-    var conf_count = utxos.length - unconfs.length;
-    var unconf_count = unconfs.length;
-    var all_count = utxos.length;
-    var in_value = UINT64(0);
-    var count = 0;
-    for(var i = 0; i < utxo_count; i++) {
-      var utxo = utxos[i];
-      if(utxo) {
-        in_value.add(UINT64(String(utxo.value)));
-        count++;
-      } else {
-        break;
-      }
-    }
-    if(in_value.gt(UINT64(0))) {
-      var fee = UINT64(String(148 * count + 34 + 10));
-      return {err: 0, value: in_value.subtract(fee).toString(), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
-    } else {
-      return {err: 0, value: "0", count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
-    }
-  }
-
-  this.calcSendUtxo = function(value_str) {
-    var unconfs = Object.assign([], _unconfs);
-    var utxos = _utxos.concat(unconfs);
-    var conf_count = utxos.length - unconfs.length;
-    var unconf_count = unconfs.length;
-    var all_count = utxos.length;
-    var value = UINT64(String(value_str));
-    if(value.eq(UINT64(0))) {
-      return {err: 0, count: 0, sign: 0, all: utxos.length, max: safe_utxo_count};
-    }
-    var in_value = UINT64(0);
-    var sign_utxos = [];
-    var utxo_count = 0;
-    var result_out = 0;
-    var eq = false;
-    for(var i in utxos) {
-      var utxo = utxos[i];
-      in_value.add(UINT64(String(utxo.value)));
-      utxo_count++;
-      if(in_value.gt(value)) {
-        var sub = in_value.clone().subtract(value);
-        var fee1 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 546));
-        var chk_eq = sub.eq(fee1);
-        if(sub.gt(fee1) || chk_eq) {
-          result_out = 2;
-          eq = chk_eq;
-          break;
-        } else {
-          var fee2 = UINT64(String(148 * utxo_count + 34 + 10));
-          var chk_eq2 = sub.eq(fee2);
-          if(sub.gt(fee2) || chk_eq2) {
-            result_out = 1;
-            eq = chk_eq2;
-            var fee3 = UINT64(String(148 * utxo_count + 34 * 2 + 10 + 148));
-            if(sub.lt(fee3)) {
-              break;
-            }
-          }
-        }
-      }
-    }
-    if(result_out != 0) {
-      return {err: 0, count: utxo_count, sign: eq ? 0 : -1, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
-    } else {
-      return {err: 1, sign: 1, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count};
-    }
-  }
-}
+writeFile(srcDir / "../../public/js/wallet.js", walletJs)
