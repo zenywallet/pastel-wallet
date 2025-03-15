@@ -48,7 +48,6 @@ task cipher, "Build cipher":
 
 task minify, "Minifies the JS using Google's closure compiler":
   exec """
-nim c -r src/js/wallet.nim
 nim c -r src/js/config.nim
 nim js -d:release -o:public/js/main.js src/js/main.nim
 java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
@@ -67,7 +66,6 @@ public/js/dotmatrix.js \
 public/js/balls.js \
 public/js/encoding.js \
 public/js/tradelogs.js \
-public/js/wallet.js \
 public/js/ui.js \
 public/js/config.js \
 public/js/pastel.js \

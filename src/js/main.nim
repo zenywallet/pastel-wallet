@@ -7,6 +7,7 @@ import jsffi
 import strutils
 import trans
 import stor as storMod
+import wallet
 
 var appInst: KaraxInstance
 var document {.importc, nodecl.}: JsObject
