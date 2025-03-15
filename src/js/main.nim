@@ -3,9 +3,9 @@
 
 import karax / [karax, karaxdsl, vdom]
 import karax / jstrutils except `&`
-include trans
 import jsffi
 import strutils
+import trans
 
 var appInst: KaraxInstance
 var document {.importc, nodecl.}: JsObject

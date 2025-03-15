@@ -1,6 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import karax / [i18n, languages]
+import karax / jstrutils except `&`
 
 template trans*(x: string): cstring = cstring(i18n(x))
 template trans*(x: string, param: openarray[cstring]): cstring = i18n(x) % param
