@@ -136,10 +136,6 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
 
 
 {.emit: """
-var jsViewSelector = function() {}
-""".}
-{.emit: """
-  jsViewSelector = `viewSelector`;
   function setSupressRedraw(flag) {
     `supressRedraw` = flag;
   }
@@ -902,7 +898,7 @@ proc backWallet(): proc() =
         $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
         resetSendBallCount();
         uriOptions = [];
-        jsViewSelector(12);
+        `viewSelector`(12);
       }
       $(this).blur();
     });
@@ -926,7 +922,7 @@ proc backWallet(): proc() =
               uriOptions.push({key: key, value: crlftab_to_html(p)});
             }
             check_amount_elm();
-            jsViewSelector(12);
+            `viewSelector`(12);
           } else {
             Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
           }
@@ -1814,7 +1810,7 @@ proc afterScript(data: RouterData) =
         enable_caret_browsing($('#section2'));
         window.scrollTo(0, 0);
         jsSeedToKeys();
-        jsViewSelector(5);
+        `viewSelector`(5);
         page_scroll_done = function() {};
       }
     """.}
@@ -1833,7 +1829,7 @@ proc afterScript(data: RouterData) =
         $('#section2').hide();
         enable_caret_browsing($('#section3'));
         window.scrollTo(0, 0);
-        jsViewSelector(12);
+        `viewSelector`(12);
         if(pastel.stream && !pastel.stream.status()) {
           pastel.stream.start();
         }
@@ -1901,7 +1897,7 @@ proc afterScript(data: RouterData) =
           window.scrollTo(0, 0);
           setSupressRedraw(false);
           reloadViewSafeStart();
-          jsViewSelector(12);
+          `viewSelector`(12);
           page_scroll_done = function() {};
           pastel.utxoballs.resume();
           `showPage4` = false;
