@@ -6,6 +6,7 @@ import karax / jstrutils except `&`
 import jsffi
 import strutils
 import trans
+import stor as storMod
 
 var appInst: KaraxInstance
 var document {.importc, nodecl.}: JsObject

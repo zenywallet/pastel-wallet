@@ -48,7 +48,6 @@ task cipher, "Build cipher":
 
 task minify, "Minifies the JS using Google's closure compiler":
   exec """
-nim js -d:release -o:public/js/stor.js src/js/stor.nim
 nim c -r src/js/wallet.nim
 nim c -r src/js/config.nim
 nim js -d:release -o:public/js/main.js src/js/main.nim
@@ -63,7 +62,6 @@ public/js/rawinflate.min.js \
 public/js/jquery-3.4.1.min.js \
 public/semantic/compact.js \
 public/js/jquery-qrcode.js \
-public/js/stor.js \
 public/js/matter.js \
 public/js/dotmatrix.js \
 public/js/balls.js \
