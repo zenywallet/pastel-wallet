@@ -135,14 +135,8 @@ proc viewSelector(view: ViewType, no_redraw: bool = false) =
     appInst.redraw()
 
 
-{.emit: """
-  function setSupressRedraw(flag) {
-    `supressRedraw` = flag;
-  }
-  function getSupressRedraw() {
-    return `supressRedraw`;
-  }
-""".}
+proc setSupressRedraw(flag: bool) = supressRedraw = flag
+proc getSupressRedraw(): bool = supressRedraw
 
 proc viewUpdate() =
   if not supressRedraw:
@@ -1895,7 +1889,7 @@ proc afterScript(data: RouterData) =
           $('#section4').hide();
           enable_caret_browsing($('#section3'));
           window.scrollTo(0, 0);
-          setSupressRedraw(false);
+          `setSupressRedraw`(false);
           reloadViewSafeStart();
           `viewSelector`(12);
           page_scroll_done = function() {};
