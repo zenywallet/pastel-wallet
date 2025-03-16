@@ -100,3 +100,5 @@ Stor.jsPrototype(set_lang):
 Stor.jsPrototype(get_lang):
   proc(): JsObject =
     return db["lang"]
+
+proc newStor*(): JsObject {.importcpp: "new Stor()".}

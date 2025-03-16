@@ -6,6 +6,7 @@ import zenyjs
 import zenyjs/core
 import zenyjs/bip32 as zenyjs_bip32
 import zenyjs/jsuint64
+import stor as storMod
 
 type
   WalletError = object of CatchableError
@@ -16,7 +17,6 @@ var Notify {.importc, nodecl.}: JsObject
 var base58 {.importc, nodecl.}: JsObject
 var network {.importc, nodecl.}: JsObject
 
-proc newStor(): JsObject {.importcpp: "new Stor()".}
 proc mnemonic_replace_trim(s: cstring): JsObject {.importcpp: "#.replace(/[ 　\\n\\r]+/g, ' ').trim()".} # /[ \u3000\n\r]+/g
 proc match_regexp2(s: cstring): JsObject {.importcpp: "#.match(/.{2}/g)".}
 proc `^=`(x, y: JsObject): JsObject {.importjs: "(# ^= #)", discardable.}
