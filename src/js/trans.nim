@@ -158,7 +158,7 @@ import stor as storMod
 
 var LangSelector {.importc, nodecl.}: JsObject
 
-var tr* {.exportc.} = proc(x: cstring, params: openarray[cstring]): cstring =
+var tr* {.exportc.} = proc(x: cstring, params: openarray[cstring] = []): cstring =
   if params.toJs.to(bool):
     return jstrans2(x, params)
   else:
