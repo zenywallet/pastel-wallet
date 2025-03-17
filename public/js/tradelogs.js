@@ -344,11 +344,12 @@ var TradeLogs = (function() {
   }
 
   var new_txlogs_worker_tval = null;
+  var txlogs = [];
   TradeLogs.get_txlogs_cb = function(data) {
     if(!start) {
       return;
     }
-    var txlogs = data.txlogs;
+    txlogs = data.txlogs;
     var rev_flag = data.rev;
     if(txlogs.length <= 0) {
       eof = true;
@@ -454,7 +455,27 @@ var TradeLogs = (function() {
   }
 
   TradeLogs.rollbacked = function(sequence) {
+    txlogs = [];
     clearTimeout(new_txlogs_worker_tval);
+    var remove_list = [];
+    $('.txlog').each(function() {
+      var seq = $(this).data('sequence');
+      if(seq > sequence) {
+        remove_list.push($(this));
+      }
+    });
+    function remove_worker() {
+      var elm = remove_list.shift();
+      if(elm) {
+        elm.animate({opacity: 0}, 600, function() {
+          elm.animate({height: 'hide'}, 600, function() {
+            elm.remove();
+            setTimeout(remove_worker, 10);
+          });
+        });
+      }
+    }
+    remove_worker();
     get_txlogs(sequence, false);
   }
 
