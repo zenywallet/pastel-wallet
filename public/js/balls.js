@@ -36,9 +36,6 @@ var UtxoBalls = function() {
     return val / 100000000;
   }
 
-  var coin = coinlibs.coin;
-  var network = coin.networks[pastel.config.network];
-  var crypto = window.crypto || window.msCrypto;
   var touch_device_flag = ('ontouchstart' in window);
   var self = this;
 
