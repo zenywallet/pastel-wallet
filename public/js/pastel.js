@@ -736,6 +736,7 @@ pastel.ready = function() {
         $('#wallet-balance .balance').text(conv_coin(balance_unconfs));
       }
       TradeLogs.unconfs(data);
+
       wallet.setUnconfs(data);
       pastel.utxoballs.setUnconfs(data);
       if(cur_recvs == null) {
@@ -766,7 +767,7 @@ pastel.ready = function() {
         }
       }
       var el = document.getElementById('wallet-balance');
-      if(!el.style.display) {
+      if(el && !el.style.display) {
         fadeIn(el, 800);
       }
       cur_balance = UINT64(String(data));
