@@ -279,7 +279,7 @@ worker(1):
       client.wsServerSend(sdata)
       release(client.cipherLock)
     else:
-      echo "ClientId=", clientId, " is Nil"
+      debug "ClientId=", clientId, " is Nil"
 
   wsReqs.recvLoop(req):
     try:
@@ -288,7 +288,7 @@ worker(1):
       if client.isNil: continue
 
       let json_cmd = parseJson(req.data.msg)
-      echo json_cmd
+      debug json_cmd
 
       # set: xpubs, data
       # get: xpubs
@@ -492,7 +492,7 @@ worker(num = cpuCount):
       client.wsServerSend(sdata)
       release(client.cipherLock)
     else:
-      echo "ClientId=", clientId, " is Nil"
+      debug "ClientId=", clientId, " is Nil"
 
   while active:
     let sdata = sendMesChannel.recv()
@@ -522,7 +522,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
 
     stream(path = "/ws", protocol = "pastel-v0.1"):
       onOpen:
-        echo "onOpen"
+        debug "onOpen"
         var kpSeed: array[32, byte]
         var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)
         if retSeed != 0: raise
@@ -534,7 +534,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
         wsSend((client.kp.pubkey, client.salt).toBytes)
 
       onMessage:
-        echo "onMessage"
+        debug "onMessage"
         if not client.exchange:
           if size == 32:
             var clientPublicKey: Ed25519PublicKey
@@ -549,16 +549,16 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
             let iv_cli_sha256 = sha256s(shared_key xor seed_cli)
             let iv_srv = yespower(iv_srv_sha256)
             let iv_cli = yespower(iv_cli_sha256)
-            echo "shared=", shared_key
-            echo "iv_srv=", iv_srv
-            echo "iv_cli=", iv_cli
+            debug "shared=", shared_key
+            debug "iv_srv=", iv_srv
+            debug "iv_cli=", iv_cli
             client.ctr.init(shared_key, iv_srv, iv_cli)
             client.exchange = true
             SendResult.Pending
           else:
             SendResult.None
         else:
-          echo "data=", content.toBytes
+          debug "data=", content.toBytes
           var rdata = newSeq[byte](size + deflateSentinel.len)
           var pos = 0
           var next_pos = 16
@@ -581,7 +581,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
           wsReqs.pending(PendingData(msg: uncomp))
 
       onClose:
-        echo "onClose"
+        debug "onClose"
         let clientId = client.markPending()
         withLock workerClientsLock:
           for wid in client.wallets:
