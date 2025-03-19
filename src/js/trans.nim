@@ -2,6 +2,11 @@
 
 import karax / [i18n, languages]
 import karax / jstrutils except `&`
+import zenyjs
+import zenyjs/core
+import stor as storMod
+
+var pastel {.importc, nodecl.}: JsObject
 
 template trans*(x: string): cstring = cstring(i18n(x))
 template trans*(x: string, param: openarray[cstring]): cstring = i18n(x) % param
@@ -15,11 +20,8 @@ proc setlang*(lang: cstring) {.exportc.} =
     setCurrentLanguage(Language.enUS)
   else:
     setCurrentLanguage(Language.enUS)
-  {.emit: """
-    if(pastel && pastel.utxoballs) {
-      pastel.utxoballs.update();
-    }
-  """.}
+  if pastel.to(bool) and pastel.utxoballs.to(bool):
+    pastel.utxoballs.update()
 
 proc getlang*(): cstring {.exportc.} =
   var lang = getCurrentLanguage()
@@ -151,10 +153,6 @@ addTranslation(Language.jaJP, "Amount is invalid. The decimal places is too long
 addTranslation(Language.jaJP, "Amount is invalid.", "数量が不正です。")
 addTranslation(Language.jaJP, "Failed to lock keys.", "ロックに失敗しました。")
 addTranslation(Language.jaJP, "Language", "言語選択")
-
-import zenyjs
-import zenyjs/core
-import stor as storMod
 
 var LangSelector {.importc, nodecl.}: JsObject
 
