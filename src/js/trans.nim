@@ -156,13 +156,11 @@ addTranslation(Language.jaJP, "Language", "言語選択")
 
 var LangSelector {.importc, nodecl.}: JsObject
 
-var tr* {.exportc.} = proc(x: cstring, params: openarray[cstring] = []): cstring =
+var tr* {.exportc: "__t".} = proc(x: cstring, params: openarray[cstring] = []): cstring =
   if params.toJs.to(bool):
     return jstrans2(x, params)
   else:
     return jstrans1(x)
-
-{.emit: "var __t = `tr`;".}
 
 var navlang {.exportc.}: JsObject = window.navigator.language or window.navigator.userLanguage or window.navigator.browserLanguage
 var stor = jsNew(Stor)
