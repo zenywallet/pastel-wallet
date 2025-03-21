@@ -2,12 +2,18 @@
 # nim js -d:release main.nim
 
 import karax / [karax, karaxdsl, vdom]
-import karax / jstrutils except `&`
-import jsffi
+import karax / jstrutils #except `&`
+import jsffi except `&`
 import strutils
 import trans
 import stor as storMod
 import wallet
+import zenyjs/jslib
+
+var pastel {.importc, nodecl.}: JsObject
+var Notify {.importc, nodecl.}: JsObject
+var base58 {.importc, nodecl.}: JsObject
+var qrReader {.importc, nodecl.}: JsObject
 
 var appInst: KaraxInstance
 var document {.importc, nodecl.}: JsObject
@@ -156,9 +162,7 @@ proc viewUpdate() =
 
 proc importSelector(importType: ImportType): proc() =
   result = proc() =
-    {.emit: """
-      qrReader.hide();
-    """.}
+    qrReader.hide()
     currentImportType = importType
 
     if currentImportType == ImportType.SeedCard:
@@ -167,22 +171,16 @@ proc importSelector(importType: ImportType): proc() =
       showPage2 = mnemonicFulfill
 
     if currentImportType == ImportType.SeedCard:
-      {.emit: """
-        $('#seedselector').removeClass('grey').addClass('olive');
-        $('#mnemonicselector').removeClass('olive').addClass('grey');
-      """.}
+      jq("#seedselector".cstring).removeClass("grey".cstring).addClass("olive".cstring)
+      jq("#mnemonicselector".cstring).removeClass("olive".cstring).addClass("grey".cstring)
     else:
-      {.emit: """
-        $('#mnemonicselector').removeClass('grey').addClass('olive');
-        $('#seedselector').removeClass('olive').addClass('grey');
-      """.}
+      jq("#mnemonicselector".cstring).removeClass("grey".cstring).addClass("olive".cstring)
+      jq("#seedselector".cstring).removeClass("olive".cstring).addClass("grey".cstring)
     viewUpdate()
 
 proc protectSelector(protectType: ProtectType): proc() =
   result = proc() =
-    {.emit: """
-      qrReader.hide();
-    """.}
+    qrReader.hide()
     currentProtectType = protectType
     showPage1 = false
     showPage2 = true
@@ -193,15 +191,11 @@ proc protectSelector(protectType: ProtectType): proc() =
     #  showPage2 = mnemonicFulfill
 
     if currentProtectType == ProtectType.KeyCard:
-      {.emit: """
-        $('#keyselector').removeClass('grey').addClass('olive');
-        $('#passselector').removeClass('olive').addClass('grey');
-      """.}
+      jq("#keyselector".cstring).removeClass("grey".cstring).addClass("olive".cstring)
+      jq("#passselector".cstring).removeClass("olive".cstring).addClass("grey".cstring)
     else:
-      {.emit: """
-        $('#passselector').removeClass('grey').addClass('olive');
-        $('#keyselector').removeClass('olive').addClass('grey');
-      """.}
+      jq("#passselector".cstring).removeClass("grey".cstring).addClass("olive".cstring)
+      jq("#keyselector".cstring).removeClass("olive".cstring).addClass("grey".cstring)
     viewUpdate()
 
 type SeedCardInfo = ref object
@@ -246,17 +240,11 @@ proc removeSeedCard(idx: int): proc() =
       viewUpdate()
 
 proc seedToKeys() =
-  {.emit: """
-    var wallet = pastel.wallet;
-  """.}
+  var wallet = pastel.wallet
   if currentImportType == ImportType.SeedCard:
-    {.emit: """
-      wallet.setSeedCard(`seedCardInfos`);
-    """.}
+    wallet.setSeedCard(seedCardInfos)
   elif currentImportType == ImportType.Mnemonic:
-    {.emit: """
-      wallet.setMnemonic(`inputWords`, `wl_select_id`);
-    """.}
+    wallet.setMnemonic(inputWords, wl_select_id)
 
 {.emit: """
   var jsSeedToKeys = `seedToKeys`;
@@ -267,10 +255,8 @@ proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
 proc cbSeedQrDone(err: int, data: cstring) =
   if err != 0:
-    {.emit: """
-      Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
-      qrReader.hide();
-    """.}
+    Notify.show(tr("Error".cstring), tr("Camera error. Please connect the camera and reload the page.".cstring), Notify.msgtype.error)
+    qrReader.hide()
   else:
     var escape_data = escape_html(data)
     var sdata = $escape_data
@@ -285,19 +271,13 @@ proc cbSeedQrDone(err: int, data: cstring) =
         seedCardInfo.gen = d[4..^1].cstring
     seedCardInfo.orig = data
 
-    {.emit: """
-      var seed_valid = false;
-      if(`seedCardInfo`.seed) {
-        var dec = base58.dec(`seedCardInfo`.seed);
-        if(dec && dec.length == 32) {
-          seed_valid = true;
-        }
-      }
-      if(!seed_valid) {
-        Notify.show(__t('Warning'), __t('Unsupported seed card was scanned.'), Notify.msgtype.warning);
-      }
-
-    """.}
+    var seed_valid = false
+    if seedCardInfo.seed.toJs.to(bool):
+      var dec = base58.dec(seedCardInfo.seed)
+      if dec.to(bool) and dec.length == 32.toJs:
+        seed_valid = true
+    if not seed_valid:
+      Notify.show(tr("Warning".cstring), tr("Unsupported seed card was scanned.".cstring), Notify.msgtype.warning)
 
     var dupcheck = false
     for s in seedCardInfos:
@@ -310,142 +290,110 @@ proc cbSeedQrDone(err: int, data: cstring) =
         break
 
     if dupcheck:
-      {.emit: """
-        Notify.show(__t('Error'), __t('The seed card has already been scanned.'), Notify.msgtype.error);
-      """.}
+      Notify.show(tr("Error".cstring), tr("The seed card has already been scanned.".cstring), Notify.msgtype.error)
     else:
       seedCardInfos.add(seedCardInfo)
 
-    {.emit: """
-      qrReader.hide();
-    """.}
+    qrReader.hide()
     viewSelector(SeedAfterScan)
 
 var keyCardVal: cstring = ""
 
 proc cbKeyQrDone(err: int, data: cstring) =
   if err != 0:
-    {.emit: """
-      Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
-      qrReader.hide();
-    """.}
+    Notify.show(tr("Error".cstring), tr("Camera error. Please connect the camera and reload the page.".cstring), Notify.msgtype.error)
+    qrReader.hide()
   else:
     keyCardVal = data
-    {.emit: """
-      qrReader.hide();
-    """.}
+    qrReader.hide()
     viewSelector(KeyAfterScan)
 
 proc showSeedQr(): proc() =
   result = proc() =
-    {.emit: """
-      qrReader.show(`cbSeedQrDone`);
-    """.}
+    qrReader.show(cbSeedQrDone)
 
 proc showKeyQr(): proc() =
   result = proc() =
     keyCardFulfill = false
     showPage3 = false
-    {.emit: """
-      qrReader.show(`cbKeyQrDone`);
-    """.}
+    qrReader.show(cbKeyQrDone)
 
 proc confirmKeyCard(ev: Event; n: VNode) =
   var ret_lock: bool = false
-  {.emit: """
-    var wallet = pastel.wallet;
-    `ret_lock` = wallet.lockShieldedKeys(`keyCardVal`, 1, true);
-  """.}
+  var wallet = pastel.wallet
+  ret_lock = wallet.lockShieldedKeys(keyCardVal, 1, true).to(bool)
   if ret_lock:
     keyCardFulfill = true
     showPage3 = true
     viewUpdate()
   else:
-    {.emit: """
-      Notify.show(__t('Error'), __t('Failed to lock your wallet with the key card.'), Notify.msgtype.error);
-    """.}
+    Notify.show(tr("Error".cstring), tr("Failed to lock your wallet with the key card.".cstring), Notify.msgtype.error)
 
 proc camChange(): proc() =
   result = proc() =
-    {.emit: """
-      $('.camtools button').blur();
-      qrReader.next();
-    """.}
+    jq(".camtools button".cstring).blur()
+    qrReader.next()
 
 proc camClose(): proc() =
   result = proc() =
-    {.emit: """
-      qrReader.hide();
-    """.}
+    qrReader.hide()
 
 import zenyjs/jslevenshtein
-{.emit: """
-function levens(word, wordlist) {
-  if(word.length == 0) {
-    return;
-  }
-  var data = {}
-  for(var i in wordlist) {
-    var wl = wordlist[i];
-    var maxlen = Math.max(word.length, wl.length);
-    var lev = `levenshtein`(word, wl);
-    var score = lev / maxlen;
-    if(data[score]) {
-      data[score].push(wl);
-    } else {
-      data[score] = [wl];
-    }
-  }
-  var similars = [];
-  var result = [];
-  var svals = Object.keys(data).sort();
-  for(var i in svals) {
-    var score = svals[i];
-    similars.push(data[score]);
-    if(result.length > 0 && score > 0.5) {
-      break;
-    }
-    if((result.length == 0 && data[score].length <= 30) || (result.length + data[score].length) <= 7) {
-      result = result.concat(data[score]);
-    }
-  }
-  return result;
-}
-function levens_one(word, wordlist) {
-  if(word.length == 0) {
-    return;
-  }
-  var data = {}
-  for(var i in wordlist) {
-    var wl = wordlist[i];
-    var maxlen = Math.max(word.length, wl.length);
-    var lev = `levenshtein`(word, wl);
-    if(lev != 1) {
-      continue;
-    }
-    var score = lev / maxlen;
-    if(data[score]) {
-      data[score].push(wl);
-    } else {
-      data[score] = [wl];
-    }
-  }
-  var result = [];
-  var svals = Object.keys(data).sort();
-  for(var i in svals) {
-    var score = svals[i];
-    result = result.concat(data[score]);
-  }
-  return result;
-}
-""".}
+
+proc levens(word, wordlist: JsObject): JsObject =
+  if word.length == 0.toJs:
+    return jsNull
+  var data = JsObject{}
+  for wl in wordlist:
+    var maxlen = Math.max(word.length, wl.length)
+    var lev = levenshtein(word.to(cstring), wl.to(cstring))
+    var score = (lev / maxlen.to(int)).toJs.to(cstring)
+    if data[score].to(bool):
+      data[score].push(wl)
+    else:
+      data[score] = [wl].toJs
+  var similars = [].toJs
+  var ret = [].toJs
+  var svals = Object.keys(data).sort()
+  for i in 0..<svals.length.to(int):
+    var score = svals[i].to(cstring)
+    similars.push(data[score])
+    if (ret.length > 0.toJs).to(bool) and score > 0.5.toJs.to(cstring):
+      break
+    if (ret.length.to(int) == 0 and data[score].length.to(int) <= 30) or (ret.length.to(int) + data[score].length.to(int)) <= 7:
+      ret = ret.concat(data[score])
+  return ret
+
+proc levens_one(word, wordlist: JsObject): JsObject =
+  if word.length == 0.toJs:
+    return jsNull
+
+  var data = JsObject{}
+  for wl in wordlist:
+    var maxlen = Math.max(word.length, wl.length)
+    var lev = levenshtein(word.to(cstring), wl.to(cstring))
+    if lev != 1:
+      continue
+    var score = (lev / maxlen.to(int)).toJs.to(cstring)
+    if data[score].to(bool):
+      data[score].push(wl)
+    else:
+      data[score] = [wl].toJs
+  var ret = [].toJs
+  var svals = Object.keys(data).sort()
+  for i in 0..<svals.length.to(int):
+    var score = svals[i].to(cstring)
+    ret = ret.concat(data[score])
+  return ret
 
 proc replace*(s, a, b: cstring): cstring {.importcpp, nodecl.}
 proc join*(s: cstring): cstring {.importcpp, nodecl.}
 proc includes*(s: seq[cstring], a: cstring): bool {.importcpp, nodecl.}
 
-proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
-proc levens_one(word, wordlist: JsObject): JsObject {.importc, nodecl.}
+#proc levens(word, wordlist: JsObject): JsObject {.importc, nodecl.}
+#proc levens_one(word, wordlist: JsObject): JsObject {.importc, nodecl.}
+
+proc check_mnemonic_replace(s: cstring): JsObject {.importcpp: "#.replace(/[ 　\\n\\r]+/g, ' ')".} # /[ \u3000\n\r]+/g
 
 proc checkMnemonic(ev: Event; n: VNode) =
   var s = n.value
@@ -458,9 +406,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
       viewSelector(MnemonicEdit)
     editingWords = s;
     var cur = document.getElementById(n.id).selectionStart
-    {.emit: """
-      `s` = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-    """.}
+    s = s.toJs.substr(0.toJs, cur).check_mnemonic_replace().split(' ').slice(-1)[0].to(cstring)
     if not s.isNil and s.len > 0:
       var tmplist: seq[cstring] = @[]
       for word in bip39_wordlist:
@@ -483,27 +429,21 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
       var cur = input_elm.selectionStart
       var newcur = cur
       if whole_replace:
-        {.emit: """
-          var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-          if(t && t.length > 0) {
-            `s` = `s`.substr(0, `cur` - t.length) + `word`;
-            `newcur` = `s`.length;
-          }
-        """.}
+        var t = s.toJs.substr(0.toJs, cur).check_mnemonic_replace().split(' ').slice(-1)[0].to(cstring)
+        if t.toJs.is(bool) and (t.toJs.length > 0.toJs).to(bool):
+          s = (s.toJs.substr(0.toJs, cur - t.toJs.length) + word.toJs).to(cstring)
+          newcur = s.toJs.length
         x.setInputText(s)
         editingWords = s
         input_elm.focus()
         input_elm.selectionStart = newcur
         input_elm.selectionEnd = newcur
       else:
-        {.emit: """
-          var t = `s`.substr(0, `cur`).replace(/[ 　\n\r]+/g, ' ').split(' ').slice(-1)[0];
-          if(t && t.length > 0) {
-            var tail = `s`.substr(`cur`) || '';
-            `s` = `s`.substr(0, `cur` - t.length) + `word` + tail;
-            `newcur` = `s`.length - tail.length;
-          }
-        """.}
+        var t = s.toJs.substr(0.toJs, cur).check_mnemonic_replace().split(' ').slice(-1)[0].to(cstring)
+        if t.toJs.is(bool) and (t.toJs.length > 0.toJs).to(bool):
+          var tail = s.toJs.substr(cur) or "".toJs
+          s = (s.toJs.substr(0.toJs, cur - t.toJs.length) + word.toJs + tail).to(cstring)
+          newcur = s.toJs.length - tail.length
         x.setInputText(s)
         editingWords = s
         input_elm.focus()
@@ -519,10 +459,8 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
     var s = x.value
     if not s.isNil and s.len > 0:
       var words: seq[cstring]
-      {.emit: """
-        `inputWords` = `s`.replace(/[ 　\n\r]+/g, ' ').trim();
-        `words` = `inputWords`.split(' ');
-      """.}
+      inputWords = s.toJs.check_mnemonic_replace().trim().to(cstring)
+      words = inputWords.toJs.split(' ').to(seq[cstring])
       chklist = @[]
       var idx: int = 0
       var allvalid = true
@@ -539,14 +477,11 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
           allvalid = false
         inc(idx)
       if allvalid and idx >= 12 and idx mod 3 == 0:
-        {.emit: """
-          var bip39 = coinlibs.bip39;
-          if(bip39.validateMnemonic(`inputWords`, `bip39_wordlist`)) {
-            `mnemonicFulfill` = true
-          } else {
-            Notify.show(__t('Warning'), __t('There are no misspellings, but some words seem to be wrong.') + (`advance` ? '' : ' ' + __t('Try to use [Advanced Check]')), Notify.msgtype.warning);
-          }
-        """.}
+        var bip39 = coinlibs.bip39
+        if bip39.validateMnemonic(inputWords.toJs, bip39_wordlist).to(bool):
+          mnemonicFulfill = true
+        else:
+          Notify.show(tr("Warning".cstring), tr("There are no misspellings, but some words seem to be wrong.".cstring).toJs + (if advance: "".cstring else: " ".cstring).toJs + tr("Try to use [Advanced Check]".cstring).toJs, Notify.msgtype.warning)
         if mnemonicFulfill:
           viewSelector(MnemonicFulfill)
     else:

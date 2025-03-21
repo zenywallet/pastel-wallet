@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import karax / [i18n, languages]
-import karax / jstrutils except `&`
+import karax / jstrutils
 import zenyjs
 import zenyjs/core
 import stor as storMod
