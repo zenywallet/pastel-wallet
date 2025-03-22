@@ -2,7 +2,6 @@
 
 import std/jsffi
 import std/macros
-import zenyjs
 import zenyjs/core
 import zenyjs/seed
 
