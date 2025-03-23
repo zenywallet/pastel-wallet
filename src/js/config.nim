@@ -1,3 +1,5 @@
+# Copyright (c) 2025 zenywallet
+
 import std/os
 import ../config
 
