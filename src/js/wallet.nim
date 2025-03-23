@@ -288,7 +288,7 @@ proc Wallet*() {.exportc.} =
   proc hex2buf(hexstr: JsObject): JsObject =
     if hexstr.length % 2.toJs != 0.toJs:
       raise newException(WalletError, "no even number")
-    newUint8Array(hexstr.match_regexp2().map(proc(b: JsObject): JsObject = Number.parseInt(b, 16)))
+    newUint8Array(hexstr.to(cstring).match_regexp2().map(proc(b: JsObject): JsObject = Number.parseInt(b, 16)))
 
   var shieldedKeys = JsObject{priv: [].toJs, pub: [].toJs}
   self.initShieldedKeys = proc(keys: JsObject) =
