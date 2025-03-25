@@ -9,6 +9,7 @@ import trans
 import stor as storMod
 import wallet
 import zenyjs/jslib
+import base58 as base58js
 
 var pastel {.importc, nodecl.}: JsObject
 var Notify {.importc, nodecl.}: JsObject

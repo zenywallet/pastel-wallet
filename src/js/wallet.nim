@@ -7,6 +7,7 @@ import zenyjs/core
 #import zenyjs/bip32 as zenyjs_bip32
 import zenyjs/jsuint64
 import stor as storMod
+import base58 as base58js
 
 type
   WalletError = object of CatchableError
