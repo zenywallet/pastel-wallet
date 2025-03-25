@@ -2,9 +2,9 @@
 
 import std/jsffi
 import std/macros
-import zenyjs
+#import zenyjs
 import zenyjs/core
-import zenyjs/bip32 as zenyjs_bip32
+#import zenyjs/bip32 as zenyjs_bip32
 import zenyjs/jsuint64
 import stor as storMod
 
