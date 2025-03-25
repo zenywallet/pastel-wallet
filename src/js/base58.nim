@@ -1,4 +1,6 @@
-// Copyright (c) 2019 zenywallet
+# Copyright (c) 2019 zenywallet
+
+{.emit: """
 var base58_chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 var base58 = (function(base58_chars) {
   var base58_map = {};
@@ -99,3 +101,4 @@ var base58 = (function(base58_chars) {
   }
   return methods;
 })(base58_chars);
+""".}

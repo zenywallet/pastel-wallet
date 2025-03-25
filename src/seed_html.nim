@@ -5,6 +5,7 @@ import caprese/contents
 const SeedScript = staticScript:
   import std/jsffi
   import caprese/jslib
+  import js/base58 as base58js
 
   type
     SeedCtyptoError = object of CatchableError
@@ -81,7 +82,6 @@ const SeedHtml* = staticHtmlDocument:
       meta(charset="utf-8")
       script(type="text/javascript", src="/js/jquery-3.4.1.slim.min.js")
       script(type="text/javascript", src="/js/jquery-qrcode.min.js")
-      script(type="text/javascript", src="/js/base58.js")
       title: text "Seed Maker"
     body:
       tdiv(id="qrcode")
