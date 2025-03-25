@@ -53,7 +53,6 @@ task minify, "Minifies the JS using Google's closure compiler":
 java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
 --js_output_file=public/js/app.js \
 public/js/cipher.js \
-public/js/base58.js \
 public/js/uint64.min.js \
 public/js/coinlibs.js \
 public/js/rawdeflate.min.js \
