@@ -3,8 +3,7 @@
 import caprese/contents
 
 const SeedScript = staticScript:
-  import std/jsffi
-  import caprese/jslib
+  import zenyjs/core
   import js/base58 as base58js
 
   type
