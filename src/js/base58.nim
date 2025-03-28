@@ -102,3 +102,16 @@ var base58 = (function(base58_chars) {
   return methods;
 })(base58_chars);
 """.}
+
+import std/jsffi
+
+type
+  Base58ModObj* = JsObject
+  Base58Mod* = ref object of Base58ModObj
+
+var base58Mod* {.importc: "base58", nodecl.}: Base58Mod
+var base58_chars* {.importc, nodecl.}: JsObject
+
+proc enc*(data: JsObject): JsObject = base58Mod.enc(data)
+proc dec*(data: JsObject): JsObject = base58Mod.dec(data)
+proc dec*(data: cstring): JsObject = base58Mod.dec(data)

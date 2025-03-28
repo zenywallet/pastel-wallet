@@ -4,20 +4,18 @@ import caprese/contents
 
 const SeedScript = staticScript:
   import zenyjs/core
-  import js/base58 as base58js
+  import js/base58
 
   type
     SeedCtyptoError = object of CatchableError
 
   proc jq(selector: cstring): JsObject {.importcpp: "$$(#)".}
-  var base58 {.importc, nodecl.}: JsObject
-  var base58_chars {.importc, nodecl.}: JsObject
 
   var crypto = window.crypto or window.msCrypto
   if crypto.to(bool) and crypto.getRandomValues.to(bool):
     var priv = newUint8Array(32)
     crypto.getRandomValues(priv)
-    var priv_base58 = base58.enc(priv)
+    var priv_base58 = base58.enc(priv.toJs)
     var priv_dec = priv_base58.dec()
     var enc_err = 0
     if priv.length != priv_dec.length:
