@@ -7,7 +7,7 @@ import zenyjs/core
 #import zenyjs/bip32 as zenyjs_bip32
 import zenyjs/jsuint64
 import stor as storMod
-import base58 as base58js
+import base58
 
 type
   WalletError = object of CatchableError
@@ -15,7 +15,6 @@ type
 var coinlibs {.importc, nodecl.}: JsObject
 var pastel {.importc, nodecl.}: JsObject
 var Notify {.importc, nodecl.}: JsObject
-var base58 {.importc, nodecl.}: JsObject
 var network {.importc, nodecl.}: JsObject
 
 proc mnemonic_replace_trim(s: cstring): JsObject {.importcpp: "#.replace(/[ 　\\n\\r]+/g, ' ').trim()".} # /[ \u3000\n\r]+/g

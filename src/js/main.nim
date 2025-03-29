@@ -9,11 +9,10 @@ import trans
 import stor as storMod
 import wallet
 import zenyjs/jslib
-import base58 as base58js
+import base58
 
 var pastel {.importc, nodecl.}: JsObject
 var Notify {.importc, nodecl.}: JsObject
-var base58 {.importc, nodecl.}: JsObject
 var qrReader {.importc, nodecl.}: JsObject
 
 var appInst: KaraxInstance
