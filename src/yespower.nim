@@ -3,7 +3,7 @@
 
 {.compile: "../deps/yespower-1.0.1/sha256.c".}
 {.compile: "../deps/yespower-1.0.1/yespower-opt.c".}
-{.compile: "yespower_hash.c".}
+import yespower_hash
 
 proc yespower_hash*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}
 proc yespower_n2r8*(input: ptr UncheckedArray[byte], input_size: int, output: ptr UncheckedArray[byte]): int {.importc.}

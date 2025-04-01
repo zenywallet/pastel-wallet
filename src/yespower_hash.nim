@@ -1,3 +1,4 @@
+{.emit: """
 #include <string.h>
 #include "../deps/yespower-1.0.1/yespower.h"
 
@@ -52,3 +53,4 @@ int yespower_n4r32(const char *input, int input_size, char *output)
 {
   return yespower_tls((uint8_t *)input, input_size, &params_n4r32, output);
 }
+""".}
