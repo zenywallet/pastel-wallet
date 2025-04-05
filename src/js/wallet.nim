@@ -55,7 +55,7 @@ proc Wallet*() {.exportc.} =
   self.getNonStandardMnemonicToSeeds = proc(mnemonic: cstring, mlang: int): JsObject =
     var seeds = [].toJs
     var m = mnemonic.mnemonic_replace_trim()
-    if m.split(' ').length.to(int) == 24:
+    if m.split(" ".cstring).length.to(int) == 24:
       var entropy = bip39.mnemonicToEntropy(m, getWordList(mlang), true)
       seeds.push(JsObject{seed: entropy, type: 101})
       if mlang == 0:
