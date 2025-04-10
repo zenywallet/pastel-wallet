@@ -858,14 +858,15 @@ proc ball_main() {.thread.} =
       if client.isNil: continue
       var clientWallets = client.wallets
       debug "AddClient ", clientWallets
-      wallet_ids.incl(clientWallets)
-      active_wids.incl(clientWallets.toHashSet())
-      BallCommand.Unspents.send(BallDataUnspents(wallets: clientWallets))
-      BallCommand.MemPool.send(BallDataMemPool(client: data.client.ClientId))
-      BallCommand.Height.send(BallDataHeight(wallet_id: clientWallets[0]))
-      BallCommand.Unused.send(BallDataUnused(wallet_id: clientWallets[0]))
-      StreamCommand.Balance.send(StreamDataBalance(wallets: clientWallets))
-      StreamCommand.Addresses.send(StreamDataAddresses(wallets: clientWallets))
+      if clientWallets.len > 0:
+        wallet_ids.incl(clientWallets)
+        active_wids.incl(clientWallets.toHashSet())
+        BallCommand.Unspents.send(BallDataUnspents(wallets: clientWallets))
+        BallCommand.MemPool.send(BallDataMemPool(client: data.client.ClientId))
+        BallCommand.Height.send(BallDataHeight(wallet_id: clientWallets[0]))
+        BallCommand.Unused.send(BallDataUnused(wallet_id: clientWallets[0]))
+        StreamCommand.Balance.send(StreamDataBalance(wallets: clientWallets))
+        StreamCommand.Addresses.send(StreamDataAddresses(wallets: clientWallets))
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
