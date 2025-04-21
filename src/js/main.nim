@@ -14,10 +14,29 @@ import base58
 var pastel {.importc, nodecl.}: JsObject
 var Notify {.importc, nodecl.}: JsObject
 var qrReader {.importc, nodecl.}: JsObject
+var qrReaderModal {.importc, nodecl.}: JsObject
+var TradeLogs {.importc, nodecl.}: JsObject
+var PhraseLock {.importc, nodecl.}: JsObject
+
+proc goSection(selector: cstring, cb: proc() = proc() = discard) {.importc, nodecl.}
+var page_scroll_done {.importc, nodecl.}: proc()
+proc reloadViewSafeEnd() {.importc, nodecl.}
+var Settings {.importc, nodecl.}: JsObject
+proc bip21reader(uri: JsObject): JsObject {.importc, nodecl.}
+proc crlftab_to_html(uri: JsObject): JsObject {.importc, nodecl.}
+proc showRecvAddress(cb: proc()) {.importc, nodecl.}
+proc showRecvAddressAfterEffect() {.importc, nodecl.}
+var target_page_scroll {.importc, nodecl.}: cstring
+proc reloadViewSafeStart() {.importc, nodecl.}
+proc find_js_native(a, b: JsObject): JsObject {.importcpp: "#.find(#)".}
+proc find_js_native(a: JsObject, b: cstring): JsObject {.importcpp: "#.find(#)".}
+var registerEventList {.importc, nodecl.}: JsObject
+proc type_js_native(a: JsObject): JsObject {.importcpp: "#.type".}
 
 var appInst: KaraxInstance
 var document {.importc, nodecl.}: JsObject
-proc jq(selector: cstring): JsObject {.importcpp: "$$(#)".}
+proc jq(selector: cstring | JsObject): JsObject {.importcpp: "$$(#)".}
+template jq(selector: string): JsObject = jq(selector.cstring)
 
 type ImportType {.pure.} = enum
   SeedCard
@@ -246,11 +265,6 @@ proc seedToKeys() =
   elif currentImportType == ImportType.Mnemonic:
     wallet.setMnemonic(inputWords, wl_select_id)
 
-{.emit: """
-  var jsSeedToKeys = `seedToKeys`;
-  var jsClearSensitive = `clearSensitive`;
-""".}
-
 proc escape_html(s: cstring): cstring {.importc, nodecl.}
 
 proc cbSeedQrDone(err: int, data: cstring) =
@@ -297,7 +311,7 @@ proc cbSeedQrDone(err: int, data: cstring) =
     qrReader.hide()
     viewSelector(SeedAfterScan)
 
-var keyCardVal: cstring = ""
+var keyCardVal: cstring = "".cstring
 
 proc cbKeyQrDone(err: int, data: cstring) =
   if err != 0:
@@ -489,40 +503,34 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
     autocompleteWords = @[]
     viewUpdate()
 
+proc fix_word_test(c: JsObject): JsObject {.importcpp: "/[ 　\\n\\r]/.test(#)".} # /[ \u3000\n\r]/
+
 proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
     var s = x.value
     if not s.isNil and s.len > 0:
-      var ret: cstring
-      {.emit: """
-        `ret` = "";
-        var count = 0;
-        var find = false;
-        var skip = false;
-        for(var t in `s`) {
-          if(/[ 　\n\r]/.test(`s`[t])) {
-            `ret` += `s`[t];
-            if(find) {
-              count++;
-            }
-            find = false;
-            skip = false;
-          } else {
-            find = true;
-            if(`idx` == count && skip == false) {
-              `ret` += `word`;
-              skip = true;
-            } else {
-              if(!skip) {
-                `ret` += `s`[t];
-              }
-            }
-          }
-        }
-      """.}
-      x.setInputText(ret)
-      editingWords = ret
+      var ret = "".toJs
+      var count = 0
+      var find = false
+      var skip = false
+      for c in s.toJs:
+        if fix_word_test(c).to(bool):
+          ret += c
+          if find:
+            inc(count)
+          find = false
+          skip = false
+        else:
+          find = true
+          if idx == count and skip == false:
+            ret += word.toJs
+            skip = true
+          else:
+            if not skip:
+              ret += c
+      x.setInputText(ret.to(cstring))
+      editingWords = ret.to(cstring)
       confirmMnemonic(input_id, confirm_mnemonic_advanced)()
 
 proc changeLanguage(ev: Event; n: VNode) =
@@ -639,24 +647,19 @@ proc changePassphrase(ev: Event; n: VNode) =
 proc confirmPassphrase(ev: Event; n: VNode) =
   var ret_lock: bool = false
   var passlen = 0
-  {.emit: """
-    var val = $('input[name="input-passphrase"]').val();
-    if(val) {
-      `passlen` = val.length;
-      $('input[name="input-passphrase"]').blur();
-      var wallet = pastel.wallet;
-      `ret_lock` = wallet.lockShieldedKeys($('input[name="input-passphrase"]').val(), 2, true);
-    }
-  """.}
+  var val = jq("""input[name="input-passphrase"]""".cstring).val()
+  if val.to(bool):
+    passlen = val.length.to(int)
+    jq("""input[name="input-passphrase"]""".cstring).blur()
+    var wallet = pastel.wallet
+    ret_lock = wallet.lockShieldedKeys(jq("""input[name="input-passphrase"]""".cstring).val(), 2.toJs, true).to(bool)
   if passlen > 0:
     if ret_lock:
       passphraseFulfill = true
       showPage3 = true
       viewUpdate()
     else:
-      {.emit: """
-        Notify.show(__t('Error'), __t('Failed to lock your wallet with the passphrase.'), Notify.msgtype.error);
-      """.}
+      Notify.show(tr("Error".cstring),tr("Failed to lock your wallet with the passphrase.".cstring), Notify.msgtype.error)
 
 proc passphraseEditor(): VNode =
   result = buildHtml(tdiv):
@@ -676,629 +679,520 @@ proc goSettings(): proc() =
     if not showPage4:
       viewSelector(WalletSettings, false)
       supressRedraw = true
-      {.emit: """
-        $('#section4').show();
-      """.}
+      jq("#section4".cstring).show()
     else:
-      {.emit: """
-        TradeLogs.stop();
-        $('.backpage').visibility({silent: true});
-        $('#tradeunconfs').empty();
-        $('#tradelogs').empty();
-      """.}
+      TradeLogs.stop()
+      jq(".backpage".cstring).visibility(JsObject{silent: true})
+      jq("#tradeunconfs".cstring).empty()
+      jq("#tradelogs".cstring).empty()
       viewSelector(WalletSettings, false)
-      {.emit: """
-        goSection('#section4');
-      """.}
+      goSection("#section4".cstring)
 
 proc goLogs(): proc() =
   result = proc() =
     if not showPage4:
       viewSelector(WalletLogs, false)
       supressRedraw = true
-      {.emit: """
-        $('#section4').show();
-      """.}
+      jq("#section4".cstring).show()
     else:
-      {.emit: """
-        TradeLogs.stop();
-        $('.backpage').visibility({silent: true});
-        $('#tradeunconfs').empty();
-        $('#tradelogs').empty();
-      """.}
+      TradeLogs.stop()
+      jq(".backpage".cstring).visibility(JsObject{silent: true})
+      jq("#tradeunconfs".cstring).empty()
+      jq("#tradelogs".cstring).empty()
       viewSelector(WalletLogs, false)
-      {.emit: """
-        goSection('#section4');
-      """.}
+      goSection("#section4".cstring)
 
 proc backWallet(): proc() =
   result = proc() =
     viewSelector(Wallet, true)
-    {.emit: """
-      goSection('#section3', page_scroll_done);
-    """.}
+    goSection("#section3".cstring, page_scroll_done)
 
-{.emit: """
-  var send_balls_count = 0;
-  var cur_calc_send_utxo = null;
+var send_balls_count = 0.toJs
+var cur_calc_send_utxo = jsNull
 
-  function conv_coin(uint64_val) {
-    var strval = uint64_val.toString();
-    var val = parseInt(strval, 10);
-    if(val > Number.MAX_SAFE_INTEGER) {
-      var d = strval.slice(-8).replace(/0+$/, '');
-      var n = strval.substr(0, strval.length - 8);
-      if(d.length > 0) {
-        return n + '.' + d;
-      } else {
-        return n;
-      }
-    }
-    return val / 100000000;
-  }
+proc conv_coin_replace(s: JsObject): JsObject {.importcpp: "#.replace(/0+$$/, '')".}
 
-  function resetSendBallCount() {
-    send_balls_count = 0;
-    cur_calc_send_utxo = null;
-    $('#btn-utxo-count').text('...');
-    pastel.utxoballs.setSend(0);
-  }
+proc conv_coin(uint64_val: JsObject): JsObject =
+  var strval = uint64_val.toString()
+  var val = Number.parseInt(strval, 10.toJs)
+  if (val > Number.MAX_SAFE_INTEGER).to(bool):
+    var d = strval.slice(-8).conv_coin_replace()
+    var n = strval.substr(0, strval.length - 8.toJs)
+    if (d.length > 0.toJs).to(bool):
+      return n + ".".toJs + d
+    else:
+      return n
+  return val / 100000000.toJs
 
-  function check_amount_elm() {
-    var amount_elm = $('#send-coins input[name="amount"]');
-    var amount = amount_elm.val().trim();
-    if(amount.length > 0) {
-      amount = amount.replace(/,/g, '');
-      var amounts = amount.split('.');
-      if(amount.match(/^\d+(\.\d{1,8})?$/)) {
-        amount_elm.closest('.field').removeClass('error warning');
-        var value = '';
-        if(amounts.length == 1) {
-          if(amounts[0] != '0') {
-            value = amounts[0] + '00000000';
-          } else {
-            value = amounts[0];
-          }
-        } else if(amounts.length == 2) {
-          value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
-        }
-        if(value.length > 0) {
-          setSendUtxo(value);
-        } else {
-          resetSendBallCount();
-        }
-      } else {
-        amount_elm.closest('.field').addClass('error');
-      }
-    } else {
-      amount_elm.closest('.field').removeClass('error warning');
-      resetSendBallCount();
-    }
-  }
+proc resetSendBallCount() =
+  send_balls_count = 0.toJs
+  cur_calc_send_utxo = jsNull
+  jq("#btn-utxo-count".cstring).text("...".cstring)
+  pastel.utxoballs.setSend(0)
 
-  function updateBallCount() {
-    if(sendrecv_switch == 1) {
-      check_amount_elm();
-    }
-  }
-  pastel.utxoballs.updateSend(updateBallCount);
+proc setSendUtxo(value: JsObject) =
+  var ret = pastel.wallet.calcSendUtxo(value)
+  cur_calc_send_utxo = ret
+  var amount_elm = jq("""#send-coins input[name="amount"]""".cstring)
+  if ret.err.to(bool):
+    if (ret.all > ret.max).to(bool):
+      jq("#btn-utxo-count".cstring).text(">".toJs + String(ret.max) + " max".toJs)
+      pastel.utxoballs.setSend(ret.max)
+      send_balls_count = ret.max
+    else:
+      jq("#btn-utxo-count".cstring).text(">".toJs + String(ret.all) + " all".toJs)
+      pastel.utxoballs.setSend(ret.all)
+      send_balls_count = ret.all
+    amount_elm.closest(".field".cstring).removeClass("warning".cstring)
+    amount_elm.closest(".field".cstring).addClass("error".cstring)
+  else:
+    if (ret.count > ret.max).to(bool):
+      jq("#btn-utxo-count".cstring).text(">".toJs + String(ret.max) + " max".toJs)
+      pastel.utxoballs.setSend(ret.max)
+      send_balls_count = ret.max
+      amount_elm.closest(".field".cstring).removeClass("warning".cstring)
+      amount_elm.closest(".field".cstring).addClass("error".cstring)
+    else:
+      amount_elm.closest(".field".cstring).removeClass("error".cstring)
+      if not ret.conf.isNull() and (ret.count > ret.conf).to(bool) and (ret.count > 0.toJs).to(bool):
+        amount_elm.closest(".field".cstring).addClass("warning".cstring)
+      else:
+        amount_elm.closest(".field".cstring).removeClass("warning".cstring)
+      jq("#btn-utxo-count".cstring).text((if ret.sign == 0.toJs: "".toJs else: "≤".toJs) + String(ret.count) + (if ret.count == ret.all: " all".toJs else: "".toJs))
+      pastel.utxoballs.setSend(ret.count)
+      send_balls_count = ret.count
 
-  function setSendUtxo(value) {
-    var ret = pastel.wallet.calcSendUtxo(value);
-    cur_calc_send_utxo = ret;
-    var amount_elm = $('#send-coins input[name="amount"]');
-    if(ret.err) {
-      if(ret.all > ret.max) {
-        $('#btn-utxo-count').text('>' + String(ret.max) + ' max');
-        pastel.utxoballs.setSend(ret.max);
-        send_balls_count = ret.max;
-      } else {
-        $('#btn-utxo-count').text('>' + String(ret.all) + ' all');
-        pastel.utxoballs.setSend(ret.all);
-        send_balls_count = ret.all;
-      }
-      amount_elm.closest('.field').removeClass('warning');
-      amount_elm.closest('.field').addClass('error');
-    } else {
-      if(ret.count > ret.max) {
-        $('#btn-utxo-count').text('>' + String(ret.max) + ' max');
-        pastel.utxoballs.setSend(ret.max);
-        send_balls_count = ret.max;
-        amount_elm.closest('.field').removeClass('warning');
-        amount_elm.closest('.field').addClass('error');
-      } else {
-        amount_elm.closest('.field').removeClass('error');
-        if(ret.conf != null && ret.count > ret.conf && ret.count > 0) {
-          amount_elm.closest('.field').addClass('warning');
-        } else {
-          amount_elm.closest('.field').removeClass('warning');
-        }
-        $('#btn-utxo-count').text((ret.sign == 0 ? '' : '≤') + String(ret.count) + (ret.count == ret.all ? ' all' : ''));
-        pastel.utxoballs.setSend(ret.count);
-        send_balls_count = ret.count;
-      }
-    }
-  }
+proc check_amount_elm_replace(s: JsObject): JsObject {.importcpp: "#.replace(/,/g, '')".}
+proc check_amount_elm_match(s: JsObject): JsObject {.importcpp: "#.match(/^\\d+(\\.\\d{1,8})?$$/)".}
 
-  function initSendForm() {
-    $('#btn-send-clear').off('click').click(function() {
-      if(!`showPage4`) {
-        $('#send-coins input[name="address"]').val('');
-        $('#send-coins input[name="amount"]').val('');
-        $('#send-coins input[name="address"]').closest('.field').removeClass('error');
-        $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
-        resetSendBallCount();
-        uriOptions = [];
-        `viewSelector`(12);
-      }
-      $(this).blur();
-    });
-    $('#btn-send-qrcode').off('click').click(function() {
-      if(!`showPage4`) {
-        qrReaderModal.show(function(err, uri) {
-          if(!err) {
-            var data = bip21reader(uri);
-            $('#send-coins input[name="address"]').val(data.address || '');
-            if(data.amount != null) {
-              $('#send-coins input[name="amount"]').val(data.amount || '');
-            }
-            uriOptions = [];
-            for(var k in data) {
-              var p = data[k];
-              if(k == 'address' || k == 'amount') {
-                continue;
-              }
-              var key = crlftab_to_html(k);
-              key = key.charAt(0).toUpperCase() + key.slice(1);
-              uriOptions.push({key: key, value: crlftab_to_html(p)});
-            }
-            check_amount_elm();
-            `viewSelector`(12);
-          } else {
-            Notify.show(__t('Error'), __t('Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
-          }
-        });
-      }
-      $(this).blur();
-    });
-    $('#btn-send-lock').off('click').click(function() {
-      var elm = $(this);
-      var icon = elm.find('i');
-      if(icon.hasClass('open')) {
-        if(pastel.wallet && pastel.wallet.lockShieldedKeys()) {
-          icon.removeClass('open');
-          elm.attr('title', 'Locked');
-          PhraseLock.notify_locked();
-          PhraseLock.disableInactivity();
-        }
-        setTimeout(function() {
-          elm.focus();
-        }, 1000);
-      } else {
-        Notify.hide_all();
-        PhraseLock.showPhraseInput(function(status) {
-          if(status == PhraseLock.PLOCK_SUCCESS) {
-            icon.addClass('open');
-            elm.attr('title', __t('Unlocked'));
-            PhraseLock.notify_unlocked();
-            var locked_flag = false;
-            PhraseLock.enableInactivity(function() {
-              if(icon.hasClass('open')) {
-                if(pastel.wallet && pastel.wallet.lockShieldedKeys()) {
-                  locked_flag = true;
-                }
-              }
-            }, function() {
-              if(icon.hasClass('open') && locked_flag) {
-                icon.removeClass('open');
-                elm.attr('title', 'Locked');
-                if(sendrecv_switch == 1) {
-                  PhraseLock.notify_locked();
-                } else {
-                  sendrecv_switch_sendafter = function() {
-                    PhraseLock.notify_locked();
-                  }
-                }
-                PhraseLock.disableInactivity();
-              }
-            });
-          } else if(status == PhraseLock.PLOCK_FAILED_QR) {
-            Notify.show(__t('Error'), __t('Failed to unlock. Wrong key card was scanned.'), Notify.msgtype.error);
-          } else if(status == PhraseLock.PLOCK_FAILED_PHRASE) {
-            Notify.show(__t('Error'), __t('Failed to unlock. Passphrase is incorrect.'), Notify.msgtype.error);
-          } else if(status == PhraseLock.PLOCK_FAILED_CAMERA) {
-            Notify.show(__t('Error'), __t('Failed to unlock. Camera error. Please connect the camera and reload the page.'), Notify.msgtype.error);
-          }
-          setTimeout(function() {
-            elm.focus();
-          }, 1000);
-        });
-      }
-    });
-    pastel.utxoballs.setSend(send_balls_count);
+proc check_amount_elm() =
+  var amount_elm = jq("""#send-coins input[name="amount"]""".cstring)
+  var amount = amount_elm.val().trim()
+  if (amount.length > 0.toJs).to(bool):
+    amount = amount.check_amount_elm_replace()
+    var amounts = amount.split(".".cstring)
+    if amount.check_amount_elm_match().to(bool):
+      amount_elm.closest(".field".cstring).removeClass("error warning".cstring)
+      var value = "".toJs
+      if amounts.length == 1.toJs:
+        if amounts[0] != '0'.toJs:
+          value = amounts[0] + "00000000".toJs
+        else:
+          value = amounts[0]
+      elif amounts.length == 2.toJs:
+        value = amounts[0] + (amounts[1] + "00000000".toJs).slice(0, 8)
+      if (value.length > 0.toJs).to(bool):
+        setSendUtxo(value)
+      else:
+        resetSendBallCount()
+    else:
+      amount_elm.closest(".field".cstring).addClass("error".cstring)
+  else:
+    amount_elm.closest(".field".cstring).removeClass("error warning".cstring)
+    resetSendBallCount()
 
-    $('#btn-utxo-plus').off('click').click(function() {
-      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
-      var cur = cur_calc_send_utxo;
-      if(cur) {
-        if(cur.err) {
-          cur.count = Math.min(cur.all, cur.max);
-          cur.sign = 0;
-          cur.err = 0;
-        } else {
-          if(cur.sign == 0) {
-            cur.count++;
-          } else {
-            cur.sign = 0;
-          }
-        }
-      } else {
-        cur = {err: 0, count: 1, sign: 0};
-        cur_calc_send_utxo = cur;
-      }
-      var sendval = pastel.wallet.calcSendValue(cur.count);
-      cur.all = sendval.all;
-      cur.max = sendval.max;
-      cur.count = sendval.count;
-      send_balls_count = cur.count;
-      pastel.utxoballs.setSend(send_balls_count);
-      $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      if(sendval.conf != null && cur.count > sendval.conf && cur.count > 0) {
-        $('#send-coins input[name="amount"]').closest('.field').addClass('warning');
-      } else {
-        $('#send-coins input[name="amount"]').closest('.field').removeClass('warning');
-      }
-      var exinfo = '';
-      if(sendval.count == sendval.all) {
-        exinfo = ' all';
-      } else if(sendval.count == sendval.max) {
-        exinfo = ' max';
-      }
-      $('#btn-utxo-count').text(String(sendval.count) + exinfo);
-      $(this).blur();
-    });
-    $('#btn-utxo-minus').off('click').click(function() {
-      $('#send-coins input[name="amount"]').closest('.field').removeClass('error');
-      var cur = cur_calc_send_utxo;
-      if(cur) {
-        if(cur.err) {
-          cur.count = Math.min(cur.all, cur.max);
-          cur.sign = 0;
-          cur.err = 0;
-        } else {
-          if(cur.sign <= 0) {
-            if(cur.count > 0) {
-              cur.count--;
-            }
-          }
-          cur.sign = 0;
-        }
-      } else {
-        cur = {err: 0, count: 0, sign: 0};
-        cur_calc_send_utxo = cur;
-      }
-      var sendval = pastel.wallet.calcSendValue(cur.count);
-      cur.all = sendval.all;
-      cur.max = sendval.max;
-      cur.count = sendval.count;
-      send_balls_count = cur.count;
-      pastel.utxoballs.setSend(send_balls_count);
-      $('#send-coins input[name="amount"]').val(conv_coin(sendval.value));
-      if(sendval.conf != null && cur.count > sendval.conf && cur.count > 0) {
-        $('#send-coins input[name="amount"]').closest('.field').addClass('warning');
-      } else {
-        $('#send-coins input[name="amount"]').closest('.field').removeClass('warning');
-      }
-      var exinfo = '';
-      if(sendval.count == sendval.all) {
-        exinfo = ' all';
-      } else if(sendval.count == sendval.max) {
-        exinfo = ' max';
-      }
-      $('#btn-utxo-count').text(String(sendval.count) + exinfo);
-      $(this).blur();
-    });
-    var send_busy = false;
-    $('#btn-tx-send').off('click').click(function() {
-      if(send_busy) {
-        return;
-      }
-      send_busy = true;
-      var locked = PhraseLock.notify_if_need_unlock();
-      if(!locked && pastel.wallet) {
-        var address = String($('#send-coins input[name="address"]').val()).trim();
-        var amount = String($('#send-coins input[name="amount"]').val()).trim();
-        if(address.length == 0 || amount.length == 0) {
-          var address_elm = $('#send-coins input[name="address"]').closest('.field');
-          var amount_elm = $('#send-coins input[name="amount"]').closest('.field');
-          var flag = true;
-          var alert_count = 0;
-          function alert_worker() {
-            if(address.length == 0) {
-              if(flag) {
-                address_elm.addClass('error');
-              } else {
-                address_elm.removeClass('error');
-              }
-            }
-            if(amount.length == 0) {
-              if(flag) {
-                amount_elm.addClass('error');
-              } else {
-                amount_elm.removeClass('error');
-              }
-            }
-            alert_count++;
-            if(alert_count < 4) {
-              flag = !flag;
-              setTimeout(alert_worker, 100);
-            }
-          }
-          alert_worker();
-          return;
-        }
-        amount = amount.replace(/,/g, '');
-        var amounts = amount.split('.');
-        if(amount.match(/^\d+(\.\d{1,8})?$/)) {
-          var value = '';
-          if(amounts.length == 1) {
-            if(amounts[0] != '0') {
-              value = amounts[0] + '00000000';
-            } else {
-              value = amounts[0];
-            }
-          } else if(amounts.length == 2) {
-            value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
-          }
-          Notify.hide_all();
-          var self = $(this);
-          $('#btn-tx-send').addClass('loading');
-          pastel.wallet.send(address, value, function(result) {
-            var ErrSend = pastel.wallet.ERR_SEND;
-            switch(result.err) {
-            case ErrSend.SUCCESS:
-              Notify.show('', __t('Coins sent successfully.'), Notify.msgtype.info);
-              pastel.unspents_after_actions.push(function() {
-                if(sendrecv_switch == 1) {
-                  setSendUtxo(value);
-                }
-              });
-              break;
-            case ErrSend.FAILED:
-              Notify.show(__t('Error'), __t('Failed to send coins.'), Notify.msgtype.error);
-              break;
-            case ErrSend.INVALID_ADDRESS:
-              Notify.show(__t('Error'), __t('Address is invalid.'), Notify.msgtype.error);
-              break;
-            case ErrSend.INSUFFICIENT_BALANCE:
-              Notify.show(__t('Error'), __t('Balance is insufficient.'), Notify.msgtype.error);
-              break;
-            case ErrSend.DUST_VALUE:
-              if(value == '0') {
-                Notify.show(__t('Error'), __t('Amount is zero.'), Notify.msgtype.error);
-              } else {
-                Notify.show(__t('Error'), __t('Amount is too small.'), Notify.msgtype.error);
-              }
-              break;
-            case ErrSend.BUSY:
-              Notify.show(__t('Error'), __t('Failed to send coins. Busy.'), Notify.msgtype.error);
-              break;
-            case ErrSend.TX_FAILED:
-              var msg = '';
-              if(result.res && result.res.message) {
-                msg = '<br> [' + result.res.message + ']';
-              }
-              Notify.show(__t('Error'), __t('Failed to send coins.') + msg, Notify.msgtype.error);
-              break;
-            case ErrSend.TX_TIMEOUT:
-              Notify.show(__t('Warning'), __t('Server is not responding. Coins may have been sent.'), Notify.msgtype.warning);
-              break;
-            case ErrSend.SERVER_ERROR:
-              Notify.show(__t('Error'), __t('Failed to send coins. Server error.'), Notify.msgtype.error);
-              break;
-            case ErrSend.SERVER_TIMEOUT:
-              Notify.show(__t('Error'), __t('Failed to send coins. Server is not responding.'), Notify.msgtype.error);
-              break;
-            default:
-              Notify.show(__t('Error'), __t('Failed to send coins.'), Notify.msgtype.error);
-            }
-            $('#btn-tx-send').removeClass('loading');
-            self.blur();
-            send_busy = false;
-          });
-        } else {
-          if(amounts.length > 1 && amounts[1].length > 8) {
-            Notify.show(__t('Error'), __t('Amount is invalid. The decimal places is too long. Please set it 8 or less.'), Notify.msgtype.error);
-          } else {
-            Notify.show(__t('Error'), __t('Amount is invalid.'), Notify.msgtype.error);
-          }
-          send_busy = false;
-          $(this).blur();
-        }
-      } else {
-        $('#btn-send-lock').focus();
-        send_busy = false;
-      }
-    });
-  }
+var sendrecv_switch = 0
 
-  var sendrecv_switch = 0;
-  var sendrecv_switch_busy = false;
-  var sendrecv_switch_tval;
-  var sendrecv_last = null;
-  var sendrecv_wait = 0;
-  var sendrecv_switch_sendafter = function() {}
-  function send_switch() {
-    sendrecv_switch_busy = true;
-    if(sendrecv_last == 2) {
-      $('#receive-address').transition({
-        animation: 'fade down',
-        onComplete : function() {
-          $('#send-coins').transition({
-            animation: 'fade down',
-            onComplete : function() {
-              sendrecv_last = 1;
-              sendrecv_switch_busy = false;
-              sendrecv_switch_sendafter();
-            }
-          });
-          initSendForm();
-        }
-      });
-    } else {
-      $('#send-coins').transition({
-        animation: 'fade down',
-        onComplete : function() {
-          sendrecv_last = 1;
-          sendrecv_switch_busy = false;
-          sendrecv_switch_sendafter();
-        }
-      });
-      initSendForm();
-    }
-  }
-  function recv_switch() {
-    sendrecv_switch_busy = true;
-    if(sendrecv_last == 1) {
-      $('#send-coins').transition({
-        animation: 'fade down',
-        onComplete : function() {
-          showRecvAddress(function() {
-            $('#receive-address').transition({
-              animation: 'fade down',
-              onComplete : function() {
-                showRecvAddressAfterEffect();
-                sendrecv_last = 2;
-                sendrecv_switch_busy = false;
-              }
-            });
-          });
-        }
-      });
-    } else {
-      showRecvAddress(function() {
-        $('#receive-address').transition({
-          animation: 'fade down',
-          onComplete : function() {
-            showRecvAddressAfterEffect();
-            sendrecv_last = 2;
-            sendrecv_switch_busy = false;
-          }
-        });
-      });
-    }
-  }
-  function reset_switch(switch_id) {
-    if(!$('#send-coins').hasClass('hidden') && (switch_id == null || switch_id == 1)) {
-      sendrecv_switch_busy = true;
-      if(switch_id == 1) {
-        pastel.utxoballs.setSend(0);
-      }
-      $('#send-coins').transition({
-        animation: 'fade down',
-        onComplete : function() {
-          sendrecv_last = 0;
-          sendrecv_switch_busy = false;
-        }
-      });
-    }
-    if(!$('#receive-address').hasClass('hidden') && (switch_id == null || switch_id == 2)) {
-      sendrecv_switch_busy = true;
-      $('#receive-address').transition({
-        animation: 'fade down',
-        onComplete : function() {
-          sendrecv_last = 0;
-          sendrecv_switch_busy = false;
-        }
-      });
-    }
-  }
-  function sendrecv_switch_worker() {
-    if(sendrecv_switch_busy) {
-      sendrecv_switch_tval = setTimeout(function() {
-        sendrecv_wait++;
-        if(sendrecv_wait < 300) {
-          sendrecv_switch_worker();
-        } else {
-          sendrecv_switch_busy = false;
-        }
-      }, 50);
-      return;
-    }
-    sendrecv_wait = 0;
-    if(sendrecv_last == sendrecv_switch) {
-      return;
-    }
-    if(sendrecv_switch == 1) {
-      send_switch();
-    } else if(sendrecv_switch == 2) {
-      recv_switch();
-    } else {
-      reset_switch();
-    }
-  }
-  function sendrecv_select(val) {
-    clearTimeout(sendrecv_switch_tval);
-    if(sendrecv_switch == 1 && val != 1) {
-      pastel.utxoballs.setSend(0);
-    }
-    sendrecv_switch = val;
-    sendrecv_switch_worker();
-  }
+proc updateBallCount() =
+  if sendrecv_switch == 1:
+    check_amount_elm()
 
-  function enable_caret_browsing(elm) {
-    elm.find('.tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)').each(function() {
-      $(this).attr('tabindex', $(this).data('tabindex') || 0);
-    });
-    $('#selectlang .tabindex, #receive-address .tabindex').each(function() {
-      $(this).attr('tabindex', $(this).data('tabindex') || 0);
-    });
-  }
-  function disable_caret_browsing(elm) {
-    elm.find('.tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)').each(function() {
-      $(this).attr('tabindex', -1);
-    });
-    $('#selectlang .tabindex, #receive-address .tabindex').each(function() {
-      $(this).attr('tabindex', -1);
-    });
-  }
-""".}
+pastel.utxoballs.updateSend(updateBallCount)
+
+var uriOptions = [].toJs
+var sendrecv_switch_sendafter: proc() = proc() = discard
+
+proc initSendForm_amount_replace(s: JsObject): JsObject {.importcpp: "#.replace(/,/g, '')".}
+proc initSendForm_match(s: JsObject): JsObject {.importcpp: "#.match(/^\\d+(\\.\\d{1,8})?$$/)".}
+
+proc initSendForm() =
+  jq("#btn-send-clear".cstring).off("click".cstring).click(proc() =
+    if not showPage4:
+      jq("""#send-coins input[name="address"]""".cstring).val("".cstring)
+      jq("""#send-coins input[name="amount"]""".cstring).val("".cstring)
+      jq("""#send-coins input[name="address"]""".cstring).closest(".field".cstring).removeClass("error".cstring)
+      jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).removeClass("error".cstring)
+      resetSendBallCount()
+      uriOptions = [].toJs
+      viewSelector(Wallet)
+    jq(this).blur()
+  )
+  jq("#btn-send-qrcode".cstring).off("click".cstring).click(proc(evt: JsObject) =
+    if not showPage4:
+      qrReaderModal.show(proc(err, uri: JsObject) =
+        if not err.to(bool):
+          var data = bip21reader(uri)
+          jq("""#send-coins input[name="address"]""".cstring).val(data.address or "".toJs)
+          if not data.amount.isNull:
+            jq("""#send-coins input[name="amount"]""".cstring).val(data.amount or "".toJs)
+          uriOptions = [].toJs
+          for k, p in data:
+            if k == "address".cstring or k == "amount".cstring:
+              continue
+            var key = crlftab_to_html(k.toJs)
+            key = key.charAt(0).toUpperCase() + key.slice(1)
+            uriOptions.push(JsObject{key: key, value: crlftab_to_html(p)})
+          check_amount_elm()
+          viewSelector(Wallet)
+        else:
+          Notify.show(tr("Error".cstring), tr("Camera error. Please connect the camera and reload the page.".cstring), Notify.msgtype.error)
+      )
+    jq(this).blur()
+  )
+  jq("#btn-send-lock".cstring).off("click".cstring).click(proc() =
+    var elm = jq(this)
+    var icon = elm.find_js_native("i".toJs)
+    if icon.hasClass("open".toJs).to(bool):
+      if pastel.wallet.to(bool) and pastel.wallet.lockShieldedKeys().to(bool):
+        icon.removeClass("open".cstring)
+        elm.attr("title".cstring, "Locked".cstring)
+        PhraseLock.notify_locked()
+        PhraseLock.disableInactivity()
+      discard setTimeout(proc() =
+        elm.focus()
+      , 1000)
+    else:
+      Notify.hide_all()
+      PhraseLock.showPhraseInput(proc(status: JsObject) =
+        if status == PhraseLock.PLOCK_SUCCESS:
+          icon.addClass("open".cstring)
+          elm.attr("title".cstring, tr("Unlocked".cstring))
+          PhraseLock.notify_unlocked()
+          var locked_flag = false
+          PhraseLock.enableInactivity(proc() =
+            if icon.hasClass("open".cstring).to(bool):
+              if pastel.wallet.to(bool) and pastel.wallet.lockShieldedKeys().to(bool):
+                locked_flag = true
+          , proc() =
+            if icon.hasClass("open".cstring).to(bool) and locked_flag:
+              icon.removeClass("open".cstring)
+              elm.attr("title".cstring, "Locked".cstring)
+              if sendrecv_switch == 1:
+                PhraseLock.notify_locked()
+              else:
+                sendrecv_switch_sendafter = proc() =
+                  PhraseLock.notify_locked()
+              PhraseLock.disableInactivity()
+          )
+        elif status == PhraseLock.PLOCK_FAILED_QR:
+          Notify.show(tr("Error".cstring), tr("Failed to unlock. Wrong key card was scanned.".cstring), Notify.msgtype.error)
+        elif status == PhraseLock.PLOCK_FAILED_PHRASE:
+          Notify.show(tr("Error".cstring), tr("Failed to unlock. Passphrase is incorrect.".cstring), Notify.msgtype.error)
+        elif status == PhraseLock.PLOCK_FAILED_CAMERA:
+          Notify.show(tr("Error".cstring), tr("Failed to unlock. Camera error. Please connect the camera and reload the page.".cstring), Notify.msgtype.error)
+        setTimeout(proc() =
+          elm.focus()
+        , 1000)
+      )
+  )
+  pastel.utxoballs.setSend(send_balls_count)
+
+  jq("#btn-utxo-plus".cstring).off("click".cstring).click(proc() =
+    jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).removeClass("error".cstring)
+    var cur = cur_calc_send_utxo
+    if cur.to(bool):
+      if cur.err.to(bool):
+        cur.count = Math.min(cur.all, cur.max)
+        cur.sign = 0
+        cur.err = 0
+      else:
+        if cur.sign == 0.toJs:
+         discard  ++(cur.count)
+        else:
+          cur.sign = 0
+    else:
+      cur = JsObject{err: 0, count: 1, sign: 0}
+      cur_calc_send_utxo = cur
+    var sendval = pastel.wallet.calcSendValue(cur.count)
+    cur.all = sendval.all
+    cur.max = sendval.max
+    cur.count = sendval.count
+    send_balls_count = cur.count
+    pastel.utxoballs.setSend(send_balls_count)
+    jq("""#send-coins input[name="amount"]""".cstring).val(conv_coin(sendval.value))
+    if not sendval.conf.isNull and (cur.count > sendval.conf).to(bool) and (cur.count > 0.toJs).to(bool):
+      jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).addClass("warning".cstring)
+    else:
+      jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).removeClass("warning".cstring)
+    var exinfo = "".toJs
+    if sendval.count == sendval.all:
+      exinfo = " all".toJs
+    elif sendval.count == sendval.max:
+      exinfo = " max".toJs
+    jq("#btn-utxo-count").text(String(sendval.count) + exinfo)
+    jq(this).blur()
+  )
+  jq("#btn-utxo-minus".cstring).off("click".cstring).click(proc() =
+    jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).removeClass("error".cstring)
+    var cur = cur_calc_send_utxo
+    if cur.to(bool):
+      if cur.err.to(bool):
+        cur.count = Math.min(cur.all, cur.max)
+        cur.sign = 0
+        cur.err = 0
+      else:
+        if (cur.sign <= 0.toJs).to(bool):
+          if (cur.count > 0.toJs).to(bool):
+            discard --(cur.count)
+        cur.sign = 0
+    else:
+      cur = JsObject{err: 0, count: 0, sign: 0}
+      cur_calc_send_utxo = cur
+    var sendval = pastel.wallet.calcSendValue(cur.count)
+    cur.all = sendval.all
+    cur.max = sendval.max
+    cur.count = sendval.count
+    send_balls_count = cur.count
+    pastel.utxoballs.setSend(send_balls_count)
+    jq("""#send-coins input[name="amount"]""".cstring).val(conv_coin(sendval.value))
+    if not sendval.conf.isNull and (cur.count > sendval.conf).to(bool) and (cur.count > 0.toJs).to(bool):
+      jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).addClass("warning".cstring)
+    else:
+      jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring).removeClass("warning".cstring)
+    var exinfo = "".toJs
+    if sendval.count == sendval.all:
+      exinfo = " all".toJs
+    elif sendval.count == sendval.max:
+      exinfo = " max".toJs
+    jq("#btn-utxo-count".cstring).text(String(sendval.count) + exinfo)
+    jq(this).blur()
+  )
+  var send_busy = false
+  jq("#btn-tx-send".cstring).off("click".cstring).click(proc() =
+    if send_busy:
+      return
+    send_busy = true
+    var locked = PhraseLock.notify_if_need_unlock()
+    if not locked.to(bool) and pastel.wallet.to(bool):
+      var address = String(jq("""#send-coins input[name="address"]""".cstring).val()).trim()
+      var amount = String(jq("""#send-coins input[name="amount"]""".cstring).val()).trim()
+      if address.length == 0.toJs or amount.length == 0.toJs:
+        var address_elm = jq("""#send-coins input[name="address"]""".cstring).closest(".field".cstring)
+        var amount_elm = jq("""#send-coins input[name="amount"]""".cstring).closest(".field".cstring)
+        var flag = true
+        var alert_count = 0
+        proc alert_worker() =
+          if address.length == 0.toJs:
+            if flag:
+              address_elm.addClass("error".cstring)
+            else:
+              address_elm.removeClass("error".cstring)
+          if amount.length == 0.toJs:
+            if flag:
+              amount_elm.addClass("error".cstring)
+            else:
+              amount_elm.removeClass("error".cstring)
+          inc(alert_count)
+          if alert_count < 4:
+            flag = not flag
+            setTimeout(alert_worker, 100)
+        alert_worker()
+        return
+      amount = amount.initSendForm_amount_replace()
+      var amounts = amount.split(".".cstring)
+      if amount.initSendForm_match().to(bool):
+        var value = "".toJs
+        if amounts.length == 1.toJs:
+          if amounts[0] != '0'.toJs:
+            value = amounts[0] + "00000000".toJs
+          else:
+            value = amounts[0]
+        elif amounts.length == 2.toJs:
+          value = amounts[0] + (amounts[1] + "00000000".toJs).slice(0, 8)
+        Notify.hide_all()
+        var self = jq(this)
+        jq("#btn-tx-send".cstring).addClass("loading".cstring)
+        pastel.wallet.send(address, value, proc(result: JsObject) =
+          var ErrSend = pastel.wallet.ERR_SEND
+          if result.err == ErrSend.SUCCESS:
+            Notify.show("".cstring, tr("Coins sent successfully.".cstring), Notify.msgtype.info)
+            pastel.unspents_after_actions.push(proc() =
+              if sendrecv_switch == 1:
+                setSendUtxo(value)
+            )
+          elif result.err == ErrSend.FAILED:
+            Notify.show(tr("Error".cstring), tr("Failed to send coins.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.INVALID_ADDRESS:
+            Notify.show(tr("Error".cstring), tr("Address is invalid.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.INSUFFICIENT_BALANCE:
+            Notify.show(tr("Error".cstring), tr("Balance is insufficient.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.DUST_VALUE:
+            if value == "0".toJs:
+              Notify.show(tr("Error".cstring), tr("Amount is zero.".cstring), Notify.msgtype.error)
+            else:
+              Notify.show(tr("Error".cstring), tr("Amount is too small.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.BUSY:
+            Notify.show(tr("Error".cstring), tr("Failed to send coins. Busy.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.TX_FAILED:
+            var msg = "".toJs
+            if result.res.to(bool) and result.res.message.to(bool):
+              msg = "<br> [".toJs + result.res.message + "]".toJs
+            Notify.show(tr("Error".cstring), tr("Failed to send coins.".cstring).toJs + msg, Notify.msgtype.error)
+          elif result.err == ErrSend.TX_TIMEOUT:
+            Notify.show(tr("Warning".cstring), tr("Server is not responding. Coins may have been sent.".cstring), Notify.msgtype.warning)
+          elif result.err == ErrSend.SERVER_ERROR:
+            Notify.show(tr("Error".cstring), tr("Failed to send coins. Server error.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.SERVER_TIMEOUT:
+            Notify.show(tr("Error".cstring), tr("Failed to send coins. Server is not responding.".cstring), Notify.msgtype.error)
+          else:
+            Notify.show(tr("Error".cstring), tr("Failed to send coins.".cstring), Notify.msgtype.error)
+          jq("#btn-tx-send".cstring).removeClass("loading".cstring)
+          self.blur()
+          send_busy = false
+        )
+      else:
+        if (amounts.length > 1.toJs).to(bool) and (amounts[1].length > 8.toJs).to(bool):
+          Notify.show(tr("Error".cstring), tr("Amount is invalid. The decimal places is too long. Please set it 8 or less.".cstring), Notify.msgtype.error)
+        else:
+          Notify.show(tr("Error".cstring), tr("Amount is invalid.".cstring), Notify.msgtype.error)
+        send_busy = false
+        jq(this).blur()
+    else:
+      jq("#btn-send-lock".cstring).focus()
+      send_busy = false
+  )
+
+#var sendrecv_switch = 0
+var sendrecv_switch_busy = false
+var sendrecv_switch_tval: int
+var sendrecv_last = -1
+var sendrecv_wait = 0
+#var sendrecv_switch_sendafter = function() {}
+proc send_switch() =
+  sendrecv_switch_busy = true
+  if sendrecv_last == 2:
+    jq("#receive-address".cstring).transition(JsObject{
+      animation: "fade down".cstring,
+      onComplete : proc() =
+        jq("#send-coins".cstring).transition(JsObject{
+          animation: "fade down".cstring,
+          onComplete : proc() =
+            sendrecv_last = 1
+            sendrecv_switch_busy = false
+            sendrecv_switch_sendafter()
+        })
+        initSendForm()
+    })
+  else:
+    jq("#send-coins".cstring).transition(JsObject{
+      animation: "fade down".cstring,
+      onComplete : proc() =
+        sendrecv_last = 1
+        sendrecv_switch_busy = false
+        sendrecv_switch_sendafter()
+    })
+    initSendForm()
+proc recv_switch() =
+  sendrecv_switch_busy = true
+  if sendrecv_last == 1:
+    jq("#send-coins".cstring).transition(JsObject{
+      animation: "fade down".cstring,
+      onComplete : proc() =
+        showRecvAddress(proc() =
+          jq("#receive-address".cstring).transition(JsObject{
+            animation: "fade down".cstring,
+            onComplete : proc() =
+              showRecvAddressAfterEffect()
+              sendrecv_last = 2
+              sendrecv_switch_busy = false
+          })
+        )
+    })
+  else:
+    showRecvAddress(proc() =
+      jq("#receive-address".cstring).transition(JsObject{
+        animation: "fade down".cstring,
+        onComplete : proc() =
+          showRecvAddressAfterEffect()
+          sendrecv_last = 2
+          sendrecv_switch_busy = false
+      })
+    )
+proc reset_switch(switch_id: int = -1) =
+  if not jq("#send-coins".cstring).hasClass("hidden".cstring).to(bool) and (switch_id == -1 or switch_id == 1):
+    sendrecv_switch_busy = true
+    if switch_id == 1:
+      pastel.utxoballs.setSend(0)
+    jq("#send-coins".cstring).transition(JsObject{
+      animation: "fade down".cstring,
+      onComplete : proc() =
+        sendrecv_last = 0
+        sendrecv_switch_busy = false
+    })
+  if not jq("#receive-address".cstring).hasClass("hidden".cstring).to(bool) and (switch_id == -1 or switch_id == 2):
+    sendrecv_switch_busy = true
+    jq("#receive-address".cstring).transition(JsObject{
+      animation: "fade down".cstring,
+      onComplete : proc() =
+        sendrecv_last = 0
+        sendrecv_switch_busy = false
+    })
+proc sendrecv_switch_worker() =
+  if sendrecv_switch_busy:
+    sendrecv_switch_tval = setTimeout(proc() =
+      inc(sendrecv_wait)
+      if sendrecv_wait < 300:
+        sendrecv_switch_worker()
+      else:
+        sendrecv_switch_busy = false
+    , 50)
+    return
+  sendrecv_wait = 0
+  if sendrecv_last == sendrecv_switch:
+    return
+  if sendrecv_switch == 1:
+    send_switch()
+  elif sendrecv_switch == 2:
+    recv_switch()
+  else:
+    reset_switch()
+proc sendrecv_select(val: int) =
+  clearTimeout(sendrecv_switch_tval)
+  if sendrecv_switch == 1 and val != 1:
+    pastel.utxoballs.setSend(0)
+  sendrecv_switch = val
+  sendrecv_switch_worker()
+
+proc enable_caret_browsing(elm: JsObject) =
+  elm.find_js_native(".tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)".toJs).each(proc(idx, val: JsObject) =
+    jq(val).attr("tabindex".cstring, jq(val).data("tabindex".cstring) or 0.toJs)
+  )
+  jq("#selectlang .tabindex, #receive-address .tabindex".cstring).each(proc(idx, val: JsObject) =
+    jq(val).attr("tabindex".cstring, jq(val).data("tabindex".cstring) or 0.toJs)
+  )
+proc disable_caret_browsing(elm: JsObject) =
+  elm.find_js_native(".tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)".toJs).each(proc(idx, val: JsObject) =
+    jq(val).attr("tabindex".cstring, -1)
+  )
+  jq("#selectlang .tabindex, #receive-address .tabindex".cstring).each(proc(idx, val: JsObject) =
+    jq(val).attr("tabindex".cstring, -1)
+  )
 
 proc btnSend: proc() =
   result = proc() =
-    {.emit: """
-      if(!pastel.wallet || !pastel.utxoballs) {
-        return;
-      }
-      sendrecv_select((sendrecv_switch == 1) ? 0 : 1);
-      document.getElementById('btn-send').blur();
-    """.}
+    if not pastel.wallet.to(bool) or  not pastel.utxoballs.to(bool):
+      return
+    sendrecv_select(if sendrecv_switch == 1: 0 else: 1)
+    document.getElementById("btn-send".cstring).blur()
 
 proc btnReceive: proc() =
   result = proc() =
-    {.emit: """
-      if(!pastel.wallet || !pastel.utxoballs) {
-        return;
-      }
-      sendrecv_select((sendrecv_switch == 2) ? 0 : 2);
-      document.getElementById('btn-receive').blur();
-    """.}
+    if not pastel.wallet.to(bool) or not pastel.utxoballs.to(bool):
+      return
+    sendrecv_select(if sendrecv_switch == 2: 0 else: 2)
+    document.getElementById("btn-receive".cstring).blur()
 
 proc btnSendClose: proc() =
   result = proc() =
-    {.emit: """
-      clearTimeout(sendrecv_switch_tval);
-      sendrecv_switch = 0;
-      reset_switch(1);
-    """.}
+    clearTimeout(sendrecv_switch_tval)
+    sendrecv_switch = 0
+    reset_switch(1)
 
 proc btnRecvClose: proc() =
   result = proc() =
-    {.emit: """
-      clearTimeout(sendrecv_switch_tval);
-      sendrecv_switch = 0;
-      reset_switch(2);
-    """.}
+    clearTimeout(sendrecv_switch_tval)
+    sendrecv_switch = 0
+    reset_switch(2)
 
 proc recvAddressSelector(): VNode =
   result = buildHtml(tdiv(id="receive-address", class="ui center aligned segment hidden")):
@@ -1351,45 +1245,36 @@ proc recvAddressModal(): VNode =
           label: text trans"Message"
           textarea(class="ui textarea", rows="2", name="message", placeholder=trans"Message")
 
+proc check_send_amount_replace(s: JsObject): JsObject {.importcpp: "#.replace(/,/g, '')".}
+proc check_send_amount_match(s: JsObject): JsObject {.importcpp: "#.match(/^\\d+(\\.\\d{1,8})?$$/)".}
 
 proc checkSendAmount(ev: Event; n: VNode) =
   var s = n.value
-  {.emit: """
-    var amount = String(`s`).trim();
-    var amount_elm = $('#send-coins input[name="amount"]');
-    if(amount.length > 0) {
-      amount = amount.replace(/,/g, '');
-      var amounts = amount.split('.');
-      if(amount.match(/^\d+(\.\d{1,8})?$/)) {
-        amount_elm.closest('.field').removeClass('error warning');
-        var value = '';
-        if(amounts.length == 1) {
-          if(amounts[0] != '0') {
-            value = amounts[0] + '00000000';
-          } else {
-            value = amounts[0];
-          }
-        } else if(amounts.length == 2) {
-          value = amounts[0] + (amounts[1] + '00000000').slice(0, 8);
-        }
-        if(value.length > 0) {
-          setSendUtxo(value);
-        } else {
-          resetSendBallCount();
-        }
-      } else {
-        amount_elm.closest('.field').addClass('error');
-      }
-    } else {
-      amount_elm.closest('.field').removeClass('error warning');
-      resetSendBallCount();
-    }
-  """.}
+  var amount = String(s.toJs).trim()
+  var amount_elm = jq("""#send-coins input[name="amount"]""".cstring)
+  if (amount.length > 0.toJs).to(bool):
+    amount = amount.check_send_amount_replace()
+    var amounts = amount.split(".".cstring)
+    if amount.check_send_amount_match().to(bool):
+      amount_elm.closest(".field".cstring).removeClass("error warning".cstring)
+      var value = "".toJs
+      if amounts.length == 1.toJs:
+        if amounts[0] != '0'.toJs:
+          value = amounts[0] + "00000000".toJs
+        else:
+          value = amounts[0]
+      elif amounts.length == 2.toJs:
+        value = amounts[0] + (amounts[1] + "00000000".toJs).slice(0, 8)
+      if (value.length > 0.toJs).to(bool):
+        setSendUtxo(value)
+      else:
+        resetSendBallCount()
+    else:
+      amount_elm.closest(".field".cstring).addClass("error".cstring)
+  else:
+    amount_elm.closest(".field".cstring).removeClass("error warning".cstring)
+    resetSendBallCount()
 
-{.emit: """
-  var uriOptions = [];
-""".}
-var uriOptions {.importc, nodecl.}: JsObject
 proc sendForm(): VNode =
   result = buildHtml(tdiv(id="send-coins", class="ui center aligned segment hidden")):
     tdiv(class="ui top attached label sendcoins"):
@@ -1672,199 +1557,156 @@ A key card or passphrase is required to encrypt and save the private key in your
 proc afterScript(data: RouterData) =
   jq(".ui.dropdown").dropdown()
   if showScanResult:
-    {.emit: """
-      function seedCardQrUpdate(vivid) {
-        $('.seed-qrcode').each(function() {
-          $(this).find('canvas').remove();
-          var fillcolor;
-          var fillStyleFn;
-          if($(this).hasClass('active')) {
-            fillcolor = vivid ? '#000' : '#7f7f7f';
-            if(!vivid) {
-              fillStyleFn = function(ctx) {
-                var w = ctx.canvas.width;
-                var h = ctx.canvas.height;
-                var grd = ctx.createLinearGradient(0, 0, w, h);
-                grd.addColorStop(0, "#666");
-                grd.addColorStop(0.3, "#aaa");
-                grd.addColorStop(1, "#555");
-                return grd;
-              }
-            }
-          } else {
-            fillcolor = '#f8f8f8';
-          }
-          $(this).qrcode({
-            render: 'canvas',
-            ecLevel: 'Q',
-            radius: 0.39,
-            text: $(this).data('orig'),
-            size: 188,
-            mode: 2,
-            label: '',
-            fontname: 'sans',
-            fontcolor: '#393939',
-            fill: fillcolor,
-            fillStyleFn: fillStyleFn
-          });
-        });
-      }
-      if(!$('.seed-qrcode .active').length) {
-        $('.seed-qrcode').last().addClass('active');
-      }
-      seedCardQrUpdate();
+    proc seedCardQrUpdate(vivid: bool = false) =
+      jq(".seed-qrcode".cstring).each(proc(idx, val: JsObject) =
+        jq(val).find_js_native("canvas".cstring).remove()
+        var fillcolor: JsObject
+        var fillStyleFn = proc(ctx: JsObject): JsObject = discard
+        if jq(val).hasClass("active".cstring).to(bool):
+          fillcolor = if vivid: "#000".toJs else: "#7f7f7f".toJs
+          if not vivid:
+            fillStyleFn = proc(ctx: JsObject): JsObject =
+              var w = ctx.canvas.width
+              var h = ctx.canvas.height
+              var grd = ctx.createLinearGradient(0, 0, w, h)
+              grd.addColorStop(0, "#666".cstring)
+              grd.addColorStop(0.3, "#aaa".cstring)
+              grd.addColorStop(1, "#555".cstring)
+              return grd
+        else:
+          fillcolor = "#f8f8f8".toJs
+        jq(val).qrcode(JsObject{
+          render: "canvas".cstring,
+          ecLevel: "Q".cstring,
+          radius: 0.39,
+          text: jq(val).data("orig".cstring),
+          size: 188,
+          mode: 2,
+          label: "",
+          fontname: "sans".cstring,
+          fontcolor: "#393939".cstring,
+          fill: fillcolor,
+          fillStyleFn: fillStyleFn
+        })
+      )
+    if not jq(".seed-qrcode .active".cstring).length.to(bool):
+      jq(".seed-qrcode".cstring).last().addClass("active".cstring)
+    seedCardQrUpdate()
 
-      $('.seed-card').off('click').on('click', function() {
-        $('.seed-card').not(this).each(function() {
-          $(this).find('.seed-qrcode').removeClass('active');
-        });
-        $(this).find('.seed-qrcode').addClass('active');
-        seedCardQrUpdate(true);
-      });
-      $('.seed-card').off('mouseleave').mouseleave(function() {
-        $('.seed-qrcode').addClass('active');
-        seedCardQrUpdate();
-      });
-      var holder = document.getElementById('seed-card-holder');
-      if(holder) {
-        holder.scrollLeft = holder.scrollWidth - holder.clientWidth;
-      }
-    """.}
+    jq(".seed-card".cstring).off("click".cstring).on("click".cstring, proc(evt: JsObject) =
+      jq(".seed-card".cstring).not(evt.currentTarget).each(proc(idx, val: JsObject) =
+        jq(val).find_js_native(".seed-qrcode".cstring).removeClass("active".cstring)
+      )
+      jq(evt.currentTarget).find_js_native(".seed-qrcode".cstring).addClass("active".cstring)
+      seedCardQrUpdate(true)
+    )
+    jq(".seed-card".cstring).off("mouseleave".cstring).mouseleave(proc() =
+      jq(".seed-qrcode".cstring).addClass("active".cstring)
+      seedCardQrUpdate()
+    )
+    var holder = document.getElementById("seed-card-holder".cstring)
+    if holder.to(bool):
+      holder.scrollLeft = holder.scrollWidth - holder.clientWidth
 
   if showScanResult or mnemonicFulfill:
-    {.emit: """
-      disable_caret_browsing($('#section2'));
-      target_page_scroll = '#section2';
-      page_scroll_done = function() {
-        $('a.pagenext').css('visibility', 'hidden');
-        $('#section1').hide();
-        enable_caret_browsing($('#section2'));
-        window.scrollTo(0, 0);
-        jsSeedToKeys();
-        `viewSelector`(5);
-        page_scroll_done = function() {};
-      }
-    """.}
+    disable_caret_browsing(jq("#section2".cstring))
+    target_page_scroll = "#section2".cstring
+    page_scroll_done = proc() =
+      jq("a.pagenext".cstring).css("visibility".cstring, "hidden".cstring)
+      jq("#section1".cstring).hide()
+      enable_caret_browsing(jq("#section2".cstring))
+      window.scrollTo(0, 0)
+      seedToKeys()
+      viewSelector(SetPassphrase)
+      page_scroll_done = proc() = discard
   if keyCardFulfill or passphraseFulfill:
-    {.emit: """
-      disable_caret_browsing($('#section3'));
-      target_page_scroll = '#section3';
-      page_scroll_done = function() {
-        var wallet = pastel.wallet;
-        var ret = wallet.lockShieldedKeys();
-        if(!ret) {
-          Notify.show(__t('Error'), __t('Failed to lock keys.'), Notify.msgtype.error);
-        }
-        jsClearSensitive();
-        $('a.pagenext').css('visibility', 'hidden');
-        $('#section2').hide();
-        enable_caret_browsing($('#section3'));
-        window.scrollTo(0, 0);
-        `viewSelector`(12);
-        if(pastel.stream && !pastel.stream.status()) {
-          pastel.stream.start();
-        }
-        page_scroll_done = function() {};
-      }
-    """.}
+    disable_caret_browsing(jq("#section3".cstring))
+    target_page_scroll = "#section3".cstring
+    page_scroll_done = proc() =
+      var wallet = pastel.wallet
+      var ret = wallet.lockShieldedKeys()
+      if not ret.to(bool):
+        Notify.show(tr("Error".cstring), tr("Failed to lock keys.".cstring), Notify.msgtype.error)
+      clearSensitive()
+      jq("a.pagenext".cstring).css("visibility".cstring, "hidden".cstring)
+      jq("#section2".cstring).hide()
+      enable_caret_browsing(jq("#section3".cstring))
+      window.scrollTo(0, 0)
+      viewSelector(Wallet)
+      if pastel.stream.to(bool) and not pastel.stream.status().to(bool):
+        pastel.stream.start()
+      page_scroll_done = proc() = discard
   if showScanResult or mnemonicFulfill or keyCardFulfill or passphraseFulfill:
-    {.emit: """
-      for(var i in registerEventList) {
-        var ev = registerEventList[i];
-        ev.elm.removeEventListener(ev.type, ev.cb);
-      }
-      var elms = document.querySelectorAll('a.pagenext');
-      Array.prototype.forEach.call(elms, function(elm) {
-        var href = elm.getAttribute("href");
-        if(href && href.startsWith('#')) {
-          var cb = function(e) {
-            e.preventDefault();
-            var href = this.getAttribute('href');
-            if(href == '#section2') {
-              goSection(href, page_scroll_done);
-            } else if(href == '#section3') {
-              goSection(href, page_scroll_done);
-            }
-          }
-          registerEventList.push({elm: elm, type: 'click', cb: cb});
-          elm.addEventListener('click', cb);
-        }
-      });
-    """.}
+    for ev in registerEventList:
+      ev.elm.removeEventListener(ev.type_js_native, ev.cb)
+    var elms = document.querySelectorAll("a.pagenext".cstring)
+    Array.prototype.forEach.call(elms, proc(elm: JsObject) =
+      var href = elm.getAttribute("href".cstring)
+      if href.to(bool) and href.startsWith("#".cstring).to(bool):
+        var cb = proc(e: JsObject) =
+          e.preventDefault()
+          var href = this.getAttribute("href".cstring)
+          if href == "#section2".toJs:
+            goSection(href.to(cstring), page_scroll_done)
+          elif href == "#section3".toJs:
+            goSection(href.to(cstring), page_scroll_done)
+        registerEventList.push(JsObject{elm: elm, type: "click".cstring, cb: cb})
+        elm.addEventListener("click".cstring, cb)
+    )
 
   if showPage2 and not passphraseFulfill:
-    {.emit: """
-      $('input[name="input-passphrase"]').focus();
-    """.}
+    jq("""input[name="input-passphrase"]""".cstring).focus()
 
   if showPage4:
-    {.emit: """
-      pastel.utxoballs.pause();
-      //$.fn.visibility.settings.silent = true;
-      $('.backpage').visibility({
-        type: 'fixed',
-        offset: 0
-      });
-    """.}
+    pastel.utxoballs.pause()
+    #$.fn.visibility.settings.silent = true
+    jq(".backpage".cstring).visibility(JsObject{
+      type: "fixed".toJs,
+      offset: 0
+    })
     if showTradeLogs:
-      {.emit: """
-        TradeLogs.start();
-      """.}
+      TradeLogs.start()
     if showSettings:
-      {.emit: """
-        Settings.init();
-      """.}
-    {.emit: """
-      goSection('#section4', function() {
-        disable_caret_browsing($('#section3'));
-        target_page_scroll = '#section3';
-        page_scroll_done = function() {
-          TradeLogs.stop();
-          $('.backpage').visibility({silent: true});
-          $('#tradeunconfs').empty();
-          $('#tradelogs').empty();
-          $('#section4').hide();
-          enable_caret_browsing($('#section3'));
-          window.scrollTo(0, 0);
-          `setSupressRedraw`(false);
-          reloadViewSafeStart();
-          `viewSelector`(12);
-          page_scroll_done = function() {};
-          pastel.utxoballs.resume();
-          `showPage4` = false;
-          $('#bottom-blink').fadeIn(100).fadeOut(400);
-        }
-      });
-    """.}
+      Settings.init()
+    goSection("#section4".cstring, proc() =
+      disable_caret_browsing(jq("#section3".cstring))
+      target_page_scroll = "#section3".cstring
+      page_scroll_done = proc() =
+        TradeLogs.stop()
+        jq(".backpage".cstring).visibility(JsObject{silent: true})
+        jq("#tradeunconfs".cstring).empty()
+        jq("#tradelogs".cstring).empty()
+        jq("#section4".cstring).hide()
+        enable_caret_browsing(jq("#section3".cstring))
+        window.scrollTo(0, 0)
+        setSupressRedraw(false)
+        reloadViewSafeStart()
+        viewSelector(Wallet)
+        page_scroll_done = proc() = discard
+        pastel.utxoballs.resume()
+        showPage4 = false
+        jq("#bottom-blink".cstring).fadeIn(100).fadeOut(400)
+    )
   else:
-    {.emit: """
-      $('#section4').hide();
-    """.}
+    jq("#section4".cstring).hide()
 
   if showPage3 or showPage4:
-    {.emit: """
-      reloadViewSafeEnd();
-    """.}
+    reloadViewSafeEnd()
 
 var walletSetup = false
-{.emit: """
-  var stor  = new Stor();
-  var xpubs = stor.get_xpubs();
-  stor = null;
-  if(xpubs.length > 0) {
-    `walletSetup` = true;
-    function check_stream_ready() {
-      setTimeout(function() {
-        if(pastel.stream && !pastel.stream.status()) {
-          pastel.stream.start();
-        } else {
-          check_stream_ready();
-        }
-      }, 50);
-    }
-    check_stream_ready();
-  }
-""".}
+var stor = newStor()
+var xpubs = stor.get_xpubs()
+stor = jsNull
+if xpubs.length.to(int) > 0:
+  walletSetup = true
+  proc check_stream_ready() =
+    setTimeout(proc() =
+      if pastel.stream.to(bool) and not pastel.stream.status().to(bool):
+        pastel.stream.start()
+      else:
+        check_stream_ready()
+    , 50)
+  check_stream_ready()
 if walletSetup:
   viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)
