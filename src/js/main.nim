@@ -897,7 +897,7 @@ proc initSendForm() =
         cur.err = 0
       else:
         if cur.sign == 0.toJs:
-         discard  ++(cur.count)
+         discard ++(cur.count)
         else:
           cur.sign = 0
     else:
