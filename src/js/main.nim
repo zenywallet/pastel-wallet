@@ -434,7 +434,9 @@ proc checkMnemonic(ev: Event; n: VNode) =
     autocompleteWords = @[]
   viewUpdate()
 
-proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): proc() =
+proc select_word_test(c: JsObject): JsObject {.importcpp: "/[ 　\\n\\r]/.test(#)".} # /[ \u3000\n\r]/
+
+proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = false): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
     var s = prevCheckWord
@@ -456,11 +458,18 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
         var t = s.toJs.substr(0.toJs, cur).to(cstring).check_mnemonic_replace().split(" ".cstring).slice(-1)[0]
         if t.to(bool) and (t.length > 0.toJs).to(bool):
           var tail = s.toJs.substr(cur) or "".toJs
+          var pos = 0.toJs
+          for c in tail:
+            if select_word_test(c).to(bool):
+              tail = tail.slice(pos - tail.length)
+              break
+            discard ++pos
           s = (s.toJs.substr(0.toJs, cur - t.length) + word.toJs + tail).to(cstring)
           newcur = s.toJs.length - tail.length
         x.setInputText(s)
         editingWords = s
         input_elm.focus()
+        input_elm.selectionStart = newcur
         input_elm.selectionEnd = newcur
     autocompleteWords = @[]
     viewUpdate()
