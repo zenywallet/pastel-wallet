@@ -437,7 +437,7 @@ proc checkMnemonic(ev: Event; n: VNode) =
 proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): proc() =
   result = proc() =
     let x = getVNodeById(input_id)
-    var s = x.value
+    var s = prevCheckWord
     if not s.isNil and s.len > 0:
       var input_elm = document.getElementById(input_id)
       var cur = input_elm.selectionStart
