@@ -444,7 +444,7 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
       var newcur = cur
       if whole_replace:
         var t = s.toJs.substr(0.toJs, cur).to(cstring).check_mnemonic_replace().split(" ".cstring).slice(-1)[0].to(cstring)
-        if t.toJs.is(bool) and (t.toJs.length > 0.toJs).to(bool):
+        if t.toJs.to(bool) and (t.toJs.length > 0.toJs).to(bool):
           s = (s.toJs.substr(0.toJs, cur - t.toJs.length) + word.toJs).to(cstring)
           newcur = s.toJs.length
         x.setInputText(s)
@@ -454,7 +454,7 @@ proc selectWord(input_id: cstring, word: cstring, whole_replace: bool = true): p
         input_elm.selectionEnd = newcur
       else:
         var t = s.toJs.substr(0.toJs, cur).to(cstring).check_mnemonic_replace().split(" ".cstring).slice(-1)[0].to(cstring)
-        if t.toJs.is(bool) and (t.toJs.length > 0.toJs).to(bool):
+        if t.toJs.to(bool) and (t.toJs.length > 0.toJs).to(bool):
           var tail = s.toJs.substr(cur) or "".toJs
           s = (s.toJs.substr(0.toJs, cur - t.toJs.length) + word.toJs + tail).to(cstring)
           newcur = s.toJs.length - tail.length
