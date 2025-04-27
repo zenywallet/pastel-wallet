@@ -3,6 +3,7 @@
 import zenyjs
 import zenyjs/core
 import zenyjs/address
+import std/os
 
 networks:
   BitZeny_mainnet:
@@ -29,7 +30,7 @@ const blockstor_wsport* = 8001
 
 const gaplimit*: uint32 = 20
 
-when defined(PASTEL_BITZENY_JP):
+when defined(PASTEL_BITZENY_JP) or os.getEnv("PASTEL_BITZENY_JP") == "1":
   const HttpsPort* = 443
   const HttpsHost* = "pastel.bitzeny.jp"
   const HttpPort* = 80
