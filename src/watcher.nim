@@ -390,7 +390,9 @@ proc stream_main() {.thread.} =
       if opcode == Opcode.Text:
         try:
           var json = parseJson(data)
-          block_reader(json)
+          if json.hasKey("height"):
+            block_reader(json)
+            await sleepAsync(6000)
           BallCommand.BsStream.send(BallDataBsStream(data: json))
         except:
           let e = getCurrentException()
