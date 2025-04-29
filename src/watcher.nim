@@ -381,22 +381,29 @@ proc block_reader(json: JsonNode) =
     doWork()
 
 proc stream_main() {.thread.} =
-  let ws = waitFor newAsyncWebsocketClient(config.blockstor_wshost, Port(config.blockstor_wsport),
-    path = "api", ssl = false, protocols = @[], userAgent = "pastel-v0.1")
 
   proc read() {.async.} =
     while true:
-      let (opcode, data) = await ws.readData()
-      if opcode == Opcode.Text:
-        try:
-          var json = parseJson(data)
-          if json.hasKey("height"):
-            block_reader(json)
-            await sleepAsync(6000)
-          BallCommand.BsStream.send(BallDataBsStream(data: json))
-        except:
-          let e = getCurrentException()
-          Debug.CommonError.write e.name, ": ", e.msg
+      try:
+        let ws = waitFor newAsyncWebsocketClient(config.blockstor_wshost, Port(config.blockstor_wsport),
+          path = "api", ssl = false, protocols = @[], userAgent = "pastel-v0.1")
+
+        while true:
+          let (opcode, data) = await ws.readData()
+          if opcode == Opcode.Text:
+            var json = parseJson(data)
+            if json.hasKey("height"):
+              block_reader(json)
+              await sleepAsync(6000)
+            BallCommand.BsStream.send(BallDataBsStream(data: json))
+
+      except:
+        let e = getCurrentException()
+        Debug.CommonError.write e.name, ": ", e.msg
+        if not active:
+          break
+
+      await sleepAsync(6000)
 
   asyncCheck read()
   while true:
