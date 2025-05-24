@@ -26,6 +26,12 @@ task rocksdb, "Build RocksDB":
     exec "DEBUG_LEVEL=0 make -j$(nproc) liblz4.a"
     exec "CPLUS_INCLUDE_PATH=./$(basename lz4-*/)/lib ROCKSDB_DISABLE_SNAPPY=1 ROCKSDB_DISABLE_ZLIB=1 ROCKSDB_DISABLE_BZIP=1 ROCKSDB_DISABLE_ZSTD=1 make -j$(nproc) static_lib"
 
+task rocksdbDefault, "Build RocksDB (Default)":
+  withDir "deps/rocksdb":
+    exec "make clean"
+    exec "DEBUG_LEVEL=0 make -j$(nproc) libsnappy.a"
+    exec "ROCKSDB_DISABLE_LZ4=1 ROCKSDB_DISABLE_ZLIB=1 ROCKSDB_DISABLE_BZIP=1 ROCKSDB_DISABLE_ZSTD=1 make -j$(nproc) static_lib"
+
 task zbar, "Build zbar":
   withDir "deps/zbar":
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
