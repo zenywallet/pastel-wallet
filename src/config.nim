@@ -4,6 +4,7 @@ import zenyjs
 import zenyjs/core
 import zenyjs/address
 import std/os
+import std/macros
 
 networks:
   BitZeny_mainnet:
@@ -46,3 +47,16 @@ else:
   const HttpRedirect* = "https://localhost:5002"
   const WebSocketUrl* = "wss://localhost:5002/ws"
   const AcmePath* = "www/localhost/"
+
+
+macro writeConfigJs() =
+  const srcDir = currentSourcePath().parentDir()
+  writeFile(srcDir / "../public/js/config.js", """
+var pastel = pastel || {};
+pastel.config = pastel.config || {
+  ws_url: '""" & WebSocketUrl & """',
+  ws_protocol: 'pastel-v0.1',
+  network: 'bitzeny'
+};
+""")
+writeConfigJs()
