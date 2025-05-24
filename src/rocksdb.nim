@@ -1672,7 +1672,9 @@ const libresslPath = currentSourcePath.parentDir() / "../deps/rocksdb"
 {.passL: libresslPath / "librocksdb.a".}
 #{.passL: libresslPath / "libz.a".}
 #{.passL: libresslPath / "libbz2.a".}
-#{.passL: libresslPath / "libsnappy.a".}
-{.passL: libresslPath / "liblz4.a".}
+when defined(ROCKSDB_DEFAULT_COMPRESSION):
+  {.passL: libresslPath / "libsnappy.a".}
+else:
+  {.passL: libresslPath / "liblz4.a".}
 #{.passL: libresslPath / "libzstd.a".}
 {.passL: "-lstdc++ -lm".}
