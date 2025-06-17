@@ -386,13 +386,12 @@ proc levens_one(word, wordlist: JsObject): JsObject =
   for wl in wordlist:
     var maxlen = Math.max(word.length, wl.length)
     var lev = levenshtein(word.to(cstring), wl.to(cstring))
-    if lev != 1:
-      continue
-    var score = (lev / maxlen.to(int)).toJs.to(cstring)
-    if data[score].to(bool):
-      data[score].push(wl)
-    else:
-      data[score] = [wl].toJs
+    if lev == 1:
+      var score = (lev / maxlen.to(int)).toJs.to(cstring)
+      if data[score].to(bool):
+        data[score].push(wl)
+      else:
+        data[score] = [wl].toJs
   var ret = [].toJs
   var svals = Object.keys(data).sort()
   for i in 0..<svals.length.to(int):
@@ -836,11 +835,10 @@ proc initSendForm() =
             jq("""#send-coins input[name="amount"]""".cstring).val(data.amount or "".toJs)
           uriOptions = [].toJs
           for k, p in data:
-            if k == "address".cstring or k == "amount".cstring:
-              continue
-            var key = crlftab_to_html(k.toJs)
-            key = key.charAt(0).toUpperCase() + key.slice(1)
-            uriOptions.push(JsObject{key: key, value: crlftab_to_html(p)})
+            if k != "address".cstring and k != "amount".cstring:
+              var key = crlftab_to_html(k.toJs)
+              key = key.charAt(0).toUpperCase() + key.slice(1)
+              uriOptions.push(JsObject{key: key, value: crlftab_to_html(p)})
           check_amount_elm()
           viewSelector(Wallet)
         else:
