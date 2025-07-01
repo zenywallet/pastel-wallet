@@ -375,10 +375,9 @@ proc watcher_main() {.thread.} =
       sleep(500)
 
 proc block_reader(json: JsonNode) =
-  if json.hasKey("height"):
-    if not blockDataChannel.send(json):
-      Debug.CommonError.write "error: blockDataChannel is null"
-    doWork()
+  if not blockDataChannel.send(json):
+    Debug.CommonError.write "error: blockDataChannel is null"
+  doWork()
 
 proc stream_main() {.thread.} =
 
