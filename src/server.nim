@@ -255,6 +255,8 @@ proc setEmpty*(pair: HashTableData) =
 loadHashTableModules()
 var walletmap = newHashTable[WalletId, seq[WalletMapData]](0x10000)
 
+active = true
+
 worker(1):
   proc sendClient(clientId: ClientId, data: string) =
     let client = getClient(clientId)
