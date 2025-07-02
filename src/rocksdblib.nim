@@ -46,25 +46,19 @@ proc open*(rocks: var RocksDb, dbpath: cstring, dbpathBackup: cstring = "",
     rocksdb_backup_engine_create_new_backup(rocks.be, rocks.db, rocks.err.addr)
     rocksdb_checkerr
 
-proc close*(rocks: var RocksDb) =
+proc close*(rocks: RocksDb) =
   if not rocks.err.isNil:
     rocksdb_free(rocks.err)
-    rocks.err = nil
   if not rocks.writeOptions.isNil:
     rocksdb_writeoptions_destroy(rocks.writeOptions)
-    rocks.writeOptions = nil
   if not rocks.readOptions.isNil:
     rocksdb_readoptions_destroy(rocks.readOptions)
-    rocks.readOptions = nil
   if not rocks.options.isNil:
     rocksdb_options_destroy(rocks.options)
-    rocks.options = nil
   if not rocks.be.isNil:
     rocksdb_backup_engine_close(rocks.be)
-    rocks.be = nil
   if not rocks.db.isNil:
     rocksdb_close(rocks.db)
-    rocks.db = nil
 
 proc put*(rocks: RocksDb, key: KeyType, val: ValueType) =
   rocksdb_put(rocks.db,
