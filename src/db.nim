@@ -210,9 +210,9 @@ proc getWallet*(xpubkey: string): DbResult[WalletXpubkeyResult] =
   var d = db.gets(key)
   if d.len > 0 and xpubkey == d[0].key[1..^9].toString:
     let wid = d[0].key[^8..^1].toUint64
-    let sequence = d[0].value[0..7].toUint64
-    let next_0_index = d[0].value[8..11].toUint32
-    let next_1_index = d[0].value[12..15].toUint32
+    let sequence = d[0].val[0..7].toUint64
+    let next_0_index = d[0].val[8..11].toUint32
+    let next_1_index = d[0].val[12..15].toUint32
     DbResult[WalletXpubkeyResult](err: DbStatus.Success, res: (wid, sequence, next_0_index, next_1_index))
   else:
     DbResult[WalletXpubkeyResult](err: DbStatus.NotFound)
@@ -230,9 +230,9 @@ proc getWallet*(wid: uint64): DbResult[WalletWidResult] =
     if d.len > 0:
       let chk_wid = d[0].key[^8..^1].toUint64
       if chk_wid == wid:
-        let sequence = d[0].value[0..7].toUint64
-        let next_0_index = d[0].value[8..11].toUint32
-        let next_1_index = d[0].value[12..15].toUint32
+        let sequence = d[0].val[0..7].toUint64
+        let next_0_index = d[0].val[8..11].toUint32
+        let next_1_index = d[0].val[12..15].toUint32
         return DbResult[WalletWidResult](err: DbStatus.Success, res: (xpubkey, sequence, next_0_index, next_1_index))
   DbResult[WalletWidResult](err: DbStatus.NotFound)
 
@@ -243,9 +243,9 @@ iterator getWallets*(xpubkey: string): tuple[xpubkey: string,
   for d in db.gets(key):
     let xpubkey = d.key[1..^9].toString
     let wid = d.key[^8..^1].toUint64
-    let sequence = d.value[0..7].toUint64
-    let next_0_index = d.value[8..11].toUint32
-    let next_1_index = d.value[12..15].toUint32
+    let sequence = d.val[0..7].toUint64
+    let next_0_index = d.val[8..11].toUint32
+    let next_1_index = d.val[12..15].toUint32
     yield (xpubkey, wid, sequence, next_0_index, next_1_index)
 
 proc delWallets*() =
@@ -299,7 +299,7 @@ iterator getHdaddrs*(wid: uint64): tuple[change: uint32,
     let change = d.key[9..12].toUint32
     let index = d.key[13..16].toUint32
     let address = d.key[17..^1].toString
-    let sequence = d.value.toUint64
+    let sequence = d.val.toUint64
     yield (change, index, address, sequence)
 
 proc setAddress*(address: string, change: uint32, index: uint32,
@@ -320,7 +320,7 @@ iterator getAddresses*(address: string): tuple[change: uint32,
     let change = d.key[^16..^13].toUint32
     let index = d.key[^12..^9].toUint32
     let wid = d.key[^8..^1].toUint64
-    let sequence = d.value.toUint64
+    let sequence = d.val.toUint64
     yield (change, index, wid, sequence)
 
 iterator getAddresses*(wid: uint64): tuple[change: uint32,
@@ -330,7 +330,7 @@ iterator getAddresses*(wid: uint64): tuple[change: uint32,
     let change = d.key[9..12].toUint32
     let index = d.key[13..16].toUint32
     let address = d.key[17..^1].toString
-    let sequence = d.value.toUint64
+    let sequence = d.val.toUint64
     yield (change, index, address, sequence)
 
 iterator getAddresses*(): tuple[address: string, change: uint32,
@@ -341,7 +341,7 @@ iterator getAddresses*(): tuple[address: string, change: uint32,
     let change = d.key[^16..^13].toUint32
     let index = d.key[^12..^9].toUint32
     let wid = d.key[^8..^1].toUint64
-    let sequence = d.value.toUint64
+    let sequence = d.val.toUint64
     yield (address, change, index, wid, sequence)
 
 proc setAddrval*(wid: uint64, change: uint32, index: uint32,
@@ -359,8 +359,8 @@ iterator getAddrvals*(wid: uint64): tuple[change: uint32,
     let change = d.key[9..12].toUint32
     let index = d.key[13..16].toUint32
     let address = d.key[17..^1].toString
-    let value = d.value[0..7].toUint64
-    let utxo_count = d.value[8..11].toUint32
+    let value = d.val[0..7].toUint64
+    let utxo_count = d.val[8..11].toUint32
     yield (change, index, address, value, utxo_count)
 
 proc delAddrval*(wid: uint64, change: uint32, index: uint32, address: string) =
@@ -387,10 +387,10 @@ iterator getAddrlogs*(wid: uint64): tuple[sequence: uint64, txtype: uint8,
     let change = d.key[18..21].toUint32
     let index = d.key[22..25].toUint32
     let address = d.key[26..^1].toString
-    let value = d.value[0..7].toUint64
-    let txid = d.value[8..^9].toString
-    let height = d.value[^8..^5].toUint32
-    let time = d.value[^4..^1].toUint32
+    let value = d.val[0..7].toUint64
+    let txid = d.val[8..^9].toString
+    let height = d.val[^8..^5].toUint32
+    let time = d.val[^4..^1].toUint32
     yield (sequence, txtype, change, index, address, value, txid, height, time)
 
 iterator getAddrlogs_gt*(wid: uint64, sequence: uint64): tuple[
@@ -409,10 +409,10 @@ iterator getAddrlogs_gt*(wid: uint64, sequence: uint64): tuple[
       let d_change = d.key[18..21].toUint32
       let d_index = d.key[22..25].toUint32
       let d_address = d.key[26..^1].toString
-      let d_value = d.value[0..7].toUint64
-      let d_txid = d.value[8..^9].toString
-      let d_height = d.value[^8..^5].toUint32
-      let d_time = d.value[^4..^1].toUint32
+      let d_value = d.val[0..7].toUint64
+      let d_txid = d.val[8..^9].toString
+      let d_height = d.val[^8..^5].toUint32
+      let d_time = d.val[^4..^1].toUint32
       yield (d_sequence, d_txtype, d_change, d_index, d_address, d_value,
             d_txid, d_height, d_time)
 
@@ -421,16 +421,16 @@ iterator getAddrlogsReverse*(wid: uint64): tuple[
                             index: uint32, address: string, value: uint64,
                             txid: string, height: uint32, time: uint32] =
   let key = concat(Prefix.addrlogs.toBytes, wid.toBytes)
-  for d in db.getsReverse(key):
+  for d in db.getsRev(key):
     let sequence = d.key[9..16].toUint64
     let txtype = d.key[17].toUint8
     let change = d.key[18..21].toUint32
     let index = d.key[22..25].toUint32
     let address = d.key[26..^1].toString
-    let value = d.value[0..7].toUint64
-    let txid = d.value[8..^9].toString
-    let height = d.value[^8..^5].toUint32
-    let time = d.value[^4..^1].toUint32
+    let value = d.val[0..7].toUint64
+    let txid = d.val[8..^9].toString
+    let height = d.val[^8..^5].toUint32
+    let time = d.val[^4..^1].toUint32
     yield (sequence, txtype, change, index, address, value, txid, height, time)
 
 iterator getAddrlogsReverse_lt*(wid: uint64, sequence: uint64): tuple[
@@ -438,7 +438,7 @@ iterator getAddrlogsReverse_lt*(wid: uint64, sequence: uint64): tuple[
                                 index: uint32, address: string, value: uint64,
                                 txid: string, height: uint32, time: uint32] =
   let key = concat(Prefix.addrlogs.toBytes, wid.toBytes, sequence.toBytes)
-  for d in db.getsReverse_nobreak(key):
+  for d in db.getsRev_nobreak(key):
     let prefix = d.key[0].toUint8
     let d_wid = d.key[1..8]
     if Prefix(prefix) != Prefix.addrlogs or d_wid.toUint64 != wid:
@@ -449,10 +449,10 @@ iterator getAddrlogsReverse_lt*(wid: uint64, sequence: uint64): tuple[
       let d_change = d.key[18..21].toUint32
       let d_index = d.key[22..25].toUint32
       let d_address = d.key[26..^1].toString
-      let d_value = d.value[0..7].toUint64
-      let d_txid = d.value[8..^9].toString
-      let d_height = d.value[^8..^5].toUint32
-      let d_time = d.value[^4..^1].toUint32
+      let d_value = d.val[0..7].toUint64
+      let d_txid = d.val[8..^9].toString
+      let d_height = d.val[^8..^5].toUint32
+      let d_time = d.val[^4..^1].toUint32
       yield (d_sequence, d_txtype, d_change, d_index, d_address, d_value,
             d_txid, d_height, d_time)
 
@@ -491,8 +491,8 @@ iterator getUnspents*(wid: uint64): tuple[sequence: uint64, txid: string,
     let sequence = d.key[9..16].toUint64
     let txid = d.key[17..^5].toString
     let n = d.key[^4..^1].toUint32
-    let address = d.value[0..^9].toString
-    let value = d.value[^8..^1].toUint64
+    let address = d.val[0..^9].toString
+    let value = d.val[^8..^1].toUint64
     yield (sequence, txid, n, address, value)
 
 iterator getUnspents_gt*(wid: uint64, sequence: uint64): tuple[
@@ -508,8 +508,8 @@ iterator getUnspents_gt*(wid: uint64, sequence: uint64): tuple[
     if d_sequence > sequence:
       let d_txid = d.key[17..^5].toString
       let d_n = d.key[^4..^1].toUint32
-      let d_address = d.value[0..^9].toString
-      let d_value = d.value[^8..^1].toUint64
+      let d_address = d.val[0..^9].toString
+      let d_value = d.val[^8..^1].toUint64
       yield (d_sequence, d_txid, d_n, d_address, d_value)
 
 proc delUnspents*(wid: uint64, sequence: uint64) =
@@ -574,7 +574,7 @@ proc delTxtime*(txid: string) =
 
 proc getLastUsedAddrIndex*(wid: uint64, change: uint32): DbResult[uint32] =
   let key = concat(Prefix.addrvals.toBytes, wid.toBytes, change.toBytes)
-  for d in db.getsReverse(key):
+  for d in db.getsRev(key):
     return DbResult[uint32](err: DbStatus.Success, res: d.key[13..16].toUint32)
   DbResult[uint32](err: DbStatus.NotFound)
 
