@@ -578,17 +578,28 @@ proc getLastUsedAddrIndex*(wid: uint64, change: uint32): DbResult[uint32] =
     return DbResult[uint32](err: DbStatus.Success, res: d.key[13..16].toUint32)
   DbResult[uint32](err: DbStatus.NotFound)
 
+var openFlag = false
 
-block start:
+proc start*() =
   debug "db open"
   db.open(".pasteldb", ".pasteldb_backup")
+  openFlag = true
+  loadWalletId()
 
-  proc quit() {.noconv.} =
+proc stop*() =
+  if openFlag:
+    openFlag = false
     db.close()
     debug "db close"
+    echo "db close"
 
-  exitprocs.addExitProc(quit)
-  loadWalletId()
+proc quit() {.noconv.} =
+  stop()
+
+exitprocs.addExitProc(quit)
+
+start()
+
 
 when isMainModule:
   echo getWallet("test")
