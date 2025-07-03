@@ -15,3 +15,6 @@
 	path = deps/rocksdb
 	url = https://github.com/facebook/rocksdb
 	ignore = dirty
+[submodule "deps/lz4"]
+	path = deps/lz4
+	url = https://github.com/lz4/lz4
