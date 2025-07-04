@@ -591,7 +591,6 @@ proc stop*() =
     openFlag = false
     db.close()
     debug "db close"
-    echo "db close"
 
 proc quit() {.noconv.} =
   stop()
