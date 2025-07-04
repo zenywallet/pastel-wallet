@@ -232,8 +232,8 @@ proc `xor`(a: array[32, byte], b: ptr array[32, byte]): array[32, byte] =
   for i in a.low..a.high:
     result[i] = a[i] xor b[i]
 
-proc yespower(a: array[32, byte]): array[32, byte] {.inline.} =
-  discard yespower_hash(cast[ptr UncheckedArray[byte]](unsafeAddr a[0]), 32, cast[ptr UncheckedArray[byte]](addr result))
+proc yespower(a: array[32, byte]): YespowerHash {.inline.} =
+  discard yespower_hash(cast[ptr UncheckedArray[byte]](unsafeAddr a[0]), 32, result)
 
 proc `$`(data: array[32, byte]): string = data.toHex
 
