@@ -14,6 +14,11 @@ proc cipher_enc*(in_blk, out_blk: ptr UncheckedArray[byte]) {.exportc: "cipher_e
 proc cipher_dec*(in_blk, out_blk: ptr UncheckedArray[byte]) {.exportc: "cipher_dec".} =
   ctr.decrypt(in_blk, out_blk)
 
+when defined(emscripten):
+  const CIPHER_MODULE_NAME = "Cipher"
+  {.passL: "-s EXPORT_NAME=" & CIPHER_MODULE_NAME.}
+
+
 when isMainModule:
   var k: array[32, byte]
   var rs: array[32, byte]
