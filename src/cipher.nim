@@ -15,8 +15,46 @@ proc cipher_dec*(in_blk, out_blk: ptr UncheckedArray[byte]) {.exportc: "cipher_d
   ctr.decrypt(in_blk, out_blk)
 
 when defined(emscripten):
+  import macros
+
   const CIPHER_MODULE_NAME = "Cipher"
   {.passL: "-s EXPORT_NAME=" & CIPHER_MODULE_NAME.}
+
+  const DEFAULT_EXPORTED_FUNCTIONS = ["_malloc", "_free"]
+  const DEFAULT_EXPORTED_RUNTIME_METHODS = [
+    "ccall", "cwrap", "UTF8ToString", "stackSave",
+    "stackAlloc", "stackRestore"]
+
+  const EXPORTED_FUNCTIONS = [
+    "_cipher_init", "_cipher_enc", "_cipher_dec", "_serpent_set_key",
+    "_serpent_encrypt", "_serpent_decrypt", "_ed25519_create_keypair",
+    "_ed25519_sign", "_ed25519_verify", "_ed25519_key_exchange",
+    "_ed25519_get_publickey", "_ed25519_add_scalar", "_yespower_hash",
+    "_yespower_n2r8", "_yespower_n4r16", "_yespower_n4r32",
+    "_murmurhash", "_zbar_init", "_zbar_destroy", "_zbar_scan"]
+
+  macro collectExportedFunctions*(): untyped =
+    result = nnkStmtList.newTree()
+    var bracket = nnkBracket.newTree()
+    for functionName in DEFAULT_EXPORTED_FUNCTIONS:
+      bracket.add(newLit(functionName))
+    when declared(cipher.EXPORTED_FUNCTIONS):
+      for functionName in cipher.EXPORTED_FUNCTIONS:
+        bracket.add(newLit(functionName))
+    result.add(
+      nnkConstSection.newTree(
+        nnkConstDef.newTree(
+          newIdentNode("exportedFunctions"),
+          newEmptyNode(),
+          bracket
+        )
+      )
+    )
+
+  collectExportedFunctions()
+
+  {.passL: "-s EXPORTED_FUNCTIONS='" & $exportedFunctions & "'".}
+  {.passL: "-s EXPORTED_RUNTIME_METHODS='" & $DEFAULT_EXPORTED_RUNTIME_METHODS & "'".}
 
 
 when isMainModule:
