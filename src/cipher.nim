@@ -23,7 +23,8 @@ when defined(emscripten):
   const DEFAULT_EXPORTED_FUNCTIONS = ["_malloc", "_free"]
   const DEFAULT_EXPORTED_RUNTIME_METHODS = [
     "ccall", "cwrap", "UTF8ToString", "stackSave",
-    "stackAlloc", "stackRestore"]
+    "stackAlloc", "stackRestore",
+    "HEAPU8", "HEAP8", "HEAPU32", "HEAP32", "HEAPU64", "HEAP64"]
 
   const EXPORTED_FUNCTIONS = [
     "_cipher_init", "_cipher_enc", "_cipher_dec", "_serpent_set_key",
