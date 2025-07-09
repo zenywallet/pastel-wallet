@@ -2,6 +2,7 @@
 # nim c -d:release -d:emscripten -o:cipher.js cipher.nim
 
 import ctrmode, algorithm, orlp_ed25519, yespower, murmurhash, zbar
+import deoxy
 
 var ctr: CTR
 
@@ -40,6 +41,9 @@ when defined(emscripten):
       result.add(newLit(functionName))
     when declared(cipher.EXPORTED_FUNCTIONS):
       for functionName in cipher.EXPORTED_FUNCTIONS:
+        result.add(newLit(functionName))
+    when declared(deoxy.EXPORTED_FUNCTIONS):
+      for functionName in deoxy.EXPORTED_FUNCTIONS:
         result.add(newLit(functionName))
 
   const exportedFunctions = collectExportedFunctions()
