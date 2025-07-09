@@ -1,9 +1,9 @@
 # Copyright (c) 2019 zenywallet
 
 import ed25519
-import serpent
+import serpent_threadsafe
 import yespower
-import ../br_hash
+import zenyjs/br_hash
 import algorithm
 
 const USE_LZ4 = true
