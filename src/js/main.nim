@@ -1160,14 +1160,14 @@ proc sendrecv_select(val: int) =
   sendrecv_switch = val
   sendrecv_switch_worker()
 
-proc enable_caret_browsing(elm: JsObject) {.exportc.} =
+proc enable_caret_browsing(elm: JsObject) =
   elm.find_js_native(".tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)".toJs).each(proc(idx, val: JsObject) =
     jq(val).attr("tabindex".cstring, jq(val).data("tabindex".cstring) or 0.toJs)
   )
   jq("#selectlang .tabindex, #receive-address .tabindex".cstring).each(proc(idx, val: JsObject) =
     jq(val).attr("tabindex".cstring, jq(val).data("tabindex".cstring) or 0.toJs)
   )
-proc disable_caret_browsing(elm: JsObject) {.exportc.} =
+proc disable_caret_browsing(elm: JsObject) =
   elm.find_js_native(".tabindex:not(:hidden), button:not(:hidden), a:not(:hidden), textarea:not(:hidden), input:not(:hidden)".toJs).each(proc(idx, val: JsObject) =
     jq(val).attr("tabindex".cstring, -1)
   )
