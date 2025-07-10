@@ -2,7 +2,7 @@
 # nim c -d:release -d:emscripten -o:cipher.js cipher.nim
 
 import ctrmode, algorithm, ed25519, yespower, murmurhash, zbar
-import deoxy
+import js/deoxy
 
 var ctr: CTR
 
