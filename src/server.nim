@@ -283,7 +283,7 @@ worker(1):
       client.wsServerSend(sdata)
       release(client.cipherLock)
     else:
-      debug "ClientId=", clientId, " is Nil"
+      debug "ClientId=", clientId, " is nil"
 
   wsReqs.recvLoop(req):
     try:
@@ -496,7 +496,7 @@ worker(num = cpuCount):
       client.wsServerSend(sdata)
       release(client.cipherLock)
     else:
-      debug "ClientId=", clientId, " is Nil"
+      debug "ClientId=", clientId, " is nil"
 
   while active:
     let sdata = sendMesChannel.recv()
