@@ -36,17 +36,27 @@ when defined(emscripten):
     "_murmurhash", "_zbar_init", "_zbar_destroy", "_zbar_scan"]
 
   macro collectExportedFunctions*(): untyped =
-    result = nnkBracket.newTree()
+    result = nnkStmtList.newTree()
+    var bracket = nnkBracket.newTree()
     for functionName in DEFAULT_EXPORTED_FUNCTIONS:
-      result.add(newLit(functionName))
+      bracket.add(newLit(functionName))
     when declared(cipher.EXPORTED_FUNCTIONS):
       for functionName in cipher.EXPORTED_FUNCTIONS:
-        result.add(newLit(functionName))
+        bracket.add(newLit(functionName))
     when declared(deoxy.EXPORTED_FUNCTIONS):
       for functionName in deoxy.EXPORTED_FUNCTIONS:
-        result.add(newLit(functionName))
+        bracket.add(newLit(functionName))
+    result.add(
+      nnkConstSection.newTree(
+        nnkConstDef.newTree(
+          newIdentNode("exportedFunctions"),
+          newEmptyNode(),
+          bracket
+        )
+      )
+    )
 
-  const exportedFunctions = collectExportedFunctions()
+  collectExportedFunctions()
 
   {.passL: "-s EXPORTED_FUNCTIONS='" & $exportedFunctions & "'".}
   {.passL: "-s EXPORTED_RUNTIME_METHODS='" & $DEFAULT_EXPORTED_RUNTIME_METHODS & "'".}
