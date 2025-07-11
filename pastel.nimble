@@ -16,6 +16,7 @@ requires "nim >= 0.20.0"
 requires "caprese"
 requires "libcurl"
 requires "karax"
+requires "regex"
 requires "https://github.com/zenywallet/zenyjs"
 
 # Tasks
