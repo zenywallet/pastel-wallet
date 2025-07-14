@@ -15,8 +15,8 @@ type
   CipherError* = object of CatchableError
 
 when defined(js):
-  import jsffi
-  import jslib
+  import std/jsffi
+  import zenyjs/jslib
 
   const RECONNECT_COUNT = 120
   const RECONNECT_WAIT = 15000
