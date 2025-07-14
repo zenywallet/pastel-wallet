@@ -211,8 +211,6 @@ elif defined(emscripten):
 
     elif cipher.stage == CipherStage.Negotiate:
       var decLen = cipher.ctr.dec(indata, insize.uint, cipher.outBuf, OUT_BUF_SIZE.uint)
-      var msg = cipher.outBuf.toBytes(decLen)
-      decLen = cipher.ctr.enc(cast[ptr UncheckedArray[byte]](addr msg[0]), msg.len.uint, cipher.outBuf, OUT_BUF_SIZE.uint)
       outdata[] = cipher.outBuf
       outsize[] = decLen.cint
       cipher.stage = CipherStage.Ready
