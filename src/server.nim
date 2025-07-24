@@ -24,6 +24,11 @@ import db
 import blockstor except send
 import config
 
+const USE_LZ4 = true
+when USE_LZ4:
+  import lz4
+  const LZ4_DICT_SIZE = 64 * 1024
+
 config:
   sigTermQuit = false
 
@@ -49,6 +54,10 @@ type
     cipherLock*: Lock
     wallets*: WalletIds
     xpubs*: WalletXPubs
+    when USE_LZ4:
+      streamComp: ptr LZ4_stream_t
+      encDict: ptr UncheckedArray[byte]
+      decDict: ptr UncheckedArray[byte]
 
   ClientData* = ClientId
 
@@ -233,7 +242,7 @@ proc `xor`(a: array[32, byte], b: ptr array[32, byte]): array[32, byte] =
     result[i] = a[i] xor b[i]
 
 proc yespower(a: array[32, byte]): YespowerHash {.inline.} =
-  discard yespower_hash(cast[ptr UncheckedArray[byte]](unsafeAddr a[0]), 32, result)
+  discard yespower_n2r8(cast[ptr UncheckedArray[byte]](unsafeAddr a[0]), 32, result)
 
 var workerClientsLock: Lock
 initLock(workerClientsLock)
@@ -259,27 +268,62 @@ worker(1):
   proc sendClient(clientId: ClientId, data: string) =
     let client = getClient(clientId)
     if not client.isNil:
-      let comp = compress(data, stream = RAW_DEFLATE)
-      var sdata = newSeq[byte](comp.len)
-      var pos = 0
-      var next_pos = 16
-      acquire(client.cipherLock)
-      while next_pos < comp.len:
-        client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
-                          cast[ptr UncheckedArray[byte]](addr sdata[pos]))
-        pos = next_pos
-        next_pos = next_pos + 16
-      if pos < comp.len:
-        var src: array[16, byte]
-        var enc: array[16, byte]
-        var plen = comp.len - pos
-        src.fill(cast[byte](plen))
-        copyMem(addr src[0], unsafeAddr comp[pos], plen)
-        client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
-                          cast[ptr UncheckedArray[byte]](addr enc[0]))
-        copyMem(addr sdata[pos], addr enc[0], plen)
-      client.wsServerSend(sdata)
-      release(client.cipherLock)
+      when USE_LZ4:
+        if client.streamComp.isNil:
+          debug "streamComp is nil"
+          return
+        if data.len <= 0:
+          debug "data.len=", data.len
+          return
+        var outdata = newSeq[byte](LZ4_COMPRESSBOUND(data.len))
+        var outsize: int = outdata.len.int
+        outsize = client.streamComp.LZ4_compress_fast_continue(cast[cstring](addr data[0]),
+                  cast[cstring](addr outdata[0]), data.len.cint, outsize.cint, 1.cint)
+        if outsize <= 0:
+          raise
+        outdata.setLen(outsize)
+        discard client.streamComp.LZ4_saveDict(cast[cstring](addr client.encDict[0]), LZ4_DICT_SIZE.cint)
+        var pos: uint = 0
+        var next_pos: uint = 16
+        acquire(client.cipherLock)
+        while next_pos < outsize.uint:
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr outdata[pos]),
+                            cast[ptr UncheckedArray[byte]](addr outdata[pos]))
+          pos = next_pos
+          inc(next_pos, 16)
+        if pos < outsize.uint:
+          var src: array[16, byte]
+          var enc: array[16, byte]
+          var plen = outsize.uint - pos
+          src.fill(cast[byte](plen))
+          copyMem(addr src[0], addr outdata[pos], plen)
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                            cast[ptr UncheckedArray[byte]](addr enc[0]))
+          copyMem(addr outdata[pos], addr enc[0], plen)
+        client.wsServerSend(outdata)
+        release(client.cipherLock)
+      else:
+        let comp = compress(data, stream = RAW_DEFLATE)
+        var sdata = newSeq[byte](comp.len)
+        var pos = 0
+        var next_pos = 16
+        acquire(client.cipherLock)
+        while next_pos < comp.len:
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
+                            cast[ptr UncheckedArray[byte]](addr sdata[pos]))
+          pos = next_pos
+          next_pos = next_pos + 16
+        if pos < comp.len:
+          var src: array[16, byte]
+          var enc: array[16, byte]
+          var plen = comp.len - pos
+          src.fill(cast[byte](plen))
+          copyMem(addr src[0], unsafeAddr comp[pos], plen)
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                            cast[ptr UncheckedArray[byte]](addr enc[0]))
+          copyMem(addr sdata[pos], addr enc[0], plen)
+        client.wsServerSend(sdata)
+        release(client.cipherLock)
     else:
       debug "ClientId=", clientId, " is nil"
 
@@ -472,27 +516,62 @@ worker(num = cpuCount):
   proc sendClient(clientId: ClientId, data: string) =
     let client = getClient(clientId)
     if not client.isNil:
-      let comp = compress(data, stream = RAW_DEFLATE)
-      var sdata = newSeq[byte](comp.len)
-      var pos = 0
-      var next_pos = 16
-      acquire(client.cipherLock)
-      while next_pos < comp.len:
-        client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
-                          cast[ptr UncheckedArray[byte]](addr sdata[pos]))
-        pos = next_pos
-        next_pos = next_pos + 16
-      if pos < comp.len:
-        var src: array[16, byte]
-        var enc: array[16, byte]
-        var plen = comp.len - pos
-        src.fill(cast[byte](plen))
-        copyMem(addr src[0], unsafeAddr comp[pos], plen)
-        client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
-                          cast[ptr UncheckedArray[byte]](addr enc[0]))
-        copyMem(addr sdata[pos], addr enc[0], plen)
-      client.wsServerSend(sdata)
-      release(client.cipherLock)
+      when USE_LZ4:
+        if client.streamComp.isNil:
+          debug "streamComp is nil"
+          return
+        if data.len <= 0:
+          debug "data.len=", data.len
+          return
+        var outdata = newSeq[byte](LZ4_COMPRESSBOUND(data.len))
+        var outsize: int = outdata.len.int
+        outsize = client.streamComp.LZ4_compress_fast_continue(cast[cstring](addr data[0]),
+                  cast[cstring](addr outdata[0]), data.len.cint, outsize.cint, 1.cint)
+        if outsize <= 0:
+          raise
+        outdata.setLen(outsize)
+        discard client.streamComp.LZ4_saveDict(cast[cstring](addr client.encDict[0]), LZ4_DICT_SIZE.cint)
+        var pos: uint = 0
+        var next_pos: uint = 16
+        acquire(client.cipherLock)
+        while next_pos < outsize.uint:
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr outdata[pos]),
+                              cast[ptr UncheckedArray[byte]](addr outdata[pos]))
+          pos = next_pos
+          inc(next_pos, 16)
+        if pos < outdata.len.uint:
+          var src: array[16, byte]
+          var enc: array[16, byte]
+          var plen = outdata.len.uint - pos
+          src.fill(cast[byte](plen))
+          copyMem(addr src[0], unsafeAddr outdata[pos], plen)
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                            cast[ptr UncheckedArray[byte]](addr enc[0]))
+          copyMem(addr outdata[pos], addr enc[0], plen)
+        client.wsServerSend(outdata)
+        release(client.cipherLock)
+      else:
+        let comp = compress(data, stream = RAW_DEFLATE)
+        var sdata = newSeq[byte](comp.len)
+        var pos = 0
+        var next_pos = 16
+        acquire(client.cipherLock)
+        while next_pos < comp.len:
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr comp[pos]),
+                            cast[ptr UncheckedArray[byte]](addr sdata[pos]))
+          pos = next_pos
+          next_pos = next_pos + 16
+        if pos < comp.len:
+          var src: array[16, byte]
+          var enc: array[16, byte]
+          var plen = comp.len - pos
+          src.fill(cast[byte](plen))
+          copyMem(addr src[0], unsafeAddr comp[pos], plen)
+          client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                            cast[ptr UncheckedArray[byte]](addr enc[0]))
+          copyMem(addr sdata[pos], addr enc[0], plen)
+        client.wsServerSend(sdata)
+        release(client.cipherLock)
     else:
       debug "ClientId=", clientId, " is nil"
 
@@ -504,9 +583,23 @@ worker(num = cpuCount):
       for wmdata in wmdatas.val:
         wmdata.clientId.sendClient(sdata.data)
 
-const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
+when USE_LZ4:
+  const DECODE_BUF_SIZE = 1048576
+  type
+    ServerThreadCtxExt {.serverThreadCtxExt.} = object
+      decBuf: ptr UncheckedArray[byte]
+      decBufSize: int
+else:
+  const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
 
 server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
+  when USE_LZ4:
+    ctx.decBuf = cast[ptr UncheckedArray[byte]](allocShared0(DECODE_BUF_SIZE))
+    ctx.decBufSize = DECODE_BUF_SIZE
+    defer:
+      ctx.decBufSize = 0
+      ctx.decBuf.deallocShared()
+
   routes(host = config.HttpsHost):
     get "/":
       case page
@@ -529,18 +622,19 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
         var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)
         if retSeed != 0: raise
         createKeypair(client.kp.pubkey, client.kp.prvkey, kpSeed)
-        retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 64.cint)
+        retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 32.cint)
         if retSeed != 0: raise
         client.exchange = false
         initLock(client.cipherLock)
-        wsSend((client.kp.pubkey, client.salt).toBytes)
+        wsSend((client.kp.pubkey, client.salt[0..31]).toBytes)
 
       onMessage:
         debug "onMessage"
         if not client.exchange:
-          if size == 32:
+          if size == 64:
             var clientPublicKey: Ed25519PublicKey
             copyMem(addr clientPublicKey, data, clientPublicKey.len)
+            copyMem(addr client.salt[32], addr data[32], 32)
             var shared: Ed25519SharedSecret
             keyExchange(shared, clientPublicKey, client.kp.prvkey)
             let shared_sha256 = sha256s(shared)
@@ -556,12 +650,21 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
             debug "iv_cli=", iv_cli
             client.ctr.init(shared_key, iv_srv, iv_cli)
             client.exchange = true
+            when USE_LZ4:
+              client.streamComp = LZ4_createStream()
+              if client.streamComp.isNil: raise
+              let p = cast[ptr UncheckedArray[byte]](allocShared0(LZ4_DICT_SIZE * 2))
+              client.encDict = cast[ptr UncheckedArray[byte]](addr p[0])
+              client.decDict = cast[ptr UncheckedArray[byte]](addr p[LZ4_DICT_SIZE])
             SendResult.Pending
           else:
             SendResult.None
         else:
           debug "data=", content.toBytes
-          var rdata = newSeq[byte](size + deflateSentinel.len)
+          when USE_LZ4:
+            var rdata = newSeq[byte](size)
+          else:
+            var rdata = newSeq[byte](size + deflateSentinel.len)
           var pos = 0
           var next_pos = 16
           while next_pos < size:
@@ -578,9 +681,23 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
             client.ctr.decrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
                               cast[ptr UncheckedArray[byte]](addr dec[0]))
             copyMem(addr rdata[pos], addr dec[0], plen)
-          copyMem(addr rdata[size], addr deflateSentinel[0], deflateSentinel.len)
-          let uncomp = uncompress((cast[ptr char](addr rdata[0])).cstring, rdata.len, stream = RAW_DEFLATE)
-          wsReqs.pending(PendingData(msg: uncomp))
+          when USE_LZ4:
+            var outsize: int = LZ4_decompress_safe_usingDict(cast[cstring](addr rdata[0]),
+                    cast[cstring](addr ctx.decBuf[0]), size.cint,
+                    ctx.decBufSize.cint, cast[cstring](addr client.decDict[0]), LZ4_DICT_SIZE.cint)
+            if outsize > LZ4_DICT_SIZE:
+              copyMem(addr client.decDict[0], addr ctx.decBuf[outsize - LZ4_DICT_SIZE], LZ4_DICT_SIZE)
+            elif outsize > 0:
+              let left = LZ4_DICT_SIZE - outsize
+              copyMem(addr client.decDict[0], addr client.decDict[outsize], left)
+              copyMem(addr client.decDict[left], addr ctx.decBuf[0], outsize)
+            else:
+              raise #newException(DeoxyError, "decompress failed")
+            wsReqs.pending(PendingData(msg: ctx.decBuf.toString(outsize)))
+          else:
+            copyMem(addr rdata[size], addr deflateSentinel[0], deflateSentinel.len)
+            let uncomp = uncompress((cast[ptr char](addr rdata[0])).cstring, rdata.len, stream = RAW_DEFLATE)
+            wsReqs.pending(PendingData(msg: uncomp))
 
       onClose:
         debug "onClose"
@@ -598,6 +715,11 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
                 var hdata2 = walletmap.get(wid)
         BallCommand.DelClient.send(BallDataDelClient(client: clientId))
         client.xpubs = @[]
+        when USE_LZ4:
+          if not client.streamComp.isNil:
+            deallocShared(client.encDict)
+            discard client.streamComp.LZ4_freeStream()
+            client.streamComp = nil
 
     get "/seed":
       SeedHtml.content("html").response
