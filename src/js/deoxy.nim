@@ -15,6 +15,7 @@ type
   CipherError* = object of CatchableError
 
 when defined(js):
+  import std/macros
   import std/jsffi
   import zenyjs/jslib
 
@@ -63,7 +64,7 @@ when defined(js):
     Module.free(pOutBuf)
     Module.free(p)
 
-  proc connect*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc();
+  proc connect0*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc();
                 onReady: proc(); onRecv: proc(data: Uint8Array); onClose: proc()) =
     deoxy.ws = newWebSocket(url, protocols)
     deoxy.ws.binaryType = "arraybuffer".cstring
@@ -75,7 +76,7 @@ when defined(js):
         dec(deoxy.reconnectCount)
         let randomWait = Math.round(Math.random() * (RECONNECT_WAIT * 2 / 3).toJs).to(int)
         let ms = Math.round(RECONNECT_WAIT / 3).to(int) + randomWait
-        setTimeout(proc() = deoxy.connect(url, protocols, onOpen, onReady, onRecv, onClose), ms)
+        setTimeout(proc() = deoxy.connect0(url, protocols, onOpen, onReady, onRecv, onClose), ms)
 
     deoxy.ws.onerror = proc(evt: JsObject) =
       console.error("websocket error:", evt)
@@ -121,6 +122,25 @@ when defined(js):
           if retProcess == CipherProcessMode.SendReady.int:
             deoxy.ready = true
             onReady()
+
+  macro connect*(deoxy: ref Deoxy, url, protocols: cstring, body: untyped): untyped =
+    var onOpen = newStmtList()
+    var onReady = newStmtList()
+    var onRecv = newStmtList()
+    var onClose = newStmtList()
+    for b in body:
+      if b[0].eqIdent("onOpen"):
+        onOpen.add(b[1])
+      elif b[0].eqIdent("onReady"):
+        onReady.add(b[1])
+      elif b[0].eqIdent("onRecv"):
+        onRecv.add(b[1])
+      elif b[0].eqIdent("onClose"):
+        onClose.add(b[1])
+    var data = ident"data"
+    quote do:
+      `deoxy`.connect0(`url`, `protocols`, proc() = `onOpen`, proc() = `onReady`,
+                      proc(`data`: Uint8Array) = `onRecv`, proc() = `onClose`)
 
   proc close*(deoxy: ref Deoxy) =
     if not deoxy.ws.isNil:
