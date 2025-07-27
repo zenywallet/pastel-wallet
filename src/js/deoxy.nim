@@ -157,7 +157,7 @@ when defined(js):
 
 
 elif defined(emscripten):
-  import zenyjs/bytes
+  import caprese/bytes
   import ../deoxy
   import ../ed25519
   import ../lz4
