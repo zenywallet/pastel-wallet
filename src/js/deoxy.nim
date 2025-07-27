@@ -3,7 +3,6 @@
 type
   CipherStage {.pure.} = enum
     None
-    Negotiate
     Ready
 
   CipherProcessMode {.pure.} = enum
@@ -223,15 +222,8 @@ elif defined(emscripten):
           copyMem(cipher.outBuf, addr pubsalt[0], pubsalt.len)
           outdata[] = cipher.outBuf
           outsize[] = pubsalt.len.cint
-          cipher.stage = CipherStage.Negotiate
-          return CipherProcessMode.SendPub.cint
-
-    elif cipher.stage == CipherStage.Negotiate:
-      var decLen = cipher.ctr.dec(indata, insize.uint, cipher.outBuf, OUT_BUF_SIZE.uint)
-      outdata[] = cipher.outBuf
-      outsize[] = decLen.cint
-      cipher.stage = CipherStage.Ready
-      return CipherProcessMode.SendReady.cint
+          cipher.stage = CipherStage.Ready
+          return CipherProcessMode.SendReady.cint
 
     outdata[] = nil
     outsize[] = 0.cint
