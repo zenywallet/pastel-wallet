@@ -10,6 +10,9 @@ import stor as storMod
 import wallet
 import zenyjs/jslib
 import base58
+import pastel as pastelMod
+import deoxy
+import std/asyncjs
 
 var pastel {.importc, nodecl.}: JsObject
 var Notify {.importc, nodecl.}: JsObject
@@ -1700,20 +1703,76 @@ proc afterScript(data: RouterData) =
   if showPage3 or showPage4:
     reloadViewSafeEnd()
 
+var stream = new Deoxy
+var streamStatus = 0.toJs
+var monitor = jsNull
+
+pastel.stream = stream
+pastel.stream.status = proc(): JsObject = streamStatus
+
+proc overrideStream() =
+  monitor = document.getElementById("connection-monitor".cstring)
+  if not monitor.to(bool):
+    var elm = document.createElement("div".cstring)
+    elm.id = "connection-monitor".cstring
+    monitor = document.body.appendChild(elm)
+    elm.addEventListener("click".cstring, proc() = echo "click!!")
+
+  pastel.send = proc(json: JsObject) =
+    var jsonStr = JSON.stringify(json)
+    echo "send json=", jsonStr.to(cstring)
+    stream.send(strToUint8Array(jsonStr))
+
+  pastel.stream.showStatus = proc(status: bool) =
+    if status:
+      monitor.innerHTML = """<i class="heartbeat icon"></i>""".cstring
+    else:
+      monitor.innerHTML = """<i class="heart outline icon"></i>""".cstring
+
+  pastel.stream.start = proc() =
+    streamStatus = 1.toJs
+
+    console.log("pastel.config.ws_url=", pastel.config.ws_url)
+    console.log("pastel.config.ws_protocol=", pastel.config.ws_protocol)
+    var ws_url = pastel.config.ws_url.to(cstring)
+    var ws_protocol = pastel.config.ws_protocol.to(cstring)
+    stream.connect(ws_url, ws_protocol):
+      onOpen:
+        echo "onOpen"
+        pastel.stream.showStatus(true)
+      onReady:
+        echo "onReady"
+        pastel.send(JsObject{cmd: "ready".cstring})
+      onRecv:
+        echo "onRecv ", uint8ArrayToStr(data)
+        var json = JSON.parse(uint8ArrayToStr(data))
+        pastel.secure_recv(json)
+
+      onClose:
+        echo "onClose"
+        pastel.stream.showStatus(false)
+        streamStatus = 0.toJs
+
 var walletSetup = false
 var stor = newStor()
 var xpubs = stor.get_xpubs()
 stor = jsNull
 if xpubs.length.to(int) > 0:
   walletSetup = true
-  proc check_stream_ready() =
-    setTimeout(proc() =
-      if pastel.stream.to(bool) and not pastel.stream.status().to(bool):
-        pastel.stream.start()
-      else:
-        check_stream_ready()
-    , 50)
-  check_stream_ready()
+
+proc check_stream_ready() =
+  setTimeout(proc() =
+    if pastel.stream.to(bool) and not pastel.stream.status().to(bool):
+      echo "stream start"
+      pastelMod.ready:
+        overrideStream()
+        if walletSetup:
+          pastel.stream.start()
+    else:
+      check_stream_ready()
+  , 50)
+check_stream_ready()
+
 if walletSetup:
   viewSelector(Wallet, true)
 appInst = setInitializer(appMain, "main", afterScript)

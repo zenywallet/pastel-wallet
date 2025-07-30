@@ -537,12 +537,12 @@ pastel.ready = function() {
   var seed = cipher.createSeed();
   var kp = cipher.createKeyPair(seed);
   var shared = null;
-  var stage = 0;
+  //var stage = 0;
   var wallet = new Wallet();
   pastel.wallet = wallet;
-  var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
+  //var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
 
-  stream.onOpen = function(evt) {
+  /*stream.onOpen = function(evt) {
     seed = cipher.createSeed();
     kp = cipher.createKeyPair(seed);
     shared = null;
@@ -577,7 +577,7 @@ pastel.ready = function() {
       sdata.set(enc, pos);
     }
     return stream.send(sdata);
-  }
+  }*/
 
   function thousands_separators(num) {
     var num_parts = num.toString().split(".");
@@ -803,7 +803,7 @@ pastel.ready = function() {
     }
   }
 
-  pastel.unsecure_recv = function(data) {
+  /*pastel.unsecure_recv = function(data) {
     try {
       var json = JSON.parse(data);
       //console.log(JSON.stringify(json));
@@ -865,9 +865,9 @@ pastel.ready = function() {
     } else if(typeof evt.data == 'string') {
       pastel.unsecure_recv(evt.data);
     }
-  }
+  }*/
 
-  pastel.stream = stream;
+  //pastel.stream = stream;
 
   if('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
