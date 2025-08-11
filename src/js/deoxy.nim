@@ -63,8 +63,14 @@ when defined(js):
     Module.free(pOutBuf)
     Module.free(p)
 
+  var reconnectTimerId = 0
+
   proc connect0*(deoxy: ref Deoxy, url, protocols: cstring; onOpen: proc();
                 onReady: proc(); onRecv: proc(data: Uint8Array); onClose: proc()) =
+    if reconnectTimerId > 0:
+      clearTimeout(reconnectTimerId)
+      reconnectTimerId = 0
+
     deoxy.ws = newWebSocket(url, protocols)
     deoxy.ws.binaryType = "arraybuffer".cstring
     if deoxy.reconnectCount == 0:
@@ -75,7 +81,9 @@ when defined(js):
         dec(deoxy.reconnectCount)
         let randomWait = Math.round(Math.random() * (RECONNECT_WAIT * 2 / 3).toJs).to(int)
         let ms = Math.round(RECONNECT_WAIT / 3).to(int) + randomWait
-        setTimeout(proc() = deoxy.connect0(url, protocols, onOpen, onReady, onRecv, onClose), ms)
+        reconnectTimerId = setTimeout(proc() = deoxy.connect0(url, protocols, onOpen, onReady, onRecv, onClose), ms)
+      else:
+        reconnectTimerId = 0
 
     deoxy.ws.onerror = proc(evt: JsObject) =
       console.error("websocket error:", evt)
@@ -143,6 +151,9 @@ when defined(js):
 
   proc close*(deoxy: ref Deoxy) =
     if not deoxy.ws.isNil:
+      if reconnectTimerId > 0:
+        clearTimeout(reconnectTimerId)
+        reconnectTimerId = 0
       deoxy.reconnectCount = 0
       deoxy.ws.close()
       deoxy.ws = jsNull
