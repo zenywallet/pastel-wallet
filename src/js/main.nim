@@ -1716,7 +1716,10 @@ proc overrideStream() =
     var elm = document.createElement("div".cstring)
     elm.id = "connection-monitor".cstring
     monitor = document.body.appendChild(elm)
-    elm.addEventListener("click".cstring, proc() = echo "click!!")
+    elm.addEventListener("click".cstring, proc() =
+      stream.close()
+      pastel.stream.start()
+      )
 
   pastel.send = proc(json: JsObject) =
     var jsonStr = JSON.stringify(json)
