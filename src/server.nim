@@ -280,7 +280,7 @@ worker(1):
         outsize = client.streamComp.LZ4_compress_fast_continue(cast[cstring](addr data[0]),
                   cast[cstring](addr outdata[0]), data.len.cint, outsize.cint, 1.cint)
         if outsize <= 0:
-          raise
+          raise newException(StreamCriticalErr, "lz4 compress")
         outdata.setLen(outsize)
         discard client.streamComp.LZ4_saveDict(cast[cstring](addr client.encDict[0]), LZ4_DICT_SIZE.cint)
         var pos: uint = 0
@@ -528,7 +528,7 @@ worker(num = cpuCount):
         outsize = client.streamComp.LZ4_compress_fast_continue(cast[cstring](addr data[0]),
                   cast[cstring](addr outdata[0]), data.len.cint, outsize.cint, 1.cint)
         if outsize <= 0:
-          raise
+          raise newException(StreamCriticalErr, "lz4 compress")
         outdata.setLen(outsize)
         discard client.streamComp.LZ4_saveDict(cast[cstring](addr client.encDict[0]), LZ4_DICT_SIZE.cint)
         var pos: uint = 0
@@ -620,10 +620,10 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
         debug "onOpen"
         var kpSeed: array[32, byte]
         var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)
-        if retSeed != 0: raise
+        if retSeed != 0: raise newException(StreamCriticalErr, "crypt seed")
         createKeypair(client.kp.pubkey, client.kp.prvkey, kpSeed)
         retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 32.cint)
-        if retSeed != 0: raise
+        if retSeed != 0: raise newException(StreamCriticalErr, "crypt seed")
         client.exchange = false
         initLock(client.cipherLock)
         wsSend((client.kp.pubkey, client.salt[0..31]).toBytes)
@@ -652,7 +652,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
             client.exchange = true
             when USE_LZ4:
               client.streamComp = LZ4_createStream()
-              if client.streamComp.isNil: raise
+              if client.streamComp.isNil: raise newException(StreamCriticalErr, "lz4 create stream")
               let p = cast[ptr UncheckedArray[byte]](allocShared0(LZ4_DICT_SIZE * 2))
               client.encDict = cast[ptr UncheckedArray[byte]](addr p[0])
               client.decDict = cast[ptr UncheckedArray[byte]](addr p[LZ4_DICT_SIZE])
@@ -692,7 +692,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
               copyMem(addr client.decDict[0], addr client.decDict[outsize], left)
               copyMem(addr client.decDict[left], addr ctx.decBuf[0], outsize)
             else:
-              raise #newException(DeoxyError, "decompress failed")
+              raise newException(StreamCriticalErr, "lz4 decompress")
             wsReqs.pending(PendingData(msg: ctx.decBuf.toString(outsize)))
           else:
             copyMem(addr rdata[size], addr deflateSentinel[0], deflateSentinel.len)
