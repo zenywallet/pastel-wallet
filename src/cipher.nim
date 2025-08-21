@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 # nim c -d:release -d:emscripten -o:cipher.js cipher.nim
 
-import ctrmode, algorithm, ed25519, yespower, murmurhash, zbar
+import ctrmode, ed25519, yespower, murmurhash, zbar
 import js/deoxy
 
 var ctr: CTR
