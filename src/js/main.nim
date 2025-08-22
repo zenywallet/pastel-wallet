@@ -1677,7 +1677,9 @@ proc afterScript(data: RouterData) =
     if showTradeLogs:
       TradeLogs.start()
     if showSettings:
-      Settings.init()
+      {.emit: """
+        Settings.init();
+      """.}
     goSection("#section4".cstring, proc() =
       disable_caret_browsing(jq("#section3".cstring))
       target_page_scroll = "#section3".cstring
