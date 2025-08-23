@@ -5,7 +5,6 @@ import serpent_threadsafe
 import yespower
 import zenyjs/br_hash
 import algorithm
-import caprese/bytes
 
 const USE_LZ4 = true
 
