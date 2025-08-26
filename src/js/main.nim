@@ -1769,14 +1769,15 @@ proc check_stream_ready() =
   setTimeout(proc() =
     if pastel.stream.to(bool) and not pastel.stream.status().to(bool):
       echo "stream start"
-      pastelMod.ready:
-        overrideStream()
-        if walletSetup:
-          pastel.stream.start()
+      overrideStream()
+      if walletSetup:
+        pastel.stream.start()
     else:
       check_stream_ready()
   , 50)
-check_stream_ready()
+
+pastelMod.ready:
+  check_stream_ready()
 
 if walletSetup:
   viewSelector(Wallet, true)
