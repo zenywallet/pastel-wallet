@@ -46,22 +46,20 @@ when defined(js):
 
   proc send*(deoxy: ref Deoxy, data: Uint8Array): bool {.discardable.} =
     if not deoxy.ready: return false
-    var size = data.length.to(cint)
-    var p = Module.malloc(size)
-    Module.HEAPU8.set(data, p)
-    var pOutBuf = Module.malloc(4)
-    var pOutBufLen = Module.malloc(4)
-    var retEncrypt = DeoxyMod.cipherEncrypt(deoxy.stream, p, size, pOutBuf, pOutBufLen)
-    if retEncrypt.to(bool):
-      var outBuf = newUint32Array(Module.HEAPU32.buffer, pOutBuf.to(int), 1)[0]
-      var outBufLen = newUint32Array(Module.HEAPU32.buffer, pOutBufLen.to(int), 1)[0]
-      var outData = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), outBufLen.to(int))
-      result = deoxy.rawSend(outData)
-    else:
-      result = false
-    Module.free(pOutBufLen)
-    Module.free(pOutBuf)
-    Module.free(p)
+    var size = data.length.to(int)
+    withStack:
+      var p = Module.stackAlloc(size)
+      Module.HEAPU8.set(data, p)
+      var pOutBuf = Module.stackAlloc(4)
+      var pOutBufLen = Module.stackAlloc(4)
+      var retEncrypt = DeoxyMod.cipherEncrypt(deoxy.stream, p, size, pOutBuf, pOutBufLen)
+      if retEncrypt.to(bool):
+        var outBuf = newUint32Array(Module.HEAPU32.buffer, pOutBuf.to(int), 1)[0]
+        var outBufLen = newUint32Array(Module.HEAPU32.buffer, pOutBufLen.to(int), 1)[0]
+        var outData = newUint8Array(Module.HEAPU8.buffer, outBuf.to(int), outBufLen.to(int))
+        result = deoxy.rawSend(outData)
+      else:
+        result = false
 
   var reconnectTimerId = 0
 
