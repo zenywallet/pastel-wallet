@@ -2,7 +2,9 @@
 
 import os, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, times, strutils
 import ../deps/"websocket.nim"/websocket
-import blockstor, db, events, logs, server as stream
+import blockstor, db, events, logs
+import stream
+import server
 import std/exitprocs
 import zenyjs
 import zenyjs/core
