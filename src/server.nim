@@ -220,13 +220,6 @@ proc j_uint64*(val: uint64): JsonNode =
   else:
     newJInt(BiggestInt(val))
 
-type
-  PendingData = object
-    msg: string
-
-var wsReqs: Pendings[PendingData]
-wsReqs.newPending(limit = 1000000)
-
 proc sha256s(data: openarray[byte]): array[32, byte] =
   var sha256Context: br_sha256_context
   br_sha256_init(addr sha256Context)
@@ -263,6 +256,13 @@ loadHashTableModules()
 var walletmap = newHashTable[WalletId, seq[WalletMapData]](0x10000)
 
 active = true
+
+type
+  PendingData = object
+    msg: string
+
+var wsReqs: Pendings[PendingData]
+wsReqs.newPending(limit = 1000000)
 
 worker(1):
   proc sendClient(clientId: ClientId, data: string) =
