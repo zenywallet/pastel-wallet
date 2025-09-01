@@ -255,8 +255,6 @@ proc setEmpty*(pair: HashTableData) =
 loadHashTableModules()
 var walletmap = newHashTable[WalletId, seq[WalletMapData]](0x10000)
 
-active = true
-
 type
   PendingData = object
     msg: string
@@ -511,6 +509,7 @@ worker(1):
       echo e.name, ": ", e.msg
 
 let cpuCount = countProcessors()
+active = true
 
 worker(num = cpuCount):
   proc sendClient(clientId: ClientId, data: string) =
