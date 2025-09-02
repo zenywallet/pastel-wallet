@@ -74,16 +74,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
 
     stream(path = "/ws", protocol = "pastel-v0.1"):
       onOpen:
-        debug "onOpen"
-        var kpSeed: array[32, byte]
-        var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)
-        if retSeed != 0: raise newException(StreamCriticalErr, "crypt seed")
-        createKeypair(client.kp.pubkey, client.kp.prvkey, kpSeed)
-        retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 32.cint)
-        if retSeed != 0: raise newException(StreamCriticalErr, "crypt seed")
-        client.exchange = false
-        initLock(client.cipherLock)
-        wsSend((client.kp.pubkey, client.salt[0..31]).toBytes)
+        client.streamOpen()
 
       onMessage:
         debug "onMessage"

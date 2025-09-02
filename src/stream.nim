@@ -219,6 +219,18 @@ caprese.base:
   var workerClientsLock: Lock
   initLock(workerClientsLock)
 
+  proc streamOpen(client: Client) =
+    debug "onOpen"
+    var kpSeed: array[32, byte]
+    var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)
+    if retSeed != 0: raise newException(StreamCriticalErr, "crypt seed")
+    createKeypair(client.kp.pubkey, client.kp.prvkey, kpSeed)
+    retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr client.salt), 32.cint)
+    if retSeed != 0: raise newException(StreamCriticalErr, "crypt seed")
+    client.exchange = false
+    initLock(client.cipherLock)
+    wsSend((client.kp.pubkey, client.salt[0..31]).toBytes)
+
 proc empty*(pair: HashTableData): bool =
   when pair.val is Array or pair.val is seq[WalletMapData]:
     pair.val.len == 0
