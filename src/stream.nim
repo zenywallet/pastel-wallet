@@ -219,7 +219,7 @@ caprese.base:
   var workerClientsLock: Lock
   initLock(workerClientsLock)
 
-  proc streamOpen(client: Client) =
+  template streamOpen() =
     debug "onOpen"
     var kpSeed: array[32, byte]
     var retSeed = cryptSeed(cast[ptr UncheckedArray[byte]](addr kpSeed), 32.cint)

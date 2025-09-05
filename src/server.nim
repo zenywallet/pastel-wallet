@@ -74,7 +74,7 @@ server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
 
     stream(path = "/ws", protocol = "pastel-v0.1"):
       onOpen:
-        client.streamOpen()
+        streamOpen()
       streamMain()
 
     get "/seed":
