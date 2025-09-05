@@ -35,6 +35,7 @@ task rocksdbDefault, "Build RocksDB (Default)":
 
 task zbar, "Build zbar":
   withDir "deps/zbar":
+    exec "make clean"
     exec "sed -i \"s/ -Werror//\" $(pwd)/configure.ac"
     exec "autoreconf -i"
     exec """
