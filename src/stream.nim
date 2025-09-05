@@ -231,6 +231,106 @@ caprese.base:
     initLock(client.cipherLock)
     wsSend((client.kp.pubkey, client.salt[0..31]).toBytes)
 
+  template streamMain(): SendResult {.dirty.} =
+    case opcode
+    of WebSocketOpcode.Binary, WebSocketOpcode.Text, WebSocketOpcode.Continue:
+      debug "onMessage"
+      if not client.exchange:
+        if size == 64:
+          var clientPublicKey: Ed25519PublicKey
+          copyMem(addr clientPublicKey, data, clientPublicKey.len)
+          copyMem(addr client.salt[32], addr data[32], 32)
+          var shared: Ed25519SharedSecret
+          keyExchange(shared, clientPublicKey, client.kp.prvkey)
+          let shared_sha256 = sha256s(shared)
+          let shared_key = yespower(shared_sha256)
+          let seed_srv = cast[ptr array[32, byte]](addr client.salt[0])
+          let seed_cli = cast[ptr array[32, byte]](addr client.salt[32])
+          let iv_srv_sha256 = sha256s(shared_key xor seed_srv)
+          let iv_cli_sha256 = sha256s(shared_key xor seed_cli)
+          let iv_srv = yespower(iv_srv_sha256)
+          let iv_cli = yespower(iv_cli_sha256)
+          debug "shared=", shared_key
+          debug "iv_srv=", iv_srv
+          debug "iv_cli=", iv_cli
+          client.ctr.init(shared_key, iv_srv, iv_cli)
+          client.exchange = true
+          when USE_LZ4:
+            client.streamComp = LZ4_createStream()
+            if client.streamComp.isNil: raise newException(StreamCriticalErr, "lz4 create stream")
+            let p = cast[ptr UncheckedArray[byte]](allocShared0(LZ4_DICT_SIZE * 2))
+            client.encDict = cast[ptr UncheckedArray[byte]](addr p[0])
+            client.decDict = cast[ptr UncheckedArray[byte]](addr p[LZ4_DICT_SIZE])
+          SendResult.Pending
+        else:
+          SendResult.None
+      else:
+        debug "data=", content.toBytes
+        when USE_LZ4:
+          var rdata = newSeq[byte](size)
+        else:
+          var rdata = newSeq[byte](size + deflateSentinel.len)
+        var pos = 0
+        var next_pos = 16
+        while next_pos < size:
+          client.ctr.decrypt(cast[ptr UncheckedArray[byte]](addr data[pos]),
+                            cast[ptr UncheckedArray[byte]](addr rdata[pos]))
+          pos = next_pos
+          next_pos = next_pos + 16
+        if pos < size:
+          var src: array[16, byte]
+          var dec: array[16, byte]
+          var plen = size - pos
+          src.fill(cast[byte](plen))
+          copyMem(addr src[0], addr data[pos], plen)
+          client.ctr.decrypt(cast[ptr UncheckedArray[byte]](addr src[0]),
+                            cast[ptr UncheckedArray[byte]](addr dec[0]))
+          copyMem(addr rdata[pos], addr dec[0], plen)
+        when USE_LZ4:
+          var outsize: int = LZ4_decompress_safe_usingDict(cast[cstring](addr rdata[0]),
+                  cast[cstring](addr ctx.decBuf[0]), size.cint,
+                  ctx.decBufSize.cint, cast[cstring](addr client.decDict[0]), LZ4_DICT_SIZE.cint)
+          if outsize > LZ4_DICT_SIZE:
+            copyMem(addr client.decDict[0], addr ctx.decBuf[outsize - LZ4_DICT_SIZE], LZ4_DICT_SIZE)
+          elif outsize > 0:
+            let left = LZ4_DICT_SIZE - outsize
+            copyMem(addr client.decDict[0], addr client.decDict[outsize], left)
+            copyMem(addr client.decDict[left], addr ctx.decBuf[0], outsize)
+          else:
+            raise newException(StreamCriticalErr, "lz4 decompress")
+          wsReqs.pending(PendingData(msg: ctx.decBuf.toString(outsize)))
+        else:
+          copyMem(addr rdata[size], addr deflateSentinel[0], deflateSentinel.len)
+          let uncomp = uncompress((cast[ptr char](addr rdata[0])).cstring, rdata.len, stream = RAW_DEFLATE)
+          wsReqs.pending(PendingData(msg: uncomp))
+    of WebSocketOpcode.Ping:
+      wsSend(content, WebSocketOpcode.Pong)
+    of WebSocketOpcode.Pong:
+      debug "pong ", content
+      SendResult.Success
+    else: # WebSocketOpcode.Close
+      debug "onClose"
+      let clientId = client.markPending()
+      withLock workerClientsLock:
+        for wid in client.wallets:
+          var hdata = walletmap.get(wid)
+          if not hdata.isNil:
+            var wmdatas = hdata.val
+            wmdatas.keepIf(proc (x: WalletMapData): bool = x.clientId != clientId)
+            if wmdatas.len > 0:
+              walletmap.set(wid, wmdatas)
+            else:
+              walletmap.del(wid)
+              var hdata2 = walletmap.get(wid)
+      BallCommand.DelClient.send(BallDataDelClient(client: clientId))
+      client.xpubs = @[]
+      when USE_LZ4:
+        if not client.streamComp.isNil:
+          deallocShared(client.encDict)
+          discard client.streamComp.LZ4_freeStream()
+          client.streamComp = nil
+      SendResult.None
+
 proc empty*(pair: HashTableData): bool =
   when pair.val is Array or pair.val is seq[WalletMapData]:
     pair.val.len == 0
