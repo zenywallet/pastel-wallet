@@ -40,22 +40,8 @@ type Page* {.pure.} = enum
 
 var page*: Page = Page.Release
 
-when USE_LZ4:
-  const DECODE_BUF_SIZE = 1048576
-  type
-    ServerThreadCtxExt {.serverThreadCtxExt.} = object
-      decBuf: ptr UncheckedArray[byte]
-      decBufSize: int
-else:
-  const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
-
 server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
-  when USE_LZ4:
-    ctx.decBuf = cast[ptr UncheckedArray[byte]](allocShared0(DECODE_BUF_SIZE))
-    ctx.decBufSize = DECODE_BUF_SIZE
-    defer:
-      ctx.decBufSize = 0
-      ctx.decBuf.deallocShared()
+  streamInit()
 
   routes(host = config.HttpsHost):
     get "/":

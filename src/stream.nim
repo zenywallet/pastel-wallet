@@ -138,6 +138,15 @@ proc send*(cmd: BallCommand, data: BallData = nil) =
     Debug.StreamError.write "error: ballChannel is full"
 
 caprese.base:
+  when USE_LZ4:
+    const DECODE_BUF_SIZE = 1048576
+    type
+      ServerThreadCtxExt {.serverThreadCtxExt.} = object
+        decBuf: ptr UncheckedArray[byte]
+        decBufSize: int
+  else:
+    const deflateSentinel = [byte 0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]
+
   type
     TxLog = ref object
       sequence: uint64
@@ -218,6 +227,14 @@ caprese.base:
 
   var workerClientsLock: Lock
   initLock(workerClientsLock)
+
+  template streamInit() =
+    when USE_LZ4:
+      ctx.decBuf = cast[ptr UncheckedArray[byte]](allocShared0(DECODE_BUF_SIZE))
+      ctx.decBufSize = DECODE_BUF_SIZE
+      defer:
+        ctx.decBufSize = 0
+        ctx.decBuf.deallocShared()
 
   template streamOpen() =
     debug "onOpen"
