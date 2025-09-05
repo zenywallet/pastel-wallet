@@ -25,10 +25,8 @@ import blockstor except send
 import stream
 import config
 
-const USE_LZ4 = true
 when USE_LZ4:
   import lz4
-  const LZ4_DICT_SIZE = 64 * 1024
 
 config:
   sigTermQuit = false

@@ -12,10 +12,9 @@ import caprese/hashtable
 import caprese/arraylib
 import std/cpuinfo
 
-const USE_LZ4 = true
+const USE_LZ4* = true
 when USE_LZ4:
   import lz4
-  const LZ4_DICT_SIZE = 64 * 1024
 
 type
   WalletId* = uint64
@@ -139,6 +138,7 @@ proc send*(cmd: BallCommand, data: BallData = nil) =
 
 caprese.base:
   when USE_LZ4:
+    const LZ4_DICT_SIZE = 64 * 1024
     const DECODE_BUF_SIZE = 1048576
     type
       ServerThreadCtxExt {.serverThreadCtxExt.} = object
