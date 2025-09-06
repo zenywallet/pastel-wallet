@@ -136,6 +136,12 @@ proc send*(cmd: BallCommand, data: BallData = nil) =
   if not ballChannel.send((cmd, data)):
     Debug.StreamError.write "error: ballChannel is full"
 
+proc j_uint64*(val: uint64): JsonNode =
+  if val > 9007199254740991'u64:
+    newJString($val)
+  else:
+    newJInt(BiggestInt(val))
+
 caprese.base:
   when USE_LZ4:
     const LZ4_DICT_SIZE = 64 * 1024
@@ -201,12 +207,6 @@ caprese.base:
     var txtype = cast[uint8](sectype and 0xff)
     var sequence = sectype shr 8
     (sequence, txtype)
-
-  proc j_uint64*(val: uint64): JsonNode =
-    if val > 9007199254740991'u64:
-      newJString($val)
-    else:
-      newJInt(BiggestInt(val))
 
   proc sha256s(data: openarray[byte]): array[32, byte] =
     var sha256Context: br_sha256_context
