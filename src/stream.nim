@@ -36,7 +36,7 @@ type
       encDict: ptr UncheckedArray[byte]
       decDict: ptr UncheckedArray[byte]
 
-  ClientData* = ClientId
+  ClientData* = tuple[id: ClientId, wallets: WalletIds]
 
 type WalletMapData* = ref object
   clientId*: ClientId
@@ -208,6 +208,8 @@ caprese.base:
     var sequence = sectype shr 8
     (sequence, txtype)
 
+
+
   proc sha256s(data: openarray[byte]): array[32, byte] =
     var sha256Context: br_sha256_context
     br_sha256_init(addr sha256Context)
@@ -339,7 +341,7 @@ caprese.base:
             else:
               walletmap.del(wid)
               var hdata2 = walletmap.get(wid)
-      BallCommand.DelClient.send(BallDataDelClient(client: clientId))
+      BallCommand.DelClient.send(BallDataDelClient(client: (clientId, client.wallets)))
       client.xpubs = @[]
       when USE_LZ4:
         if not client.streamComp.isNil:
@@ -464,7 +466,7 @@ worker(1):
                   hdata.val.add(wmdata)
 
           var json = %*{"type": "xpubs", "data": client.xpubs}
-          BallCommand.AddClient.send(BallDataAddClient(client: clientId))
+          BallCommand.AddClient.send(BallDataAddClient(client: (clientId, client.wallets)))
           sendClient(clientId, $json)
           Debug.Connection.write "connect clientId=", clientId, " wid=", client.wallets
 

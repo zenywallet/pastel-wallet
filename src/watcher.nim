@@ -726,8 +726,7 @@ proc ball_main() {.thread.} =
 
     of BallCommand.MemPool:
       var data = BallDataMemPool(ch_data.data)
-      var client = getClient(data.client.ClientId)
-      if client.isNil: continue
+      var client = data.client
       var clientWallets = client.wallets
       let j_mempool = blockstor.getMempool()
       if j_mempool.kind != JNull and j_mempool.hasKey("res") and getBsErrorCode(j_mempool["err"].getInt) == BsErrorCode.SUCCESS:
@@ -864,15 +863,14 @@ proc ball_main() {.thread.} =
 
     of BallCommand.AddClient:
       var data = BallDataAddClient(ch_data.data)
-      var client = getClient(data.client.ClientId)
-      if client.isNil: continue
+      var client = data.client
       var clientWallets = client.wallets
       debug "AddClient ", clientWallets
       if clientWallets.len > 0:
         wallet_ids.incl(clientWallets)
         active_wids.incl(clientWallets.toHashSet())
         BallCommand.Unspents.send(BallDataUnspents(wallets: clientWallets))
-        BallCommand.MemPool.send(BallDataMemPool(client: data.client.ClientId))
+        BallCommand.MemPool.send(BallDataMemPool(client: client))
         BallCommand.Height.send(BallDataHeight(wallet_id: clientWallets[0]))
         BallCommand.Unused.send(BallDataUnused(wallet_id: clientWallets[0]))
         StreamCommand.Balance.send(StreamDataBalance(wallets: clientWallets))
@@ -880,8 +878,7 @@ proc ball_main() {.thread.} =
 
     of BallCommand.DelClient:
       var data = BallDataDelClient(ch_data.data)
-      var client = getClient(data.client.ClientId)
-      if client.isNil: continue
+      var client = data.client
       var clientWallets = client.wallets
       debug "DelClient ", clientWallets
       if clientWallets.len > 0:
