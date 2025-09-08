@@ -4,7 +4,6 @@ import os, asyncdispatch, sequtils, tables, random, sets, algorithm, hashes, tim
 import ../deps/"websocket.nim"/websocket
 import blockstor, db, events, logs
 import stream
-import server
 import std/exitprocs
 import zenyjs
 import zenyjs/core
@@ -920,7 +919,6 @@ proc stop*() =
   BallCommand.Abort.send()
   for i in 0..threads.high: joinThread(threads[i][])
   Debug.Common.write "watcher stop"
-  serverStop()
   sendMesChannel.drop()
 
 proc quit() {.noconv.} =
