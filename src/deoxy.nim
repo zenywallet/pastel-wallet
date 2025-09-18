@@ -2,7 +2,7 @@
 
 import ed25519
 import serpent_threadsafe
-import yespower
+import zenyjs/yespower
 import zenyjs/br_hash
 import algorithm
 

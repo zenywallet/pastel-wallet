@@ -7,7 +7,7 @@ import std/locks
 import logs #as patelog except debug
 import std/json
 import caprese/bearssl/hash
-import yespower
+import zenyjs/yespower
 import caprese/hashtable
 import caprese/arraylib
 import std/cpuinfo
