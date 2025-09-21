@@ -17,7 +17,7 @@ requires "caprese"
 requires "libcurl"
 requires "karax"
 requires "regex"
-requires "https://github.com/zenywallet/zenyjs"
+requires "zenyjs"
 
 # Tasks
 
