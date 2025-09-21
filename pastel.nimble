@@ -18,6 +18,8 @@ requires "libcurl"
 requires "karax"
 requires "regex"
 requires "zenyjs"
+requires "zenycore"
+
 
 # Tasks
 
