@@ -1,9 +1,11 @@
 # Copyright (c) 2019 zenywallet
 
 import sequtils, endians, locks, logs
-import rocksdblib
+import zenycore/rocksdblib
 export rocksdblib.RocksDbErr
 import std/exitprocs
+import zenycore/db_types
+export db_types
 
 type Prefix* {.pure.} = enum
   params = 0  # param_id = value
@@ -29,21 +31,6 @@ type Prefix* {.pure.} = enum
               #                          confirm_count, fail_count
   rewards     # wallet_id = hashcash_point, hashcash_total
 
-
-type
-  DbStatus* {.pure.} = enum
-    Success = 0
-    Error
-    NotFound
-
-  DbResult*[T] = object
-    case err*: DbStatus
-    of DbStatus.Success:
-      res*: T
-    of DbStatus.Error:
-      discard
-    of DbStatus.NotFound:
-      discard
 
 var db: RocksDb
 
