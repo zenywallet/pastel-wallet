@@ -1,9 +1,12 @@
 # Copyright (c) 2019 zenywallet
 
-import sequtils, endians, locks, logs
+import std/sequtils
+import std/endians
+import std/locks
+import std/exitprocs
+import logs
 import zenycore/rocksdblib
 export rocksdblib.RocksDbErr
-import std/exitprocs
 import zenycore/db_types
 export db_types
 
