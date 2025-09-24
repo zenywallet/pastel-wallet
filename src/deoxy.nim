@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import ed25519
+import zenyjs/ed25519
 import serpent_threadsafe
 import zenyjs/yespower
 import zenyjs/br_hash

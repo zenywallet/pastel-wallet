@@ -1,7 +1,7 @@
 # Copyright (c) 2019 zenywallet
 
 import caprese
-import ed25519
+import zenyjs/ed25519
 import ctrmode
 import std/locks
 import logs #as patelog except debug

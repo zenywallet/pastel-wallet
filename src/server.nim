@@ -16,7 +16,7 @@ import templates/layout_base
 import base_css
 import seed_html
 import ctrmode
-import ed25519
+import zenyjs/ed25519
 import zenyjs/yespower
 import ../deps/zip/zip/zlib
 import logs as patelog except debug
