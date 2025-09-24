@@ -1,10 +1,10 @@
 # Copyright (c) 2019 zenywallet
 
+import std/algorithm
 import zenyjs/ed25519
 import zenyjs/serpent
 import zenyjs/yespower
 import zenyjs/br_hash
-import algorithm
 
 const USE_LZ4 = true
 
