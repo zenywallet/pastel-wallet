@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import serpent_threadsafe
+import zenyjs/serpent
 
 type
   CTR* = object
