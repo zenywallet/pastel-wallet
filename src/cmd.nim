@@ -1,6 +1,6 @@
 # Copyright (c) 2019 zenywallet
 
-import terminal, parseopt, db, blockstor, logs, strutils, server
+import terminal, parseopt, db, blockstor, logs, strutils, pages
 import std/exitprocs
 import config
 import std/nativesockets

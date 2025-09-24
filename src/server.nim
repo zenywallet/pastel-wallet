@@ -23,6 +23,7 @@ import logs as patelog except debug
 import db
 import blockstor except send
 import stream
+import pages
 import config
 
 when USE_LZ4:
@@ -30,13 +31,6 @@ when USE_LZ4:
 
 config:
   sigTermQuit = false
-
-type Page* {.pure.} = enum
-  Release
-  Maintenance
-  Debug
-
-var page*: Page = Page.Release
 
 server(ssl = true, ip = "0.0.0.0", port = config.HttpsPort):
   streamInit()
