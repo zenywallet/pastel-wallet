@@ -168,8 +168,8 @@ when defined(js):
 elif defined(emscripten):
   import caprese/bytes
   import ../deoxy
-  import ../ed25519
-  import ../lz4
+  import zenyjs/ed25519
+  import zenyjs/lz4
 
   const EXPORTED_FUNCTIONS* = ["_cipher_create", "_cipher_free", "_cipher_process", "_cipher_encrypt"]
 

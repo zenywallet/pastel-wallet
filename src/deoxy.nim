@@ -9,7 +9,7 @@ import zenyjs/br_hash
 const USE_LZ4 = true
 
 when USE_LZ4:
-  import lz4
+  import zenyjs/lz4
   const DICT_SIZE = 64 * 1024
 else:
   import brotli

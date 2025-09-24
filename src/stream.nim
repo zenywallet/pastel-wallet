@@ -14,7 +14,7 @@ import std/cpuinfo
 
 const USE_LZ4* = true
 when USE_LZ4:
-  import lz4
+  import zenyjs/lz4
 
 type
   WalletId* = uint64
