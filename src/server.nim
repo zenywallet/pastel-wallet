@@ -18,7 +18,6 @@ import seed_html
 import ctrmode
 import zenyjs/ed25519
 import zenyjs/yespower
-import ../deps/zip/zip/zlib
 import logs as patelog except debug
 import db
 import blockstor except send
@@ -28,6 +27,10 @@ import config
 
 when USE_LZ4:
   import zenyjs/lz4
+else:
+  import ../deps/zip/zip/zlib
+  when not defined(ROCKSDB_DEFAULT_COMPRESSION):
+    import zenyjs/lz4
 
 config:
   sigTermQuit = false
