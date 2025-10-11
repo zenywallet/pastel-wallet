@@ -27,7 +27,7 @@ import pages
 import config
 
 when USE_LZ4:
-  import lz4
+  import zenyjs/lz4
 
 config:
   sigTermQuit = false
