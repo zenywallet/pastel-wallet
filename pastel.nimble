@@ -29,7 +29,7 @@ task cipher, "Build cipher":
   exec "nim c -r src/cipher_patch.nim"
 
 task minify, "Minifies the JS using Google's closure compiler":
-  exec "nim c -r src/config.nim"
+  exec "nim c -r --forceBuild src/config.nim"
   exec "nim js -d:release -o:public/js/main.js src/js/main.nim"
   exec """
 java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
