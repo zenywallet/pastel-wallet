@@ -37,8 +37,6 @@ java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
 public/js/cipher.js \
 public/js/uint64.min.js \
 public/js/coinlibs.js \
-public/js/rawdeflate.min.js \
-public/js/rawinflate.min.js \
 public/js/jquery-3.4.1.min.js \
 public/semantic/compact.js \
 public/js/jquery-qrcode.js \
