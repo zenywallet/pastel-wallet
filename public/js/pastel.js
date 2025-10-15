@@ -537,47 +537,8 @@ pastel.ready = function() {
   var seed = cipher.createSeed();
   var kp = cipher.createKeyPair(seed);
   var shared = null;
-  //var stage = 0;
   var wallet = new Wallet();
   pastel.wallet = wallet;
-  //var stream = new Stream(pastel.config.ws_url, pastel.config.ws_protocol);
-
-  /*stream.onOpen = function(evt) {
-    seed = cipher.createSeed();
-    kp = cipher.createKeyPair(seed);
-    shared = null;
-    stage = 0;
-    stream.send(kp.publicKey);
-  }
-
-  pastel.stream_ready = function() {
-    return stage == 1;
-  }
-
-  pastel.send = function(json) {
-    if(stage != 1) {
-      return false;
-    }
-    var d = JSON.stringify(json);
-    var comp = new Zlib.RawDeflate(d.toByteArray(false)).compress();
-    var sdata = new Uint8Array(comp.length);
-    var pos = 0, next_pos = 16;
-    while(next_pos < comp.length) {
-      var enc = cipher.enc(comp.slice(pos, next_pos));
-      sdata.set(enc, pos);
-      pos = next_pos;
-      next_pos += 16;
-    }
-    if(pos < comp.length) {
-      var buf = new Uint8Array(16);
-      var plen = comp.length - pos;
-      buf.fill(plen);
-      buf.set(comp.slice(pos, comp.length), 0)
-      var enc = cipher.enc(buf).slice(0, plen);
-      sdata.set(enc, pos);
-    }
-    return stream.send(sdata);
-  }*/
 
   function thousands_separators(num) {
     var num_parts = num.toString().split(".");
@@ -802,72 +763,6 @@ pastel.ready = function() {
       pastel.send({cmd: 'xpubs', data: xpubs});
     }
   }
-
-  /*pastel.unsecure_recv = function(data) {
-    try {
-      var json = JSON.parse(data);
-      //console.log(JSON.stringify(json));
-    } catch(ex) {
-      //console.log(data);
-    }
-  }
-
-  stream.onMessage = function(evt) {
-    if(typeof evt.data == 'object') {
-      var data = new Uint8Array(evt.data);
-      if(stage == 1) {
-        var rdata = new Uint8Array(data.length);
-        var pos = 0, next_pos = 16;
-        while(next_pos < data.length) {
-          var dec = cipher.dec(data.slice(pos, next_pos));
-          rdata.set(dec, pos);
-          pos = next_pos;
-          next_pos += 16;
-        }
-        if(pos < data.length) {
-          var buf = new Uint8Array(16);
-          var plen = data.length - pos;
-          buf.fill(plen);
-          buf.set(data.slice(pos, data.length), 0)
-          var dec = cipher.dec(buf).slice(0, plen);
-          rdata.set(dec, pos);
-        }
-        var rdataSentinel = new Uint8Array(rdata.length + deflateSentinel.length);
-        rdataSentinel.set(rdata);
-        rdataSentinel.set(deflateSentinel, rdata.length);
-        var decomp = new Zlib.RawInflate(rdataSentinel, {verify: true}).decompress();
-        var json = JSON.parse(new TextDecoder().decode(decomp));
-        pastel.secure_recv(json);
-      } else if(stage == 0 && !shared && data.length == 96) {
-        var pub = data.slice(0, 32);
-        shared = cipher.keyExchange(pub, kp.secretKey);
-        var shared_key = cipher.yespower(coin.crypto.sha256(shared), 32);
-        var shared_key_uint8array = new Uint8Array(shared_key);
-        shared = shared_key_uint8array;
-
-        var seed_srv = data.slice(32, 64);
-        var seed_cli = data.slice(64, 96);
-        var rs = new Uint8Array(32);
-        var rc = new Uint8Array(32);
-        for(var i = 0; i < 32; i++) {
-          rs[i] = shared[i] ^ seed_srv[i];
-          rc[i] = shared[i] ^ seed_cli[i];
-        }
-        var iv_srv = cipher.yespower(coin.crypto.sha256(rs), 32);
-        var iv_cli = cipher.yespower(coin.crypto.sha256(rc), 32);
-        cipher.init(shared, iv_cli, iv_srv);
-
-        stage = 1;
-        pastel.send({cmd: 'ready'});
-      } else {
-        //console.log(data);
-      }
-    } else if(typeof evt.data == 'string') {
-      pastel.unsecure_recv(evt.data);
-    }
-  }*/
-
-  //pastel.stream = stream;
 
   if('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
