@@ -385,15 +385,16 @@ worker(1):
           return
         var outdata = newSeq[byte](LZ4_COMPRESSBOUND(data.len))
         var outsize: int = outdata.len.int
+        acquire(client.cipherLock)
         outsize = client.streamComp.LZ4_compress_fast_continue(cast[cstring](addr data[0]),
                   cast[cstring](addr outdata[0]), data.len.cint, outsize.cint, 1.cint)
         if outsize <= 0:
+          release(client.cipherLock)
           raise newException(StreamCriticalErr, "lz4 compress")
         outdata.setLen(outsize)
         discard client.streamComp.LZ4_saveDict(cast[cstring](addr client.encDict[0]), LZ4_DICT_SIZE.cint)
         var pos: uint = 0
         var next_pos: uint = 16
-        acquire(client.cipherLock)
         while next_pos < outsize.uint:
           client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr outdata[pos]),
                             cast[ptr UncheckedArray[byte]](addr outdata[pos]))
@@ -634,15 +635,16 @@ worker(num = cpuCount):
           return
         var outdata = newSeq[byte](LZ4_COMPRESSBOUND(data.len))
         var outsize: int = outdata.len.int
+        acquire(client.cipherLock)
         outsize = client.streamComp.LZ4_compress_fast_continue(cast[cstring](addr data[0]),
                   cast[cstring](addr outdata[0]), data.len.cint, outsize.cint, 1.cint)
         if outsize <= 0:
+          release(client.cipherLock)
           raise newException(StreamCriticalErr, "lz4 compress")
         outdata.setLen(outsize)
         discard client.streamComp.LZ4_saveDict(cast[cstring](addr client.encDict[0]), LZ4_DICT_SIZE.cint)
         var pos: uint = 0
         var next_pos: uint = 16
-        acquire(client.cipherLock)
         while next_pos < outsize.uint:
           client.ctr.encrypt(cast[ptr UncheckedArray[byte]](addr outdata[pos]),
                               cast[ptr UncheckedArray[byte]](addr outdata[pos]))
