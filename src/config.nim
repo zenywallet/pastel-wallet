@@ -6,6 +6,9 @@ import zenyjs/address
 import std/os
 import std/macros
 
+#{.define: ROCKSDB_DEFAULT_COMPRESSION.}
+#{.define: PASTEL_BITZENY_JP.}
+
 networks:
   BitZeny_mainnet:
     pubKeyPrefix: 81'u8
