@@ -29,8 +29,10 @@ when USE_LZ4:
   import zenyjs/lz4
 else:
   import ../deps/zip/zip/zlib
-  when not defined(ROCKSDB_DEFAULT_COMPRESSION):
-    import zenyjs/lz4
+when defined(ROCKSDB_DEFAULT_COMPRESSION):
+  import zenycore/rocksdb/snappy
+elif not USE_LZ4:
+  import zenyjs/lz4
 
 config:
   sigTermQuit = false
