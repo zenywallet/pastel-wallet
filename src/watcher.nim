@@ -914,6 +914,7 @@ proc ball_main() {.thread.} =
 
 proc stop*() =
   active = false
+  streamActive = false
   event.setEvent()
   StreamCommand.Abort.send()
   BallCommand.Abort.send()

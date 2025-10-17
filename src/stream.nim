@@ -620,7 +620,7 @@ worker(1):
       echo e.name, ": ", e.msg
 
 let cpuCount = countProcessors()
-active = true
+var streamActive* = true
 
 worker(num = cpuCount):
   proc sendClient(clientId: ClientId, data: string) =
@@ -686,7 +686,7 @@ worker(num = cpuCount):
     else:
       debug "ClientId=", clientId, " is nil"
 
-  while active:
+  while streamActive:
     let sdata = sendMesChannel.recv()
     Debug.Stream.write "sendManager wid=", sdata.wallet_id, " data=", sdata.data
     var wmdatas = walletmap.get(sdata.wallet_id)
