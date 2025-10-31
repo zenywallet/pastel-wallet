@@ -1723,10 +1723,10 @@ proc overrideStream() =
       pastel.stream.start()
       )
 
-  pastel.send = proc(json: JsObject) =
+  pastel.send = proc(json: JsObject): JsObject =
     var jsonStr = JSON.stringify(json)
     echo "send json=", jsonStr.to(cstring)
-    stream.send(strToUint8Array(jsonStr))
+    stream.send(strToUint8Array(jsonStr)).toJs
 
   pastel.stream.showStatus = proc(status: bool) =
     if status:
