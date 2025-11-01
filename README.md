@@ -1,35 +1,26 @@
 # Pastel Wallet
 A sample wallet using Blockstor API
 
-
-### Requirements
-- Nim https://nim-lang.org/
-- Emscripten https://emscripten.org/
-- Google Closure Compiler https://github.com/google/closure-compiler
-- blockstor https://github.com/zenywallet/blockstor
-
+### Prerequirements
+- https://github.com/zenywallet/emsdkenv
+- https://github.com/zenywallet/zenyjs
+- https://github.com/zenywallet/zenycore
+- https://github.com/zenywallet/caprese
+- https://github.com/zenywallet/blockstor
 
 ### Build Instructions
-```bash
-git clone https://github.com/zenywallet/pastel-wallet
-cd pastel-wallet
-git submodule update --init
-```
+    git clone https://github.com/zenywallet/pastel-wallet pastel
+    cd pastel
+    git submodule update --init
 
-- Download [Emscripten](https://emscripten.org/) and install
-- Download [closure-compiler.jar](https://developers.google.com/closure/compiler) and copy to bin/closure-compiler.jar
-- Change src/config.nim as you like
+- Download [closure-compiler.jar](https://developers.google.com/closure/compiler/) and copy to bin/closure-compiler.jar
+- Edit src/config.nim as you like
 
-```bash
-nimble depsAll
-nimble cipher
-nimble minify
-nimble build -d:release
-```
-
+    nimble cipher
+    nimble minify
+    nimble build -d:release --opt:speed
 
 ### Launch
-```bash
-bin/pastel
-```
+    bin/pastel
+
 - https://localhost:5002/
