@@ -753,9 +753,9 @@ proc Wallet*() {.exportc.} =
         break
     var fee = newUint64((148 * count + 34 + 10).uint)
     if in_value.gt(fee).to(bool):
-      return JsObject{err: 0, value: in_value.subtract(fee).toString(), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
+      return JsObject{err: 0, value: in_value.subtract(fee).to(Uint64), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
     else:
-      return JsObject{err: 0, value: "0", count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
+      return JsObject{err: 0, value: newUint64(0), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
 
   self.calcSendUtxo = proc(value_str: cstring): JsObject =
     var unconfs = Object.assign([].toJs, u_unconfs)
