@@ -751,8 +751,8 @@ proc Wallet*() {.exportc.} =
         inc(count)
       else:
         break
-    if in_value.gt(newUint64(0)).to(bool):
-      var fee = newUint64((148 * count + 34 + 10).uint)
+    var fee = newUint64((148 * count + 34 + 10).uint)
+    if in_value.gt(fee).to(bool):
       return JsObject{err: 0, value: in_value.subtract(fee).toString(), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
     else:
       return JsObject{err: 0, value: "0", count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
