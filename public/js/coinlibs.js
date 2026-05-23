@@ -5884,8 +5884,9 @@ function config (name) {
 exports.coin = require('bitcoinjs-lib');
 exports.bip32 = require('bip32');
 exports.bip39 = require('bip39');
+exports.Buffer = require('safe-buffer').Buffer
 
-},{"bip32":37,"bip39":39,"bitcoinjs-lib":53}],33:[function(require,module,exports){
+},{"bip32":37,"bip39":39,"bitcoinjs-lib":53,"safe-buffer":146}],33:[function(require,module,exports){
 'use strict'
 // base-x encoding / decoding
 // Copyright (c) 2018 base-x contributors
