@@ -2,12 +2,19 @@
 
 import std/jsffi
 import std/macros
-#import zenyjs
+import std/strutils
+import zenyjs
 import zenyjs/core
 #import zenyjs/bip32 as zenyjs_bip32
+import zenyjs/bip39
+import zenyjs/bip39_en
+import zenyjs/bip39_ja
 import zenyjs/jsuint64
 import stor as storMod
 import base58
+
+const en* = bip39_en.words
+const ja* = bip39_ja.words
 
 type
   WalletError = object of CatchableError
@@ -25,22 +32,17 @@ proc newTransactionBuilder(coin, network: JsObject): JsObject {.importcpp: "new 
 
 proc Wallet*() {.exportc.} =
   var self = this
-  var bip39 = coinlibs.bip39
   var bip32 = coinlibs.bip32
   var coin = coinlibs.coin
+  var Buffer = coinlibs.Buffer
   var network = coin.networks[pastel.config.network.to(cstring)]
   var stor = newStor()
   var u_hdpath = "m/44'/123'/0'".cstring
 
-  proc getWordList(mlang: int): JsObject =
-    if mlang == 1:
-      return bip39.wordlists.japanese
-    else:
-      return bip39.wordlists.english
+  zenyjs.ready:
+    echo "zenyjs.ready"
 
-  self.getMnemonicToSeed = proc(mnemonic, password: cstring): JsObject =
-    var m = mnemonic.mnemonic_replace_trim()
-    bip39.mnemonicToSeedSync(m, password)
+  template getWordList(mlang: int): untyped = (if mlang == 1: ja else: en)
 
   var MnemonicSeedType = JsObject{
     0: "Unknown".cstring,
@@ -56,18 +58,28 @@ proc Wallet*() {.exportc.} =
     var seeds = [].toJs
     var m = mnemonic.mnemonic_replace_trim()
     if m.split(" ".cstring).length.to(int) == 24:
-      var entropy = bip39.mnemonicToEntropy(m, getWordList(mlang), true)
-      seeds.push(JsObject{seed: entropy, type: 101})
+      var ma: Array[string]
+      for s in ($m.to(cstring)).split():
+        ma.add(s)
+      var entropy = bip39.mnemonicToEntropy(ma, getWordList(mlang))
+      var seed = Buffer.from(entropy.toUint8Array.buffer)
+      seeds.push(JsObject{seed: seed, type: 101})
       if mlang == 0:
         var m2 = bip39.entropyToMnemonic(entropy, getWordList(1))
-        var seed2 = bip39.mnemonicToSeedSync(m2)
+        var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(m2), passphrase = "")
+        var seed2 = Buffer.from(bip39Seed.toUint8Array.buffer)
         seeds.push(JsObject{seed: seed2, type: 102})
     seeds
 
   self.getMnemonicToSeeds = proc(mnemonic: cstring, mlang: int, password: cstring): JsObject =
     var seeds = [].toJs
     var m = mnemonic.mnemonic_replace_trim()
-    var seed = bip39.mnemonicToSeedSync(m, password)
+    var ma: Array[string]
+    for s in ($m.to(cstring)).split():
+      ma.add(s)
+    var passphrase = if password.toJs.to(bool): $password else: ""
+    var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(ma), passphrase)
+    var seed = Buffer.from(bip39Seed.toUint8Array.buffer)
     seeds.push(JsObject{seed: seed, type: if password.toJs.to(bool): 2 else: 1})
     var nonstd_seeds = self.getNonStandardMnemonicToSeeds(mnemonic, mlang)
     seeds = seeds.concat(nonstd_seeds)

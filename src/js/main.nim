@@ -2,13 +2,15 @@
 # nim js -d:release main.nim
 
 import karax / [karax, karaxdsl, vdom]
-import karax / jstrutils #except `&`
+import karax / jstrutils except `&`
 import jsffi except `&`
 import strutils
 import trans
 import stor as storMod
 import wallet
-import zenyjs/jslib
+import zenyjs
+import zenyjs/core
+import zenyjs/bip39
 import base58
 import pastel as pastelMod
 import deoxy
@@ -237,12 +239,14 @@ var prevCheckWord: cstring = ""
 var passPhrase: cstring = ""
 
 var coinlibs {.importc, nodecl.}: JsObject
-var bip39 = coinlibs.bip39
-var bip39_wordlist = bip39.wordlists.japanese
-var wl_japanese = bip39.wordlists.japanese.to(seq[cstring])
-var wl_english = bip39.wordlists.english.to(seq[cstring])
+var enjs = wallet.en.toJs
+var jajs = wallet.ja.toJs
+var bip39_wordlist = jajs
+var wl_japanese = @(wallet.ja)
+var wl_english = @(wallet.en)
 var wl_select = wl_japanese
 var wl_select_id = 1
+template getWordList(): untyped = (if wl_select_id == 1: wallet.ja else: wallet.en)
 
 proc clearSensitive() =
   seedCardInfos = @[]
@@ -490,7 +494,7 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
       var idx: int = 0
       var allvalid = true
       for word in words:
-        if wl_select.includes(cast[cstring](word)):
+        if wl_select.includes(word):
           if advance:
             let levs = cast[seq[cstring]](levens_one(word.toJs, bip39_wordlist))
             chklist.add (idx, word, true, levs)
@@ -502,10 +506,13 @@ proc confirmMnemonic(input_id: cstring, advance: bool): proc() =
           allvalid = false
         inc(idx)
       if allvalid and idx >= 12 and idx mod 3 == 0:
-        var bip39 = coinlibs.bip39
-        if bip39.validateMnemonic(inputWords.toJs, bip39_wordlist).to(bool):
+        try:
+          var wordArray = newArray[string](words.len)
+          for i in 0..<words.len:
+            wordArray[i] = $words[i]
+          discard bip39.mnemonicToEntropy(wordArray, getWordList())
           mnemonicFulfill = true
-        else:
+        except:
           Notify.show(tr("Warning".cstring), tr("There are no misspellings, but some words seem to be wrong.".cstring).toJs + (if advance: "".cstring else: " ".cstring).toJs + tr("Try to use [Advanced Check]".cstring).toJs, Notify.msgtype.warning)
         if mnemonicFulfill:
           viewSelector(MnemonicFulfill)
@@ -547,11 +554,11 @@ proc fixWord(input_id: cstring, idx: int, word: cstring): proc() =
 proc changeLanguage(ev: Event; n: VNode) =
   var langId = cast[int](n.value)
   if langId == 0:
-    bip39_wordlist = bip39.wordlists.english
+    bip39_wordlist = enjs
     wl_select = wl_english
     wl_select_id = 0
   elif langId == 1:
-    bip39_wordlist = bip39.wordlists.japanese
+    bip39_wordlist = jajs
     wl_select = wl_japanese
     wl_select_id = 1
   autocompleteWords = @[]
@@ -1655,7 +1662,7 @@ proc afterScript(data: RouterData) =
       if href.to(bool) and href.startsWith("#".cstring).to(bool):
         var cb = proc(e: JsObject) =
           e.preventDefault()
-          var href = this.getAttribute("href".cstring)
+          var href = e.currentTarget.getAttribute("href".cstring)
           if href == "#section2".toJs:
             goSection(href.to(cstring), page_scroll_done)
           elif href == "#section3".toJs:
