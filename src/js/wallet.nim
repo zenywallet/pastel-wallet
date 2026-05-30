@@ -383,7 +383,10 @@ proc Wallet*() {.exportc.} =
       return true
     except:
       let e = getCurrentException()
-      console.log(e.name & ": ".cstring & e.msg.cstring)
+      if e.isNull():
+        {.emit: "console.log(lastJSError.name + \": \" + lastJSError.message);".}
+      else:
+        console.log(e.name & ": ".cstring & e.msg.cstring)
       return false
 
   self.setSeedCard = proc(cardInfos: JsObject) =
