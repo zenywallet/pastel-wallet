@@ -10,6 +10,7 @@ import zenyjs/bip39
 import zenyjs/bip39_en
 import zenyjs/bip39_ja
 import zenyjs/jsuint64
+import zenyjs/utils
 import stor as storMod
 import base58
 
@@ -292,7 +293,13 @@ proc Wallet*() {.exportc.} =
       for i in 0..<b1.length.to(int):
         b1[i] ^= b2[i]
 
-  proc sha256d(data: JsObject): JsObject = coin.crypto.sha256(coin.crypto.sha256(data))
+  proc sha256d(data: JsObject): Uint8Array =
+    if jsTypeOf(data) == "string".cstring:
+      sha256d(data.to(cstring).toBytes)
+    elif jsTypeOf(data) == "object".cstring:
+      sha256d(data.to(Uint8Array).toBytes)
+    else:
+      raise
 
   proc buf2hex(buffer: JsObject): cstring =
     Array.prototype.map.call(newUint8Array(buffer), proc(x: JsObject): JsObject = ("00".toJs + x.toString(16)).slice(-2)).join("").to(cstring)
