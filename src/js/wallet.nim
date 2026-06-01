@@ -345,6 +345,7 @@ proc Wallet*() {.exportc.} =
     var salt = stor.get_salt(true)
     if not salt.to(bool):
       return false
+
     var p = cipher.yespower_n4r32(sha256d(phrase), 32)
     xc(p, salt)
     p = cipher.yespower_n4r32(sha256d(p), 32)
@@ -517,7 +518,10 @@ proc Wallet*() {.exportc.} =
       tx.addOutput(send_address, value)
     except:
       let e = getCurrentException()
-      console.log(e.name & ": ".cstring & e.msg.cstring)
+      if e.isNull():
+        {.emit: "console.log(lastJSError.name + \": \" + lastJSError.message);".}
+      else:
+        console.log(e.name & ": ".cstring & e.msg.cstring)
       cb(JsObject{err: ErrSend.INVALID_ADDRESS})
       return
     if result_out == 1:
@@ -649,7 +653,10 @@ proc Wallet*() {.exportc.} =
         tx.addOutput(send_address, value)
       except:
         let e = getCurrentException()
-        console.log(e.name & ": ".cstring & e.msg.cstring)
+        if e.isNull():
+          {.emit: "console.log(lastJSError.name + \": \" + lastJSError.message);".}
+        else:
+          console.log(e.name & ": ".cstring & e.msg.cstring)
         cb(JsObject{err: ErrSend.INVALID_ADDRESS})
         return
       if result_out == 1:
