@@ -421,7 +421,9 @@ proc Wallet*() {.exportc.} =
       else:
         mix = sbuf
       if mix.to(bool):
-        var kp = self.getHdNodeKeyPairs(buf2hex(mix))
+        var ua = newUint8Array(mix)
+        var uab = Buffer.from(ua.buffer)
+        var kp = self.getHdNodeKeyPairs(uab)
         self.addShieldedKey(kp)
 
   self.setMnemonic = proc(words: cstring, lang_id: int) =
