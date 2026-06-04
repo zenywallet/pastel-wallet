@@ -155,7 +155,9 @@ proc Wallet*() {.exportc.} =
         if utxo.address != p2wpkh:
           var p2sh = address_caches[idx]["p2sh".cstring]
           if not p2sh.to(bool):
-            p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh, network: network}).address
+            var child = u_nodes[xpub.to(cstring)].derive(utxo.change).derive(utxo.index)
+            var p2wpkh_obj = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network})
+            p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh_obj, network: network}).address
             address_caches[idx]["p2sh".cstring] = p2sh
           if utxo.address != p2sh:
             error("invalid utxo address".cstring)
@@ -165,10 +167,11 @@ proc Wallet*() {.exportc.} =
       var p2pkh = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network}).address
       address_caches[idx] = JsObject{child: child, p2pkh: p2pkh}
       if utxo.address != p2pkh:
-        var p2wpkh = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network}).address
+        var p2wpkh_obj = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network})
+        var p2wpkh = p2wpkh_obj.address
         address_caches[idx]["p2wpkh".cstring] = p2wpkh
         if utxo.address != p2wpkh:
-          var p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh, network: network}).address
+          var p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh_obj, network: network}).address
           address_caches[idx]["p2sh".cstring] = p2sh
           if utxo.address != p2sh:
             error("invalid utxo address".cstring)
