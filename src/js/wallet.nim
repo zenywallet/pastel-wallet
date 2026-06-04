@@ -5,7 +5,7 @@ import std/macros
 import std/strutils
 import zenyjs
 import zenyjs/core
-#import zenyjs/bip32 as zenyjs_bip32
+import zenyjs/bip32 as zenyjs_bip32
 import zenyjs/bip39
 import zenyjs/bip39_en
 import zenyjs/bip39_ja
@@ -38,7 +38,6 @@ proc Wallet*() {.exportc.} =
   var Buffer = coinlibs.Buffer
   var network = coin.networks[pastel.config.network.to(cstring)]
   var stor = newStor()
-  var u_hdpath = "m/44'/123'/0'".cstring
 
   zenyjs.ready:
     echo "zenyjs.ready"
@@ -86,34 +85,32 @@ proc Wallet*() {.exportc.} =
     seeds = seeds.concat(nonstd_seeds)
     seeds
 
-  self.setHdpath = proc(hdpath: cstring) = u_hdpath = hdpath
+  self.getHdNodeKeyPairs = proc(seed: JsObject): JsObject =
+    var m = zenyjs_bip32.master(seed.to(Uint8Array))
+    var n = m.hardened(44).hardened(123).hardened(0)
+    JsObject{priv: n.xprv(), pub: n.xpub()}
 
-  self.getHdNodeKeyPairs = proc(seed: JsObject, hdpath: cstring): JsObject =
-    var node = if jsTypeof(seed) == "string": bip32.fromSeedHex(seed, network) else: bip32.fromSeed(seed, network)
-    var child = node.derivePath(hdpath.toJs or u_hdpath.toJs)
-    JsObject{priv: child.toBase58(), pub: child.neutered().toBase58()}
+  self.getHdNodePrivate = proc(seed: JsObject): cstring =
+    var m = zenyjs_bip32.master(seed.to(Uint8Array))
+    var n = m.hardened(44).hardened(123).hardened(0)
+    n.xprv()
 
-  self.getHdNodePrivate = proc(seed: JsObject, hdpath: cstring): JsObject =
-    var node = if jsTypeof(seed) == "string": bip32.fromSeedHex(seed, network) else: bip32.fromSeed(seed, network)
-    var child = node.derivePath(hdpath.toJs or u_hdpath.toJs)
-    child.toBase58()
+  self.getHdNodePublic = proc(seed: JsObject): cstring =
+    var m = zenyjs_bip32.master(seed.to(Uint8Array))
+    var n = m.hardened(44).hardened(123).hardened(0)
+    n.xpub()
 
-  self.getHdNodePublic = proc(seed: JsObject, hdpath: cstring): JsObject =
-    var node = if jsTypeof(seed) == "string": bip32.fromSeedHex(seed, network) else: bip32.fromSeed(seed, network)
-    var child = node.derivePath(hdpath.toJs or u_hdpath.toJs)
-    child.neutered().toBase58()
-
-  self.resetXpubFromSeed = proc(seed: JsObject, hdpath: cstring) =
+  self.resetXpubFromSeed = proc(seed: JsObject) =
     stor.del_xpubs()
-    var xpub = self.getHdNodePublic(seed, hdpath.toJs or u_hdpath.toJs)
+    var xpub = self.getHdNodePublic(seed)
     stor.add_xpub(xpub)
 
-  self.resetXpubFromMnemonic = proc(mnemonic: cstring, mlang: int, password: cstring, hdpath: cstring) =
+  self.resetXpubFromMnemonic = proc(mnemonic: cstring, mlang: int, password: cstring) =
     var seeds = self.getMnemonicToSeeds(mnemonic, mlang, password)
     stor.del_xpubs()
     for i in 0..<seeds.length.to(int):
       var seed = seeds[i].seed
-      var xpub = self.getHdNodePublic(seed, hdpath.toJs or u_hdpath.toJs)
+      var xpub = self.getHdNodePublic(seed)
       stor.add_xpub(xpub)
 
   proc error(msg: cstring) = console.log("ERROR: ".cstring & msg)
