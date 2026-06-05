@@ -66,7 +66,7 @@ proc Wallet*() {.exportc.} =
       seeds.push(JsObject{seed: seed, type: 101})
       if mlang == 0:
         var m2 = bip39.entropyToMnemonic(entropy, getWordList(1))
-        var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(m2), passphrase = "")
+        var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(m2), passphrase = "".cstring)
         var seed2 = Buffer.from(bip39Seed.toUint8Array.buffer)
         seeds.push(JsObject{seed: seed2, type: 102})
     seeds
@@ -77,7 +77,7 @@ proc Wallet*() {.exportc.} =
     var ma: Array[string]
     for s in ($m.to(cstring)).split():
       ma.add(s)
-    var passphrase = if password.toJs.to(bool): $password else: ""
+    var passphrase = if password.toJs.to(bool): password else: "".cstring
     var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(ma), passphrase)
     var seed = Buffer.from(bip39Seed.toUint8Array.buffer)
     seeds.push(JsObject{seed: seed, type: if password.toJs.to(bool): 2 else: 1})
