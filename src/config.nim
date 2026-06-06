@@ -1,11 +1,11 @@
 # Copyright (c) 2020 zenywallet
 
+#{.define: ROCKSDB_DEFAULT_COMPRESSION.}
+#{.define: PASTEL_BITZENY_JP.}
+
 import zenyjs
 import zenyjs/core
 import zenyjs/address
-
-#{.define: ROCKSDB_DEFAULT_COMPRESSION.}
-#{.define: PASTEL_BITZENY_JP.}
 
 networks:
   BitZeny_mainnet:
