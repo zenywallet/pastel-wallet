@@ -11,8 +11,10 @@ import zenyjs/bip39_en
 import zenyjs/bip39_ja
 import zenyjs/jsuint64
 import zenyjs/utils
+import zenyjs/address except networks
 import stor as storMod
 import base58
+import ../config
 
 const en* = bip39_en.words
 const ja* = bip39_ja.words
@@ -118,7 +120,6 @@ proc Wallet*() {.exportc.} =
   var u_xpubs = [].toJs
   var u_utxos = [].toJs
   var u_unconfs = [].toJs
-  var u_nodes = JsObject{}
 
   self.getXpubs = proc(): JsObject =
     u_xpubs = stor.get_xpubs()
@@ -138,37 +139,34 @@ proc Wallet*() {.exportc.} =
     if not xpub.to(bool):
       error("xpub not found".cstring)
       return false
-    if not u_nodes[xpub.to(cstring)].to(bool):
-      u_nodes[xpub.to(cstring)] = bip32.fromBase58(xpub, network)
     var idx = (utxo.xpub_idx + "-".toJs + utxo.change + "-".toJs + utxo.index).to(cstring)
     var cache = address_caches[idx]
     if cache.toJs.to(bool):
       if utxo.address != cache.p2pkh:
         var p2wpkh = address_caches[idx]["p2wpkh".cstring]
         if not p2wpkh.to(bool):
-          var child = u_nodes[xpub.to(cstring)].derive(utxo.change).derive(utxo.index)
-          p2wpkh = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network}).address
+          var n = zenyjs_bip32.node(xpub.to(cstring)).derive(utxo.change.to(uint32)).derive(utxo.index.to(uint32))
+          p2wpkh = n.nativeSegwitAddress(config.network).toJs
+
           address_caches[idx]["p2wpkh".cstring] = p2wpkh
         if utxo.address != p2wpkh:
           var p2sh = address_caches[idx]["p2sh".cstring]
           if not p2sh.to(bool):
-            var child = u_nodes[xpub.to(cstring)].derive(utxo.change).derive(utxo.index)
-            var p2wpkh_obj = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network})
-            p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh_obj, network: network}).address
+            var n = zenyjs_bip32.node(xpub.to(cstring)).derive(utxo.change.to(uint32)).derive(utxo.index.to(uint32))
+            p2sh = n.segwitAddress(config.network).toJs
             address_caches[idx]["p2sh".cstring] = p2sh
           if utxo.address != p2sh:
             error("invalid utxo address".cstring)
             return false
     else:
-      var child = u_nodes[xpub.to(cstring)].derive(utxo.change).derive(utxo.index)
-      var p2pkh = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network}).address
-      address_caches[idx] = JsObject{child: child, p2pkh: p2pkh}
+      var n = zenyjs_bip32.node(xpub.to(cstring)).derive(utxo.change.to(uint32)).derive(utxo.index.to(uint32))
+      var p2pkh = n.address(config.network).toJs
+      address_caches[idx] = JsObject{p2pkh: p2pkh}
       if utxo.address != p2pkh:
-        var p2wpkh_obj = coin.payments.p2wpkh(JsObject{pubkey: child.publicKey, network: network})
-        var p2wpkh = p2wpkh_obj.address
+        var p2wpkh = n.nativeSegwitAddress(config.network).toJs
         address_caches[idx]["p2wpkh".cstring] = p2wpkh
         if utxo.address != p2wpkh:
-          var p2sh = coin.payments.p2sh(JsObject{redeem: p2wpkh_obj, network: network}).address
+          var p2sh = n.segwitAddress(config.network).toJs
           address_caches[idx]["p2sh".cstring] = p2sh
           if utxo.address != p2sh:
             error("invalid utxo address".cstring)
@@ -268,8 +266,6 @@ proc Wallet*() {.exportc.} =
     var xpub = u_xpubs[0]
     if not xpub.to(bool):
      xpub = self.getXpubs()[0]
-    if not u_nodes[xpub.to(cstring)].to(bool):
-      u_nodes[xpub.to(cstring)] = bip32.fromBase58(xpub, network)
     var addrs = [].toJs
     var data = u_unusedList
     var datatmp = [].toJs
@@ -283,9 +279,9 @@ proc Wallet*() {.exportc.} =
       for i in 1..count - data.length.to(int):
         datatmp.push(last + i)
     for i in 0..<datatmp.length.to(int):
-      var child = u_nodes[xpub.to(cstring)].derive(0).derive(datatmp[i])
-      var p2pkh = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network})
-      addrs.push(p2pkh.address)
+      var n = zenyjs_bip32.node(xpub.to(cstring)).derive(0.uint32).derive(datatmp[i].to(uint32))
+      var p2pkh = n.address(config.network).toJs
+      addrs.push(p2pkh)
     cb(addrs)
 
   proc xc(b1, b2: JsObject) =
@@ -736,10 +732,8 @@ proc Wallet*() {.exportc.} =
       if data.length.to(int) > 0:
         var index = data[0]
         var xpub = u_xpubs[0]
-        if xpub.to(bool) and not u_nodes[xpub.to(cstring)].to(bool):
-          u_nodes[xpub.to(cstring)] = bip32.fromBase58(xpub, network)
-        var child = u_nodes[xpub.to(cstring)].derive(1).derive(index)
-        var change_address = coin.payments.p2pkh(JsObject{pubkey: child.publicKey, network: network}).address.to(cstring)
+        var n = zenyjs_bip32.node(xpub.to(cstring)).derive(1.uint32).derive(index.to(uint32))
+        var change_address = n.address(config.network)
         send_lazy_internal(address, change_address, value, proc(ret: JsObject) =
           send_busy = false
           cb(ret)
