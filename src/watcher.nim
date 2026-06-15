@@ -229,7 +229,7 @@ proc updateAddressInfos(updateAddrInfos: seq[UpdateAddrInfo]) =
 
     for a in updateAddrInfos:
       if addrBalances.hasKey(a.address):
-        var cur_log_sequence = 0'u64
+        var cur_log_sequence = a.sequence
         while true:
           var addrlogs = blockstor.getAddrlog(a.address, (gte: cur_log_sequence,
                                               limit: 1000, reverse: 0,
