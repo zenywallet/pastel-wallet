@@ -441,7 +441,8 @@ proc Wallet*() {.exportc.} =
     TX_FAILED: 6,
     TX_TIMEOUT: 7,
     SERVER_ERROR: 8,
-    SERVER_TIMEOUT: 9
+    SERVER_TIMEOUT: 9,
+    TX_TOO_BIG: 10
   }
   self.ERR_SEND = ErrSend
 

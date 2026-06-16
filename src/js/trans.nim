@@ -149,6 +149,7 @@ addTranslation(Language.jaJP, "Failed to send coins. Busy.", "コインの送信
 addTranslation(Language.jaJP, "Server is not responding. Coins may have been sent.", "サーバーが応答しません。 コインの送信に成功している可能性もあります。")
 addTranslation(Language.jaJP, "Failed to send coins. Server error.", "コインの送信に失敗しました。 サーバーエラー")
 addTranslation(Language.jaJP, "Failed to send coins. Server is not responding.", "サーバーが応答しません。")
+addTranslation(Language.jaJP, "Too many balls are being sent at once.", "一度に送信するボールの数が多すぎます。")
 addTranslation(Language.jaJP, "Amount is invalid. The decimal places is too long. Please set it 8 or less.", "数量が不正です。 小数点以下が長すぎます。 小数点以下の桁数は8以内にしてください。")
 addTranslation(Language.jaJP, "Amount is invalid.", "数量が不正です。")
 addTranslation(Language.jaJP, "Failed to lock keys.", "ロックに失敗しました。")

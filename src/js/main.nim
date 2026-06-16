@@ -1051,6 +1051,8 @@ proc initSendForm() =
             Notify.show(tr("Error".cstring), tr("Failed to send coins. Server error.".cstring), Notify.msgtype.error)
           elif result.err == ErrSend.SERVER_TIMEOUT:
             Notify.show(tr("Error".cstring), tr("Failed to send coins. Server is not responding.".cstring), Notify.msgtype.error)
+          elif result.err == ErrSend.TX_TOO_BIG:
+            Notify.show(tr("Error".cstring), tr("Too many balls are being sent at once.".cstring), Notify.msgtype.error)
           else:
             Notify.show(tr("Error".cstring), tr("Failed to send coins.".cstring), Notify.msgtype.error)
           jq("#btn-tx-send".cstring).removeClass("loading".cstring)
