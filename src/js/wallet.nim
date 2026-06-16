@@ -3,6 +3,7 @@
 import std/jsffi
 import std/macros
 import std/strutils
+import std/json
 import zenyjs
 import zenyjs/core
 import zenyjs/bip32 as zenyjs_bip32
@@ -12,6 +13,9 @@ import zenyjs/bip39_ja
 import zenyjs/jsuint64
 import zenyjs/utils
 import zenyjs/address except networks
+import zenyjs/tx as txlib
+import zenyjs/eckey
+import zenyjs/seed
 import stor as storMod
 import base58
 import ../config
@@ -568,6 +572,82 @@ proc Wallet*() {.exportc.} =
 
     cb(JsObject{err: ErrSend.FAILED})
 
+  proc send_internal2(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
+    template incNonce(nonce: typed) =
+      for i in 0..<32:
+        inc(nonce[i])
+        if nonce[i] != 0: break
+
+    var in_value = newUint64(0)
+    var utxo_count = 0
+    var utxos = u_utxos.concat(u_unconfs)
+    var privNodes: seq[HDNode]
+    var signCount = 0
+    var tx = newTx()
+    tx.ver = 2'i32
+    while true:
+      var utxo = utxos.shift()
+      if utxo.to(bool):
+        var xpub = shieldedKeys.priv[utxo.xpub_idx.to(int)]
+        var n = zenyjs_bip32.node(xpub.to(cstring)).derive(utxo.change.to(uint32)).derive(utxo.index.to(uint32))
+        privNodes.add(n)
+        tx.ins.add (tx: Hash(Hex($utxo.txid.to(cstring))),
+                    n: utxo.n.to(uint32),
+                    sig: Sig(address.getScript(config.network, utxo.address.to(cstring))),
+                    sequence: 0xffffffff'u32)
+        in_value.add(newUint64(String(utxo.value)))
+        inc(utxo_count)
+
+        template txSignAndSend() {.dirty.} =
+          var txSignHash = sha256d((tx, SIGHASH_ALL.uint32).toBytes)
+          for i, n in privNodes:
+            var signDer = sign(n.prv, txSignHash)
+            inc(signCount)
+            if signDer.len > 70: # 148-71, 147-70, 146-69, 145-68
+              var nonce = cryptSeed(32)
+              while true:
+                signDer = sign(n.prv, txSignHash, nonce)
+                inc(signCount)
+                if signDer.len <= 70: break
+                incNonce(nonce)
+            tx.ins[i].sig = Sig(PushData(signDer, SIGHASH_ALL.uint8), PushData(n.prv.pub))
+          echo (%tx).pretty
+          echo tx.toBytes
+          var rawtx = tx.toBytes.toHex.toJs
+          send_tx(rawtx, proc(resultData: JsObject) = cb(resultData))
+
+        if in_value.gt(value).to(bool):
+          var baseSize = if utxo_count < 253: 10 else: 12
+          var sub = in_value.clone().subtract(value).to(Uint64)
+          var sign_fee = newUint64((147 * utxo_count + 34 * 2 + baseSize).uint)
+          var fee1 = newUint64((147 * utxo_count + 34 * 2 + baseSize + 546).uint)
+          if sub.gt(fee1).to(bool) or sub.eq(fee1).to(bool):
+            var change_sub = sub.clone().subtract(sign_fee).to(Uint64)
+            tx.outs.add (value: value.uint64, script: address.getScript(config.network, send_address))
+            tx.outs.add (value: change_sub.uint64, script: address.getScript(config.network, change_address))
+            txSignAndSend()
+            break
+          else:
+            var fee2 = newUint64((147 * utxo_count + 34 + baseSize).uint)
+            if sub.gt(fee2).to(bool) or sub.eq(fee2).to(bool):
+              if utxos.length.to(int) > 0:
+                var nextBaseSize = if utxo_count + 1 < 253: 10 else: 12
+                var fee3 = newUint64((147 * utxo_count + 34 * 2 + nextBaseSize + 147).uint)
+                if sub.lt(fee3).to(bool):
+                  tx.outs.add (value: value.uint64, script: address.getScript(config.network, send_address))
+                  txSignAndSend()
+                  break
+              else:
+                tx.outs.add (value: value.uint64, script: address.getScript(config.network, send_address))
+                txSignAndSend()
+                break
+      else:
+        if utxo_count > 679:
+          cb(JsObject{err: ErrSend.TX_TOO_BIG})
+        else:
+          cb(JsObject{err: ErrSend.INSUFFICIENT_BALANCE})
+        break
+
   proc send_lazy_internal(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
     var lazy_time = 2
     var tx = newTransactionBuilder(coin, network)
@@ -735,7 +815,7 @@ proc Wallet*() {.exportc.} =
         var xpub = u_xpubs[0]
         var n = zenyjs_bip32.node(xpub.to(cstring)).derive(1.uint32).derive(index.to(uint32))
         var change_address = n.address(config.network)
-        send_lazy_internal(address, change_address, value, proc(ret: JsObject) =
+        send_internal2(address, change_address, value, proc(ret: JsObject) =
           send_busy = false
           cb(ret)
         )
@@ -752,9 +832,9 @@ proc Wallet*() {.exportc.} =
   proc get_safecount(): int =
     var safe_size = newUint64("100000".cstring)
     var safe_utxo_count = 0
-    var size = newUint64(34 + 10)
+    var size = newUint64(34 + 12)
     while true:
-      size.add(newUint64(148))
+      size.add(newUint64(147))
       if safe_size.gt(size).to(bool):
         inc(safe_utxo_count)
       else:
@@ -777,7 +857,7 @@ proc Wallet*() {.exportc.} =
         inc(count)
       else:
         break
-    var fee = newUint64((148 * count + 34 + 10).uint)
+    var fee = newUint64((147 * count + 34 + (if count < 253: 10 else: 12)).uint)
     if in_value.gt(fee).to(bool):
       return JsObject{err: 0, value: in_value.subtract(fee).to(Uint64), count: count, all: all_count, max: safe_utxo_count, conf: conf_count, unconf: unconf_count}
     else:
@@ -803,19 +883,19 @@ proc Wallet*() {.exportc.} =
       inc(utxo_count)
       if in_value.gt(value).to(bool):
         var sub = in_value.clone().subtract(value).to(Uint64)
-        var fee1 = newUint64((148 * utxo_count + 34 * 2 + 10 + 546).uint)
+        var fee1 = newUint64((147 * utxo_count + 34 * 2 + (if utxo_count < 253: 10 else: 12) + 546).uint)
         var chk_eq = sub.eq(fee1).to(bool)
         if sub.gt(fee1).to(bool) or chk_eq:
           result_out = 2
           eq = chk_eq
           break
         else:
-          var fee2 = newUint64((148 * utxo_count + 34 + 10).uint)
+          var fee2 = newUint64((147 * utxo_count + 34 + (if utxo_count < 253: 10 else: 12)).uint)
           var chk_eq2 = sub.eq(fee2).to(bool)
           if sub.gt(fee2).to(bool) or chk_eq2:
             result_out = 1
             eq = chk_eq2
-            var fee3 = newUint64((148 * utxo_count + 34 * 2 + 10 + 148).uint)
+            var fee3 = newUint64((147 * utxo_count + 34 * 2 + (if utxo_count < 253: 10 else: 12) + 147).uint)
             if sub.lt(fee3).to(bool):
               break
     if result_out != 0:
