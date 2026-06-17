@@ -8,10 +8,7 @@ import std/times
 import std/cpuinfo
 import caprese
 import caprese/bearssl/hash
-import caprese/server_types
-import caprese/hashtable
 import caprese/bytes
-import caprese/arraylib
 import templates/layout_base
 import base_css
 import seed_html
