@@ -1,8 +1,5 @@
 var TradeLogs = (function() {
   var cipher;
-  var coin;
-  var network;
-  var crypto;
   var _height = 0;
 
   function conv_coin(uint64_val) {
@@ -314,9 +311,6 @@ var TradeLogs = (function() {
 
   TradeLogs.start = function() {
     cipher = cipher || pastel.cipher;
-    coin = coin || coinlibs.coin;
-    network = network || coin.networks[pastel.config.network];
-    crypto = crypto || window.crypto || window.msCrypto;
     if(!$('#tradelogs').length) {
       return;
     }
