@@ -68,12 +68,12 @@ proc Wallet*() {.exportc.} =
       for s in ($m.to(cstring)).split():
         ma.add(s)
       var entropy = bip39.mnemonicToEntropy(ma, getWordList(mlang))
-      var seed = Buffer.from(entropy.toUint8Array.buffer)
+      var seed = entropy.toUint8Array.toJs
       seeds.push(JsObject{seed: seed, type: 101})
       if mlang == 0:
         var m2 = bip39.entropyToMnemonic(entropy, getWordList(1))
         var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(m2), passphrase = "".cstring)
-        var seed2 = Buffer.from(bip39Seed.toUint8Array.buffer)
+        var seed2 = bip39Seed.toUint8Array.toJs
         seeds.push(JsObject{seed: seed2, type: 102})
     seeds
 
@@ -85,7 +85,7 @@ proc Wallet*() {.exportc.} =
       ma.add(s)
     var passphrase = if password.toJs.to(bool): password else: "".cstring
     var bip39Seed = bip39.mnemonicToSeed(bip39.normalizeMnemonic(ma), passphrase)
-    var seed = Buffer.from(bip39Seed.toUint8Array.buffer)
+    var seed = bip39Seed.toUint8Array.toJs
     seeds.push(JsObject{seed: seed, type: if password.toJs.to(bool): 2 else: 1})
     var nonstd_seeds = self.getNonStandardMnemonicToSeeds(mnemonic, mlang)
     seeds = seeds.concat(nonstd_seeds)
@@ -419,8 +419,7 @@ proc Wallet*() {.exportc.} =
         mix = sbuf
       if mix.to(bool):
         var ua = newUint8Array(mix)
-        var uab = Buffer.from(ua.buffer)
-        var kp = self.getHdNodeKeyPairs(uab)
+        var kp = self.getHdNodeKeyPairs(ua.toJs)
         self.addShieldedKey(kp)
 
   self.setMnemonic = proc(words: cstring, lang_id: int) =
