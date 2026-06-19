@@ -11,9 +11,9 @@ import wallet
 import zenyjs
 import zenyjs/core
 import zenyjs/bip39
+import zenyjs/deoxy
 import base58
 import pastel as pastelMod
-import deoxy
 import std/asyncjs
 
 var pastel {.importc, nodecl.}: JsObject
