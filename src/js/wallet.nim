@@ -26,23 +26,16 @@ const ja* = bip39_ja.words
 type
   WalletError = object of CatchableError
 
-var coinlibs {.importc, nodecl.}: JsObject
 var pastel {.importc, nodecl.}: JsObject
 var Notify {.importc, nodecl.}: JsObject
-var network {.importc, nodecl.}: JsObject
 
 proc mnemonic_replace_trim(s: cstring): JsObject {.importcpp: "#.replace(/[ 　\\n\\r]+/g, ' ').trim()".} # /[ \u3000\n\r]+/g
 proc match_regexp2(s: cstring): JsObject {.importcpp: "#.match(/.{2}/g)".}
 proc `^=`(x, y: JsObject): JsObject {.importjs: "(# ^= #)", discardable.}
 proc newUint64*(val: SomeSignedInt): Uint64 = newUint64(cstring($val.uint))
-proc newTransactionBuilder(coin, network: JsObject): JsObject {.importcpp: "new #.TransactionBuilder(#)".}
 
 proc Wallet*() {.exportc.} =
   var self = this
-  var bip32 = coinlibs.bip32
-  var coin = coinlibs.coin
-  var Buffer = coinlibs.Buffer
-  var network = coin.networks[pastel.config.network.to(cstring)]
   var stor = newStor()
 
   zenyjs.ready:
@@ -476,101 +469,6 @@ proc Wallet*() {.exportc.} =
       result_cb = proc(ignore: JsObject) = discard
       cb(JsObject{err: ErrSend.TX_FAILED, res: jsNull})
 
-  proc send_internal(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
-    var tx = newTransactionBuilder(coin, network)
-    var in_value = newUint64(0)
-    var sign_utxos = [].toJs
-    var utxo_count = 0
-    var result_out = 0
-
-    for i in 0..<u_utxos.length.to(int):
-      var utxo = u_utxos[i]
-      tx.addInput(utxo.txid, utxo.n)
-      in_value.add(newUint64(String(utxo.value)))
-      sign_utxos.push(utxo)
-      inc(utxo_count)
-
-      if in_value.gt(value).to(bool):
-        var sub = in_value.clone().subtract(value).to(Uint64)
-        var fee1 = newUint64(cstring($(148 * utxo_count + 34 * 2 + 10 + 546)))
-        if sub.gt(fee1).to(bool) or sub.eq(fee1).to(bool):
-          result_out = 2
-          break
-        else:
-          var fee2 = newUint64(cstring($(148 * utxo_count + 34 + 10)))
-          if sub.gt(fee2).to(bool) or sub.eq(fee2).to(bool):
-            result_out = 1
-            var fee3 = newUint64(cstring($(148 * utxo_count + 34 * 2 + 10 + 148)))
-            if sub.lt(fee3).to(bool):
-              break
-    if result_out == 0:
-      cb(JsObject{err: ErrSend.INSUFFICIENT_BALANCE})
-      return
-
-    var priv_nodes = JsObject{}
-    var keys = JsObject{}
-    for i in 0..<sign_utxos.length.to(int):
-      var s = sign_utxos[i]
-      if not priv_nodes[s.xpub_idx.to(int)].to(bool):
-        priv_nodes[s.xpub_idx.to(int)] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx.to(int)], network)
-      var child = priv_nodes[s.xpub_idx.to(int)].derive(s.change).derive(s.index)
-      keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)] = child
-
-    try:
-      tx.addOutput(send_address, value)
-    except:
-      let e = getCurrentException()
-      if e.isNull():
-        {.emit: "console.log(lastJSError.name + \": \" + lastJSError.message);".}
-      else:
-        console.log(e.name & ": ".cstring & e.msg.cstring)
-      cb(JsObject{err: ErrSend.INVALID_ADDRESS})
-      return
-    if result_out == 1:
-      for i in 0..<sign_utxos.length.to(int):
-        var s = sign_utxos[i]
-        var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
-        tx.sign(i, key)
-      var rawtx = tx.build().toHex()
-      var total_bytes = rawtx.length.to(int) div 2
-      var fee = in_value.clone().subtract(value).to(Uint64)
-      send_tx(rawtx, proc(resultData: JsObject) = cb(resultData))
-      return
-
-    var change_value = in_value.clone().subtract(value).to(Uint64)
-    var fee_low = 147 * utxo_count + 34 * 2 + 10
-    var fee_high = 148 * utxo_count + 34 * 2 + 10
-    var fee_mid = Math.round(147.5 * utxo_count.float64 + 34 * 2 + 10).to(int)
-    var fee_start = fee_mid - Math.ceil(1000 / utxo_count).to(int)
-    if fee_start < fee_low:
-      fee_start = fee_low
-
-    var better_tx = jsNull
-    var better_size = 0
-    var better_fee = 0
-    for fee in fee_start..fee_high:
-      var change_sub = change_value.clone().subtract(newUint64(fee.uint)).to(Uint64)
-      tx.addOutput(change_address, change_sub)
-      for i in 0..<sign_utxos.length.to(int):
-        var s = sign_utxos[i]
-        var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
-        tx.sign(i, key)
-      var rawtx = tx.build().toHex()
-      var total_bytes = rawtx.length.to(int) div 2
-
-      if fee >= total_bytes:
-        better_tx = rawtx
-        better_size = total_bytes
-        better_fee = fee
-        break
-      tx.removeOutput(1)
-      tx.removeSign()
-    if better_tx != jsNull:
-      send_tx(better_tx, proc(resultData: JsObject) = cb(resultData))
-      return
-
-    cb(JsObject{err: ErrSend.FAILED})
-
   proc send_internal2(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
     template incNonce(nonce: typed) =
       for i in 0..<32:
@@ -646,151 +544,6 @@ proc Wallet*() {.exportc.} =
         else:
           cb(JsObject{err: ErrSend.INSUFFICIENT_BALANCE})
         break
-
-  proc send_lazy_internal(send_address: cstring, change_address: cstring, value: Uint64, cb: proc(data: JsObject)) =
-    var lazy_time = 2
-    var tx = newTransactionBuilder(coin, network)
-    var in_value = newUint64(0)
-    var sign_utxos = [].toJs
-    var utxo_count = 0
-    var result_out = 0
-
-    var sign_worker_sign_utxos = [].toJs
-    var sign_i = 0
-    var better_tx = jsNull
-    var better_size = 0
-    var better_fee = 0
-    var sign_fee = 0
-    var sign_fee_high = 0
-    var keys = JsObject{}
-    proc sign_worker3()
-
-    proc sign_worker4() =
-      var s = sign_worker_sign_utxos.shift()
-      if s.to(bool):
-        var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
-        tx.sign(sign_i, key)
-        inc(sign_i)
-        setTimeout(sign_worker4, lazy_time)
-      else:
-        var rawtx = tx.build().toHex()
-        var total_bytes = rawtx.length.to(int) div 2
-
-        if sign_fee >= total_bytes:
-          better_tx = rawtx
-          better_size = total_bytes
-          better_fee = sign_fee
-          send_tx(better_tx, proc(resultData: JsObject) = cb(resultData))
-        else:
-          tx.removeOutput(1)
-          tx.removeSign()
-          inc(sign_fee)
-          if sign_fee <= sign_fee_high:
-            sign_worker3()
-          else:
-            if better_tx != jsNull:
-              send_tx(better_tx, proc(resultData: JsObject) = cb(resultData))
-            else:
-              cb(JsObject{err: ErrSend.FAILED})
-
-    var change_value = newUint64(0)
-    proc sign_worker3() =
-      var change_sub = change_value.clone().subtract(newUint64(sign_fee.uint)).to(Uint64)
-      tx.addOutput(change_address, change_sub)
-      sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
-      sign_i = 0
-      sign_worker4()
-
-    proc sign_worker2() =
-      change_value = in_value.clone().to(Uint64).subtract(value).to(Uint64)
-      var fee_low = 147 * utxo_count + 34 * 2 + 10
-      var fee_high = 148 * utxo_count + 34 * 2 + 10
-      var fee_mid = Math.round(147.5 * utxo_count.float64 + 34 * 2 + 10)
-      var fee_start = (fee_mid - Math.ceil(1000 / utxo_count)).to(int)
-      if fee_start < fee_low:
-        fee_start = fee_low
-      sign_fee = fee_start
-      sign_fee_high = fee_high
-      sign_worker3()
-
-    proc sign_worker() =
-      var s = sign_worker_sign_utxos.shift()
-      if s.to(bool):
-        var key = keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)]
-        tx.sign(sign_i, key)
-        inc(sign_i)
-        setTimeout(sign_worker, lazy_time)
-      else:
-        var rawtx = tx.build().toHex()
-        var total_bytes = rawtx.length.to(int) div 2
-        var fee = in_value.clone().subtract(value).to(Uint64)
-        send_tx(rawtx, proc(resultData: JsObject) = cb(resultData))
-
-    proc addoutput_worker() =
-      try:
-        tx.addOutput(send_address, value)
-      except:
-        let e = getCurrentException()
-        if e.isNull():
-          {.emit: "console.log(lastJSError.name + \": \" + lastJSError.message);".}
-        else:
-          console.log(e.name & ": ".cstring & e.msg.cstring)
-        cb(JsObject{err: ErrSend.INVALID_ADDRESS})
-        return
-      if result_out == 1:
-        sign_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
-        sign_i = 0
-        sign_worker()
-      else:
-        sign_worker2()
-
-    var priv_nodes = JsObject{}
-    var keys_worker_sign_utxos = [].toJs
-    proc keys_worker() =
-      var s = keys_worker_sign_utxos.shift()
-      if s.to(bool):
-        if not priv_nodes[s.xpub_idx.to(int)].to(bool):
-          priv_nodes[s.xpub_idx.to(int)] = bip32.fromBase58(shieldedKeys.priv[s.xpub_idx.to(int)], network)
-        var child = priv_nodes[s.xpub_idx.to(int)].derive(s.change).derive(s.index)
-        keys[(s.xpub_idx + "-".toJs + s.change + "-".toJs + s.index).to(cstring)] = child
-        setTimeout(keys_worker, lazy_time)
-      else:
-        addoutput_worker()
-
-    var utxos = u_utxos.concat(u_unconfs)
-    proc addinput_worker() =
-      var utxo = utxos.shift()
-      if utxo.to(bool):
-        tx.addInput(utxo.txid, utxo.n)
-        in_value.add(newUint64(String(utxo.value)))
-        sign_utxos.push(utxo)
-        inc(utxo_count)
-
-        if in_value.gt(value).to(bool):
-          var sub = in_value.clone().subtract(value).to(Uint64)
-          var fee1 = newUint64((148 * utxo_count + 34 * 2 + 10 + 546).uint)
-          if sub.gt(fee1).to(bool) or sub.eq(fee1).to(bool):
-            result_out = 2
-            keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
-            keys_worker()
-            return
-          else:
-            var fee2 = newUint64((148 * utxo_count + 34 + 10).uint)
-            if sub.gt(fee2).to(bool) or sub.eq(fee2).to(bool):
-              result_out = 1
-              var fee3 = newUint64((148 * utxo_count + 34 * 2 + 10 + 148).uint)
-              if sub.lt(fee3).to(bool):
-                keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
-                keys_worker()
-                return
-        setTimeout(addinput_worker, lazy_time)
-      else:
-        if result_out == 0:
-          cb(JsObject{err: ErrSend.INSUFFICIENT_BALANCE})
-          return
-        keys_worker_sign_utxos = JSON.parse(JSON.stringify(sign_utxos))
-        keys_worker()
-    addinput_worker()
 
   var send_busy = false
   self.send = proc(address: cstring, value_str: cstring, cb: proc(data: JsObject)) =
