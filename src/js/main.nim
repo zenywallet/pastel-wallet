@@ -238,7 +238,6 @@ var chklist: seq[tuple[idx: int, word: cstring, flag: bool, levs: seq[cstring]]]
 var prevCheckWord: cstring = ""
 var passPhrase: cstring = ""
 
-var coinlibs {.importc, nodecl.}: JsObject
 var enjs = wallet.en.toJs
 var jajs = wallet.ja.toJs
 var bip39_wordlist = jajs
