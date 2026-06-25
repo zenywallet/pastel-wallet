@@ -14,7 +14,13 @@ import stor as storMod
 import wallet
 import zenyjs
 import zenyjs/core
+import zenyjs/bip32
 import zenyjs/bip39
+import zenyjs/utils
+import zenyjs/address
+import zenyjs/tx
+import zenyjs/eckey
+import zenyjs/seed
 import zenyjs/deoxy
 import base58
 import pastel as pastelMod
@@ -1788,8 +1794,9 @@ proc check_stream_ready() =
       check_stream_ready()
   , 50)
 
-pastelMod.ready:
-  check_stream_ready()
+zenyjs.ready:
+  pastelMod.ready:
+    check_stream_ready()
 
 if walletSetup:
   viewSelector(Wallet, true)

@@ -38,9 +38,6 @@ proc Wallet*() {.exportc.} =
   var self = this
   var stor = newStor()
 
-  zenyjs.ready:
-    echo "zenyjs.ready"
-
   template getWordList(mlang: int): untyped = (if mlang == 1: ja else: en)
 
   var MnemonicSeedType = JsObject{
