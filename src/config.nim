@@ -56,7 +56,7 @@ when not defined(js) and not defined(emscripten):
 
   macro writeConfigJs() =
     const srcDir = currentSourcePath().parentDir()
-    writeFile(srcDir / "../public/js/config.js", """
+    writeFile(srcDir / "js/config.js", """
   var pastel = pastel || {};
   pastel.config = pastel.config || {
     ws_url: '""" & WebSocketUrl & """',

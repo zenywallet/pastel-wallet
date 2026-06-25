@@ -44,9 +44,5 @@ public/js/matter.js \
 public/js/dotmatrix.js \
 public/js/balls.js \
 public/js/encoding.js \
-public/js/tradelogs.js \
-public/js/ui.js \
-public/js/config.js \
-public/js/pastel.js \
 public/js/main.js 2>&1 | cut -c 1-240
 """

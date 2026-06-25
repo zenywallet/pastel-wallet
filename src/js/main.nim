@@ -5,6 +5,10 @@ import karax / [karax, karaxdsl, vdom]
 import karax / jstrutils except `&`
 import jsffi except `&`
 import strutils
+import tradelogs
+import ui
+import config
+import pasteljs
 import trans
 import stor as storMod
 import wallet
