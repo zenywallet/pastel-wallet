@@ -22,7 +22,7 @@ import zenyjs/tx
 import zenyjs/eckey
 import zenyjs/seed
 import zenyjs/deoxy
-import base58
+import zenyjs/base58
 import pastel as pastelMod
 import std/asyncjs
 
@@ -304,7 +304,7 @@ proc cbSeedQrDone(err: int, data: cstring) =
     var seed_valid = false
     if seedCardInfo.seed.toJs.to(bool):
       var dec = base58.dec(seedCardInfo.seed)
-      if dec.to(bool) and dec.length == 32.toJs:
+      if dec.len == 32:
         seed_valid = true
     if not seed_valid:
       Notify.show(tr("Warning".cstring), tr("Unsupported seed card was scanned.".cstring), Notify.msgtype.warning)
