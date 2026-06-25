@@ -5,7 +5,7 @@ import ctrmode, murmurhash
 import zenyjs/zbar
 import zenyjs/ed25519
 import zenyjs/yespower
-import js/deoxy
+import zenyjs/deoxy
 
 var ctr: CTR
 
