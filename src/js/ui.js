@@ -610,17 +610,11 @@ function bip21reader(uri) {
     }
     var addr = a[a.length - 1];
     if(addr.length > 0 && /^[a-z0-9]+$/i.test(addr)) {
-      var coin = pastel.coin;
-      if(coin) {
-        try {
-          coin.address.toOutputScript(addr, coin.networks[pastel.config.network]);
-          result.address = addr;
-        } catch(e) {
-          result.unknown = escape_html(d_uri);
-          return result;
-        }
-      } else {
+      if(check_address(addr)) {
         result.address = addr;
+      } else {
+        result.unknown = escape_html(d_uri);
+        return result;
       }
       for(var i = 1; i < s.length; i++) {
         var p = s[i].split('=');
