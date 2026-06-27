@@ -149,8 +149,6 @@ pastel.load = function() {
         }
       }
 
-      var coin = coinlibs.coin;
-
       cipher.enc_json = function(key, json, deflate) {
         var h = cipher.setkey(key);
         var d = JSON.stringify(json);
@@ -161,7 +159,7 @@ pastel.load = function() {
           comp = d.toByteArray(false);
         }
         var encdata = new Uint8Array(comp.length);
-        var enc_iv = cipher.yespower(coin.crypto.sha256(key), 32).slice(0, 16);
+        var enc_iv = cipher.yespower(sha256s(key), 32).slice(0, 16);
         var pos = 0, next_pos = 16;
         while(next_pos < comp.length) {
           var enc = cipher.encrypt(h, enc_iv);
@@ -193,7 +191,7 @@ pastel.load = function() {
         var h = cipher.setkey(key);
         var data = new Uint8Array(encdata, 0, encdata.length);
         var decdata = new Uint8Array(data.length);
-        var dec_iv = cipher.yespower(coin.crypto.sha256(key), 32).slice(0, 16);
+        var dec_iv = cipher.yespower(sha256s(key), 32).slice(0, 16);
         var pos = 0, next_pos = 16;
         while(next_pos < data.length) {
           var dec = cipher.encrypt(h, dec_iv);
