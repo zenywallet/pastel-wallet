@@ -16,8 +16,8 @@ import zenyjs/address except networks
 import zenyjs/tx as txlib
 import zenyjs/eckey
 import zenyjs/seed
+import zenyjs/base58
 import stor as storMod
-import base58
 import ../config
 
 const en* = bip39_en.words
@@ -393,7 +393,7 @@ proc Wallet*() {.exportc.} =
     var mix: JsObject
     for i in 0..<cardInfos.length.to(int):
       var s = cardInfos[i]
-      var sbuf = base58.dec(s.seed or s.orig)
+      var sbuf = base58.dec((s.seed or s.orig).to(cstring)).toUint8Array.toJs
       if not sbuf.to(bool) and not s.seed.to(bool) and s.orig.to(bool):
         sbuf = cipher.yespower_n4r32(sha256d(s.orig), 32)
       if s.sv.to(bool) and s.sv.length.to(int) > 0:
