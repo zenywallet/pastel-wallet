@@ -36,7 +36,6 @@ java -jar bin/closure-compiler.jar --compilation_level SIMPLE \
 --js_output_file=public/js/app.js \
 public/js/cipher.js \
 public/js/uint64.min.js \
-public/js/coinlibs.js \
 public/js/jquery-3.4.1.min.js \
 public/semantic/compact.js \
 public/js/jquery-qrcode.js \

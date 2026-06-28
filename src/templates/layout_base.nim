@@ -33,7 +33,6 @@ const layout_debug* = staticHtmlDocument:
       link(rel="mask-icon", href="/safari-pinned-tab.svg", color="#5bbad5")
       script(type="text/javascript", src="/js/cipher.js")
       script(type="text/javascript", src="/js/uint64.min.js")
-      script(type="text/javascript", src="/js/coinlibs.js")
       script(type="text/javascript", src="/js/jquery-3.4.1.min.js")
       script(type="text/javascript", src="/semantic/compact.js")
       script(type="text/javascript", src="/js/jquery-qrcode.js")
