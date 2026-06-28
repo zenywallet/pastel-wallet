@@ -11,7 +11,7 @@ var zbar_stream = function(symbol, data, polygon, polysize) {}
 var deflateSentinel = new Uint8Array([0x00, 0x00, 0x00, 0xff, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff]);
 pastel.ready = function() {}
 pastel.load = function() {
-  var ready_flag = {cipher: false, coin: false};
+  var ready_flag = {cipher: false};
   var cipher = pastel.cipher || {};
   var cipherMod = {
     onRuntimeInitialized: function() {
@@ -403,7 +403,6 @@ pastel.load = function() {
   };
 
   Cipher(cipherMod).then(function() {
-    pastel.coin = coinlibs.coin;
     pastel.ready();
   });
 }
@@ -530,7 +529,6 @@ var Stream = (function() {
 
 pastel.ready = function() {
   var cipher = pastel.cipher;
-  var coin = pastel.coin;
 
   var seed = cipher.createSeed();
   var kp = cipher.createKeyPair(seed);
