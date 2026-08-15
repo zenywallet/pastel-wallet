@@ -12,6 +12,7 @@ import config
 import caprese
 import caprese/queue
 import caprese/server_types
+import wsclient
 
 var
   threads: array[5, ref Thread[void]]
@@ -381,35 +382,24 @@ proc block_reader(json: JsonNode) =
   doWork()
 
 proc stream_main() {.thread.} =
+  var client = newWsClient()
+  client.connect("ws://" & config.blockstor_wshost & ":" & $config.blockstor_wsport & "/api", "pastel-v0.1"):
+    onOpen:
+      echo "onOpen"
+    onReady:
+      echo "onReady"
+    onMessage:
+      echo "onMessage"
+      echo content
+      var json = parseJson(content)
+      if json.hasKey("height"):
+        block_reader(json)
+        sleep(6000)
+      BallCommand.BsStream.send(BallDataBsStream(data: json))
+    onClose:
+      echo "onClose"
 
-  proc read() {.async.} =
-    while true:
-      try:
-        let ws = waitFor newAsyncWebsocketClient(config.blockstor_wshost, Port(config.blockstor_wsport),
-          path = "api", ssl = false, protocols = @[], userAgent = "pastel-v0.1")
-
-        while true:
-          let (opcode, data) = await ws.readData()
-          if opcode == Opcode.Text:
-            var json = parseJson(data)
-            if json.hasKey("height"):
-              block_reader(json)
-              await sleepAsync(6000)
-            BallCommand.BsStream.send(BallDataBsStream(data: json))
-
-      except:
-        let e = getCurrentException()
-        Debug.CommonError.write e.name, ": ", e.msg
-        if not active:
-          break
-
-      await sleepAsync(6000)
-
-  asyncCheck read()
-  while true:
-    if not active:
-      break
-    poll()
+  joinThread(connectManager(false))
 
 proc cmd_main() {.thread.} =
   var mempool: JsonNode = newJArray()
@@ -915,6 +905,7 @@ proc ball_main() {.thread.} =
 proc stop*() =
   active = false
   streamActive = false
+  wsclient.abort()
   event.setEvent()
   StreamCommand.Abort.send()
   BallCommand.Abort.send()
