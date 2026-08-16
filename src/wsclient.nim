@@ -322,7 +322,7 @@ proc dispacher(params: DispacherParams) {.thread.} =
               acquire(client.lock)
               if client.sendDataSize > 0:
                 while true:
-                  let sendRet = client.sock.send(cast[cstring](addr client.sendBuf[pos]), cast[cint](client.sendDataSize), MSG_NOSIGNAL) #, 0'i32)
+                  let sendRet = client.sock.send(cast[cstring](addr client.sendBuf[pos]), cast[cint](client.sendDataSize), MSG_NOSIGNAL)
                   if sendRet == client.sendDataSize:
                     client.sendDataSize = 0
                     client.appId = client.appNextId
