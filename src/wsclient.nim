@@ -304,7 +304,6 @@ proc dispacher(params: DispacherParams) {.thread.} =
                 nextEv()
               else:
                 reconnect()
-                break
 
             of AppReconnect:
               proc reconnectThread(client: WsClient) {.thread.} =
