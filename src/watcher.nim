@@ -389,12 +389,17 @@ proc stream_main() {.thread.} =
       echo "onReady"
     onMessage:
       echo "onMessage"
-      echo content
-      var json = parseJson(content)
-      if json.hasKey("height"):
-        block_reader(json)
-        sleep(6000)
-      BallCommand.BsStream.send(BallDataBsStream(data: json))
+      echo "[", content, "]"
+      if content.len > 0:
+        try:
+          var json = parseJson(content)
+          if json.hasKey("height"):
+            block_reader(json)
+            sleep(6000)
+          BallCommand.BsStream.send(BallDataBsStream(data: json))
+        except:
+          let e = getCurrentException()
+          Debug.CommonError.write e.name, ": ", e.msg
     onClose:
       echo "onClose"
 
