@@ -476,6 +476,9 @@ proc Wallet*() {.exportc.} =
     var utxo_count = 0
     var utxos = u_utxos.concat(u_unconfs)
     var privNodes: seq[HDNode]
+    var sigs: seq[Sig]
+    var emptySig: Sig
+    var txSignHash: seq[Hash32Array]
     var signCount = 0
     var tx = newTx()
     tx.ver = 2'i32
@@ -485,22 +488,26 @@ proc Wallet*() {.exportc.} =
         var xpub = shieldedKeys.priv[utxo.xpub_idx.to(int)]
         var n = zenyjs_bip32.node(xpub.to(cstring)).derive(utxo.change.to(uint32)).derive(utxo.index.to(uint32))
         privNodes.add(n)
+        sigs.add(Sig(address.getScript(config.network, utxo.address.to(cstring))))
         tx.ins.add (tx: Hash(Hex($utxo.txid.to(cstring))),
                     n: utxo.n.to(uint32),
-                    sig: Sig(address.getScript(config.network, utxo.address.to(cstring))),
+                    sig: emptySig,
                     sequence: 0xffffffff'u32)
         in_value.add(newUint64(String(utxo.value)))
         inc(utxo_count)
 
         template txSignAndSend() {.dirty.} =
-          var txSignHash = sha256d((tx, SIGHASH_ALL.uint32).toBytes)
+          for i, s in sigs:
+            tx.ins[i].sig = s
+            txSignHash.add(sha256d((tx, SIGHASH_ALL.uint32).toBytes))
+            tx.ins[i].sig = emptySig
           for i, n in privNodes:
-            var signDer = sign(n.prv, txSignHash)
+            var signDer = sign(n.prv, txSignHash[i])
             inc(signCount)
             if signDer.len > 70: # 148-71, 147-70, 146-69, 145-68
               var nonce = cryptSeed(32)
               while true:
-                signDer = sign(n.prv, txSignHash, nonce)
+                signDer = sign(n.prv, txSignHash[i], nonce)
                 inc(signCount)
                 if signDer.len <= 70: break
                 incNonce(nonce)
